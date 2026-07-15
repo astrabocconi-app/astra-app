@@ -1,0 +1,30 @@
+// ASTRA — Prisma schema
+//
+// Connection strategy (see docs/SETUP.md):
+//   - `url`       = DATABASE_URL  → Neon POOLED host (the `-pooler` endpoint).
+//                   Used by Vercel serverless functions at runtime. Plain
+//                   unpooled connections exhaust under serverless concurrency.
+//   - `directUrl` = DIRECT_URL    → Neon UNPOOLED host. Used by
+//                   `prisma migrate` / introspection only.
+//
+// TODO(scaffold): the full pilot schema is DEFERRED for this pass.
+// The tables/indexes/constraints, the append-only PointsLedgerEntry, the
+// PointsBalance & MaterialStats SQL views, the UPDATE/DELETE-revoking trigger,
+// the DiscountUsage generated `usageDate` column, PostGIS verification, the
+// Better Auth tables, and the seed data all land in a follow-up.
+// See docs/ARCHITECTURE.md §"Data model" for the intended design.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// -----------------------------------------------------------------------------
+// TODO(scaffold): models go here. Do NOT add a mutable points `balance` column —
+// balances are derived from the append-only PointsLedgerEntry via a SQL view.
+// -----------------------------------------------------------------------------

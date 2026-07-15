@@ -1,13 +1,33 @@
 # Contributing to ASTRA
 
-## Branches
+## Branches — keep it simple
 
-- `main` — production. Protected: no direct pushes, PR + 1 approval + green CI.
-- `develop` — integration branch for the pilot.
-- Work on short-lived branches off `develop`:
-  - `feat/US-012-material-upload`
-  - `fix/otp-rate-limit`
-  - `chore/ci-cache`
+There are only two branches you need to know about:
+
+- **`develop`** — this is where everyone works. All your day-to-day work goes here.
+- **`main`** — production. You never touch this directly. Code only gets here after
+  Michele reviews and approves it.
+
+**The whole flow:**
+
+1. **Always** get the latest code before you start working. Make sure you're on
+   `develop` and up to date:
+   ```bash
+   git checkout develop
+   git fetch
+   git pull
+   ```
+   Do this every time you sit down to work — it avoids conflicts with what
+   others have already pushed.
+2. Do your work, commit it (see commit format below), and push to `develop`:
+   ```bash
+   git push
+   ```
+3. That's it. When a chunk of work is ready to ship, Michele reviews everything
+   on `develop` and promotes it to `main` (with an approval + green CI).
+
+You don't need to create your own branches or open PRs against `main`. Just work
+on `develop`. If you're ever unsure, ask before pushing.
 
 ## Commits — [Conventional Commits](https://www.conventionalcommits.org/)
 
@@ -28,14 +48,22 @@ docs(architecture): ADR for API-inside-Next.js
 
 Reference the backlog story where relevant: `feat(web): US-002 GET /api/me`.
 
-## Pull requests
+## Before you push (always)
 
-1. Branch off `develop`, keep it focused.
-2. `npm run lint && npm run typecheck && npm run build` must pass locally.
-3. Open the PR against `develop` (release PRs `develop → main`).
-4. Fill in the description: what, why, how tested. Link the user story.
-5. At least **1 approval** and **green CI** are required to merge.
-6. Squash-merge; the squash title must be a valid Conventional Commit.
+Run these and make sure they pass — don't push red code onto `develop`:
+
+```bash
+npm run format
+npm run lint && npm run typecheck && npm run build
+```
+
+## Going to production (Michele only)
+
+Contributors don't do this — it's here so you know what happens to your work.
+
+When `develop` is ready to ship, Michele opens a release PR (`develop → main`),
+which requires **1 approval** and **green CI** before it merges. That's the only
+gate to production.
 
 ## Code rules (non-negotiable)
 
@@ -46,11 +74,3 @@ Reference the backlog story where relevant: `feat(web): US-002 GET /api/me`.
 - **No server secrets in client code or the mobile bundle.** `EXPO_PUBLIC_*` is public.
 - **Mobile never imports Prisma / `@astra/db`.** It only calls `/api/*`.
 - Never commit a real `.env` — only `*.env.example`.
-
-## Before you push
-
-```bash
-npm run format
-npm run lint
-npm run typecheck
-```

@@ -1,0 +1,33 @@
+{
+  "name": "astra-app",
+  "private": true,
+  "version": "0.0.0",
+  "description": "ASTRA App — loyalty platform for the ASTRA ecosystem (monorepo: mobile + web/api)",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@11.16.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "npm run generate -w @astra/db",
+    "db:migrate": "npm run migrate -w @astra/db",
+    "db:studio": "npm run studio -w @astra/db",
+    "db:seed": "npm run seed -w @astra/db"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.5",
+    "turbo": "^2.10.5",
+    "typescript": "^5.9.3"
+  }
+}

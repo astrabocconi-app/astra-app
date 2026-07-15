@@ -1,0 +1,9 @@
+node_modules
+.turbo
+.next
+.expo
+dist
+build
+coverage
+**/src/generated
+package-lock.json

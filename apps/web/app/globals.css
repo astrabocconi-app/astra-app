@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* ASTRA theme tokens.
+ * TODO(scaffold): replace these PLACEHOLDER brand colors with the real ASTRA
+ * palette — flagged to the product owner. */
+@theme {
+  --color-astra-primary: #1a1a2e; /* PLACEHOLDER */
+  --color-astra-accent: #e94560; /* PLACEHOLDER */
+}
+
+body {
+  @apply bg-white text-gray-900 antialiased;
+}

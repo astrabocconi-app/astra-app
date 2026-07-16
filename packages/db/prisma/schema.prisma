@@ -1,30 +1,452 @@
 // ASTRA — Prisma schema
 //
-// Connection strategy (see docs/SETUP.md):
-//   - `url`       = DATABASE_URL  → Neon POOLED host (the `-pooler` endpoint).
-//                   Used by Vercel serverless functions at runtime. Plain
-//                   unpooled connections exhaust under serverless concurrency.
-//   - `directUrl` = DIRECT_URL    → Neon UNPOOLED host. Used by
-//                   `prisma migrate` / introspection only.
+// Connection strategy (Prisma 7 — see prisma.config.ts + docs/SETUP.md):
+//   - Runtime client uses a DRIVER ADAPTER (@prisma/adapter-pg) built from
+//     DATABASE_URL (Neon POOLED `-pooler` host). See packages/db/src/index.ts.
+//   - Migrations/introspection use DIRECT_URL (Neon UNPOOLED host), configured
+//     as the CLI `datasource` in prisma.config.ts.
+//   Prisma 7 no longer allows `url`/`directUrl` inside the datasource block.
 //
-// TODO(scaffold): the full pilot schema is DEFERRED for this pass.
-// The tables/indexes/constraints, the append-only PointsLedgerEntry, the
-// PointsBalance & MaterialStats SQL views, the UPDATE/DELETE-revoking trigger,
-// the DiscountUsage generated `usageDate` column, PostGIS verification, the
-// Better Auth tables, and the seed data all land in a follow-up.
-// See docs/ARCHITECTURE.md §"Data model" for the intended design.
+// DESIGN NOTES (see docs/ARCHITECTURE.md §"Data model"):
+//   - Points are APPEND-ONLY. There is no mutable balance column anywhere.
+//     Balances come from the `PointsBalance` SQL VIEW over PointsLedgerEntry.
+//   - The ledger is made immutable by a Postgres trigger that blocks
+//     UPDATE/DELETE. That trigger, the PointsBalance/MaterialStats views, and
+//     the DiscountUsage generated column are not expressible in Prisma schema;
+//     they are created by the init migration and documented in
+//     packages/db/prisma/sql/0001_views_and_immutability.sql.
+//   - Soft delete via `deletedAt`. Consent stored as text `policyVersion`.
+//   - Better Auth's own tables (session/account/verification) are added in
+//     Phase 2 via the Better Auth CLI; `User` below is intentionally
+//     compatible with it (id/email/emailVerified/name/image/timestamps).
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
-// -----------------------------------------------------------------------------
-// TODO(scaffold): models go here. Do NOT add a mutable points `balance` column —
-// balances are derived from the append-only PointsLedgerEntry via a SQL view.
-// -----------------------------------------------------------------------------
+// ============================================================================
+// Enums
+// ============================================================================
+
+/// Global roles. Area-scoped authority is expressed via AreaMembership.
+enum Role {
+  STUDENT
+  STAFF // can operate scanners (event check-in, partner card scan)
+  AREA_MANAGER // manages content within their areas
+  ADMIN // full access
+  PARTNER_MANAGER // external partner staff (limited)
+}
+
+/// Points "wallet". v1 uses a single spendable currency (POINTS); the enum
+/// exists so PointsBalance can aggregate per (userId, kind) as designed.
+enum PointsKind {
+  POINTS
+}
+
+/// Where a ledger entry came from (for reporting; delta sign encodes earn/spend).
+enum LedgerSource {
+  SIGNUP
+  EVENT_CHECKIN
+  PARTNER_SCAN
+  REWARD_REDEMPTION
+  ADMIN_ADJUSTMENT
+  OTHER
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+  FREEBIE
+  OTHER
+}
+
+enum RsvpStatus {
+  GOING
+  WAITLIST
+  CANCELLED
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  VOID
+}
+
+enum RedemptionStatus {
+  PENDING
+  FULFILLED
+  CANCELLED
+}
+
+enum Platform {
+  IOS
+  ANDROID
+}
+
+// ============================================================================
+// Identity & access
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  name          String?
+  image         String?
+  roles         Role[]    @default([STUDENT])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // relations
+  areaMemberships   AreaMembership[]
+  consents          Consent[]
+  ledgerEntries     PointsLedgerEntry[] @relation("LedgerOwner")
+  grantedEntries    PointsLedgerEntry[] @relation("LedgerGrantedBy")
+  discountUsages    DiscountUsage[]
+  rewardRedemptions RewardRedemption[]
+  rsvps             Rsvp[]
+  tickets           Ticket[]
+  checkedInTickets  Ticket[]            @relation("TicketCheckedInBy")
+  newsPosts         NewsPost[]
+  pushTokens        PushToken[]
+  materialAccesses  MaterialAccess[]
+  auditLogs         AuditLog[]          @relation("AuditActor")
+
+  @@index([deletedAt])
+}
+
+/// An association sub-team / department. Content and authority are scoped to areas.
+model Area {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships AreaMembership[]
+  partners    Partner[]
+  rewards     Reward[]
+  events      Event[]
+  newsPosts   NewsPost[]
+  materials   Material[]
+}
+
+model AreaMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  areaId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  area Area @relation(fields: [areaId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, areaId])
+  @@index([areaId])
+}
+
+/// Consent history — one row per acceptance. Latest by acceptedAt is current.
+model Consent {
+  id            String   @id @default(cuid())
+  userId        String
+  policyVersion String
+  acceptedAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ============================================================================
+// Points — append-only ledger (NO balance column; balance = PointsBalance view)
+// ============================================================================
+
+model PointsLedgerEntry {
+  id          String       @id @default(cuid())
+  userId      String
+  kind        PointsKind   @default(POINTS)
+  delta       Int // positive = earn, negative = spend
+  source      LedgerSource @default(OTHER)
+  reason      String
+  refType     String? // e.g. "Event", "Offer", "Reward", "Ticket"
+  refId       String?
+  grantedById String? // admin/staff who created a manual entry, if any
+  createdAt   DateTime     @default(now())
+
+  user      User  @relation("LedgerOwner", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User? @relation("LedgerGrantedBy", fields: [grantedById], references: [id])
+
+  // Immutability (block UPDATE/DELETE) is enforced by a DB trigger in the
+  // raw-SQL migration — NOT by application code. See header notes.
+  @@index([userId, kind])
+  @@index([refType, refId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// Partners & offers
+// ============================================================================
+
+model Partner {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  logoKey     String? // R2 object key
+  address     String?
+  latitude    Float?
+  longitude   Float?
+  areaId      String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  area   Area?   @relation(fields: [areaId], references: [id])
+  offers Offer[]
+
+  @@index([active, deletedAt])
+}
+
+model Offer {
+  id            String       @id @default(cuid())
+  partnerId     String
+  title         String
+  description   String?
+  discountType  DiscountType @default(OTHER)
+  discountValue Int? // percent (0-100) or fixed cents, depending on discountType
+  pointsAwarded Int          @default(0) // points earned when this offer is used
+  active        Boolean      @default(true)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+
+  partner Partner         @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  usages  DiscountUsage[]
+
+  @@index([partnerId, active])
+}
+
+/// One row per redemption. `usageDate` is a Postgres GENERATED column
+/// (usedAt::date) — added in the raw-SQL migration — so the unique constraint
+/// enforces "once per user per offer per day".
+model DiscountUsage {
+  id      String   @id @default(cuid())
+  userId  String
+  offerId String
+  usedAt  DateTime @default(now())
+  /// DB-generated STORED column (usedAt::date, UTC day). Prisma never writes it.
+  /// Note: Postgres forbids STABLE functions in generated columns, so this is a
+  /// UTC calendar day (not Rome-local). See prisma/sql/0001_views_and_immutability.sql.
+  usageDate DateTime? @default(dbgenerated("(\"usedAt\")::date")) @db.Date
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, offerId, usageDate])
+  @@index([offerId])
+}
+
+// ============================================================================
+// Rewards (spend points)
+// ============================================================================
+
+model Reward {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  imageKey    String? // R2 object key
+  costPoints  Int
+  stock       Int? // null = unlimited
+  active      Boolean   @default(true)
+  areaId      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  area        Area?              @relation(fields: [areaId], references: [id])
+  redemptions RewardRedemption[]
+
+  @@index([active, deletedAt])
+}
+
+model RewardRedemption {
+  id            String           @id @default(cuid())
+  userId        String
+  rewardId      String
+  costPoints    Int // snapshot of cost at redemption time
+  status        RedemptionStatus @default(PENDING)
+  code          String?          @unique // fulfillment/pickup code
+  ledgerEntryId String?          @unique // the SPEND PointsLedgerEntry
+  createdAt     DateTime         @default(now())
+  fulfilledAt   DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward Reward @relation(fields: [rewardId], references: [id])
+
+  @@index([userId])
+  @@index([rewardId, status])
+}
+
+// ============================================================================
+// Events + tickets
+// ============================================================================
+
+model Event {
+  id              String    @id @default(cuid())
+  title           String
+  description     String?
+  coverImageKey   String?
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  startsAt        DateTime
+  endsAt          DateTime?
+  capacity        Int? // null = unlimited
+  pointsOnCheckin Int       @default(0)
+  areaId          String?
+  published       Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  area    Area?    @relation(fields: [areaId], references: [id])
+  rsvps   Rsvp[]
+  tickets Ticket[]
+
+  @@index([published, startsAt])
+}
+
+model Rsvp {
+  id        String     @id @default(cuid())
+  eventId   String
+  userId    String
+  status    RsvpStatus @default(GOING)
+  createdAt DateTime   @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+model Ticket {
+  id            String       @id @default(cuid())
+  eventId       String
+  userId        String
+  code          String       @unique // opaque id embedded in the signed QR payload
+  status        TicketStatus @default(VALID)
+  checkedInAt   DateTime?
+  checkedInById String?
+  createdAt     DateTime     @default(now())
+
+  event       Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user        User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkedInBy User? @relation("TicketCheckedInBy", fields: [checkedInById], references: [id])
+
+  @@unique([eventId, userId]) // one ticket per user per event
+  @@index([status])
+}
+
+// ============================================================================
+// News / announcements
+// ============================================================================
+
+model NewsPost {
+  id            String    @id @default(cuid())
+  title         String
+  body          String // markdown/rich text
+  excerpt       String?
+  coverImageKey String?
+  authorId      String?
+  areaId        String?
+  published     Boolean   @default(false)
+  pinned        Boolean   @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  author User? @relation(fields: [authorId], references: [id])
+  area   Area? @relation(fields: [areaId], references: [id])
+
+  @@index([published, pinned, publishedAt])
+}
+
+// ============================================================================
+// Materials (files via R2). Per-user access is recorded privately; only the
+// aggregate MaterialStats view is exposed (never per-user rows).
+// ============================================================================
+
+model Material {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  fileKey     String // R2 object key
+  fileType    String?
+  sizeBytes   Int?
+  areaId      String?
+  published   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  area     Area?            @relation(fields: [areaId], references: [id])
+  accesses MaterialAccess[]
+
+  @@index([published, deletedAt])
+}
+
+model MaterialAccess {
+  id         String   @id @default(cuid())
+  materialId String
+  userId     String?
+  accessedAt DateTime @default(now())
+
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([materialId])
+}
+
+// ============================================================================
+// Push notifications & audit
+// ============================================================================
+
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique // Expo push token
+  platform  Platform
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Append-only audit trail of mutating admin/staff actions.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String // e.g. "reward.create", "points.adjust"
+  targetType String?
+  targetId   String?
+  areaId     String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+}

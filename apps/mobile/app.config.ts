@@ -27,7 +27,6 @@ const config: ExpoConfig = {
   },
   android: {
     package: "it.astrabocconi.app",
-    edgeToEdgeEnabled: true,
   },
   plugins: [
     "expo-router",

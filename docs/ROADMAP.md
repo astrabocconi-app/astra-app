@@ -21,43 +21,47 @@ promote `develop → main` yourself.
 
 Each phase unblocks the next. Ownership is marked per item.
 
+**Progress:** Phases 1–3 ✅ done (DB, auth, branded app shell). Phase 0 partial
+(Neon + secrets done; Resend/R2/Sentry/Expo-build/store accounts pending).
+**Next up → Phase 4 (points engine).** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
+
 ---
 
 ## PART A — Foundation (scope-independent; do first, in order)
 
-### Phase 0 — Accounts & secrets  *(🙋 you; ~30 min, parallelizable)*
-- [ ] 🙋 **Neon** `dev` project, pooling on. Copy `DATABASE_URL` (pooled `-pooler`) + `DIRECT_URL`.
-- [ ] 🙋 **Resend** account + API key + verified sending domain.
-- [ ] 🙋 **Cloudflare R2** bucket + scoped API token *(can defer until Materials/News images)*.
+### Phase 0 — Accounts & secrets  *(🙋 you; ~partially done)*
+- [x] 🙋 **Neon** `dev` project, pooling on. `DATABASE_URL` (pooled) + `DIRECT_URL` in `apps/web/.env`.
+- [ ] 🙋 **Resend** account + API key + verified sending domain. *(dev OTP logs to console until then)*
+- [ ] 🙋 **Cloudflare R2** bucket + scoped API token *(deferred until Materials/News images)*.
 - [ ] 🙋 **Sentry** — one project for web, one for mobile → 2 DSNs.
-- [ ] 🙋 **Expo/EAS** — `eas login`, `eas init`, paste `projectId` into `app.config.ts`.
-- [ ] 🙋 Secrets: `BETTER_AUTH_SECRET` = `openssl rand -base64 32`; `CARD_TOKEN_HMAC_SECRET` = `openssl rand -hex 32`.
-- [ ] 🙋 Fill `apps/web/.env` and `apps/mobile/.env` from the `.env.example` files. 🤖 I'll map each value.
-- [ ] 🙋 Start **Apple Developer** ($99/yr) + **Google Play** ($25) enrollment — needed only to ship, but approval lags.
+- [~] 🙋 **Expo/EAS** — Expo account done; `eas init` + `projectId` in `app.config.ts` still TODO (needed for dev/store builds).
+- [x] 🙋 Secrets: `BETTER_AUTH_SECRET` + `CARD_TOKEN_HMAC_SECRET` generated.
+- [x] 🙋 `apps/web/.env` + `apps/mobile/.env` created (DB + secrets in; Resend/R2/Sentry still placeholders).
+- [ ] 🙋 Start **Apple Developer** ($99/yr) + **Google Play** ($25) enrollment — needed only to ship.
 
-### Phase 1 — Database schema  *(🤖 keystone — everything depends on it)*
-- [ ] 🤖 Full Prisma schema: `User`, roles/areas, soft-delete (`deletedAt`), consent (`policyVersion`).
-- [ ] 🤖 Append-only `PointsLedgerEntry` (+ no mutable balance anywhere).
-- [ ] 🤖 `PointsBalance` SQL view + `MaterialStats` view (raw-SQL migration; aggregate-only for privacy).
-- [ ] 🤖 UPDATE/DELETE-revoking trigger on the ledger (raw SQL).
-- [ ] 🤖 `DiscountUsage` with generated `usageDate` + `@@unique([userId, offerId, usageDate])`.
-- [ ] 🤖 Geo strategy: verify PostGIS on Neon; else `earthdistance`/haversine. Record choice in ARCHITECTURE.md.
-- [ ] 🤖 Better Auth Prisma tables. Seed script (fake data + a seeded admin = you).
-- [ ] 🙋 `npm run db:migrate` + `npm run db:seed`; verify in `npm run db:studio`.
+### Phase 1 — Database schema  ✅ DONE  *(🤖 keystone)*
+- [x] 🤖 Full Prisma schema: `User`, roles/areas, soft-delete (`deletedAt`), consent (`policyVersion`).
+- [x] 🤖 Append-only `PointsLedgerEntry` (+ no mutable balance anywhere).
+- [x] 🤖 `PointsBalance` SQL view + `MaterialStats` view (raw-SQL migration; aggregate-only for privacy).
+- [x] 🤖 UPDATE/DELETE-revoking trigger on the ledger (raw SQL) — verified live.
+- [x] 🤖 `DiscountUsage` with generated `usageDate` (UTC day) + `@@unique([userId, offerId, usageDate])`.
+- [ ] 🤖 Geo strategy: verify PostGIS on Neon; else `earthdistance`/haversine. *(deferred to Phase 6)*
+- [x] 🤖 Better Auth Prisma tables (Session/Account/Verification). Seed script (areas, demo student, partner, reward, event, news).
+- [x] 🙋 Migrated to Neon (`migrate deploy`) + seeded; zero schema drift verified.
 
-### Phase 2 — Auth spine  *(🤖)*
-- [ ] 🤖 Better Auth email-OTP on web: `/api/auth/otp/send` (validate `@studbocconi.it` + rate-limit 3/min) & `/verify`.
-- [ ] 🤖 Implement `lib/authz.ts` for real — deny-by-default; roles + areas.
-- [ ] 🤖 `/api/me` returns the real user; `/api/health` verifies Neon (`SELECT 1`).
-- [ ] 🤖 Real mobile OTP flow (SecureStore session) + auth header in the shared typed client.
-- [ ] 🙋 **Milestone:** log in on your phone with your student email → land on home showing real `/api/me`.
+### Phase 2 — Auth spine  ✅ DONE  *(🤖)*
+- [x] 🤖 Better Auth email-OTP on web (`@studbocconi.it`/`@unibocconi.it` before-hook + rate-limit 3/min); bearer plugin.
+- [x] 🤖 Implement `lib/authz.ts` for real — deny-by-default; roles + areas.
+- [x] 🤖 `/api/me` returns the real user; `/api/health` verifies Neon (`SELECT 1`).
+- [x] 🤖 Real mobile OTP flow (SecureStore session) + Bearer auth header in the shared typed client.
+- [x] 🙋 **Milestone:** verified end to end (curl + on the iOS simulator).
 
-### Phase 3 — Shells → real  *(🤖)*
-- [ ] 🙋 Add the **media kit** to `apps/mobile/assets/brand` (logo SVG/PNG, colors, fonts).
-- [ ] 🤖 Design tokens from the media kit (NativeWind theme); app icon + splash.
-- [ ] 🤖 Mobile bottom-tab navigation (Home/Card, Partners, Rewards, Events, News, Profile).
-- [ ] 🤖 Web dashboard: real auth-gated layout; protect all admin routes via `authz`.
-- [ ] 🤖 Establish the per-endpoint pattern: Zod parse → `authz.assertCan` → Prisma → audit write.
+### Phase 3 — Shells → real  ✅ DONE  *(🤖)*
+- [x] 🙋 Media kit (logos) added to `brand/` + `apps/mobile/assets/`. *(exact brand hexes/fonts optional refinement)*
+- [x] 🤖 Design tokens from the logo (brand blue `#04107E` in NativeWind); app icon. *(splash deferred to builds)*
+- [x] 🤖 Mobile bottom-tab navigation (Home / Events / Card / Rewards / Profile); campus-backdrop login.
+- [x] 🤖 Web dashboard: auth-gated layout (deny-by-default) + `/signin`; admin routes protected.
+- [x] 🤖 Established the per-endpoint pattern: session → `authz` → Prisma (+ audit lands with the feature phases).
 
 ---
 

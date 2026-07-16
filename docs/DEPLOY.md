@@ -10,16 +10,17 @@ No `vercel.json` is required.
 2. **Root Directory:** `apps/web`.
 3. Framework preset: **Next.js** (auto-detected). Vercel runs the workspace-aware
    install from the repo root and builds `apps/web`.
-4. **Environment variables** — add everything from `apps/web/.env.example` for each
-   Vercel environment:
-   - **Production** → your prod Neon (pooled `DATABASE_URL` + `DIRECT_URL`), prod
-     Resend/R2/Sentry keys, `BETTER_AUTH_URL` = the production domain.
-   - **Preview** → staging Neon (or a per-PR **Neon branch** — see
-     [SETUP.md](SETUP.md)), staging secrets.
-   - **Development** (optional) → dev Neon.
-   > `DATABASE_URL` must be the **pooled** (`-pooler`) string on Vercel — serverless
-   > functions exhaust unpooled connections.
-5. Deploy. Smoke-test `https://<deployment>/api/health`.
+4. **Storage → Neon** (Postgres) and **Storage → Blob**, and the **Resend**
+   Marketplace integration — connect them to the project. These auto-inject their
+   env vars (DB connection strings, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`)
+   across environments. The DB layer reads whichever DB names are present.
+5. **Remaining env vars** you set manually (Project → Settings → Environment
+   Variables): `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (= the deployment domain),
+   `CARD_TOKEN_HMAC_SECRET`, `ALLOWED_EMAIL_DOMAINS`, `MOBILE_ALLOWED_ORIGINS`,
+   `SENTRY_DSN`. Pull them locally with `vercel env pull apps/web/.env`.
+6. Deploy. Smoke-test `https://<deployment>/api/health` → `{"db":"up"}`.
+   > The runtime client uses the **pooled** DB connection automatically; migrations
+   > use the **direct** one. Both come from the injected Neon vars.
 
 ### Migrations on deploy
 Run migrations against the target DB **before/at** release using the **direct**

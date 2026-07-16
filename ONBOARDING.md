@@ -27,25 +27,23 @@ cd astra-app
 npm install            # one install for the whole monorepo (Turborepo)
 ```
 
-## 3. Environment files (get the values from the team lead)
+## 3. Environment (pulled from Vercel)
 
-Create these two files (they're gitignored — they won't appear in `git status`):
-
-- **`apps/web/.env`** — server secrets (DB, auth, Resend, R2, Sentry).
-- **`apps/mobile/.env`** — public config only (API URL, Sentry DSN, `APP_ENV`).
-
-Each has a committed template you can copy for the shape:
+Infra is managed by Vercel, so you don't hand-copy secrets — you **pull** them.
+Ask the team lead to add you to the Vercel project, then:
 
 ```bash
-cp apps/web/.env.example    apps/web/.env
-cp apps/mobile/.env.example apps/mobile/.env
+npm i -g vercel
+vercel login
+vercel link                       # from repo root → select the astra-app project
+vercel env pull apps/web/.env     # writes DB / auth / email / etc. locally
+cp apps/mobile/.env.example apps/mobile/.env   # mobile has NO secrets — edit if needed
 ```
 
-Then fill in the real values from the team lead. The DB URL and auth secrets are
-**shared dev values** (everyone points at the same Neon dev database). The
-`RESEND_API_KEY`, `R2_*`, and `SENTRY_DSN` are filled in as those accounts come
-online — placeholders are fine until then (OTP codes print to the server
-console in dev; see §6).
+`.env` files are gitignored (won't show in `git status`). Re-run
+`vercel env pull apps/web/.env` whenever the Vercel env changes. Everyone points
+at the **same shared dev database**, so no migration is needed to start (§4).
+In local dev the OTP code prints to the server console — see §6.
 
 ## 4. Run the app
 

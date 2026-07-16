@@ -48,7 +48,7 @@ the DB without an explicit check from it. Deny-by-default once implemented.
 ### 4. The server/client boundary inside one Next.js app
 Because the API lives inside the Next.js app, two leaks must be actively prevented:
 - Route handlers must **not** import client-only React code.
-- Server-only env vars (`DATABASE_URL`, `BETTER_AUTH_SECRET`, R2/HMAC secrets) must
+- Server-only env vars (`DATABASE_URL`, `BETTER_AUTH_SECRET`, Blob token / HMAC secrets) must
   **not** be imported into any file that can end up in a client bundle. Keep them in
   server modules (`lib/*.ts` used only by route handlers / server components).
   `packages/db` and `@prisma/client` are listed in `serverExternalPackages` in
@@ -98,11 +98,14 @@ authenticates with a **Bearer token** (not cookies) via `@astra/shared`'s client
 
 ## ADRs
 
-### ADR-001 — Neon (not Supabase)
-**Decision:** Neon serverless Postgres. **Why:** we need serverless Postgres with
-cheap per-PR **branch** databases and pooled connections for Vercel functions; we do
-not need Supabase's bundled auth/storage/realtime (we use Better Auth + R2). Fewer
-moving parts, plain Postgres we can take anywhere.
+### ADR-001 — Neon (not Supabase), provisioned via Vercel
+**Decision:** Neon serverless Postgres, provisioned through **Vercel → Storage** so
+Vercel manages and injects the connection env vars. **Why:** we need serverless
+Postgres with cheap per-PR **branch** databases and pooled connections for Vercel
+functions; we don't need Supabase's bundled auth/storage/realtime (we use Better
+Auth + **Vercel Blob**). Consolidating infra under Vercel means one dashboard and
+`vercel env pull` instead of hand-managed secrets. The DB layer reads both our env
+names and Vercel's injected ones (see `packages/db`).
 
 ### ADR-002 — The API lives inside Next.js (no separate backend)
 **Decision:** the API is `apps/web/app/api/**`; no Hono/Express/Fastify service.

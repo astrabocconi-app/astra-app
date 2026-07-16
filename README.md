@@ -42,7 +42,7 @@ astra-app/
 npm workspaces + **Turborepo** · TypeScript (strict) · **Neon** serverless Postgres ·
 **Prisma** · **Next.js** Route Handlers for the API · **Better Auth** (email OTP) ·
 Expo + Expo Router + NativeWind + TanStack Query + Zustand · Tailwind + shadcn/ui ·
-Cloudflare **R2** (signed URLs) · **Resend** (OTP email) · **Zod** at every network
+**Vercel** (hosting + DB/Blob/email via Storage & Marketplace) · **Resend** (OTP email) · **Zod** at every network
 boundary · **Sentry**. No payments in Phase 1.
 
 ## Get running locally (< 10 min)

@@ -10,7 +10,7 @@ points at partners) and **event tickets** (RSVP + check-in).
 
 **Stack (locked by ADRs — see ARCHITECTURE.md):** Turborepo · Neon Postgres ·
 Prisma · Next.js (dashboard + API) · Better Auth email-OTP (`@studbocconi.it` / `@unibocconi.it`) ·
-Cloudflare R2 · Resend · Expo/Expo Router/NativeWind/TanStack Query/Zustand · Zod
+Vercel (hosting + Neon DB / Blob / Resend via Storage & Marketplace) · Expo/Expo Router/NativeWind/TanStack Query/Zustand · Zod
 at every boundary · Sentry.
 
 **Workflow:** Claude Code builds on `develop`; you review, verify it works, then
@@ -22,7 +22,7 @@ promote `develop → main` yourself.
 Each phase unblocks the next. Ownership is marked per item.
 
 **Progress:** Phases 1–3 ✅ done (DB, auth, branded app shell). Phase 0 partial
-(Neon + secrets done; Resend/R2/Sentry/Expo-build/store accounts pending).
+(Neon + secrets done; Resend/Blob/Sentry/Expo-build/store via Vercel pending).
 **Next up → Phase 4 (points engine).** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---
@@ -32,11 +32,11 @@ Each phase unblocks the next. Ownership is marked per item.
 ### Phase 0 — Accounts & secrets  *(🙋 you; ~partially done)*
 - [x] 🙋 **Neon** `dev` project, pooling on. `DATABASE_URL` (pooled) + `DIRECT_URL` in `apps/web/.env`.
 - [ ] 🙋 **Resend** account + API key + verified sending domain. *(dev OTP logs to console until then)*
-- [ ] 🙋 **Cloudflare R2** bucket + scoped API token *(deferred until Materials/News images)*.
+- [ ] 🙋 **Vercel Blob** (Storage → Blob) — auto-injects `BLOB_READ_WRITE_TOKEN` *(deferred until Materials/News images)*.
 - [ ] 🙋 **Sentry** — one project for web, one for mobile → 2 DSNs.
 - [~] 🙋 **Expo/EAS** — Expo account done; `eas init` + `projectId` in `app.config.ts` still TODO (needed for dev/store builds).
 - [x] 🙋 Secrets: `BETTER_AUTH_SECRET` + `CARD_TOKEN_HMAC_SECRET` generated.
-- [x] 🙋 `apps/web/.env` + `apps/mobile/.env` created (DB + secrets in; Resend/R2/Sentry still placeholders).
+- [x] 🙋 `apps/web/.env` + `apps/mobile/.env` created (DB + secrets in; Resend/Blob/Sentry via Vercel pending).
 - [ ] 🙋 Start **Apple Developer** ($99/yr) + **Google Play** ($25) enrollment — needed only to ship.
 
 ### Phase 1 — Database schema  ✅ DONE  *(🤖 keystone)*
@@ -102,13 +102,13 @@ Each phase unblocks the next. Ownership is marked per item.
 - [ ] 🙋 Test full loop: get ticket → check in → re-scan shows "already used".
 
 ### Phase 9 — News / announcements + push  *(🤖 new module)*
-- [ ] 🤖 `NewsPost` model (+ images via R2); dashboard publish/CRUD.
+- [ ] 🤖 `NewsPost` model (+ images via Vercel Blob); dashboard publish/CRUD.
 - [ ] 🤖 Mobile: news feed (pull-to-refresh) + detail.
 - [ ] 🤖 Expo push: register device tokens; send on publish (Edge/route + Expo push API).
 - [ ] 🙋 Approve the notification permission on device; confirm a push arrives on publish.
 
 ### Phase 10 — Materials  *(🤖)*
-- [ ] 🤖 `Material` model; upload → R2; download via **short-lived signed URLs** (bucket never public).
+- [ ] 🤖 `Material` model; upload → **Vercel Blob**; serve via Blob URLs (private/token where needed).
 - [ ] 🤖 `MaterialStats` view surfaced to admins — **aggregate counts only, no per-user rows**.
 - [ ] 🤖 Mobile: materials list + download; dashboard: upload + stats.
 - [ ] 🙋 Confirm signed URLs expire and the bucket isn't publicly listable.

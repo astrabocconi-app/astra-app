@@ -2,7 +2,7 @@
 //
 // SERVER-ONLY. Never import from client components. See docs/ARCHITECTURE.md §Auth.
 //
-//   - Only @studbocconi.it emails may request an OTP (validated before send).
+//   - Only Bocconi emails (studbocconi.it / unibocconi.it) may request an OTP.
 //   - OTP delivery: Resend if configured, otherwise logged to the server
 //     console in development so the flow is testable without a Resend account.
 //   - The `bearer` plugin lets the mobile app authenticate with
@@ -14,9 +14,22 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { emailOTP, bearer } from "better-auth/plugins";
 import { prisma } from "@astra/db";
+import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
 
-const ALLOWED_DOMAIN = (process.env.ALLOWED_EMAIL_DOMAIN ?? "studbocconi.it").toLowerCase();
+// Allowed sign-in domains. Configurable via ALLOWED_EMAIL_DOMAINS (comma-list);
+// defaults to the shared constant (studbocconi.it, unibocconi.it).
+const ALLOWED_DOMAINS = (process.env.ALLOWED_EMAIL_DOMAINS ?? ALLOWED_EMAIL_DOMAINS.join(","))
+  .split(",")
+  .map((d) => d.trim().toLowerCase())
+  .filter(Boolean);
+
+function emailDomainAllowed(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return !!domain && ALLOWED_DOMAINS.includes(domain);
+}
+
+const DOMAIN_ERROR = `Only ${ALLOWED_DOMAINS.map((d) => "@" + d).join(" or ")} email addresses are allowed.`;
 
 const resendKey = process.env.RESEND_API_KEY;
 const resend =
@@ -63,11 +76,8 @@ export const auth = betterAuth({
       ];
       if (guarded.includes(ctx.path)) {
         const email = (ctx.body as { email?: string } | undefined)?.email ?? "";
-        const domain = email.split("@")[1]?.toLowerCase();
-        if (domain !== ALLOWED_DOMAIN) {
-          throw new APIError("BAD_REQUEST", {
-            message: `Only @${ALLOWED_DOMAIN} email addresses are allowed.`,
-          });
+        if (!emailDomainAllowed(email)) {
+          throw new APIError("BAD_REQUEST", { message: DOMAIN_ERROR });
         }
       }
     }),
@@ -77,11 +87,8 @@ export const auth = betterAuth({
       otpLength: 6,
       expiresIn: 600, // 10 minutes
       async sendVerificationOTP({ email, otp }) {
-        const domain = email.split("@")[1]?.toLowerCase();
-        if (domain !== ALLOWED_DOMAIN) {
-          throw new APIError("BAD_REQUEST", {
-            message: `Only @${ALLOWED_DOMAIN} email addresses are allowed.`,
-          });
+        if (!emailDomainAllowed(email)) {
+          throw new APIError("BAD_REQUEST", { message: DOMAIN_ERROR });
         }
         await deliverOtp(email, otp);
       },

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { isAllowedEmail, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { api } from "../lib/api";
 import { setToken } from "../lib/session";
 
@@ -53,7 +54,9 @@ export default function LoginScreen() {
     }
   }
 
-  const disabled = loading || (step === "email" ? !email : code.length < 4);
+  // Send code only enabled for a valid Bocconi email; verify needs a 4+ digit code.
+  const disabled =
+    loading || (step === "email" ? !isAllowedEmail(email) : code.length < 4);
 
   return (
     <ImageBackground
@@ -75,7 +78,7 @@ export default function LoginScreen() {
           <View className="w-full items-center gap-4" style={{ maxWidth: 360 }}>
             <Text className="text-center text-sm text-gray-600">
               {step === "email"
-                ? "Sign in with your @studbocconi.it email."
+                ? `Sign in with your ${ALLOWED_EMAIL_DOMAINS.map((d) => "@" + d).join(" or ")} email.`
                 : `Enter the 6-digit code sent to ${email}.`}
             </Text>
 

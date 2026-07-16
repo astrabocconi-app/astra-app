@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@astra/shared": "*",
+    "@expo/vector-icons": "^15.0.2",
     "@sentry/react-native": "^8.18.0",
     "@tanstack/react-query": "^5.101.2",
     "expo": "^57.0.6",

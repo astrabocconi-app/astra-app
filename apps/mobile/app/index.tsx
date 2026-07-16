@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  ActivityIndicator,
+  Image,
+  ImageBackground,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { api } from "../lib/api";
@@ -45,63 +53,88 @@ export default function LoginScreen() {
     }
   }
 
+  const disabled = loading || (step === "email" ? !email : code.length < 4);
+
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 justify-center gap-4 px-6">
-        <Text className="text-3xl font-bold text-astra-primary">ASTRA</Text>
-        <Text className="text-sm text-gray-500">
-          {step === "email"
-            ? "Sign in with your @studbocconi.it email."
-            : `Enter the 6-digit code we sent to ${email}.`}
-        </Text>
-
-        {step === "email" ? (
-          <TextInput
-            className="rounded-lg border border-gray-300 px-3 py-3"
-            placeholder="name@studbocconi.it"
-            autoCapitalize="none"
-            autoCorrect={false}
-            keyboardType="email-address"
-            value={email}
-            onChangeText={setEmail}
-            editable={!loading}
+    <ImageBackground
+      source={require("../assets/campus.jpg")}
+      resizeMode="cover"
+      imageStyle={{ opacity: 0.18 }}
+      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+    >
+      <SafeAreaView className="flex-1">
+        <View className="flex-1 items-center justify-center px-8">
+          {/* Centered brand lockup */}
+          <Image
+            source={require("../assets/logo-horizontal.png")}
+            resizeMode="contain"
+            style={{ width: 260, height: 70, marginBottom: 40 }}
           />
-        ) : (
-          <TextInput
-            className="rounded-lg border border-gray-300 px-3 py-3 text-center text-xl tracking-[8px]"
-            placeholder="000000"
-            keyboardType="number-pad"
-            maxLength={6}
-            value={code}
-            onChangeText={setCode}
-            editable={!loading}
-            autoFocus
-          />
-        )}
 
-        {error && <Text className="text-sm text-red-600">{error}</Text>}
-
-        <Pressable
-          className="rounded-lg bg-astra-primary px-4 py-3 active:opacity-80"
-          disabled={loading || (step === "email" ? !email : code.length < 4)}
-          onPress={step === "email" ? sendCode : verify}
-          style={{ opacity: loading || (step === "email" ? !email : code.length < 4) ? 0.5 : 1 }}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text className="text-center font-medium text-white">
-              {step === "email" ? "Send code" : "Verify & continue"}
+          {/* Centered form */}
+          <View className="w-full items-center gap-4" style={{ maxWidth: 360 }}>
+            <Text className="text-center text-sm text-gray-600">
+              {step === "email"
+                ? "Sign in with your @studbocconi.it email."
+                : `Enter the 6-digit code sent to ${email}.`}
             </Text>
-          )}
-        </Pressable>
 
-        {step === "code" && !loading && (
-          <Pressable onPress={() => { setStep("email"); setCode(""); setError(null); }}>
-            <Text className="text-center text-sm text-gray-500">Use a different email</Text>
-          </Pressable>
-        )}
-      </View>
-    </SafeAreaView>
+            {step === "email" ? (
+              <TextInput
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center"
+                placeholder="name@studbocconi.it"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+                editable={!loading}
+              />
+            ) : (
+              <TextInput
+                className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-xl tracking-[8px]"
+                placeholder="000000"
+                keyboardType="number-pad"
+                maxLength={6}
+                value={code}
+                onChangeText={setCode}
+                editable={!loading}
+                autoFocus
+              />
+            )}
+
+            {error && <Text className="text-center text-sm text-red-600">{error}</Text>}
+
+            <Pressable
+              className="w-full items-center rounded-xl px-4 py-3"
+              disabled={disabled}
+              onPress={step === "email" ? sendCode : verify}
+              // Fully opaque: disabled shows a solid muted blue (not see-through).
+              style={{ backgroundColor: disabled ? "#A9B0D8" : "#04107E" }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text className="text-center font-semibold text-white">
+                  {step === "email" ? "Send code" : "Verify & continue"}
+                </Text>
+              )}
+            </Pressable>
+
+            {step === "code" && !loading && (
+              <Pressable
+                onPress={() => {
+                  setStep("email");
+                  setCode("");
+                  setError(null);
+                }}
+              >
+                <Text className="text-center text-sm text-gray-500">Use a different email</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

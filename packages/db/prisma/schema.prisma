@@ -1,18 +1,20 @@
 // ASTRA — Prisma schema
 //
-// Connection strategy (see docs/SETUP.md):
-//   - `url`       = DATABASE_URL  → Neon POOLED host (`-pooler`). Runtime on Vercel.
-//   - `directUrl` = DIRECT_URL    → Neon UNPOOLED host. `prisma migrate` only.
+// Connection strategy (Prisma 7 — see prisma.config.ts + docs/SETUP.md):
+//   - Runtime client uses a DRIVER ADAPTER (@prisma/adapter-pg) built from
+//     DATABASE_URL (Neon POOLED `-pooler` host). See packages/db/src/index.ts.
+//   - Migrations/introspection use DIRECT_URL (Neon UNPOOLED host), configured
+//     as the CLI `datasource` in prisma.config.ts.
+//   Prisma 7 no longer allows `url`/`directUrl` inside the datasource block.
 //
 // DESIGN NOTES (see docs/ARCHITECTURE.md §"Data model"):
 //   - Points are APPEND-ONLY. There is no mutable balance column anywhere.
 //     Balances come from the `PointsBalance` SQL VIEW over PointsLedgerEntry.
 //   - The ledger is made immutable by a Postgres trigger that blocks
-//     UPDATE/DELETE. Views + trigger + the DiscountUsage generated column are
-//     NOT expressible in Prisma schema — they live in a raw-SQL migration.
-//     See packages/db/prisma/sql/0001_views_and_immutability.sql and
-//     docs/ROADMAP.md Phase 1. Fold that SQL into the migration with:
-//       prisma migrate dev --create-only --name views_and_immutability
+//     UPDATE/DELETE. That trigger, the PointsBalance/MaterialStats views, and
+//     the DiscountUsage generated column are not expressible in Prisma schema;
+//     they are created by the init migration and documented in
+//     packages/db/prisma/sql/0001_views_and_immutability.sql.
 //   - Soft delete via `deletedAt`. Consent stored as text `policyVersion`.
 //   - Better Auth's own tables (session/account/verification) are added in
 //     Phase 2 via the Better Auth CLI; `User` below is intentionally
@@ -23,9 +25,7 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 // ============================================================================
@@ -241,9 +241,10 @@ model DiscountUsage {
   userId  String
   offerId String
   usedAt  DateTime @default(now())
-  /// GENERATED ALWAYS AS ((usedAt AT TIME ZONE 'Europe/Rome')::date) STORED
-  /// (set in the migration; Prisma cannot express generated columns).
-  usageDate DateTime @db.Date
+  /// DB-generated STORED column (usedAt::date, UTC day). Prisma never writes it.
+  /// Note: Postgres forbids STABLE functions in generated columns, so this is a
+  /// UTC calendar day (not Rome-local). See prisma/sql/0001_views_and_immutability.sql.
+  usageDate DateTime? @default(dbgenerated("(\"usedAt\")::date")) @db.Date
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)

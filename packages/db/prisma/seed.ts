@@ -7,9 +7,15 @@
 // promote yourself with, e.g.:
 //   UPDATE "User" SET roles = ARRAY['ADMIN']::"Role"[] WHERE email = 'you@studbocconi.it';
 
+import { fileURLToPath } from "node:url";
 import { PrismaClient, Role, DiscountType, LedgerSource } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const prisma = new PrismaClient();
+// Prisma 7 doesn't auto-load .env; load the web app's env, then build a client.
+process.loadEnvFile(fileURLToPath(new URL("../../../apps/web/.env", import.meta.url)));
+
+const adapter = new PrismaPg(process.env.DATABASE_URL!);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   // --- Areas ----------------------------------------------------------------

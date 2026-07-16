@@ -1,35 +1,23 @@
--- ASTRA — raw-SQL migration companion
+-- ASTRA — reference: raw-SQL database objects
 -- =============================================================================
--- Database objects Prisma cannot express in schema.prisma. Fold this into a
--- Prisma migration (do NOT rely on it applying by itself):
---
---   1. Create the base schema migration WITHOUT applying:
---        npm run migrate -w @astra/db -- --create-only --name init
---   2. Append the SQL below to that migration's migration.sql
---      (or create a follow-up:  -- --create-only --name views_and_immutability).
---   3. Apply:  npm run migrate -w @astra/db
---
--- NOTE (must verify against the live DB during the migrate run):
---   * Postgres GENERATED columns cannot be written by Prisma. usageDate is
---     modelled in schema.prisma for the unique constraint, but the migration
---     must (re)create it as GENERATED so the app never inserts it. If Prisma's
---     drift check complains, represent it with @default(dbgenerated(...)) or
---     drop the field from the model and keep the unique index here in SQL.
---   * Constraint/index names below assume Prisma's defaults — confirm the exact
---     names in the generated migration before running.
+-- These objects cannot be expressed in schema.prisma and are created by the
+-- init migration (prisma/migrations/20260716120000_init/migration.sql). This
+-- file is DOCUMENTATION of what exists in the DB — it is not applied on its own.
+-- Keep it in sync if the objects change in a future migration.
 -- =============================================================================
 
--- ── 1. DiscountUsage.usageDate → GENERATED (once-per-user-per-offer-per-day) ──
--- Rome-local calendar day so "per day" matches the user's timezone.
-ALTER TABLE "DiscountUsage"
-  DROP CONSTRAINT IF EXISTS "DiscountUsage_userId_offerId_usageDate_key";
-ALTER TABLE "DiscountUsage" DROP COLUMN IF EXISTS "usageDate";
-ALTER TABLE "DiscountUsage"
-  ADD COLUMN "usageDate" date
-  GENERATED ALWAYS AS ((("usedAt" AT TIME ZONE 'Europe/Rome'))::date) STORED;
-ALTER TABLE "DiscountUsage"
-  ADD CONSTRAINT "DiscountUsage_userId_offerId_usageDate_key"
-  UNIQUE ("userId", "offerId", "usageDate");
+-- ── 1. DiscountUsage.usageDate — GENERATED STORED column (once-per-day guard) ──
+-- Enforces "once per user, per offer, per day" via UNIQUE(userId, offerId, usageDate).
+-- IMPORTANT: Postgres generated columns require an IMMUTABLE expression. `AT TIME
+-- ZONE '<zone>'` is only STABLE (tz rules can change), so a Rome-local day is NOT
+-- allowed here. We therefore use the UTC calendar day. If a Rome-local "day" is
+-- ever required, compute it in the application/query layer instead of the column.
+--
+--   "usageDate" date GENERATED ALWAYS AS (("usedAt")::date) STORED
+--
+-- In schema.prisma this is represented as:
+--   usageDate DateTime? @default(dbgenerated("(\"usedAt\")::date")) @db.Date
+-- so Prisma reads it but never writes it.
 
 -- ── 2. PointsBalance — spendable balance per (user, kind). No mutable column. ──
 CREATE OR REPLACE VIEW "PointsBalance" AS
@@ -44,9 +32,9 @@ GROUP BY "userId", "kind";
 CREATE OR REPLACE VIEW "MaterialStats" AS
 SELECT
   "materialId",
-  COUNT(*)::bigint                     AS "totalAccesses",
-  COUNT(DISTINCT "userId")::bigint      AS "uniqueUsers",
-  MAX("accessedAt")                     AS "lastAccessedAt"
+  COUNT(*)::bigint                AS "totalAccesses",
+  COUNT(DISTINCT "userId")::bigint AS "uniqueUsers",
+  MAX("accessedAt")               AS "lastAccessedAt"
 FROM "MaterialAccess"
 GROUP BY "materialId";
 
@@ -67,7 +55,8 @@ CREATE TRIGGER ledger_no_update_delete
   FOR EACH ROW EXECUTE FUNCTION astra_block_ledger_mutation();
 
 -- ── 5. Geo (partners "near me") — PostGIS is optional on Neon. ──
--- Verify availability, then record the choice in docs/ARCHITECTURE.md:
+-- Not yet enabled. When implementing Phase 6, verify availability and record
+-- the choice in docs/ARCHITECTURE.md:
 --   CREATE EXTENSION IF NOT EXISTS postgis;   -- if available
--- If unavailable, fall back to earthdistance/cube or a haversine expression in
--- the query layer (lat/lng are plain Float columns on Partner/Event).
+-- Otherwise fall back to earthdistance/cube or a haversine expression in the
+-- query layer (lat/lng are plain Float columns on Partner/Event).

@@ -39,8 +39,7 @@ const DEV_LOGIN =
   process.env.NODE_ENV !== "production" || process.env.DEV_LOGIN_ENABLED === "true";
 
 const DEV_USERS: Record<string, { email: string; name: string }> = {
-  administrator: { email: "administrator@astra.dev", name: "Administrator" },
-  thecola13: { email: "thecola13@astra.dev", name: "thecola13" },
+  blabmerda: { email: "blabmerda@astra.dev", name: "Dev" },
 };
 
 /** Custom Better Auth plugin: POST /dev-login { username } → session (dev only). */

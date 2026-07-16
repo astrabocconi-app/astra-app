@@ -94,8 +94,8 @@ console** instead of emailed:
 3. Enter it → you're in.
 
 **Dev bypass (local only):** in a dev build you can skip OTP entirely — type
-**`administrator`** or **`thecola13`** in the email field and tap the button.
-This hits `POST /api/auth/dev-login`, which creates/returns an **ADMIN** session.
+**`blabmerda`** in the email field and tap the button. This hits
+`POST /api/auth/dev-login`, which creates/returns an **ADMIN** session.
 It works **only** against a local (`NODE_ENV !== production`) API and only in dev
 builds of the app — it's disabled on every deployment, so it's not a prod hole.
 

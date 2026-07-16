@@ -15,7 +15,7 @@ export function isAllowedEmail(email: string): boolean {
  * The server honours it ONLY on non-production (local) API instances, and the
  * mobile client only offers it in dev builds (`__DEV__`). NOT a production path.
  */
-export const DEV_LOGIN_USERNAMES = ["administrator", "thecola13"] as const;
+export const DEV_LOGIN_USERNAMES = ["blabmerda"] as const;
 
 export function isDevLoginUsername(input: string): boolean {
   return (DEV_LOGIN_USERNAMES as readonly string[]).includes(input.trim().toLowerCase());

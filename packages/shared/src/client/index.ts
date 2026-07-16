@@ -90,6 +90,16 @@ export function createApiClient(options: ApiClientOptions) {
         const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
         return { token, user: data?.user ?? null };
       },
+
+      /** DEV-ONLY bypass: sign in by username, no OTP. Server rejects in prod. */
+      devLogin: async (username: string) => {
+        const { data, res } = await request<{ token?: string; user?: MeResponse }>(
+          "/api/auth/dev-login",
+          { method: "POST", body: JSON.stringify({ username }) }
+        );
+        const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
+        return { token, user: data?.user ?? null };
+      },
     },
   };
 }

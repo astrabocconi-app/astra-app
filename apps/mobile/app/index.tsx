@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { isAllowedEmail, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
+import { isAllowedEmail, isDevLoginUsername, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { api } from "../lib/api";
 import { setToken } from "../lib/session";
 
@@ -26,10 +26,20 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // DEV-ONLY: typing a dev username (in a dev build) bypasses OTP entirely.
+  const isDevBypass = __DEV__ && isDevLoginUsername(email);
+
   async function sendCode() {
     setLoading(true);
     setError(null);
     try {
+      if (isDevBypass) {
+        const { token } = await api.auth.devLogin(email.trim());
+        if (!token) throw new Error("Dev login failed.");
+        await setToken(token);
+        router.replace("/loading");
+        return;
+      }
       await api.auth.sendOtp(email.trim());
       setStep("code");
     } catch (e) {
@@ -54,9 +64,11 @@ export default function LoginScreen() {
     }
   }
 
-  // Send code only enabled for a valid Bocconi email; verify needs a 4+ digit code.
+  // Send code enabled for a valid Bocconi email (or a dev-bypass username in dev);
+  // verify needs a 4+ digit code.
   const disabled =
-    loading || (step === "email" ? !isAllowedEmail(email) : code.length < 4);
+    loading ||
+    (step === "email" ? !(isAllowedEmail(email) || isDevBypass) : code.length < 4);
 
   return (
     <ImageBackground
@@ -119,7 +131,11 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text className="text-center font-semibold text-white">
-                  {step === "email" ? "Send code" : "Verify & continue"}
+                  {step === "email"
+                    ? isDevBypass
+                      ? "Dev sign in"
+                      : "Send code"
+                    : "Verify & continue"}
                 </Text>
               )}
             </Pressable>

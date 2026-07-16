@@ -93,6 +93,12 @@ console** instead of emailed:
 2. Copy the 6-digit code from the `apps/web` terminal.
 3. Enter it → you're in.
 
+**Dev bypass (local only):** in a dev build you can skip OTP entirely — type
+**`administrator`** or **`thecola13`** in the email field and tap the button.
+This hits `POST /api/auth/dev-login`, which creates/returns an **ADMIN** session.
+It works **only** against a local (`NODE_ENV !== production`) API and only in dev
+builds of the app — it's disabled on every deployment, so it's not a prod hole.
+
 To give yourself dashboard/admin access, promote your user after first sign-in:
 
 ```sql

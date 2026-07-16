@@ -9,11 +9,12 @@
 //     `Authorization: Bearer <token>` (matches @astra/shared's typed client),
 //     instead of cookies.
 
-import { betterAuth } from "better-auth";
+import { betterAuth, type BetterAuthPlugin } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { APIError, createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthEndpoint, createAuthMiddleware } from "better-auth/api";
+import { setSessionCookie } from "better-auth/cookies";
 import { emailOTP, bearer } from "better-auth/plugins";
-import { prisma } from "@astra/db";
+import { prisma, Role } from "@astra/db";
 import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
 
@@ -27,6 +28,54 @@ const ALLOWED_DOMAINS = (process.env.ALLOWED_EMAIL_DOMAINS ?? ALLOWED_EMAIL_DOMA
 function emailDomainAllowed(email: string): boolean {
   const domain = email.split("@")[1]?.toLowerCase();
   return !!domain && ALLOWED_DOMAINS.includes(domain);
+}
+
+// ── DEV-ONLY login bypass ────────────────────────────────────────────────────
+// Lets the two developers sign in by typing a username (no OTP). Enabled ONLY on
+// non-production API instances — on any Vercel deploy NODE_ENV === "production",
+// so this path returns 404 there. Force-enable elsewhere with DEV_LOGIN_ENABLED
+// (do NOT do this on a public server without adding a password).
+const DEV_LOGIN =
+  process.env.NODE_ENV !== "production" || process.env.DEV_LOGIN_ENABLED === "true";
+
+const DEV_USERS: Record<string, { email: string; name: string }> = {
+  administrator: { email: "administrator@astra.dev", name: "Administrator" },
+  thecola13: { email: "thecola13@astra.dev", name: "thecola13" },
+};
+
+/** Custom Better Auth plugin: POST /dev-login { username } → session (dev only). */
+function devLoginPlugin(): BetterAuthPlugin {
+  return {
+    id: "dev-login",
+    endpoints: {
+      devLogin: createAuthEndpoint("/dev-login", { method: "POST" }, async (ctx) => {
+        if (!DEV_LOGIN) {
+          throw new APIError("NOT_FOUND", { message: "Not found." });
+        }
+        const username = String((ctx.body as { username?: string })?.username ?? "")
+          .trim()
+          .toLowerCase();
+        const dev = DEV_USERS[username];
+        if (!dev) {
+          throw new APIError("BAD_REQUEST", { message: "Unknown dev account." });
+        }
+        const user = await prisma.user.upsert({
+          where: { email: dev.email },
+          update: { name: dev.name, roles: [Role.ADMIN], emailVerified: true },
+          create: { email: dev.email, name: dev.name, roles: [Role.ADMIN], emailVerified: true },
+        });
+        const session = await ctx.context.internalAdapter.createSession(user.id);
+        if (!session) {
+          throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
+        }
+        await setSessionCookie(ctx, { session, user: { ...user, name: user.name ?? dev.name } });
+        return ctx.json({
+          token: session.token,
+          user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
+        });
+      }),
+    },
+  };
 }
 
 const DOMAIN_ERROR = `Only ${ALLOWED_DOMAINS.map((d) => "@" + d).join(" or ")} email addresses are allowed.`;
@@ -94,6 +143,7 @@ export const auth = betterAuth({
       },
     }),
     bearer(),
+    devLoginPlugin(),
   ],
   rateLimit: {
     enabled: true,

@@ -19,7 +19,7 @@ export default function RootLayout() {
     // Restore the persisted session before showing any screen; if we already
     // have a token, skip the login screen.
     loadToken().then((token) => {
-      if (token) router.replace("/home");
+      if (token) router.replace("/loading");
       setReady(true);
     });
   }, []);

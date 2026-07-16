@@ -46,7 +46,7 @@ export default function LoginScreen() {
       const { token } = await api.auth.verifyOtp(email.trim(), code.trim());
       if (!token) throw new Error("No session token returned.");
       await setToken(token);
-      router.replace("/home");
+      router.replace("/loading");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid or expired code.");
     } finally {

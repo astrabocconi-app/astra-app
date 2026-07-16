@@ -39,9 +39,10 @@ For preview deployments, create a **Neon branch** per PR (a copy-on-write branch
 [Neon–Vercel integration](https://neon.tech/docs/guides/vercel) can automate
 branch-per-preview; wire it up in the Vercel project settings.
 
-### Run migrations (once the schema exists — deferred now)
+### Run migrations
+The schema is already migrated on the shared dev DB, so you don't need this to
+start. Use it when you change the Prisma schema (uses `DIRECT_URL`):
 ```bash
-# uses DIRECT_URL
 npm run db:migrate      # prisma migrate dev
 npm run db:seed         # minimal fake data
 npm run db:studio       # browse
@@ -100,7 +101,7 @@ See [DEPLOY.md](DEPLOY.md). In short: import the repo, set the **Root Directory*
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 |
 | `CARD_TOKEN_HMAC_SECRET` | `openssl rand -hex 32` — signs scannable card tokens |
 | `SENTRY_DSN` | Sentry (web) |
-| `ALLOWED_EMAIL_DOMAIN` | e.g. `studbocconi.it` — validated before OTP send |
+| `ALLOWED_EMAIL_DOMAINS` | comma-separated, e.g. `studbocconi.it,unibocconi.it` — validated before OTP send |
 | `MOBILE_ALLOWED_ORIGINS` | CORS allow-list for `/api/*` |
 
 ### `apps/mobile/.env`

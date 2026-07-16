@@ -28,7 +28,8 @@ connection:
 DATABASE_URL=$DIRECT_URL npm run db:migrate:deploy -w @astra/db   # prisma migrate deploy
 ```
 Do this from CI or locally against staging/prod — not inside the Vercel build.
-(Deferred until the schema exists.)
+The schema exists and the dev DB is migrated; run this per environment (staging,
+prod) when you set them up.
 
 ### CORS
 Set `MOBILE_ALLOWED_ORIGINS` to the Expo dev-client origin(s) and the production app
@@ -52,6 +53,9 @@ eas submit --profile production  --platform android    # after verifying API 36
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs on PRs/pushes to `main` and `develop`:
-`npm ci` → `turbo run lint typecheck test build` → Prisma migration drift check.
-Branch protection on `main` requires this to be green + 1 approval.
+**Not wired yet.** The scaffold shipped a `.github/workflows/ci.yml`
+(`npm ci` → `turbo run lint typecheck test build` → Prisma drift check) but it
+failed on the still-scaffolded apps and was removed to unblock development. Also
+note: branch protection isn't available on this private repo's plan. Reintroduce
+a working pipeline (and a drift check with the Prisma 7 `--to-schema` flag +
+a Postgres service) once the apps build green — see `docs/ROADMAP.md` Phase 12.

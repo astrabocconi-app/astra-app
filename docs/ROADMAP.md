@@ -9,7 +9,7 @@ doesn't yet have; the scannable QR exists in two forms — a **loyalty card** (e
 points at partners) and **event tickets** (RSVP + check-in).
 
 **Stack (locked by ADRs — see ARCHITECTURE.md):** Turborepo · Neon Postgres ·
-Prisma · Next.js (dashboard + API) · Better Auth email-OTP (`@studbocconi.it`) ·
+Prisma · Next.js (dashboard + API) · Better Auth email-OTP (`@studbocconi.it` / `@unibocconi.it`) ·
 Cloudflare R2 · Resend · Expo/Expo Router/NativeWind/TanStack Query/Zustand · Zod
 at every boundary · Sentry.
 

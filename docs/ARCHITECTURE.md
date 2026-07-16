@@ -54,10 +54,11 @@ Because the API lives inside the Next.js app, two leaks must be actively prevent
   `packages/db` and `@prisma/client` are listed in `serverExternalPackages` in
   `next.config.ts` so they never get bundled for the browser.
 
-## Data model (intended — deferred in the scaffold)
+## Data model (implemented)
 
-The full schema is a `TODO(scaffold)` in `packages/db/prisma/schema.prisma`. Design
-notes for whoever implements it:
+The full schema lives in `packages/db/prisma/schema.prisma`, applied via the init
+migration (the raw-SQL parts Prisma can't express are documented in
+`packages/db/prisma/sql/`). Key decisions:
 
 - **Points are append-only.** `PointsLedgerEntry(id, userId, delta, kind, reason,
   refType, refId, createdAt)` with **no mutable balance column anywhere**. Balances
@@ -69,23 +70,29 @@ notes for whoever implements it:
   Postgres role used.
 - **`MaterialStats` view: aggregated counts only, never per-user rows** — protects
   student privacy from Head Media.
-- **`DiscountUsage`** needs a generated/computed `usageDate` and
-  `@@unique([userId, offerId, usageDate])`. If Prisma can't express the generated
-  date column, use `prisma migrate dev --create-only` and hand-edit the SQL.
+- **`DiscountUsage`** has a Postgres **generated** `usageDate` (`usedAt::date`)
+  with `@@unique([userId, offerId, usageDate])` — one use per offer per day.
+  Generated columns require an IMMUTABLE expression, so the day is **UTC** (not
+  Rome-local); Prisma maps it as `@default(dbgenerated(...))` and never writes it.
 - **Geo / partner radius:** PostGIS is not on every Neon config. Verify with
   `CREATE EXTENSION postgis` in a migration; if unavailable, fall back to
   `earthdistance`/`cube` or a haversine calculation in raw SQL. Record the choice
   here when implemented.
 - **Soft deletes** via `deletedAt`; **consent** stored with a text `policyVersion`,
   not a boolean.
-- Better Auth's own tables (sessions, verification, …) come from its Prisma schema
-  generator/CLI.
+- Better Auth's own tables (`Session`, `Account`, `Verification`) are generated
+  by its CLI and included in the schema/migration.
 
-## Auth (intended)
+## Auth (implemented)
 
-Better Auth with the **email-OTP** plugin (+ Expo plugin), Prisma adapter, tables on
-Neon. The `@studbocconi.it` domain is validated **server-side before** an OTP email
-is sent; resend is rate-limited (max 3/min per email). Resend delivers the mail.
+Better Auth with the **email-OTP** and **bearer** plugins, Prisma adapter, tables
+on Neon (`apps/web/lib/auth.ts`). Allowed domains (`@studbocconi.it` /
+`@unibocconi.it`, configurable via `ALLOWED_EMAIL_DOMAINS`) are validated
+**server-side before** an OTP is issued — enforced in a `before` hook so Better
+Auth's anti-enumeration "silent success" for unknown emails can't bypass it.
+Sends are rate-limited (max 3/min). Delivery is via **Resend**, or logged to the
+server console in dev when no `RESEND_API_KEY` is set. The mobile app
+authenticates with a **Bearer token** (not cookies) via `@astra/shared`'s client.
 
 ---
 
@@ -112,8 +119,9 @@ review + lint intent).
 
 ### ADR-004 — Prisma
 **Decision:** Prisma for schema, migrations, and typed access. **Why:** best-in-class
-DX and migration tooling for a team ramping up fast; `prisma migrate diff` powers our
-CI drift check. Views/triggers it can't model are handled with raw-SQL migrations.
+DX and migration tooling for a team ramping up fast; `prisma migrate diff` can power
+a schema-vs-migrations drift check (to be re-added to CI). Views/triggers it can't
+model are handled with raw-SQL migrations.
 
 ### ADR-005 — Admin work during the pilot without a full panel
 **Decision:** the dashboard is a **skeleton** in Phase 1; real admin actions happen

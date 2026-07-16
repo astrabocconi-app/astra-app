@@ -3,11 +3,12 @@
 Loyalty platform for the ASTRA ecosystem — a **monorepo** containing the student
 mobile app, the admin dashboard, and the API (which lives _inside_ the web app).
 
-> **Scaffold status.** This repository is a working skeleton so three part-time
-> developers can clone it and start the same day. The **database schema, the
-> business endpoints, and the full auth flow are intentionally deferred** and
-> marked with `TODO(scaffold)` / `TODO(US-xxx)`. See
-> [Deferred work](#deferred-work) and [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+> **Status.** Phase 1 (database schema + migrations) and Phase 2 (email-OTP
+> auth, Bearer tokens) are implemented and wired; Phase 3 (branding, bottom-tab
+> navigation, dashboard auth-gate) is in. The feature modules (points, events,
+> rewards, partners, news, materials) are next — see
+> [`docs/ROADMAP.md`](docs/ROADMAP.md). Remaining stubs are marked `TODO(...)`
+> in-code.
 
 ---
 
@@ -15,7 +16,7 @@ mobile app, the admin dashboard, and the API (which lives _inside_ the web app).
 
 | Path | What it is |
 |---|---|
-| `apps/mobile` | Expo (managed) student app — Expo Router, NativeWind, TanStack Query, Zustand. Two screens: OTP-login shell + a home screen that calls `GET /api/me`. |
+| `apps/mobile` | Expo (managed) student app — Expo Router, NativeWind, TanStack Query, Zustand. Email-OTP login + bottom-tab shell (Home / Events / Card / Rewards / Profile). |
 | `apps/web` | Next.js (App Router) — the admin **dashboard** _and_ the **API** (`app/api/**/route.ts`). Hosted on Vercel. There is **no separate API service.** |
 | `packages/db` | Prisma schema, migrations, seed, and the Neon client singleton. **Server-only.** |
 | `packages/shared` | Zod schemas, types inferred from them, domain constants, and the typed API client the mobile app uses. |
@@ -32,7 +33,6 @@ astra-app/
 │   ├── shared/          # Zod schemas, inferred types, typed API client
 │   └── config/          # eslint / prettier / tsconfig base
 ├── docs/
-├── .github/workflows/
 ├── turbo.json
 └── package.json         # npm workspaces root
 ```
@@ -143,9 +143,9 @@ Metro, then in **Expo Go** tap the server under **"Development servers"** (phone
 ### Signing in (local dev)
 
 No Resend key locally → the email-OTP code is **printed to the `apps/web` server
-console** instead of emailed. Enter your `@studbocconi.it` email → **Send code**
-→ copy the 6-digit code from the web terminal → enter it. Only `@studbocconi.it`
-addresses are accepted.
+console** instead of emailed. Enter your `@studbocconi.it` or `@unibocconi.it`
+email → **Send code** → copy the 6-digit code from the web terminal → enter it.
+Only those Bocconi domains are accepted (configurable via `ALLOWED_EMAIL_DOMAINS`).
 
 ### Troubleshooting
 
@@ -193,16 +193,23 @@ Target a single workspace with `-w`, e.g. `npm run dev -w @astra/web`.
 
 Full rationale + ADRs: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-## Deferred work
+## What's built vs. next
 
-Tracked as `TODO(scaffold)` / `TODO(US-xxx)` in-code. Not built in this pass:
+Full roadmap: [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
-- The full Prisma schema (tables, indexes, constraints), migrations, the
-  append-only `PointsLedgerEntry` + trigger, the `PointsBalance` / `MaterialStats`
-  SQL views, the `DiscountUsage` generated column, PostGIS verification, seed data.
-- Better Auth wiring and the real email-OTP flow (mobile + web).
-- All business endpoints (as typed `501` stubs) beyond `GET /api/health`.
-- `GET /api/me` currently returns `501` until auth + DB land.
+**Done:**
+- Full Prisma schema + migrations on Neon: append-only `PointsLedgerEntry` +
+  immutability trigger, `PointsBalance` / `MaterialStats` SQL views, the
+  `DiscountUsage` generated column, seed data. (PostGIS for partner geo is
+  verified/enabled in Phase 6.)
+- Better Auth email-OTP end to end (mobile + web), Bearer tokens, `@studbocconi.it`
+  / `@unibocconi.it` gate. `GET /api/me` and `GET /api/health` are live.
+- Branding, bottom-tab navigation, and an auth-gated dashboard shell.
+
+**Next (feature modules):** points engine, loyalty card + partner scan, partners
+& discounts, rewards, events + tickets, news + push, materials, admin + audit.
+Business endpoints beyond the above are still typed `501` stubs until their phase
+lands.
 
 ## Contributing
 

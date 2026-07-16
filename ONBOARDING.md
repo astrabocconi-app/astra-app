@@ -89,7 +89,7 @@ first launch tap **"Open"** on the *"Open in Expo Go?"* dialog.
 No Resend key locally → the email-OTP code is **printed to the `apps/web` server
 console** instead of emailed:
 
-1. Enter your `@studbocconi.it` email → **Send code** (only this domain is accepted).
+1. Enter your `@studbocconi.it` or `@unibocconi.it` email → **Send code** (only these domains are accepted).
 2. Copy the 6-digit code from the `apps/web` terminal.
 3. Enter it → you're in.
 

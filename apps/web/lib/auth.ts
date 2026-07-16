@@ -83,13 +83,23 @@ const resendKey = process.env.RESEND_API_KEY;
 const resend =
   resendKey && !resendKey.includes("PLACEHOLDER") ? new Resend(resendKey) : null;
 
+// Base URL: explicit override, else the Vercel deployment domain, else local.
+const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
+const vercelProdUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : undefined;
+const baseURL =
+  process.env.BETTER_AUTH_URL ?? vercelProdUrl ?? vercelUrl ?? "http://localhost:3000";
+
 const trustedOrigins = [
-  process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL,
+  vercelUrl,
+  vercelProdUrl,
   ...(process.env.MOBILE_ALLOWED_ORIGINS ?? "")
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean),
-];
+].filter((o): o is string => Boolean(o));
 
 async function deliverOtp(email: string, otp: string): Promise<void> {
   if (resend) {
@@ -107,7 +117,7 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
 }
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:3000",
+  baseURL,
   secret: process.env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   trustedOrigins,

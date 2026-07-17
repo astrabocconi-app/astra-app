@@ -14,7 +14,14 @@ import { PrismaPg } from "@prisma/adapter-pg";
 // Prisma 7 doesn't auto-load .env; load the web app's env, then build a client.
 process.loadEnvFile(fileURLToPath(new URL("../../../apps/web/.env", import.meta.url)));
 
-const adapter = new PrismaPg(process.env.DATABASE_URL!);
+const pooledUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.STORAGE_DATABASE_URL ||
+  process.env.STORAGE_POSTGRES_PRISMA_URL ||
+  process.env.STORAGE_POSTGRES_URL;
+const adapter = new PrismaPg(pooledUrl!);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

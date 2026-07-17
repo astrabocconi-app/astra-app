@@ -3,8 +3,9 @@
 // SERVER-ONLY. Never import from client components. See docs/ARCHITECTURE.md §Auth.
 //
 //   - Only Bocconi emails (studbocconi.it / unibocconi.it) may request an OTP.
-//   - OTP delivery: Resend if configured, otherwise logged to the server
-//     console in development so the flow is testable without a Resend account.
+//   - OTP delivery: SMTP (e.g. Aruba) if SMTP_* is configured, else Resend if
+//     configured, otherwise logged to the server console in development so the
+//     flow is testable without any email provider.
 //   - The `bearer` plugin lets the mobile app authenticate with
 //     `Authorization: Bearer <token>` (matches @astra/shared's typed client),
 //     instead of cookies.
@@ -17,6 +18,7 @@ import { emailOTP, bearer } from "better-auth/plugins";
 import { prisma, Role } from "@astra/db";
 import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
+import nodemailer, { type Transporter } from "nodemailer";
 
 // Allowed sign-in domains. Configurable via ALLOWED_EMAIL_DOMAINS (comma-list);
 // defaults to the shared constant (studbocconi.it, unibocconi.it).
@@ -83,6 +85,34 @@ const resendKey = process.env.RESEND_API_KEY;
 const resend =
   resendKey && !resendKey.includes("PLACEHOLDER") ? new Resend(resendKey) : null;
 
+// SMTP transport (e.g. Aruba). Enabled when SMTP_HOST + SMTP_USER + SMTP_PASS
+// are set. Aruba mailboxes: host `smtps.aruba.it`, port 465 (SMTP_SECURE=true).
+// Built lazily and reused across warm invocations.
+const smtpHost = process.env.SMTP_HOST;
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const smtpEnabled = Boolean(
+  smtpHost &&
+    smtpUser &&
+    smtpPass &&
+    ![smtpHost, smtpUser, smtpPass].some((v) => v!.includes("PLACEHOLDER")),
+);
+let smtpTransport: Transporter | null = null;
+function getSmtp(): Transporter | null {
+  if (!smtpEnabled) return null;
+  if (!smtpTransport) {
+    const port = Number(process.env.SMTP_PORT ?? 465);
+    smtpTransport = nodemailer.createTransport({
+      host: smtpHost,
+      port,
+      // true for 465 (implicit TLS); false for 587 (STARTTLS). Overridable.
+      secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
+      auth: { user: smtpUser, pass: smtpPass },
+    });
+  }
+  return smtpTransport;
+}
+
 // Base URL: explicit override, else the Vercel deployment domain, else local.
 const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
 const vercelProdUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -101,21 +131,40 @@ const trustedOrigins = [
     .filter(Boolean),
 ].filter((o): o is string => Boolean(o));
 
-// Sender for OTP emails. Must be an address on a domain VERIFIED in Resend for
-// real delivery; `onboarding@resend.dev` only reaches your own Resend account.
-const RESEND_FROM = process.env.RESEND_FROM ?? "ASTRA <onboarding@resend.dev>";
+// Sender for OTP emails. For SMTP this must be an address on the authenticated
+// mailbox's domain (e.g. `ASTRA <noreply@yourdomain.it>`); for Resend it must be
+// on a VERIFIED domain (`onboarding@resend.dev` only reaches your own account).
+// EMAIL_FROM is preferred; RESEND_FROM is kept for backward compatibility.
+const EMAIL_FROM =
+  process.env.EMAIL_FROM ?? process.env.RESEND_FROM ?? "ASTRA <onboarding@resend.dev>";
+
+const OTP_SUBJECT = "Your ASTRA sign-in code";
+const otpText = (otp: string) =>
+  `Your ASTRA sign-in code is ${otp}. It expires in 10 minutes.`;
 
 async function deliverOtp(email: string, otp: string): Promise<void> {
-  if (resend) {
-    await resend.emails.send({
-      from: RESEND_FROM,
+  // 1) SMTP (e.g. Aruba) takes priority when configured.
+  const smtp = getSmtp();
+  if (smtp) {
+    await smtp.sendMail({
+      from: EMAIL_FROM,
       to: email,
-      subject: "Your ASTRA sign-in code",
-      text: `Your ASTRA sign-in code is ${otp}. It expires in 10 minutes.`,
+      subject: OTP_SUBJECT,
+      text: otpText(otp),
     });
     return;
   }
-  // Dev fallback: no Resend key configured — print the code so we can test.
+  // 2) Resend, if configured.
+  if (resend) {
+    await resend.emails.send({
+      from: EMAIL_FROM,
+      to: email,
+      subject: OTP_SUBJECT,
+      text: otpText(otp),
+    });
+    return;
+  }
+  // 3) Dev fallback: no provider configured — print the code so we can test.
   // eslint-disable-next-line no-console
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }

@@ -7,6 +7,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { initSentry } from "../lib/sentry";
 import { loadToken } from "../lib/session";
+import { useBootStore } from "../lib/boot-store";
+import BootOverlay from "../components/BootOverlay";
 
 initSentry();
 
@@ -14,12 +16,16 @@ const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
+  const booting = useBootStore((s) => s.booting);
 
   useEffect(() => {
     // Restore the persisted session before showing any screen; if we already
-    // have a token, skip the login screen.
+    // have a token, skip the login screen and play the intro overlay over home.
     loadToken().then((token) => {
-      if (token) router.replace("/loading");
+      if (token) {
+        useBootStore.getState().trigger();
+        router.replace("/home");
+      }
       setReady(true);
     });
   }, []);
@@ -37,6 +43,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StatusBar style="auto" />
         <Stack screenOptions={{ headerShown: false }} />
+        {booting && <BootOverlay />}
       </SafeAreaProvider>
     </QueryClientProvider>
   );

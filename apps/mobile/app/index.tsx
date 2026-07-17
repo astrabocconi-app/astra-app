@@ -13,6 +13,13 @@ import { router } from "expo-router";
 import { isAllowedEmail, isDevLoginUsername, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { api } from "../lib/api";
 import { setToken } from "../lib/session";
+import { useBootStore } from "../lib/boot-store";
+
+// Play the logo-morph intro overlay over home, then navigate there.
+function enterApp() {
+  useBootStore.getState().trigger();
+  router.replace("/home");
+}
 
 // Email-OTP login against apps/web (Better Auth):
 //   1. sendOtp(email)          — server validates @studbocconi.it, emails a code
@@ -37,7 +44,7 @@ export default function LoginScreen() {
         const { token } = await api.auth.devLogin(email.trim());
         if (!token) throw new Error("Dev login failed.");
         await setToken(token);
-        router.replace("/loading");
+        enterApp();
         return;
       }
       await api.auth.sendOtp(email.trim());
@@ -56,7 +63,7 @@ export default function LoginScreen() {
       const { token } = await api.auth.verifyOtp(email.trim(), code.trim());
       if (!token) throw new Error("No session token returned.");
       await setToken(token);
-      router.replace("/loading");
+      enterApp();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid or expired code.");
     } finally {

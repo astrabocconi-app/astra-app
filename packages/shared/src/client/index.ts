@@ -40,6 +40,10 @@ export function createApiClient(options: ApiClientOptions) {
     const token = getToken?.();
     const res = await fetch(new URL(path, baseUrl), {
       ...init,
+      // Bearer-only client: never send cookies. A stray session cookie (e.g. one
+      // the platform auto-stored from a prior response) would trigger Better
+      // Auth's origin check, which fails because RN fetch sends no Origin header.
+      credentials: "omit",
       headers: {
         "content-type": "application/json",
         ...(token ? { authorization: `Bearer ${token}` } : {}),

@@ -21,9 +21,13 @@ promote `develop → main` yourself.
 
 Each phase unblocks the next. Ownership is marked per item.
 
-**Progress:** Phases 1–3 ✅ done (DB, auth, branded app shell). Phase 0 partial
-(Neon + secrets done; Resend/Blob/Sentry/Expo-build/store via Vercel pending).
-**Next up → Phase 4 (points engine).** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
+**Progress:** Phases 1–4 ✅ done (DB, auth, branded app shell, points engine).
+Phase 0 mostly done (Neon, secrets, **email delivery via Aruba SMTP** done;
+Blob / Sentry / EAS-build / store enrollment pending). Phase 13 partially done —
+**web dashboard + API are deployed and live on Vercel** (ASTRA team) with
+`/api/health` green and real OTP email working end-to-end; dedicated
+staging/prod Neon + CI migration wiring still TODO.
+**Next up → Phase 5 (loyalty card QR).** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---
 
@@ -129,10 +133,10 @@ Each phase unblocks the next. Ownership is marked per item.
 
 ## PART C — Ship
 
-### Phase 13 — Deploy web (dashboard + API)  *(🙋 + 🤖)*
-- [ ] 🙋 Neon `staging` + `prod` projects; 🙋 Vercel import, Root Dir `apps/web`, env per environment.
-- [ ] 🤖 `db:migrate:deploy` wiring against `DIRECT_URL` (from CI/local, not Vercel build).
-- [ ] 🙋 Smoke-test `/api/health` on the deployment; wire per-PR Neon branch previews.
+### Phase 13 — Deploy web (dashboard + API)  *(🙋 + 🤖; ~partially done)*
+- [~] 🙋 Vercel import + Root Dir `apps/web` + env done — **production live on the ASTRA-team Vercel** (`astra-app-liard.vercel.app`); dedicated Neon `staging`/`prod` projects still TODO (one Neon for now).
+- [~] 🤖 DB migrated to Neon (`migrate deploy` from Phase 1); formal `db:migrate:deploy` CI wiring against `DIRECT_URL` still TODO.
+- [~] 🙋 `/api/health` smoke-tested on the live deployment (`db:up` ✅); per-PR Neon branch previews still TODO.
 
 ### Phase 14 — Ship mobile  *(🙋 + 🤖)*
 - [ ] 🤖 Finalize `app.config.ts` per-env API URLs, `eas.json` profiles, Android **API 36**.

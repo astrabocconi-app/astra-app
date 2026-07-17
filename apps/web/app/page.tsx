@@ -107,8 +107,8 @@ export default function LandingPage() {
           {/* Phones */}
           <div className="astra-fade-up relative mx-auto flex h-[520px] w-full max-w-md items-center justify-center lg:h-[620px]">
             <PhoneFrame
-              src="/screens/events.png"
-              alt="ASTRA app — events screen"
+              src="/screens/points.png"
+              alt="ASTRA app — points history screen"
               className="absolute right-2 top-6 w-40 rotate-6 opacity-90 sm:w-52 lg:right-0"
             />
             <PhoneFrame

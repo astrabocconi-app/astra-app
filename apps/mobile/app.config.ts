@@ -10,8 +10,8 @@ const APP_ENV = (process.env.APP_ENV ?? "development") as
 const API_URL: Record<typeof APP_ENV, string> = {
   // Dev uses localhost (so the dev-login bypass works against the local API).
   development: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000",
-  staging: "https://astra-app-cyan.vercel.app",
-  production: "https://astra-app-cyan.vercel.app",
+  staging: "https://astra-app-liard.vercel.app",
+  production: "https://astra-app-liard.vercel.app",
 };
 
 const config: ExpoConfig = {

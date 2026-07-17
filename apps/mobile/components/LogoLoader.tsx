@@ -1,43 +1,26 @@
-// @ts-nocheck — vendored animation component (index-heavy worklet math);
+// @ts-nocheck — vendored animation component (index-heavy morph math);
 // intentionally not type-checked under strict/noUncheckedIndexedAccess.
 /**
  * LogoLoader — liquid warping morph loading animation.
  *
  * From nothing, a point appears at center and warps outward into the full
- * logo along spiraling, rippling paths, holds, then twists back down into
- * the point and vanishes. Loops.
+ * ASTRA logo along spiraling, rippling paths, holds, then twists back down
+ * into the point and vanishes. Loops.
  *
- * Curviness comes from three combined effects, all of which vanish at the
- * start and end so the empty point and the finished logo are both clean:
- *   1. polar interpolation + swirl  -> points spiral instead of moving straight
- *   2. radial warp (sine lobes)     -> silhouette bulges and ripples organically
- *   3. tangential shear             -> edges bend sideways, removing straightness
- * A gentle radius overshoot adds an elastic settle. The outline is rendered
- * as smooth cubic curves (Catmull-Rom), never faceted segments.
+ * Runs on a plain requestAnimationFrame loop (JS thread) + react-native-svg —
+ * NO react-native-reanimated / worklets. (Worklets segfault / throw in Expo Go
+ * when serialising the large SHAPES geometry; a RAF loop is smooth enough for a
+ * brief loading screen and has zero native risk.)
  *
- * Requires:
- *   npm install react-native-svg react-native-reanimated
- * Files:
- *   LogoLoader.jsx (this file) + logoMorphShapes.js (precomputed geometry)
+ * Requires:  react-native-svg
+ * Files:     LogoLoader.tsx (this) + logoMorphShapes.js (precomputed geometry)
  *
- * Usage:
- *   import LogoLoader from './LogoLoader';
- *   <LogoLoader size={140} />
+ * Usage:  <LogoLoader size={160} />
  */
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Svg, { Path, G } from 'react-native-svg';
-import Animated, {
-  useSharedValue,
-  useAnimatedProps,
-  withRepeat,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
-import { CX, CY, SHAPES } from './logoMorphShapes';
-
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-const AnimatedG = Animated.createAnimatedComponent(G);
+import React, { useEffect, useRef, useState } from "react";
+import { View, StyleSheet } from "react-native";
+import Svg, { Path, G } from "react-native-svg";
+import { CX, CY, SHAPES } from "./logoMorphShapes";
 
 // Timeline (ms)
 const APPEAR = 150;
@@ -48,21 +31,23 @@ const VANISH = 150;
 const PAUSE = 250;
 const TOTAL = APPEAR + GROW + HOLD + SHRINK + VANISH + PAUSE;
 
-// Warp character — tune these for more/less curviness
-const SWIRL = 1.4;      // turns of twist during the morph
-const WARP_R = 46;      // radial ripple amplitude (viewbox units)
-const WARP_T = 34;      // tangential shear amplitude
-const LOBES_A = 3;      // radial ripple frequency around the ring
-const LOBES_B = 5;      // tangential shear frequency
-const OVERSHOOT = 0.10; // elastic radius overshoot mid-morph
+// Warp character — tune for more/less curviness
+const SWIRL = 1.4; // turns of twist during the morph
+const WARP_R = 46; // radial ripple amplitude (viewbox units)
+const WARP_T = 34; // tangential shear amplitude
+const LOBES_A = 3; // radial ripple frequency around the ring
+const LOBES_B = 5; // tangential shear frequency
+const OVERSHOOT = 0.1; // elastic radius overshoot mid-morph
 const TWOPI = Math.PI * 2;
 
-function phases(clock: number) {
-  'worklet';
+function phases(clock) {
   const t = clock * TOTAL;
-  let morph = 0, rot = 0, opacity = 1, scale = 1;
-  const eOut = (k: number) => 1 - Math.pow(1 - k, 3);
-  const eIn = (k: number) => k * k * k;
+  let morph = 0,
+    rot = 0,
+    opacity = 1,
+    scale = 1;
+  const eOut = (k) => 1 - Math.pow(1 - k, 3);
+  const eIn = (k) => k * k * k;
 
   if (t < APPEAR) {
     const k = t / APPEAR;
@@ -87,10 +72,9 @@ function phases(clock: number) {
 }
 
 // Catmull-Rom -> cubic bezier, smooth closed outline
-function smoothPath(pts: number[][]) {
-  'worklet';
+function smoothPath(pts) {
   const n = pts.length;
-  let d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
+  let d = "M" + pts[0][0].toFixed(1) + "," + pts[0][1].toFixed(1);
   for (let i = 0; i < n; i++) {
     const p0 = pts[(i - 1 + n) % n];
     const p1 = pts[i];
@@ -100,25 +84,36 @@ function smoothPath(pts: number[][]) {
     const c1y = p1[1] + (p2[1] - p0[1]) / 6;
     const c2x = p2[0] - (p3[0] - p1[0]) / 6;
     const c2y = p2[1] - (p3[1] - p1[1]) / 6;
-    d += 'C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' ' +
-               c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' ' +
-               p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
+    d +=
+      "C" +
+      c1x.toFixed(1) +
+      "," +
+      c1y.toFixed(1) +
+      " " +
+      c2x.toFixed(1) +
+      "," +
+      c2y.toFixed(1) +
+      " " +
+      p2[0].toFixed(1) +
+      "," +
+      p2[1].toFixed(1);
   }
-  return d + 'Z';
+  return d + "Z";
 }
 
-function buildPath(shape: { from: number[]; to: number[] }, p: number) {
-  'worklet';
+function buildPath(shape, p) {
   const from = shape.from;
   const to = shape.to;
-  const pts: number[][] = [];
-  const bell = Math.sin(Math.PI * p);   // 0 at ends, 1 at mid
-  const bell2 = bell * bell;            // sharper warp falloff
+  const pts = [];
+  const bell = Math.sin(Math.PI * p); // 0 at ends, 1 at mid
+  const bell2 = bell * bell; // sharper warp falloff
   const swirl = SWIRL * (1 - p) * TWOPI;
   const phase = p * TWOPI;
   for (let i = 0; i < from.length; i += 2) {
-    const fx = from[i] - CX, fy = from[i + 1] - CY;
-    const tx = to[i] - CX, ty = to[i + 1] - CY;
+    const fx = from[i] - CX,
+      fy = from[i + 1] - CY;
+    const tx = to[i] - CX,
+      ty = to[i + 1] - CY;
     const rf = Math.sqrt(fx * fx + fy * fy);
     const rt = Math.sqrt(tx * tx + ty * ty);
     const af = Math.atan2(fy, fx);
@@ -128,7 +123,6 @@ function buildPath(shape: { from: number[]; to: number[] }, p: number) {
     while (da < -Math.PI) da += TWOPI;
     let r = rf + (rt - rf) * p;
     let a = af + da * p + swirl;
-    // organic warps — vanish at p=0 and p=1
     r += WARP_R * bell2 * Math.sin(LOBES_A * a + phase);
     r *= 1 + OVERSHOOT * bell * Math.sin(2 * a - phase);
     a += (WARP_T / (r + 1)) * bell2 * Math.sin(LOBES_B * a - phase);
@@ -137,40 +131,41 @@ function buildPath(shape: { from: number[]; to: number[] }, p: number) {
   return smoothPath(pts);
 }
 
-export default function LogoLoader({ size = 140, color = '#04107e' }) {
-  const clock = useSharedValue(0);
+function compute(clock) {
+  const { morph, rot, opacity, scale } = phases(clock);
+  return {
+    d0: buildPath(SHAPES[0], morph),
+    d1: buildPath(SHAPES[1], morph),
+    opacity,
+    transform: `translate(${CX} ${CY}) rotate(${rot}) scale(${scale}) translate(${-CX} ${-CY})`,
+  };
+}
+
+export default function LogoLoader({ size = 140, color = "#04107e" }) {
+  const [frame, setFrame] = useState(() => compute(0));
+  const start = useRef(null);
+  const raf = useRef(null);
 
   useEffect(() => {
-    clock.value = 0;
-    clock.value = withRepeat(
-      withTiming(1, { duration: TOTAL, easing: Easing.linear }),
-      -1,
-      false,
-    );
-  }, []);
-
-  const groupProps = useAnimatedProps(() => {
-    const { rot, opacity, scale } = phases(clock.value);
-    return {
-      opacity,
-      transform: `translate(${CX} ${CY}) rotate(${rot}) scale(${scale}) translate(${-CX} ${-CY})`,
+    const loop = (now) => {
+      if (start.current == null) start.current = now;
+      const clock = ((now - start.current) % TOTAL) / TOTAL;
+      setFrame(compute(clock));
+      raf.current = requestAnimationFrame(loop);
     };
-  });
-
-  const shape0Props = useAnimatedProps(() => ({
-    d: buildPath(SHAPES[0], phases(clock.value).morph),
-  }));
-  const shape1Props = useAnimatedProps(() => ({
-    d: buildPath(SHAPES[1], phases(clock.value).morph),
-  }));
+    raf.current = requestAnimationFrame(loop);
+    return () => {
+      if (raf.current != null) cancelAnimationFrame(raf.current);
+    };
+  }, []);
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size} viewBox="0 0 375 374.999991">
-        <AnimatedG animatedProps={groupProps}>
-          <AnimatedPath animatedProps={shape0Props} fill={color} fillRule="evenodd" />
-          <AnimatedPath animatedProps={shape1Props} fill={color} fillRule="evenodd" />
-        </AnimatedG>
+        <G opacity={frame.opacity} transform={frame.transform}>
+          <Path d={frame.d0} fill={color} fillRule="evenodd" />
+          <Path d={frame.d1} fill={color} fillRule="evenodd" />
+        </G>
       </Svg>
     </View>
   );
@@ -178,7 +173,7 @@ export default function LogoLoader({ size = 140, color = '#04107e' }) {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

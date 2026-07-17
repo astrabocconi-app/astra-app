@@ -1,4 +1,4 @@
-import type { MeResponse } from "../schemas";
+import type { MeResponse, PointsBalanceResponse, PointsHistoryResponse } from "../schemas";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
 // Mobile NEVER touches the DB — this HTTPS client is its only data path.
@@ -68,6 +68,15 @@ export function createApiClient(options: ApiClientOptions) {
 
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
+
+    points: {
+      /** GET /api/points/balance — current spendable balance. */
+      balance: async () =>
+        (await request<PointsBalanceResponse>("/api/points/balance")).data,
+      /** GET /api/points/history — recent ledger entries, newest first. */
+      history: async () =>
+        (await request<PointsHistoryResponse>("/api/points/history")).data,
+    },
 
     auth: {
       /** Request a 6-digit sign-in code by email. */

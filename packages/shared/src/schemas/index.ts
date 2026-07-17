@@ -24,3 +24,30 @@ export const meResponse = z.object({
   roles: z.array(z.string()),
 });
 export type MeResponse = z.infer<typeof meResponse>;
+
+// ── Points ──────────────────────────────────────────────────────────────────
+
+/** GET /api/points/balance — the current user's spendable balance. */
+export const pointsBalanceResponse = z.object({
+  balance: z.number().int(),
+  kind: z.string(),
+});
+export type PointsBalanceResponse = z.infer<typeof pointsBalanceResponse>;
+
+/** A single append-only ledger entry (read model). */
+export const ledgerEntry = z.object({
+  id: z.string(),
+  delta: z.number().int(), // + earned, − spent
+  source: z.string(),
+  reason: z.string(),
+  refType: z.string().nullable(),
+  refId: z.string().nullable(),
+  createdAt: z.string(), // ISO
+});
+export type LedgerEntry = z.infer<typeof ledgerEntry>;
+
+/** GET /api/points/history — recent ledger entries, newest first. */
+export const pointsHistoryResponse = z.object({
+  entries: z.array(ledgerEntry),
+});
+export type PointsHistoryResponse = z.infer<typeof pointsHistoryResponse>;

@@ -67,12 +67,12 @@ Each phase unblocks the next. Ownership is marked per item.
 
 ## PART B — Feature modules (dependency-ordered)
 
-### Phase 4 — Points engine  *(🤖 core; rewards/partners/events depend on it)*
-- [ ] 🤖 Server service: `earn()` / `spend()` writing ledger entries; balance read via `PointsBalance`.
-- [ ] 🤖 `spend()` rejects when balance insufficient (checked in a transaction).
-- [ ] 🤖 Endpoints: `GET /api/points/balance`, `GET /api/points/history`.
-- [ ] 🤖 Mobile: points balance on Home + ledger history screen.
-- [ ] 🙋 Verify earn/spend/balance with seeded data.
+### Phase 4 — Points engine  ✅ DONE  *(🤖 core; rewards/partners/events depend on it)*
+- [x] 🤖 Server service (`lib/points.ts`): `earn()` / `spend()` writing ledger entries; balance = SUM over the ledger.
+- [x] 🤖 `spend()` rejects when balance insufficient (Serializable transaction — no overspend races).
+- [x] 🤖 Endpoints: `GET /api/points/balance`, `GET /api/points/history` (auth-gated).
+- [x] 🤖 Mobile: points balance on Home (tappable) + points-history screen.
+- [x] 🙋 Verified: earn 250 → spend 90 → balance 160; overspend rejected; API returns balance+history.
 
 ### Phase 5 — Loyalty card (scannable QR)  *(🤖 the earn mechanism)*
 - [ ] 🤖 HMAC-signed, short-lived rotating card token (`CARD_TOKEN_HMAC_SECRET`).

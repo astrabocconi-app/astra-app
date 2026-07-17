@@ -17,14 +17,20 @@ try {
   // No local file (e.g. CI / Vercel) — vars come from the environment.
 }
 
-// Direct/unpooled connection for migrations & introspection.
+// Direct/unpooled connection for migrations & introspection. Supports our names,
+// Vercel's Neon names, and the STORAGE_ prefix Vercel adds to the store's vars.
 const directUrl =
   process.env.DIRECT_URL ||
   process.env.DATABASE_URL_UNPOOLED ||
   process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.STORAGE_DATABASE_URL_UNPOOLED ||
+  process.env.STORAGE_POSTGRES_URL_NON_POOLING ||
   process.env.DATABASE_URL ||
+  process.env.STORAGE_DATABASE_URL ||
   process.env.POSTGRES_PRISMA_URL ||
-  process.env.POSTGRES_URL;
+  process.env.STORAGE_POSTGRES_PRISMA_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.STORAGE_POSTGRES_URL;
 
 export default defineConfig({
   schema: "prisma/schema.prisma",

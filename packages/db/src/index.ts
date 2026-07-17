@@ -13,16 +13,18 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-/** Pooled connection string, from our name or Vercel's Neon-integration names. */
+/** Pooled connection string, from our name or Vercel's Neon-integration names
+ *  (including the STORAGE_ prefix Vercel applies when connecting the store). */
 function pooledConnectionString(): string {
   const url =
     process.env.DATABASE_URL ||
     process.env.POSTGRES_PRISMA_URL ||
-    process.env.POSTGRES_URL;
+    process.env.POSTGRES_URL ||
+    process.env.STORAGE_DATABASE_URL ||
+    process.env.STORAGE_POSTGRES_PRISMA_URL ||
+    process.env.STORAGE_POSTGRES_URL;
   if (!url) {
-    throw new Error(
-      "No database URL set (DATABASE_URL / POSTGRES_PRISMA_URL / POSTGRES_URL)."
-    );
+    throw new Error("No pooled database URL set (DATABASE_URL / STORAGE_DATABASE_URL / …).");
   }
   return url;
 }

@@ -101,10 +101,14 @@ const trustedOrigins = [
     .filter(Boolean),
 ].filter((o): o is string => Boolean(o));
 
+// Sender for OTP emails. Must be an address on a domain VERIFIED in Resend for
+// real delivery; `onboarding@resend.dev` only reaches your own Resend account.
+const RESEND_FROM = process.env.RESEND_FROM ?? "ASTRA <onboarding@resend.dev>";
+
 async function deliverOtp(email: string, otp: string): Promise<void> {
   if (resend) {
     await resend.emails.send({
-      from: "ASTRA <onboarding@resend.dev>", // TODO: switch to a verified domain sender
+      from: RESEND_FROM,
       to: email,
       subject: "Your ASTRA sign-in code",
       text: `Your ASTRA sign-in code is ${otp}. It expires in 10 minutes.`,

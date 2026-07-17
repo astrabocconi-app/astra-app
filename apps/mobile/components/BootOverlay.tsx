@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet } from "react-native";
 import LogoLoader from "./LogoLoader";
 import { useBootStore } from "../lib/boot-store";
@@ -20,6 +20,7 @@ export default function BootOverlay() {
   const done = useBootStore((s) => s.done);
   const backdrop = useRef(new Animated.Value(1)).current; // white sheet opacity
   const logo = useRef(new Animated.Value(1)).current; // logo layer opacity
+  const [frozen, setFrozen] = useState(false); // stops the morph looping on reveal
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -29,6 +30,9 @@ export default function BootOverlay() {
         duration: BG_FADE_MS,
         useNativeDriver: true,
       }).start(() => {
+        // Freeze the morph the instant home is revealed so it can't kick off a
+        // fresh cycle (the faint trailing animation) while the logo fades out.
+        setFrozen(true);
         // 2) let the logo hang over the live home, then fade it out last
         Animated.timing(logo, {
           toValue: 0,
@@ -51,7 +55,7 @@ export default function BootOverlay() {
       <Animated.View
         style={[StyleSheet.absoluteFill, { backgroundColor: "#fff", opacity: backdrop }]}
       />
-      <LogoLoader size={168} />
+      <LogoLoader size={168} paused={frozen} />
     </Animated.View>
   );
 }

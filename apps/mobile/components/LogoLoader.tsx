@@ -141,12 +141,16 @@ function compute(clock) {
   };
 }
 
-export default function LogoLoader({ size = 140, color = "#04107e" }) {
+export default function LogoLoader({ size = 140, color = "#04107e", paused = false }) {
   const [frame, setFrame] = useState(() => compute(0));
   const start = useRef(null);
   const raf = useRef(null);
 
   useEffect(() => {
+    // When paused, stop the RAF loop and hold the current frame — this prevents
+    // the cycle from vanishing and restarting a new morph (the faint "extra"
+    // animation) while a caller is fading the loader out.
+    if (paused) return;
     const loop = (now) => {
       if (start.current == null) start.current = now;
       const clock = ((now - start.current) % TOTAL) / TOTAL;
@@ -157,7 +161,7 @@ export default function LogoLoader({ size = 140, color = "#04107e" }) {
     return () => {
       if (raf.current != null) cancelAnimationFrame(raf.current);
     };
-  }, []);
+  }, [paused]);
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>

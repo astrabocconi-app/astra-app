@@ -1,18 +1,11 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSessionUser } from "@/lib/session";
-
-// Planned dashboard sections. Pages fill in as feature stories land.
-const NAV = [
-  { href: "/dashboard/users", label: "Users" },
-  { href: "/dashboard/materials", label: "Materials" },
-  { href: "/dashboard/events", label: "Events" },
-  { href: "/dashboard/points", label: "Points" },
-  { href: "/dashboard/rewards", label: "Rewards" },
-  { href: "/dashboard/partners", label: "Partners" },
-  { href: "/dashboard/audit", label: "Audit log" },
-] as const;
+import { AstraLogo } from "@/app/_ui/logo";
+import { Badge } from "@/app/_ui/badge";
+import { SidebarNav } from "./_components/sidebar-nav";
+import { SignOutButton } from "./_components/sign-out-button";
 
 // Roles allowed into the dashboard at all. Per-action authorization still runs
 // through lib/authz.ts inside each route/page.
@@ -32,36 +25,51 @@ export default async function DashboardLayout({
   const isStaff = session.user.roles.some((r) => STAFF_ROLES.includes(r));
   if (!isStaff) {
     return (
-      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-3 p-6 text-center">
+      <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
+        <AstraLogo size={48} className="text-astra-primary" />
         <h1 className="text-xl font-semibold text-gray-900">No dashboard access</h1>
         <p className="text-gray-500">
           Signed in as {session.user.email}, but this account has no staff role.
           Ask an admin to grant access.
         </p>
+        <SignOutButton />
       </main>
     );
   }
 
+  const email = session.user.email;
+  const initial = (session.user.name ?? email).charAt(0).toUpperCase();
+
   return (
     <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r border-gray-200 p-4">
-        <Link href="/dashboard" className="mb-6 block text-lg font-semibold" style={{ color: "#04107E" }}>
-          ASTRA
+      <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col border-r border-gray-100 bg-white/80 px-4 py-5 backdrop-blur">
+        <Link
+          href="/dashboard"
+          className="mb-8 flex items-center gap-2.5 px-2 text-astra-primary"
+        >
+          <AstraLogo size={30} />
+          <span className="text-lg font-bold tracking-tight">ASTRA</span>
+          <Badge tone="neutral">Staff</Badge>
         </Link>
-        <nav className="flex flex-col gap-1">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <p className="mt-6 truncate text-xs text-gray-400">{session.user.email}</p>
+
+        <SidebarNav />
+
+        <div className="mt-auto border-t border-gray-100 pt-4">
+          <div className="mb-3 flex items-center gap-3 px-1">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-astra-light text-sm font-semibold text-astra-primary">
+              {initial}
+            </div>
+            <p className="truncate text-xs text-gray-500" title={email}>
+              {email}
+            </p>
+          </div>
+          <SignOutButton />
+        </div>
       </aside>
-      <main className="flex-1 p-8">{children}</main>
+
+      <main className="astra-fade-up flex-1 px-8 py-8">
+        <div className="mx-auto max-w-5xl">{children}</div>
+      </main>
     </div>
   );
 }

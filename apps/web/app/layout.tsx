@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "ASTRA Dashboard",
-  description: "ASTRA App — internal dashboard (Phase 1.5 skeleton)",
+  description: "ASTRA App — staff dashboard for the ASTRA loyalty platform.",
 };
 
 export default function RootLayout({

@@ -28,6 +28,13 @@ const config: ExpoConfig = {
   ios: {
     bundleIdentifier: "it.astrabocconi.app",
     supportsTablet: false,
+    infoPlist: {
+      // Required for the partner scanner (expo-camera). Kept here so every
+      // prebuild includes it regardless of plugin ordering.
+      NSCameraUsageDescription: "ASTRA uses the camera to scan member loyalty cards.",
+      NSMicrophoneUsageDescription:
+        "ASTRA uses the microphone only as part of the camera scanner.",
+    },
   },
   android: {
     package: "it.astrabocconi.app",

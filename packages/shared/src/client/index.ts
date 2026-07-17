@@ -82,6 +82,33 @@ export function createApiClient(options: ApiClientOptions) {
         (await request<PointsHistoryResponse>("/api/points/history")).data,
     },
 
+    card: {
+      /** GET /api/card/token — signed token to render in the student's card QR. */
+      token: async () =>
+        (await request<{ token: string }>("/api/card/token")).data,
+    },
+
+    partner: {
+      /** POST /api/partner/scan — award points for a scanned student card token. */
+      scan: async (token: string) =>
+        (
+          await request<{ awarded: number; student: { name: string | null }; balance: number }>(
+            "/api/partner/scan",
+            { method: "POST", body: JSON.stringify({ token }) },
+          )
+        ).data,
+      /** GET /api/partner/stats — this venue's scan tallies. */
+      stats: async () =>
+        (
+          await request<{
+            partner: { id: string; name: string };
+            scansToday: number;
+            scansTotal: number;
+            pointsToday: number;
+          }>("/api/partner/stats")
+        ).data,
+    },
+
     auth: {
       /** Request a 6-digit sign-in code by email. */
       sendOtp: async (email: string) => {
@@ -112,6 +139,20 @@ export function createApiClient(options: ApiClientOptions) {
         );
         const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
         return { token, user: data?.user ?? null };
+      },
+
+      /** Partner venue sign-in: login code + password (issued by ASTRA). */
+      partnerLogin: async (code: string, password: string) => {
+        const { data, res } = await request<{
+          token?: string;
+          user?: MeResponse;
+          partner?: { id: string; name: string };
+        }>("/api/auth/partner-login", {
+          method: "POST",
+          body: JSON.stringify({ code, password }),
+        });
+        const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
+        return { token, user: data?.user ?? null, partner: data?.partner ?? null };
       },
     },
   };

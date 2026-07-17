@@ -4,7 +4,11 @@ import * as SecureStore from "expo-secure-store";
 // in memory so the API client's synchronous getToken() can read it.
 
 const KEY = "astra_session_token";
+const TYPE_KEY = "astra_account_type";
 let cachedToken: string | null = null;
+let cachedType: AccountType | null = null;
+
+export type AccountType = "student" | "partner";
 
 /** Load the persisted token into memory. Call once at app boot. */
 export async function loadToken(): Promise<string | null> {
@@ -24,5 +28,23 @@ export async function setToken(token: string): Promise<void> {
 
 export async function clearToken(): Promise<void> {
   cachedToken = null;
+  cachedType = null;
   await SecureStore.deleteItemAsync(KEY);
+  await SecureStore.deleteItemAsync(TYPE_KEY);
+}
+
+// Account type — persisted so cold-boot can route partner vs student without a
+// network round-trip (keeps students able to open the app offline).
+export async function loadAccountType(): Promise<AccountType | null> {
+  cachedType = (await SecureStore.getItemAsync(TYPE_KEY)) as AccountType | null;
+  return cachedType;
+}
+
+export function getAccountType(): AccountType | null {
+  return cachedType;
+}
+
+export async function setAccountType(type: AccountType): Promise<void> {
+  cachedType = type;
+  await SecureStore.setItemAsync(TYPE_KEY, type);
 }

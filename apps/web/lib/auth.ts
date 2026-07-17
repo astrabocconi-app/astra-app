@@ -21,6 +21,7 @@ import { Resend } from "resend";
 import nodemailer, { type Transporter } from "nodemailer";
 import { ASTRA_LOGO_PNG_BASE64 } from "./email-logo";
 import { OTP_LOGO_CID, OTP_SUBJECT, otpEmailHtml, otpEmailText } from "./email-template";
+import { verifyPassword } from "./partner";
 
 // Allowed sign-in domains. Configurable via ALLOWED_EMAIL_DOMAINS (comma-list);
 // defaults to the shared constant (studbocconi.it, unibocconi.it).
@@ -179,6 +180,46 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }
 
+// Partner venues sign in with a login code + password (issued by ASTRA). This
+// bypasses the student email-OTP + Bocconi-domain gate entirely and returns a
+// bearer token, just like the students' flow, but for a PARTNER_MANAGER account.
+function partnerLoginPlugin(): BetterAuthPlugin {
+  return {
+    id: "partner-login",
+    endpoints: {
+      partnerLogin: createAuthEndpoint("/partner-login", { method: "POST" }, async (ctx) => {
+        const body = ctx.body as { code?: string; password?: string } | undefined;
+        const code = String(body?.code ?? "").trim().toLowerCase();
+        const password = String(body?.password ?? "");
+        if (!code || !password) {
+          throw new APIError("BAD_REQUEST", { message: "Code and password are required." });
+        }
+        const membership = await prisma.partnerMembership.findUnique({
+          where: { loginCode: code },
+          include: { user: true, partner: true },
+        });
+        if (!membership || !verifyPassword(password, membership.passwordHash)) {
+          throw new APIError("UNAUTHORIZED", { message: "Invalid code or password." });
+        }
+        const user = membership.user;
+        const session = await ctx.context.internalAdapter.createSession(user.id);
+        if (!session) {
+          throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
+        }
+        await setSessionCookie(ctx, {
+          session,
+          user: { ...user, name: user.name ?? membership.partner.name },
+        });
+        return ctx.json({
+          token: session.token,
+          user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
+          partner: { id: membership.partner.id, name: membership.partner.name },
+        });
+      }),
+    },
+  };
+}
+
 export const auth = betterAuth({
   baseURL,
   secret: process.env.BETTER_AUTH_SECRET,
@@ -216,6 +257,7 @@ export const auth = betterAuth({
     }),
     bearer(),
     devLoginPlugin(),
+    partnerLoginPlugin(),
   ],
   rateLimit: {
     enabled: true,

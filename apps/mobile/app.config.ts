@@ -36,6 +36,14 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-secure-store",
     [
+      // Partner venues use the camera to scan members' loyalty-card QR codes.
+      "expo-camera",
+      {
+        cameraPermission: "ASTRA uses the camera to scan members' loyalty cards.",
+        recordAudioAndroid: false,
+      },
+    ],
+    [
       // Android must target API 36 (required on Play as of 2026-08-31).
       // TODO(scaffold): verify the pinned Expo SDK 57 fully supports API 36.
       "expo-build-properties",

@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { initSentry } from "../lib/sentry";
-import { loadToken } from "../lib/session";
+import { loadToken, loadAccountType } from "../lib/session";
 import { useBootStore } from "../lib/boot-store";
 import BootOverlay from "../components/BootOverlay";
 
@@ -20,11 +20,16 @@ export default function RootLayout() {
 
   useEffect(() => {
     // Restore the persisted session before showing any screen; if we already
-    // have a token, skip the login screen and play the intro overlay over home.
-    loadToken().then((token) => {
+    // have a token, route by account type — partners to their venue home,
+    // students through the intro overlay to the tabbed home.
+    Promise.all([loadToken(), loadAccountType()]).then(([token, type]) => {
       if (token) {
-        useBootStore.getState().trigger();
-        router.replace("/home");
+        if (type === "partner") {
+          router.replace("/(partner)/home");
+        } else {
+          useBootStore.getState().trigger();
+          router.replace("/home");
+        }
       }
       setReady(true);
     });

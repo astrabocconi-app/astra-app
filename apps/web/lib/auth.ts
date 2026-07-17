@@ -19,6 +19,8 @@ import { prisma, Role } from "@astra/db";
 import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
 import nodemailer, { type Transporter } from "nodemailer";
+import { ASTRA_LOGO_PNG_BASE64 } from "./email-logo";
+import { OTP_LOGO_CID, OTP_SUBJECT, otpEmailHtml, otpEmailText } from "./email-template";
 
 // Allowed sign-in domains. Configurable via ALLOWED_EMAIL_DOMAINS (comma-list);
 // defaults to the shared constant (studbocconi.it, unibocconi.it).
@@ -138,9 +140,13 @@ const trustedOrigins = [
 const EMAIL_FROM =
   process.env.EMAIL_FROM ?? process.env.RESEND_FROM ?? "ASTRA <onboarding@resend.dev>";
 
-const OTP_SUBJECT = "Your ASTRA sign-in code";
-const otpText = (otp: string) =>
-  `Your ASTRA sign-in code is ${otp}. It expires in 10 minutes.`;
+// Inline logo attachment (CID) — auto-displays without a "load images" prompt.
+const logoAttachment = {
+  filename: "astra-logo.png",
+  content: Buffer.from(ASTRA_LOGO_PNG_BASE64, "base64"),
+  cid: OTP_LOGO_CID,
+  contentType: "image/png",
+};
 
 async function deliverOtp(email: string, otp: string): Promise<void> {
   // 1) SMTP (e.g. Aruba) takes priority when configured.
@@ -150,17 +156,21 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
       from: EMAIL_FROM,
       to: email,
       subject: OTP_SUBJECT,
-      text: otpText(otp),
+      text: otpEmailText(otp),
+      html: otpEmailHtml(otp),
+      attachments: [logoAttachment],
     });
     return;
   }
-  // 2) Resend, if configured.
+  // 2) Resend, if configured. (Inline CID logo isn't sent here; text/HTML still
+  //    render — Resend is only a fallback when SMTP isn't set.)
   if (resend) {
     await resend.emails.send({
       from: EMAIL_FROM,
       to: email,
       subject: OTP_SUBJECT,
-      text: otpText(otp),
+      text: otpEmailText(otp),
+      html: otpEmailHtml(otp),
     });
     return;
   }

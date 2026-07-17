@@ -91,7 +91,7 @@ export default function LoginScreen() {
       if (!token) throw new Error("Login failed.");
       await setToken(token);
       await setAccountType("partner");
-      router.replace("/(partner)/home");
+      router.replace("/partner/home");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid code or password.");
     } finally {

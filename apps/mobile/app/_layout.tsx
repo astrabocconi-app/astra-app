@@ -25,7 +25,7 @@ export default function RootLayout() {
     Promise.all([loadToken(), loadAccountType()]).then(([token, type]) => {
       if (token) {
         if (type === "partner") {
-          router.replace("/(partner)/home");
+          router.replace("/partner/home");
         } else {
           useBootStore.getState().trigger();
           router.replace("/home");

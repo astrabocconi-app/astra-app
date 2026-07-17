@@ -23,7 +23,7 @@ export default function PartnerHomeScreen() {
       {/* Big scans-today card */}
       <Pressable
         className="mt-6 rounded-3xl bg-astra-primary p-6 active:opacity-90"
-        onPress={() => router.push("/(partner)/scan")}
+        onPress={() => router.push("/partner/scan")}
       >
         <Text className="text-xs uppercase tracking-wide text-white/70">Codes scanned today</Text>
         <Text className="mt-1 text-6xl font-bold text-white">

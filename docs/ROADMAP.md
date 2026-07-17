@@ -31,7 +31,7 @@ Each phase unblocks the next. Ownership is marked per item.
 
 ### Phase 0 — Accounts & secrets  *(🙋 you; ~partially done)*
 - [x] 🙋 **Neon** `dev` project, pooling on. `DATABASE_URL` (pooled) + `DIRECT_URL` in `apps/web/.env`.
-- [ ] 🙋 **Resend** account + API key + verified sending domain. *(dev OTP logs to console until then)*
+- [x] 🙋 **Email delivery** — OTP codes sent via **Aruba SMTP** (`noreply@astrabocconi.com`); SMTP_* env set on Vercel. *(dev still logs to console; Resend remains a coded fallback.)*
 - [ ] 🙋 **Vercel Blob** (Storage → Blob) — auto-injects `BLOB_READ_WRITE_TOKEN` *(deferred until Materials/News images)*.
 - [ ] 🙋 **Sentry** — one project for web, one for mobile → 2 DSNs.
 - [~] 🙋 **Expo/EAS** — Expo account done; `eas init` + `projectId` in `app.config.ts` still TODO (needed for dev/store builds).

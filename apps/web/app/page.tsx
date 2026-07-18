@@ -47,7 +47,6 @@ function PhoneFrame({
     <div
       className={`overflow-hidden rounded-[2.4rem] border-[10px] border-neutral-900 bg-neutral-900 shadow-2xl ${className}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} className="block h-auto w-full" />
     </div>
   );

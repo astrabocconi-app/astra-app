@@ -35,7 +35,6 @@ export function log(
   message: string,
   extra?: Record<string, unknown>
 ): void {
-  // eslint-disable-next-line no-console
   console[level](JSON.stringify({ level, requestId, message, ...extra }));
 }
 

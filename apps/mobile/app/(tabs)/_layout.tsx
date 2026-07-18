@@ -8,9 +8,10 @@ const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
+type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
 
 // Raised circular button for the center "Card" (QR) tab — big + easy to reach.
-function CenterCardButton({ onPress }: { onPress?: (e: any) => void }) {
+function CenterCardButton({ onPress }: { onPress?: PressableOnPress }) {
   return (
     <View style={styles.centerWrap} pointerEvents="box-none">
       <Pressable onPress={onPress} style={styles.centerButton} hitSlop={12}>

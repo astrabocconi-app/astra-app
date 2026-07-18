@@ -108,6 +108,8 @@ export default function LoginScreen() {
 
   return (
     <ImageBackground
+      // Metro's static asset loading uses CommonJS require.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       source={require("../assets/campus.jpg")}
       resizeMode="cover"
       imageStyle={{ opacity: 0.18 }}
@@ -116,6 +118,8 @@ export default function LoginScreen() {
       <SafeAreaView className="flex-1">
         <View className="flex-1 items-center justify-center px-8">
           <Image
+            // Metro's static asset loading uses CommonJS require.
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
             source={require("../assets/logo-horizontal.png")}
             resizeMode="contain"
             style={{ width: 260, height: 70, marginBottom: 40 }}

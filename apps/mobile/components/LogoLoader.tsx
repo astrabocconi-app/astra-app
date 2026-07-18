@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck — vendored animation component (index-heavy morph math);
 // intentionally not type-checked under strict/noUncheckedIndexedAccess.
 /**

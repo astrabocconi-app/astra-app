@@ -186,7 +186,6 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
     return;
   }
   // 3) Dev fallback: no provider configured — print the code so we can test.
-  // eslint-disable-next-line no-console
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }
 

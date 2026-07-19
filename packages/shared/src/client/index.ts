@@ -88,6 +88,30 @@ export function createApiClient(options: ApiClientOptions) {
         (await request<{ token: string }>("/api/card/token")).data,
     },
 
+    classrooms: {
+      /** GET /api/classrooms — live Bocconi free-classroom availability (Free@B). */
+      list: async (params?: { time?: string; day?: string }) => {
+        const qs = new URLSearchParams();
+        if (params?.time) qs.set("time", params.time);
+        if (params?.day) qs.set("day", params.day);
+        const q = qs.toString();
+        return (
+          await request<{
+            rooms: {
+              name: string;
+              building: string;
+              status: "free" | "occupied";
+              freeUntil?: string;
+              isStudyRoom?: boolean;
+            }[];
+            freeRooms: number;
+            totalRooms: number;
+            timestamp: string | null;
+          }>(`/api/classrooms${q ? `?${q}` : ""}`)
+        ).data;
+      },
+    },
+
     partner: {
       /** POST /api/partner/scan — award points for a scanned student card token. */
       scan: async (token: string) =>

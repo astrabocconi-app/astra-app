@@ -52,6 +52,24 @@ export default function ProfileScreen() {
         </View>
       )}
 
+      {/* Services */}
+      <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        Services
+      </Text>
+      <Pressable
+        className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+        onPress={() => router.push("/classrooms")}
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+          <Ionicons name="school-outline" size={22} color="#04107E" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">Find a free classroom</Text>
+          <Text className="text-xs text-gray-500">Live room availability · Free@B</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+      </Pressable>
+
       <View className="flex-1" />
 
       <Pressable

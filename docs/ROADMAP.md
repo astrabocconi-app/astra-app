@@ -1,12 +1,13 @@
 # ASTRA — v1 Build Roadmap
 
 The ordered checklist to take the scaffold to a **complete v1 loyalty platform**
-(points, rewards, partners, materials, events+tickets, news, users, audit) across
+(points, rewards, partners, materials, events, news, users, audit) across
 the Expo app and the Next.js dashboard+API.
 
-**Scope:** full platform, nothing trimmed. Adds a **News** module the scaffold
-doesn't yet have; the scannable QR exists in two forms — a **loyalty card** (earn
-points at partners) and **event tickets** (RSVP + check-in).
+**Scope:** Adds a **News** module the scaffold doesn't yet have. The scannable QR
+is **loyalty-card only** — students show it, partner venues scan it to award
+points. **Events are advertise-only** (no in-app tickets/RSVP/check-in): they're
+shown in the app and link out to where tickets are actually sold.
 
 **Stack (locked by ADRs — see ARCHITECTURE.md):** Turborepo · Neon Postgres ·
 Prisma · Next.js (dashboard + API) · Better Auth email-OTP (`@studbocconi.it` / `@unibocconi.it`) ·
@@ -97,13 +98,14 @@ staging/prod Neon + CI migration wiring still TODO.
 - [ ] 🤖 Mobile: rewards catalog, redeem, redemption history.
 - [ ] 🙋 Verify a redemption debits points and a too-expensive one is refused.
 
-### Phase 8 — Events + tickets + check-in  *(🤖)*
-- [ ] 🤖 `Event`, `Rsvp`, `Ticket` models; capacity handling.
-- [ ] 🤖 RSVP / get-ticket → issue signed ticket; optional points on check-in.
-- [ ] 🤖 Staff **check-in scanner** (expo-camera): valid ✅ / used ⚠️ / invalid ❌; marks used atomically.
-- [ ] 🤖 Mobile: events list/detail, "My Tickets" with offline QR.
-- [ ] 🤖 Dashboard: event CRUD + live check-in counts.
-- [ ] 🙋 Test full loop: get ticket → check in → re-scan shows "already used".
+### Phase 8 — Events (advertise + external ticketing)  *(🤖; scope trimmed)*
+**No in-app tickets / RSVP / check-in.** Events are advertised in the app and link
+out to wherever tickets are actually sold. (The `Rsvp`/`Ticket` models, the
+`EVENT_CHECKIN` points source, and the check-in scanner are **dropped** from v1.)
+- [ ] 🤖 `Event` model: title, description, image (Blob), date/time, location, **external ticket URL**.
+- [ ] 🤖 Dashboard: event CRUD (publish/unpublish, area-scoped).
+- [ ] 🤖 Mobile: events list + detail with a **"Get tickets"** button that opens the external link (wires up the Home "Latest events" placeholder).
+- [ ] 🙋 Verify events publish/hide correctly and the external link opens.
 
 ### Phase 9 — News / announcements + push  *(🤖 new module)*
 - [ ] 🤖 `NewsPost` model (+ images via Vercel Blob); dashboard publish/CRUD.

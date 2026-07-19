@@ -111,11 +111,15 @@ export default function ClassroomsScreen() {
             </Text>
           }
           ListEmptyComponent={
-            <View className="flex-1 items-center justify-center gap-2 pt-24">
-              <Ionicons name="time-outline" size={30} color="#9CA3AF" />
-              <Text className="px-10 text-center text-gray-400">
-                No free rooms to show right now. Availability is limited on weekends and
-                outside term.
+            <View className="flex-1 items-center justify-center gap-2 px-10 pt-24">
+              <Ionicons name="calendar-outline" size={34} color="#9CA3AF" />
+              <Text className="text-center text-base font-semibold text-gray-700">
+                Not available yet
+              </Text>
+              <Text className="text-center text-sm leading-5 text-gray-400">
+                Live classroom availability is read from Bocconi&apos;s timetable, which has no
+                data right now (weekends and outside term). This will start working
+                automatically once the semester begins.
               </Text>
             </View>
           }

@@ -48,3 +48,39 @@ export async function registerForPush(): Promise<void> {
     // Native module missing (needs a rebuild) or any other issue — no-op.
   }
 }
+
+// Fire a LOCAL notification — works on the simulator (unlike remote push). For
+// demoing how a news alert looks. Returns a short status string for the UI.
+export async function sendTestNotification(): Promise<string> {
+  try {
+    const Notifications = await import("expo-notifications");
+
+    if (!handlerSet) {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowBanner: true,
+          shouldShowList: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+        }),
+      });
+      handlerSet = true;
+    }
+
+    let { status } = await Notifications.getPermissionsAsync();
+    if (status !== "granted") status = (await Notifications.requestPermissionsAsync()).status;
+    if (status !== "granted") return "Notifications are turned off — enable them in Settings.";
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "ASTRA",
+        body: "🔔 New announcement — this is how news alerts will appear.",
+        sound: "default",
+      },
+      trigger: null, // deliver immediately
+    });
+    return "Sent! Check the banner (background the app to see it on the lock screen too).";
+  } catch {
+    return "Notifications need a rebuilt dev build to work.";
+  }
+}

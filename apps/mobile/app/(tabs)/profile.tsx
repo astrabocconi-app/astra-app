@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView } from "react-native";
+import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
 import { clearToken } from "../../lib/session";
+import { sendTestNotification } from "../../lib/push";
 import { useProfileStore, COURSES, YEARS, shortCourse } from "../../lib/profile-store";
 
 type Picker = "course" | "year" | null;
@@ -135,6 +136,20 @@ export default function ProfileScreen() {
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-900">Find a free classroom</Text>
           <Text className="text-xs text-gray-500">Live room availability · Free@B</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+      </Pressable>
+
+      <Pressable
+        className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+        onPress={async () => Alert.alert("Notifications", await sendTestNotification())}
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+          <Ionicons name="notifications-outline" size={22} color="#04107E" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">Send test notification</Text>
+          <Text className="text-xs text-gray-500">Preview how alerts appear</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>

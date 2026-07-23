@@ -72,7 +72,11 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
         <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write the announcement…" />
       </Field>
       <Field label="Cover image">
-        <ImageInput value={imageUrl} onChange={setImageUrl} />
+        <ImageInput
+          value={imageUrl}
+          onChange={setImageUrl}
+          hint="Recommended: 1200 × 675 px (16:9 landscape)"
+        />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Toggle label="Published" hint="Visible in the app" checked={published} onChange={setPublished} />

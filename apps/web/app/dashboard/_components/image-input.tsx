@@ -8,9 +8,11 @@ import { useRef, useState } from "react";
 export function ImageInput({
   value,
   onChange,
+  hint,
 }: {
   value: string;
   onChange: (v: string) => void;
+  hint?: string;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -91,6 +93,7 @@ export function ImageInput({
           />
         </div>
       </div>
+      {hint && <p className="text-xs font-medium text-gray-500">{hint}</p>}
       <p className="text-xs text-gray-400">JPEG, PNG, WebP or GIF · up to 5 MB.</p>
       {error && <p className="text-xs text-red-600">{error}</p>}
     </div>

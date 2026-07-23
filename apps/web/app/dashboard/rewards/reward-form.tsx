@@ -98,7 +98,11 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
         </Field>
       </div>
       <Field label="Image">
-        <ImageInput value={imageUrl} onChange={setImageUrl} />
+        <ImageInput
+          value={imageUrl}
+          onChange={setImageUrl}
+          hint="Recommended: 800 × 800 px (square)"
+        />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Toggle label="Unlimited stock" checked={unlimited} onChange={setUnlimited} />

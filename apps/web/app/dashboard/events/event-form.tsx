@@ -94,7 +94,11 @@ export function EventForm({ id, initial }: { id?: string; initial?: EventItem })
         <Input value={externalTicketUrl} onChange={(e) => setExternalTicketUrl(e.target.value)} placeholder="https://eventbrite.com/…" />
       </Field>
       <Field label="Cover image">
-        <ImageInput value={imageUrl} onChange={setImageUrl} />
+        <ImageInput
+          value={imageUrl}
+          onChange={setImageUrl}
+          hint="Recommended: 1200 × 675 px (16:9 landscape)"
+        />
       </Field>
       <Toggle label="Published" hint="Visible in the app" checked={published} onChange={setPublished} />
 

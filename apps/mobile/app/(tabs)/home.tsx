@@ -66,7 +66,7 @@ export default function HomeScreen() {
                 <Pressable
                   onPress={() => router.push(`/news/${n.id}`)}
                   className="overflow-hidden rounded-2xl active:opacity-90"
-                  style={{ height: 132 }}
+                  style={{ aspectRatio: 16 / 9 }}
                 >
                   {n.imageUrl ? (
                     <Image source={{ uri: n.imageUrl }} resizeMode="cover" style={{ flex: 1 }} />

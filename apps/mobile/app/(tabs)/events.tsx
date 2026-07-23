@@ -53,7 +53,7 @@ export default function EventsScreen() {
           }}
         >
           {e.imageUrl ? (
-            <Image source={{ uri: e.imageUrl }} resizeMode="cover" style={{ width: "100%", height: 150 }} />
+            <Image source={{ uri: e.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
           ) : (
             <View style={{ height: 96, backgroundColor: "#04107E" }} className="items-center justify-center">
               <Ionicons name="sparkles" size={28} color="rgba(255,255,255,0.9)" />

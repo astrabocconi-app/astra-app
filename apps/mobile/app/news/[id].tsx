@@ -32,7 +32,7 @@ export default function NewsDetailScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {post.imageUrl ? (
-            <Image source={{ uri: post.imageUrl }} resizeMode="cover" style={{ width: "100%", height: 200 }} />
+            <Image source={{ uri: post.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
           ) : null}
           <View className="px-5 pt-5">
             <Text className="text-2xl font-bold text-gray-900">{post.title}</Text>

@@ -38,7 +38,7 @@ export default function EventDetailScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {event.imageUrl ? (
-            <Image source={{ uri: event.imageUrl }} resizeMode="cover" style={{ width: "100%", height: 200 }} />
+            <Image source={{ uri: event.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
           ) : (
             <View style={{ height: 120, backgroundColor: "#04107E" }} className="items-center justify-center">
               <Ionicons name="sparkles" size={34} color="rgba(255,255,255,0.9)" />

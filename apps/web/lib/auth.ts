@@ -22,6 +22,15 @@ import nodemailer, { type Transporter } from "nodemailer";
 import { ASTRA_LOGO_PNG_BASE64 } from "./email-logo";
 import { OTP_LOGO_CID, OTP_SUBJECT, otpEmailHtml, otpEmailText } from "./email-template";
 import { verifyPassword } from "./partner";
+import {
+  verifyAdminCredentials,
+  adminEmail,
+  maskEmail,
+  generateOtp,
+  storeAdminOtp,
+  consumeAdminOtp,
+  upsertAdminUser,
+} from "./admin-auth";
 
 // Allowed sign-in domains. Configurable via ALLOWED_EMAIL_DOMAINS (comma-list);
 // defaults to the shared constant (studbocconi.it, unibocconi.it).
@@ -220,6 +229,52 @@ function partnerLoginPlugin(): BetterAuthPlugin {
   };
 }
 
+// ASTRA's single central admin: username + password (env) → emailed OTP → session.
+// Two custom endpoints, mounted under /api/auth/admin-login and /admin-verify.
+function adminLoginPlugin(): BetterAuthPlugin {
+  return {
+    id: "admin-login",
+    endpoints: {
+      adminLogin: createAuthEndpoint("/admin-login", { method: "POST" }, async (ctx) => {
+        const body = ctx.body as { username?: string; password?: string } | undefined;
+        const username = String(body?.username ?? "");
+        const password = String(body?.password ?? "");
+        // Same generic error whether username or password is wrong (no enumeration).
+        if (!verifyAdminCredentials(username, password)) {
+          throw new APIError("UNAUTHORIZED", { message: "Invalid username or password." });
+        }
+        const otp = generateOtp();
+        await storeAdminOtp(otp);
+        // Dev affordance: print the admin OTP to the server console (never in
+        // production), matching deliverOtp's dev fallback for students.
+        if (process.env.NODE_ENV !== "production") {
+          // eslint-disable-next-line no-console
+          console.log(`\n[auth] DEV admin OTP: ${otp}\n`);
+        }
+        await deliverOtp(adminEmail(), otp);
+        return ctx.json({ pending: true, sentTo: maskEmail(adminEmail()) });
+      }),
+      adminVerify: createAuthEndpoint("/admin-verify", { method: "POST" }, async (ctx) => {
+        const body = ctx.body as { otp?: string } | undefined;
+        const otp = String(body?.otp ?? "").trim();
+        if (!otp || !(await consumeAdminOtp(otp))) {
+          throw new APIError("UNAUTHORIZED", { message: "Invalid or expired code." });
+        }
+        const user = await upsertAdminUser();
+        const session = await ctx.context.internalAdapter.createSession(user.id);
+        if (!session) {
+          throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
+        }
+        await setSessionCookie(ctx, { session, user: { ...user, name: user.name ?? "ASTRA Admin" } });
+        return ctx.json({
+          ok: true,
+          user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
+        });
+      }),
+    },
+  };
+}
+
 export const auth = betterAuth({
   baseURL,
   secret: process.env.BETTER_AUTH_SECRET,
@@ -268,6 +323,7 @@ export const auth = betterAuth({
     bearer(),
     devLoginPlugin(),
     partnerLoginPlugin(),
+    adminLoginPlugin(),
   ],
   rateLimit: {
     enabled: true,

@@ -2,36 +2,59 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
 import { AstraLogo } from "@/app/_ui/logo";
 import { Button } from "@/app/_ui/button";
 
-// Minimal email-OTP sign-in for the dashboard. Only @studbocconi.it is accepted
-// (enforced server-side); admins are promoted via SQL after first sign-in.
+// ASTRA admin sign-in: username + password, then a 6-digit OTP emailed to the
+// admin address (two factors). Talks to the custom Better Auth endpoints
+// /api/auth/admin-login and /api/auth/admin-verify.
+async function post(path: string, body: unknown) {
+  const res = await fetch(`/api/auth/${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message ?? "Something went wrong.");
+  return data;
+}
+
 export default function SignInPage() {
   const router = useRouter();
-  const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState("");
+  const [step, setStep] = useState<"credentials" | "otp">("credentials");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
+  const [sentTo, setSentTo] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function sendCode() {
+  async function submitCredentials() {
     setLoading(true);
     setError(null);
-    const { error } = await authClient.emailOtp.sendVerificationOtp({ email, type: "sign-in" });
-    setLoading(false);
-    if (error) return setError(error.message ?? "Couldn't send the code.");
-    setStep("code");
+    try {
+      const { sentTo } = await post("admin-login", { username, password });
+      setSentTo(sentTo ?? "");
+      setStep("otp");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Invalid username or password.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  async function verify() {
+  async function submitOtp() {
     setLoading(true);
     setError(null);
-    const { error } = await authClient.signIn.emailOtp({ email, otp });
-    setLoading(false);
-    if (error) return setError(error.message ?? "Invalid or expired code.");
-    router.replace("/dashboard");
+    try {
+      await post("admin-verify", { otp });
+      router.replace("/dashboard");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Invalid or expired code.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -43,24 +66,35 @@ export default function SignInPage() {
           </div>
           <h1 className="mt-4 text-2xl font-bold text-astra-primary">ASTRA Dashboard</h1>
           <p className="mt-1 text-sm text-gray-500">
-            {step === "email"
-              ? "Sign in with your @studbocconi.it email."
-              : `Enter the 6-digit code sent to ${email}.`}
+            {step === "credentials"
+              ? "Sign in with your admin username and password."
+              : `Enter the 6-digit code sent to ${sentTo || "your email"}.`}
           </p>
         </div>
 
         <div className="mt-6 flex flex-col gap-4">
-          {step === "email" ? (
-            <input
-              className="rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-astra-accent"
-              type="email"
-              autoComplete="email"
-              placeholder="name@studbocconi.it"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              onKeyDown={(e) => e.key === "Enter" && email && sendCode()}
-            />
+          {step === "credentials" ? (
+            <>
+              <input
+                className="rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-astra-accent"
+                type="text"
+                autoComplete="username"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={loading}
+              />
+              <input
+                className="rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-astra-accent"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+                onKeyDown={(e) => e.key === "Enter" && username && password && submitCredentials()}
+              />
+            </>
           ) : (
             <input
               className="rounded-xl border border-gray-300 px-3.5 py-2.5 text-center text-lg tracking-[8px] outline-none transition-colors focus:border-astra-accent"
@@ -71,7 +105,7 @@ export default function SignInPage() {
               onChange={(e) => setOtp(e.target.value)}
               disabled={loading}
               autoFocus
-              onKeyDown={(e) => e.key === "Enter" && otp.length >= 4 && verify()}
+              onKeyDown={(e) => e.key === "Enter" && otp.length >= 4 && submitOtp()}
             />
           )}
 
@@ -79,22 +113,24 @@ export default function SignInPage() {
 
           <Button
             block
-            disabled={loading || (step === "email" ? !email : otp.length < 4)}
-            onClick={step === "email" ? sendCode : verify}
+            disabled={
+              loading || (step === "credentials" ? !username || !password : otp.length < 4)
+            }
+            onClick={step === "credentials" ? submitCredentials : submitOtp}
           >
-            {loading ? "…" : step === "email" ? "Send code" : "Verify & continue"}
+            {loading ? "…" : step === "credentials" ? "Continue" : "Verify & sign in"}
           </Button>
 
-          {step === "code" && (
+          {step === "otp" && (
             <button
               className="text-sm text-gray-500 hover:text-gray-700"
               onClick={() => {
-                setStep("email");
+                setStep("credentials");
                 setOtp("");
                 setError(null);
               }}
             >
-              Use a different email
+              Back
             </button>
           )}
         </div>

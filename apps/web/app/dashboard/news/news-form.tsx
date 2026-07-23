@@ -75,7 +75,7 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
         <ImageInput
           value={imageUrl}
           onChange={setImageUrl}
-          hint="Recommended: 1200 × 675 px (16:9 landscape)"
+          hint="Recommended: 1200 × 600 px (2:1 landscape)"
         />
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">

@@ -17,6 +17,7 @@
     "better-auth": "^1.6.23",
     "next": "^16.2.10",
     "nodemailer": "^9.0.3",
+    "openai": "^4.104.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "resend": "^6.17.2",

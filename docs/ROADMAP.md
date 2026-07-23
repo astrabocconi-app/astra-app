@@ -47,6 +47,12 @@ notification" toggle on the news form, and mobile registration
 (`expo-notifications`). Real *delivery* needs a real EAS `projectId`
 (`eas init`) + a physical-device build — it no-ops on the simulator.
 Course/year targeting + reward redemption still to come.
+**Ask ASTRA (RAG chatbot) scaffolded** (new, not in the original v1 scope): a
+"Ask us anything" bar on Home → chat screen → `/api/chat` (OpenAI embeddings +
+gpt-4o-mini) → pgvector similarity search over a `Document` table (`vector`
+extension + IVFFlat cosine index migrated). Content pipeline in `bocconi-scraper/`
+(Playwright crawl of astrabocconi.com + scoped unibocconi.it sections → PDFs →
+OpenAI-embedded chunks). Needs `OPENAI_API_KEY` + a crawl/ingest run to go live.
 **Next up → reward redemption (spend), then News push + course/year targeting.** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---

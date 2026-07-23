@@ -144,6 +144,18 @@ export default function HomeScreen() {
         </>
       )}
 
+      {/* Ask ASTRA — RAG chatbot entry point */}
+      <Pressable
+        onPress={() => router.push("/ask")}
+        className="mx-5 mt-4 flex-row items-center gap-2.5 rounded-2xl bg-astra-light px-4 py-3.5 active:opacity-90"
+      >
+        <Ionicons name="sparkles" size={18} color="#04107E" />
+        <Text className="flex-1 text-sm font-medium text-astra-primary">
+          Ask us anything — ASTRA is here for you
+        </Text>
+        <Ionicons name="chevron-forward" size={16} color="#04107E" />
+      </Pressable>
+
       {/* Free@B — quick shortcut to the classroom finder */}
       <Pressable
         onPress={() => router.push("/classrooms")}

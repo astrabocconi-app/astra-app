@@ -462,6 +462,18 @@ model ImageAsset {
   createdAt DateTime @default(now())
 }
 
+// RAG knowledge base for the "Ask ASTRA" chatbot. Chunks of scraped Bocconi /
+// ASTRA pages + their OpenAI embedding (text-embedding-3-small, 1536 dims).
+// The IVFFlat index for cosine search is added in the migration (raw SQL);
+// queried via prisma.$queryRaw with the `<=>` operator.
+model Document {
+  id        String                       @id @default(cuid())
+  content   String
+  sourceUrl String
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+}
+
 // ============================================================================
 // Materials (files via R2). Per-user access is recorded privately; only the
 // aggregate MaterialStats view is exposed (never per-user rows).

@@ -170,3 +170,18 @@ export const pushRegisterInput = z.object({
   platform: z.enum(["IOS", "ANDROID"]),
 });
 export type PushRegisterInput = z.infer<typeof pushRegisterInput>;
+
+// ── Ask ASTRA (RAG chatbot) ─────────────────────────────────────────────────
+
+/** POST /api/chat — ask the Bocconi/ASTRA knowledge base a question. */
+export const chatInput = z.object({
+  message: z.string().trim().min(1, "Ask a question").max(1000),
+});
+export type ChatInput = z.infer<typeof chatInput>;
+
+export const chatResponse = z.object({
+  answer: z.string(),
+  sources: z.array(z.object({ url: z.string(), similarity: z.number() })),
+  grounded: z.boolean(),
+});
+export type ChatResponse = z.infer<typeof chatResponse>;

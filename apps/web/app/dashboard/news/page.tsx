@@ -52,7 +52,7 @@ export default async function NewsListPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="truncate font-medium text-gray-900">{n.title}</span>
-                  {n.pinned && <Badge tone="brand">Pinned</Badge>}
+                  {n.pinned && <Badge tone="brand">Shown first</Badge>}
                 </div>
                 {n.excerpt && <p className="mt-0.5 truncate text-sm text-gray-500">{n.excerpt}</p>}
               </div>

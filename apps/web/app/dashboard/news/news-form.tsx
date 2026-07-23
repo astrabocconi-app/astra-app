@@ -76,7 +76,12 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Toggle label="Published" hint="Visible in the app" checked={published} onChange={setPublished} />
-        <Toggle label="Pinned" hint="Show at the top" checked={pinned} onChange={setPinned} />
+        <Toggle
+          label="Show first"
+          hint="Appears first in the app news carousel"
+          checked={pinned}
+          onChange={setPinned}
+        />
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

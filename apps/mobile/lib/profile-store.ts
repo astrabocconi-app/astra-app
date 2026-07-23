@@ -13,18 +13,19 @@ import * as SecureStore from "expo-secure-store";
 const COURSE_KEY = "astra_profile_course";
 const YEAR_KEY = "astra_profile_year";
 
-// Placeholder options — swap for the official list later.
-export const COURSES: string[] = [
-  "Economics & Management (CLEAM)",
-  "International Economics & Management (BIEM)",
-  "Economics & Finance (CLEF)",
-  "International Economics & Finance (BIEF)",
-  "Economics, Management & Computer Science (BEMACS)",
-  "World Bachelor in Business (WBB)",
-  "Economic & Social Sciences (CLES)",
-  "Management (Master)",
-  "Finance (Master)",
-  "Data Science & Business Analytics (Master)",
+// Placeholder options — swap for the official list later. The profile shows the
+// `code` (acronym); the picker shows the full name so it's recognizable.
+export const COURSES: { code: string; name: string }[] = [
+  { code: "CLEAM", name: "Economics & Management" },
+  { code: "BIEM", name: "International Economics & Management" },
+  { code: "CLEF", name: "Economics & Finance" },
+  { code: "BIEF", name: "International Economics & Finance" },
+  { code: "BEMACS", name: "Economic, Management & Computer Science" },
+  { code: "WBB", name: "World Bachelor in Business" },
+  { code: "CLES", name: "Economic & Social Sciences" },
+  { code: "MSc Mgmt", name: "Management (Master)" },
+  { code: "MSc Fin", name: "Finance (Master)" },
+  { code: "MSc DSBA", name: "Data Science & Business Analytics (Master)" },
 ];
 
 export const YEARS: string[] = [

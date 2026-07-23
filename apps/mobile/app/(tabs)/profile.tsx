@@ -32,7 +32,13 @@ export default function ProfileScreen() {
     router.replace("/");
   }
 
-  const pickerOptions = picker === "course" ? COURSES : YEARS;
+  // Course options show the full name but store the acronym; years are plain.
+  const pickerOptions: { value: string; label: string }[] =
+    picker === "course"
+      ? COURSES.map((c) => ({ value: c.code, label: `${c.name} (${c.code})` }))
+      : YEARS.map((y) => ({ value: y, label: y }));
+  const currentValue = picker === "course" ? course : year;
+
   async function choose(value: string) {
     if (picker === "course") await setCourse(value);
     else if (picker === "year") await setYear(value);
@@ -161,15 +167,15 @@ export default function ProfileScreen() {
             </Text>
             <ScrollView>
               {pickerOptions.map((opt) => {
-                const selected = (picker === "course" ? course : year) === opt;
+                const selected = currentValue === opt.value;
                 return (
                   <Pressable
-                    key={opt}
+                    key={opt.value}
                     className="flex-row items-center justify-between px-5 py-4 active:bg-gray-50"
-                    onPress={() => choose(opt)}
+                    onPress={() => choose(opt.value)}
                   >
                     <Text className={`flex-1 pr-3 text-base ${selected ? "font-semibold text-astra-primary" : "text-gray-800"}`}>
-                      {opt}
+                      {opt.label}
                     </Text>
                     {selected && <Ionicons name="checkmark" size={20} color="#04107E" />}
                   </Pressable>

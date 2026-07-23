@@ -18,22 +18,16 @@ import { api } from "../../lib/api";
 // Fallback tints for cards without a cover image (cycled by index).
 const TINTS = ["#04107E", "#3B4AD0", "#1E2A8A"];
 
-function eventDate(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
-}
-
 export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
   const balance = useQuery({ queryKey: ["points-balance"], queryFn: () => api.points.balance(), retry: false });
   const history = useQuery({ queryKey: ["points-history"], queryFn: () => api.points.history(), retry: false });
   const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list(), retry: false });
-  const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list(), retry: false });
 
   const firstName = me.data?.name?.split(" ")[0];
   const recent = history.data?.entries.slice(0, 3) ?? [];
   const newsItems = news.data?.items ?? [];
-  const eventItems = (events.data?.items ?? []).slice(0, 6);
 
   const [newsIndex, setNewsIndex] = useState(0);
   function onNewsScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
@@ -135,41 +129,6 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
-      )}
-
-      {/* Latest events — compact cards */}
-      {eventItems.length > 0 && (
-        <>
-          <Text className="mt-6 px-5 text-lg font-semibold text-gray-900">Latest events</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 12, gap: 12 }}
-          >
-            {eventItems.map((e, i) => (
-              <Pressable
-                key={e.id}
-                onPress={() => router.push(`/event/${e.id}`)}
-                className="overflow-hidden rounded-2xl"
-                style={{ width: 124, height: 140 }}
-              >
-                {e.imageUrl ? (
-                  <Image source={{ uri: e.imageUrl }} resizeMode="cover" style={{ flex: 1 }} />
-                ) : (
-                  <View style={{ flex: 1, backgroundColor: TINTS[i % TINTS.length] }} className="justify-between p-3">
-                    <Ionicons name="sparkles" size={22} color="rgba(255,255,255,0.9)" />
-                    <View>
-                      <Text className="text-sm font-semibold text-white" numberOfLines={2}>
-                        {e.title}
-                      </Text>
-                      <Text className="mt-0.5 text-[11px] text-white/70">{eventDate(e.startsAt)}</Text>
-                    </View>
-                  </View>
-                )}
-              </Pressable>
-            ))}
-          </ScrollView>
-        </>
       )}
 
       {/* Ask ASTRA — RAG chatbot entry point */}

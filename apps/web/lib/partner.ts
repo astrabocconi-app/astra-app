@@ -56,6 +56,26 @@ export async function partnerStats(partnerUserId: string) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   const where = { grantedById: partnerUserId, source: LedgerSource.PARTNER_SCAN } as const;
+
+  // Per-day scan counts over the last 7 calendar days (for the home line chart).
+  const rows = await prisma.$queryRaw<{ day: Date; n: number }[]>`
+    SELECT date_trunc('day', "createdAt") AS day, count(*)::int AS n
+    FROM "PointsLedgerEntry"
+    WHERE "grantedById" = ${partnerUserId}
+      AND source = 'PARTNER_SCAN'
+      AND "createdAt" >= (CURRENT_DATE - INTERVAL '6 days')
+    GROUP BY day
+  `;
+  const byDay = new Map<string, number>();
+  for (const r of rows) byDay.set(new Date(r.day).toISOString().slice(0, 10), Number(r.n));
+  const scansByDay: { date: string; count: number }[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    scansByDay.push({ date: key, count: byDay.get(key) ?? 0 });
+  }
+
   const [scansTotal, scansToday, todaySum] = await Promise.all([
     prisma.pointsLedgerEntry.count({ where }),
     prisma.pointsLedgerEntry.count({ where: { ...where, createdAt: { gte: start } } }),
@@ -64,5 +84,5 @@ export async function partnerStats(partnerUserId: string) {
       where: { ...where, createdAt: { gte: start } },
     }),
   ]);
-  return { scansTotal, scansToday, pointsToday: todaySum._sum.delta ?? 0 };
+  return { scansTotal, scansToday, pointsToday: todaySum._sum.delta ?? 0, scansByDay };
 }

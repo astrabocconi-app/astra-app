@@ -24,8 +24,8 @@ export default function ScanScreen() {
       const res = await api.partner.scan(data);
       setResult({
         ok: true,
-        title: `+${res.awarded} points`,
-        subtitle: res.student.name ? `awarded to ${res.student.name}` : undefined,
+        title: "Scanned ✓",
+        subtitle: res.student.name ? `${res.student.name}'s card` : "Member card",
       });
       qc.invalidateQueries({ queryKey: ["partner-stats"] });
     } catch (e) {

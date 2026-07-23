@@ -175,6 +175,7 @@ export function createApiClient(options: ApiClientOptions) {
             scansToday: number;
             scansTotal: number;
             pointsToday: number;
+            scansByDay: { date: string; count: number }[];
           }>("/api/partner/stats")
         ).data,
     },

@@ -11,10 +11,10 @@ import { useBootStore } from "../lib/boot-store";
 // underneath in opacity — while the morphing logo stays fully visible on top.
 // The logo lingers over the real home for a beat, then fades out last. The
 // animation literally finishes on top of the home page.
-const HOLD_MS = 600; // keep the loader up at least this long (min on-screen time)
-const BG_FADE_MS = 300; // white backdrop dissolves → home appears gradually in opacity
-const LOGO_HOLD_MS = 80; // logo floats over the now-visible home for a beat
-const LOGO_FADE_MS = 220; // then the logo itself fades away over home
+const HOLD_MS = 2200; // keep the loader up at least this long (min on-screen time)
+const BG_FADE_MS = 650; // white backdrop dissolves → home appears gradually in opacity
+const LOGO_HOLD_MS = 300; // logo floats over the now-visible home for a beat
+const LOGO_FADE_MS = 450; // then the logo itself fades away over home
 
 export default function BootOverlay() {
   const done = useBootStore((s) => s.done);

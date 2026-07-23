@@ -34,7 +34,14 @@ swipeable news carousel, compact event cards (cover-image ready), safe-area tab
 bar, QR card with a centered A-logo + offline token caching, a profile
 course/year selector (on-device placeholder until the real list + server field),
 and a red-outlined sign-out.
-**Next up → Phase 5 (loyalty card QR) hardening.** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
+**CMS landed:** admin can publish **News, Events, and Rewards** end-to-end —
+dashboard CRUD (`/dashboard/news|events|rewards`) → admin API
+(`/api/admin/*`, admin-only, **audit-logged**) → student read API
+(`/api/news|events|rewards`) → mobile screens (news carousel + detail, events
+list + detail with "Get tickets", rewards catalog). Images accept a URL for now
+(Supabase upload pending). Push + course/year targeting + reward redemption
+still to come.
+**Next up → reward redemption (spend), then News push + course/year targeting.** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---
 

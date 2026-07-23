@@ -378,8 +378,9 @@ model Event {
   longitude       Float?
   startsAt        DateTime
   endsAt          DateTime?
-  capacity        Int? // null = unlimited
-  pointsOnCheckin Int       @default(0)
+  externalTicketUrl String? // advertise-only: link out to where tickets are sold
+  capacity        Int? // null = unlimited (legacy; unused in advertise-only v1)
+  pointsOnCheckin Int       @default(0) // legacy; unused in advertise-only v1
   areaId          String?
   published       Boolean   @default(false)
   createdAt       DateTime  @default(now())

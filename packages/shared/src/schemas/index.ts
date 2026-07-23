@@ -51,3 +51,101 @@ export const pointsHistoryResponse = z.object({
   entries: z.array(ledgerEntry),
 });
 export type PointsHistoryResponse = z.infer<typeof pointsHistoryResponse>;
+
+// ── CMS: News ─────────────────────────────────────────────────────────────
+// `imageUrl` holds an image link for now; it becomes a Supabase storage key +
+// resolved URL once storage is wired. Empty string → null on the wire.
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .url()
+  .nullish()
+  .or(z.literal("").transform(() => null));
+
+/** Admin create/update payload for a news post. */
+export const newsInput = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  body: z.string().trim().min(1, "Body is required"),
+  excerpt: z.string().trim().max(240).nullish(),
+  imageUrl: optionalUrl,
+  published: z.boolean().default(false),
+  pinned: z.boolean().default(false),
+});
+export type NewsInput = z.infer<typeof newsInput>;
+
+export const newsItem = z.object({
+  id: z.string(),
+  title: z.string(),
+  body: z.string(),
+  excerpt: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  published: z.boolean(),
+  pinned: z.boolean(),
+  publishedAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type NewsItem = z.infer<typeof newsItem>;
+
+export const newsListResponse = z.object({ items: z.array(newsItem) });
+export type NewsListResponse = z.infer<typeof newsListResponse>;
+
+// ── CMS: Events (advertise-only) ────────────────────────────────────────────
+
+/** Admin create/update payload for an event. */
+export const eventInput = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  description: z.string().trim().nullish(),
+  imageUrl: optionalUrl,
+  location: z.string().trim().nullish(),
+  startsAt: z.string().min(1, "Start date is required"), // ISO; parsed server-side
+  endsAt: z.string().nullish(),
+  externalTicketUrl: optionalUrl,
+  published: z.boolean().default(false),
+});
+export type EventInput = z.infer<typeof eventInput>;
+
+export const eventItem = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  location: z.string().nullable(),
+  startsAt: z.string(),
+  endsAt: z.string().nullable(),
+  externalTicketUrl: z.string().nullable(),
+  published: z.boolean(),
+  createdAt: z.string(),
+});
+export type EventItem = z.infer<typeof eventItem>;
+
+export const eventListResponse = z.object({ items: z.array(eventItem) });
+export type EventListResponse = z.infer<typeof eventListResponse>;
+
+// ── CMS: Rewards ──────────────────────────────────────────────────────────
+
+/** Admin create/update payload for a reward. */
+export const rewardInput = z.object({
+  title: z.string().trim().min(1, "Title is required"),
+  description: z.string().trim().nullish(),
+  imageUrl: optionalUrl,
+  costPoints: z.coerce.number().int().min(0, "Cost must be ≥ 0"),
+  stock: z.coerce.number().int().min(0).nullish(), // null = unlimited
+  active: z.boolean().default(true),
+});
+export type RewardInput = z.infer<typeof rewardInput>;
+
+export const rewardItem = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  costPoints: z.number().int(),
+  stock: z.number().int().nullable(),
+  active: z.boolean(),
+  createdAt: z.string(),
+});
+export type RewardItem = z.infer<typeof rewardItem>;
+
+export const rewardListResponse = z.object({ items: z.array(rewardItem) });
+export type RewardListResponse = z.infer<typeof rewardListResponse>;

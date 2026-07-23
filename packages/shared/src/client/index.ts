@@ -1,4 +1,11 @@
-import type { MeResponse, PointsBalanceResponse, PointsHistoryResponse } from "../schemas";
+import type {
+  MeResponse,
+  PointsBalanceResponse,
+  PointsHistoryResponse,
+  NewsListResponse,
+  EventListResponse,
+  RewardListResponse,
+} from "../schemas";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
 // Mobile NEVER touches the DB — this HTTPS client is its only data path.
@@ -86,6 +93,21 @@ export function createApiClient(options: ApiClientOptions) {
       /** GET /api/card/token — signed token to render in the student's card QR. */
       token: async () =>
         (await request<{ token: string }>("/api/card/token")).data,
+    },
+
+    /** GET /api/news — published news posts for the feed. */
+    news: {
+      list: async () => (await request<NewsListResponse>("/api/news")).data,
+    },
+
+    /** GET /api/events — published upcoming events. */
+    events: {
+      list: async () => (await request<EventListResponse>("/api/events")).data,
+    },
+
+    /** GET /api/rewards — active rewards catalog. */
+    rewards: {
+      list: async () => (await request<RewardListResponse>("/api/rewards")).data,
     },
 
     classrooms: {

@@ -24,6 +24,24 @@ function base({ size = 24, ...props }: IconProps) {
   };
 }
 
+export function PlusIcon(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function NewspaperIcon(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M4 5h13v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5Z" />
+      <path d="M17 8h3v10a2 2 0 0 1-2 2" />
+      <path d="M7 8h7M7 12h7M7 16h4" />
+    </svg>
+  );
+}
+
 export function HomeIcon(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">

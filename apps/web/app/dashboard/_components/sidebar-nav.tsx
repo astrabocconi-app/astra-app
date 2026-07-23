@@ -12,15 +12,17 @@ import {
   GiftIcon,
   StoreIcon,
   AuditIcon,
+  NewspaperIcon,
 } from "@/app/_ui/icons";
 
 const NAV: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/dashboard", label: "Overview", icon: <HomeIcon size={20} /> },
+  { href: "/dashboard/news", label: "News", icon: <NewspaperIcon size={20} /> },
+  { href: "/dashboard/events", label: "Events", icon: <CalendarIcon size={20} /> },
+  { href: "/dashboard/rewards", label: "Rewards", icon: <GiftIcon size={20} /> },
   { href: "/dashboard/users", label: "Users", icon: <UsersIcon size={20} /> },
   { href: "/dashboard/materials", label: "Materials", icon: <BookIcon size={20} /> },
-  { href: "/dashboard/events", label: "Events", icon: <CalendarIcon size={20} /> },
   { href: "/dashboard/points", label: "Points", icon: <CoinsIcon size={20} /> },
-  { href: "/dashboard/rewards", label: "Rewards", icon: <GiftIcon size={20} /> },
   { href: "/dashboard/partners", label: "Partners", icon: <StoreIcon size={20} /> },
   { href: "/dashboard/audit", label: "Audit log", icon: <AuditIcon size={20} /> },
 ];

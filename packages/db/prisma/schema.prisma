@@ -464,8 +464,9 @@ model ImageAsset {
 
 // RAG knowledge base for the "Ask ASTRA" chatbot. Chunks of scraped Bocconi /
 // ASTRA pages + their OpenAI embedding (text-embedding-3-small, 1536 dims).
-// The IVFFlat index for cosine search is added in the migration (raw SQL);
-// queried via prisma.$queryRaw with the `<=>` operator.
+// Queried via prisma.$queryRaw with the cosine-distance `<=>` operator. Exact
+// (seq-scan) search for now — correct at small scale; add an HNSW index when
+// the corpus grows to thousands of rows (see the rag_drop_ivfflat migration).
 model Document {
   id        String                       @id @default(cuid())
   content   String

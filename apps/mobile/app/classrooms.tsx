@@ -14,14 +14,32 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
 
+// Day options mirror Free@B's own selector.
+const DAYS = [
+  { key: "today", label: "Today" },
+  { key: "tomorrow", label: "Tomorrow" },
+  { key: "day-after", label: "In 2 days" },
+] as const;
+
+// Half-hour time slots 08:00–21:30; "Now" (null) omits the param → current time.
+const TIMES: string[] = (() => {
+  const out: string[] = [];
+  for (let h = 8; h <= 21; h++) {
+    for (const m of [0, 30]) out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+  }
+  return out;
+})();
+
 // Free@B — live Bocconi free-classroom availability, rendered natively.
 export default function ClassroomsScreen() {
+  const [day, setDay] = useState<(typeof DAYS)[number]["key"]>("today");
+  const [time, setTime] = useState<string | null>(null); // null = "Now"
   const [building, setBuilding] = useState("all");
   const [studyOnly, setStudyOnly] = useState(false);
 
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ["classrooms"],
-    queryFn: () => api.classrooms.list(),
+    queryKey: ["classrooms", day, time],
+    queryFn: () => api.classrooms.list({ day, time: time ?? undefined }),
     retry: false,
     refetchInterval: 300_000, // 5 min, like Free@B
   });
@@ -38,6 +56,10 @@ export default function ClassroomsScreen() {
     (r) => (building === "all" || r.building === building) && (!studyOnly || r.isStudyRoom),
   );
 
+  const chip = (active: boolean) =>
+    `rounded-full px-4 py-1.5 ${active ? "bg-astra-primary" : "bg-gray-100"}`;
+  const chipText = (active: boolean) => (active ? "font-medium text-white" : "text-gray-600");
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Header */}
@@ -53,26 +75,52 @@ export default function ClassroomsScreen() {
 
       {/* Filters */}
       <View className="border-b border-gray-100 pb-3">
+        {/* Day */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, gap: 8 }}
         >
-          {["all", ...buildings].map((b) => {
-            const active = building === b;
-            return (
-              <Pressable
-                key={b}
-                onPress={() => setBuilding(b)}
-                className={`rounded-full px-4 py-1.5 ${active ? "bg-astra-primary" : "bg-gray-100"}`}
-              >
-                <Text className={active ? "font-medium text-white" : "text-gray-600"}>
-                  {b === "all" ? "All buildings" : b}
-                </Text>
-              </Pressable>
-            );
-          })}
+          {DAYS.map((d) => (
+            <Pressable key={d.key} onPress={() => setDay(d.key)} className={chip(day === d.key)}>
+              <Text className={chipText(day === d.key)}>{d.label}</Text>
+            </Pressable>
+          ))}
         </ScrollView>
+
+        {/* Time */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, gap: 8 }}
+        >
+          <Pressable onPress={() => setTime(null)} className={chip(time === null)}>
+            <View className="flex-row items-center gap-1">
+              <Ionicons name="time-outline" size={14} color={time === null ? "#fff" : "#6B7280"} />
+              <Text className={chipText(time === null)}>Now</Text>
+            </View>
+          </Pressable>
+          {TIMES.map((t) => (
+            <Pressable key={t} onPress={() => setTime(t)} className={chip(time === t)}>
+              <Text className={chipText(time === t)}>{t}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {/* Building */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, gap: 8 }}
+        >
+          {["all", ...buildings].map((b) => (
+            <Pressable key={b} onPress={() => setBuilding(b)} className={chip(building === b)}>
+              <Text className={chipText(building === b)}>{b === "all" ? "All buildings" : b}</Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        {/* Study-only */}
         <Pressable
           onPress={() => setStudyOnly((v) => !v)}
           className="mx-4 mt-3 flex-row items-center gap-2"
@@ -108,6 +156,7 @@ export default function ClassroomsScreen() {
             <Text className="mb-1 text-sm text-gray-500">
               {visible.length} free {visible.length === 1 ? "room" : "rooms"}
               {building !== "all" ? ` in ${building}` : ""}
+              {time ? ` at ${time}` : ""}
             </Text>
           }
           ListEmptyComponent={
@@ -118,8 +167,8 @@ export default function ClassroomsScreen() {
               </Text>
               <Text className="text-center text-sm leading-5 text-gray-400">
                 Live classroom availability is read from Bocconi&apos;s timetable, which has no
-                data right now (weekends and outside term). This will start working
-                automatically once the semester begins.
+                data for this time (weekends and outside term). Try another day or time — it
+                fills in automatically once the semester is running.
               </Text>
             </View>
           }
@@ -148,10 +197,20 @@ export default function ClassroomsScreen() {
             </View>
           )}
           ListFooterComponent={
-            <Text className="mt-4 px-2 text-center text-[11px] leading-4 text-gray-400">
-              Rooms may close for cleaning or events. Times include a 15-min buffer before the
-              next class. Weekend/off-term data can be incomplete. Powered by Free@B.
-            </Text>
+            <View className="mt-4 gap-3">
+              {/* Disclaimer — flagged with ⚠️ so students actually read it */}
+              <View className="flex-row gap-2 rounded-xl bg-amber-50 px-3 py-3">
+                <Text className="text-base">⚠️</Text>
+                <Text className="flex-1 text-xs leading-4 text-amber-800">
+                  Please read: rooms may close for cleaning or events, and times include a 15-min
+                  buffer before the next class. Weekend and off-term data can be incomplete — always
+                  double-check before relying on a room. Powered by Free@B.
+                </Text>
+              </View>
+              <Text className="text-center text-[11px] text-gray-400">
+                Free@B developed by Michele F. Matozza
+              </Text>
+            </View>
           }
         />
       )}

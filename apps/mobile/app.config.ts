@@ -42,6 +42,7 @@ const config: ExpoConfig = {
   plugins: [
     "expo-router",
     "expo-secure-store",
+    "expo-notifications",
     [
       // Partner venues use the camera to scan members' loyalty-card QR codes.
       "expo-camera",

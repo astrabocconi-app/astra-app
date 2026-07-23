@@ -28,6 +28,7 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
   const [pinned, setPinned] = useState(initial?.pinned ?? false);
+  const [notify, setNotify] = useState(false); // per-save action, not stored
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +36,7 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
     setLoading(true);
     setError(null);
     try {
-      const payload = { title, excerpt, body, imageUrl, published, pinned };
+      const payload = { title, excerpt, body, imageUrl, published, pinned, notify };
       if (id) await send(`/api/admin/news/${id}`, "PATCH", payload);
       else await send("/api/admin/news", "POST", payload);
       router.push("/dashboard/news");
@@ -87,6 +88,12 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
           onChange={setPinned}
         />
       </div>
+      <Toggle
+        label="Send push notification"
+        hint="Alerts every student's phone when you save this as published"
+        checked={notify}
+        onChange={setNotify}
+      />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

@@ -5,6 +5,7 @@ import { newRequestId, errorResponse } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toNewsItem } from "@/lib/cms-map";
+import { sendPushToAll } from "@/lib/push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,7 +20,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const existing = await prisma.newsPost.findFirst({ where: { id, deletedAt: null } });
   if (!existing) return errorResponse(404, "NOT_FOUND", "News post not found.", requestId);
 
-  const parsed = newsInput.partial().safeParse(await req.json().catch(() => null));
+  const raw = await req.json().catch(() => null);
+  const notify = raw?.notify === true;
+  const parsed = newsInput.partial().safeParse(raw);
   if (!parsed.success) {
     return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
   }
@@ -49,6 +52,13 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     targetId: id,
     metadata: { title: updated.title },
   });
+  if (notify && updated.published) {
+    await sendPushToAll({
+      title: updated.title,
+      body: updated.excerpt ?? updated.body.slice(0, 140),
+      data: { type: "news", id: updated.id },
+    });
+  }
   return NextResponse.json(toNewsItem(updated), { headers: { "x-request-id": requestId } });
 }
 

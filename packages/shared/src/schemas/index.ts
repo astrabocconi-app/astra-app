@@ -161,3 +161,12 @@ export type RewardItem = z.infer<typeof rewardItem>;
 
 export const rewardListResponse = z.object({ items: z.array(rewardItem) });
 export type RewardListResponse = z.infer<typeof rewardListResponse>;
+
+// ── Push notifications ──────────────────────────────────────────────────────
+
+/** POST /api/push/register — register this device's Expo push token. */
+export const pushRegisterInput = z.object({
+  token: z.string().min(1),
+  platform: z.enum(["IOS", "ANDROID"]),
+});
+export type PushRegisterInput = z.infer<typeof pushRegisterInput>;

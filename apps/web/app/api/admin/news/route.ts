@@ -5,6 +5,7 @@ import { newRequestId, errorResponse } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toNewsItem } from "@/lib/cms-map";
+import { sendPushToAll } from "@/lib/push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +32,9 @@ export async function POST(req: Request) {
   const guard = await requireAdmin(req, requestId);
   if ("error" in guard) return guard.error;
 
-  const parsed = newsInput.safeParse(await req.json().catch(() => null));
+  const raw = await req.json().catch(() => null);
+  const notify = raw?.notify === true; // not stored; a per-save action
+  const parsed = newsInput.safeParse(raw);
   if (!parsed.success) {
     return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
   }
@@ -55,5 +58,12 @@ export async function POST(req: Request) {
     targetId: created.id,
     metadata: { title: created.title, published: created.published },
   });
+  if (notify && created.published) {
+    await sendPushToAll({
+      title: created.title,
+      body: created.excerpt ?? created.body.slice(0, 140),
+      data: { type: "news", id: created.id },
+    });
+  }
   return NextResponse.json(toNewsItem(created), { status: 201, headers: { "x-request-id": requestId } });
 }

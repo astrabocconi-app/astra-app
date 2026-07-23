@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import { isAllowedEmail, isDevLoginUsername, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { api } from "../lib/api";
 import { setToken, setAccountType } from "../lib/session";
+import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
 
 // Student: play the logo-morph intro overlay over home, then navigate there.
@@ -20,6 +21,7 @@ async function enterStudentApp() {
   await setAccountType("student");
   useBootStore.getState().trigger();
   router.replace("/home");
+  void registerForPush();
 }
 
 // Login against apps/web (Better Auth). Two modes:

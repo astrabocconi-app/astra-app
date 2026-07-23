@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { initSentry } from "../lib/sentry";
 import { loadToken, loadAccountType } from "../lib/session";
+import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
 import BootOverlay from "../components/BootOverlay";
 
@@ -29,6 +30,7 @@ export default function RootLayout() {
         } else {
           useBootStore.getState().trigger();
           router.replace("/home");
+          void registerForPush();
         }
       }
       setReady(true);

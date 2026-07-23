@@ -40,8 +40,13 @@ dashboard CRUD (`/dashboard/news|events|rewards`) → admin API
 (`/api/news|events|rewards`) → mobile screens (news carousel + detail, events
 list + detail with "Get tickets", rewards catalog). **Image upload** works now —
 files are stored in Postgres (`ImageAsset`) and served via `/api/media/:id`
-(swappable for Blob later); Supabase is reserved for Materials. Push +
-course/year targeting + reward redemption still to come.
+(swappable for Blob later); Supabase is reserved for Materials.
+**Push notifications are built**: device-token registration (`/api/push/register`,
+`PushToken`), Expo send-on-publish (`lib/push.ts`) with a "Send push
+notification" toggle on the news form, and mobile registration
+(`expo-notifications`). Real *delivery* needs a real EAS `projectId`
+(`eas init`) + a physical-device build — it no-ops on the simulator.
+Course/year targeting + reward redemption still to come.
 **Next up → reward redemption (spend), then News push + course/year targeting.** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---

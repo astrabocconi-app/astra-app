@@ -110,6 +110,18 @@ export function createApiClient(options: ApiClientOptions) {
       list: async () => (await request<RewardListResponse>("/api/rewards")).data,
     },
 
+    /** Push notifications. */
+    push: {
+      /** Register this device's Expo push token for the signed-in user. */
+      register: async (token: string, platform: "IOS" | "ANDROID") =>
+        (
+          await request<{ ok: boolean }>("/api/push/register", {
+            method: "POST",
+            body: JSON.stringify({ token, platform }),
+          })
+        ).data,
+    },
+
     classrooms: {
       /** GET /api/classrooms — live Bocconi free-classroom availability (Free@B). */
       list: async (params?: { time?: string; day?: string }) => {

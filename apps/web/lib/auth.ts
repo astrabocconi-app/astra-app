@@ -24,6 +24,7 @@ import { OTP_LOGO_CID, OTP_SUBJECT, otpEmailHtml, otpEmailText } from "./email-t
 import { verifyPassword } from "./partner";
 import {
   verifyAdminCredentials,
+  admin2faEnabled,
   adminEmail,
   maskEmail,
   generateOtp,
@@ -242,6 +243,19 @@ function adminLoginPlugin(): BetterAuthPlugin {
         // Same generic error whether username or password is wrong (no enumeration).
         if (!verifyAdminCredentials(username, password)) {
           throw new APIError("UNAUTHORIZED", { message: "Invalid username or password." });
+        }
+        // Dev / 2FA-disabled: password alone signs in (no OTP step).
+        if (!admin2faEnabled()) {
+          const user = await upsertAdminUser();
+          const session = await ctx.context.internalAdapter.createSession(user.id);
+          if (!session) {
+            throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
+          }
+          await setSessionCookie(ctx, { session, user: { ...user, name: user.name ?? "ASTRA Admin" } });
+          return ctx.json({
+            ok: true,
+            user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
+          });
         }
         const otp = generateOtp();
         await storeAdminOtp(otp);

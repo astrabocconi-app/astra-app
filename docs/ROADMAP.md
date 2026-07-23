@@ -73,7 +73,7 @@ and a red-outlined sign-out.
 - [x] 🤖 Design tokens from the logo (brand blue `#04107E` in NativeWind); app icon. *(splash deferred to builds)*
 - [x] 🤖 Mobile bottom-tab navigation (Home / Events / Card / Rewards / Profile); campus-backdrop login.
 - [x] 🤖 Web dashboard: auth-gated layout (deny-by-default) + `/signin`; admin routes protected.
-- [x] 🤖 **Single central admin login** — `/signin` is now username + password + emailed OTP (2FA), fully separate from the student email-OTP flow (`lib/admin-auth.ts`, `adminLoginPlugin` in `lib/auth.ts`, `scripts/create-admin.mjs`). ASTRA controls all content; partners/areas do **not** self-serve.
+- [x] 🤖 **Single central admin login** — `/signin` is username + password + emailed OTP (2FA), fully separate from the student email-OTP flow (`lib/admin-auth.ts`, `adminLoginPlugin` in `lib/auth.ts`, `scripts/create-admin.mjs`). OTP defaults ON in production, OFF locally (`ADMIN_2FA_ENABLED` override). Dashboard is URL-only — the public landing page has no staff-login link. ASTRA controls all content; partners/areas do **not** self-serve.
 - [x] 🤖 Established the per-endpoint pattern: session → `authz` → Prisma (+ audit lands with the feature phases).
 
 ---

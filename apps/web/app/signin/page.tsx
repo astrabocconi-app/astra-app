@@ -34,8 +34,13 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
     try {
-      const { sentTo } = await post("admin-login", { username, password });
-      setSentTo(sentTo ?? "");
+      const res = await post("admin-login", { username, password });
+      // 2FA disabled (local/dev): signed in already → go to the dashboard.
+      if (!res?.pending) {
+        router.replace("/dashboard");
+        return;
+      }
+      setSentTo(res.sentTo ?? "");
       setStep("otp");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Invalid username or password.");

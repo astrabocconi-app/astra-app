@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { AstraLogo } from "@/app/_ui/logo";
 import { StoreBadges } from "@/app/_ui/store-badges";
 
@@ -63,12 +62,7 @@ export default function LandingPage() {
           <AstraLogo size={30} />
           <span className="text-xl font-extrabold tracking-tight">ASTRA</span>
         </div>
-        <Link
-          href="/dashboard"
-          className="rounded-full px-4 py-2 text-sm font-medium text-neutral-500 transition-colors hover:bg-astra-light hover:text-astra-primary"
-        >
-          Staff login →
-        </Link>
+        {/* Admin dashboard is intentionally URL-only (visit /signin directly). */}
       </header>
 
       {/* Hero */}

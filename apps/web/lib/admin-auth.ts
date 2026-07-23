@@ -25,6 +25,15 @@ const OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
 // Better Auth Verification table.
 const OTP_IDENTIFIER = "admin-2fa";
 
+// OTP second factor: ON in production, OFF locally (so it's usable without an
+// inbox during dev). Override explicitly with ADMIN_2FA_ENABLED=true|false.
+export function admin2faEnabled(): boolean {
+  if (process.env.ADMIN_2FA_ENABLED != null) {
+    return process.env.ADMIN_2FA_ENABLED === "true";
+  }
+  return process.env.NODE_ENV === "production";
+}
+
 export function adminConfigured(): boolean {
   return Boolean(
     ADMIN_USERNAME &&

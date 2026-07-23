@@ -1,23 +1,34 @@
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
 import { Platform } from "react-native";
 import { api } from "./api";
 
-// Show notifications while the app is foregrounded, too.
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+// Push registration. Native modules (expo-notifications / expo-device) are
+// loaded LAZILY inside the try/catch — importing them at the top level would
+// crash the whole app on a dev build compiled before they were added
+// ("Cannot find native module 'ExpoPushTokenManager'"). This way push simply
+// no-ops until the dev client is rebuilt (npx expo run:ios) with the modules
+// compiled in — and it never blocks the app from booting.
 
-// Register this device's Expo push token with the server. Best-effort: never
-// throws, and no-ops cleanly on the simulator or before an EAS projectId is set.
+let handlerSet = false;
+
 export async function registerForPush(): Promise<void> {
   try {
+    const Notifications = await import("expo-notifications");
+    const Device = await import("expo-device");
+    const Constants = (await import("expo-constants")).default;
+
+    // Show notifications while foregrounded, too (set once).
+    if (!handlerSet) {
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowBanner: true,
+          shouldShowList: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+        }),
+      });
+      handlerSet = true;
+    }
+
     // Push isn't delivered on simulators/emulators.
     if (!Device.isDevice) return;
 
@@ -27,13 +38,13 @@ export async function registerForPush(): Promise<void> {
     }
     if (status !== "granted") return;
 
-    const projectId =
-      (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)?.eas?.projectId;
+    const projectId = (Constants.expoConfig?.extra as { eas?: { projectId?: string } } | undefined)
+      ?.eas?.projectId;
     if (!projectId || projectId.includes("REPLACE")) return; // not configured yet
 
     const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
     await api.push.register(token, Platform.OS === "ios" ? "IOS" : "ANDROID");
   } catch {
-    // Best-effort; never block the app on push registration.
+    // Native module missing (needs a rebuild) or any other issue — no-op.
   }
 }

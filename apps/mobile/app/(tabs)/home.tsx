@@ -5,6 +5,7 @@ import {
   ScrollView,
   Pressable,
   Image,
+  StyleSheet,
   useWindowDimensions,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
@@ -69,7 +70,19 @@ export default function HomeScreen() {
                   style={{ aspectRatio: 2 / 1 }}
                 >
                   {n.imageUrl ? (
-                    <Image source={{ uri: n.imageUrl }} resizeMode="cover" style={{ flex: 1 }} />
+                    <View style={{ flex: 1 }}>
+                      <Image source={{ uri: n.imageUrl }} resizeMode="cover" style={StyleSheet.absoluteFill} />
+                      {/* dim the picture so the title reads clearly on top */}
+                      <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.35)" }]} />
+                      <View className="flex-1 justify-end p-4">
+                        <Text className="text-[11px] font-medium uppercase tracking-wide text-white/80">
+                          News
+                        </Text>
+                        <Text className="text-lg font-semibold text-white" numberOfLines={2}>
+                          {n.title}
+                        </Text>
+                      </View>
+                    </View>
                   ) : (
                     <View
                       style={{ flex: 1, borderWidth: 1.5, borderColor: TINTS[i % TINTS.length] }}

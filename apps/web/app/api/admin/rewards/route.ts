@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(
-    { items: rows.map(toRewardItem) },
+    { items: rows.map((r) => toRewardItem(r)) },
     { headers: { "x-request-id": requestId } },
   );
 }

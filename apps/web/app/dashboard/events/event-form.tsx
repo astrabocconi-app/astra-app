@@ -6,6 +6,7 @@ import type { EventItem } from "@astra/shared";
 import { Button } from "@/app/_ui/button";
 import { Card } from "@/app/_ui/card";
 import { Field, Input, Textarea, Toggle } from "@/app/_ui/field";
+import { ImageInput } from "../_components/image-input";
 
 async function send(path: string, method: string, body?: unknown) {
   const res = await fetch(path, {
@@ -92,8 +93,8 @@ export function EventForm({ id, initial }: { id?: string; initial?: EventItem })
       <Field label="Ticket link" hint="Where students buy tickets (opens in their browser).">
         <Input value={externalTicketUrl} onChange={(e) => setExternalTicketUrl(e.target.value)} placeholder="https://eventbrite.com/…" />
       </Field>
-      <Field label="Image URL" hint="Paste an image link for now (direct upload arrives with Supabase).">
-        <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://…" />
+      <Field label="Cover image">
+        <ImageInput value={imageUrl} onChange={setImageUrl} />
       </Field>
       <Toggle label="Published" hint="Visible in the app" checked={published} onChange={setPublished} />
 

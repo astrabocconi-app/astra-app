@@ -38,9 +38,10 @@ and a red-outlined sign-out.
 dashboard CRUD (`/dashboard/news|events|rewards`) → admin API
 (`/api/admin/*`, admin-only, **audit-logged**) → student read API
 (`/api/news|events|rewards`) → mobile screens (news carousel + detail, events
-list + detail with "Get tickets", rewards catalog). Images accept a URL for now
-(Supabase upload pending). Push + course/year targeting + reward redemption
-still to come.
+list + detail with "Get tickets", rewards catalog). **Image upload** works now —
+files are stored in Postgres (`ImageAsset`) and served via `/api/media/:id`
+(swappable for Blob later); Supabase is reserved for Materials. Push +
+course/year targeting + reward redemption still to come.
 **Next up → reward redemption (spend), then News push + course/year targeting.** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---

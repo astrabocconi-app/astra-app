@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newRequestId, errorResponse } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
-import { toRewardItem } from "@/lib/cms-map";
+import { toRewardItem, originFromRequest } from "@/lib/cms-map";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,8 +18,9 @@ export async function GET(req: Request) {
     orderBy: { costPoints: "asc" },
     take: 100,
   });
+  const origin = originFromRequest(req);
   return NextResponse.json(
-    { items: rows.map(toRewardItem) },
+    { items: rows.map((r) => toRewardItem(r, origin)) },
     { headers: { "x-request-id": requestId } },
   );
 }

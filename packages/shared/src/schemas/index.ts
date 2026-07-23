@@ -53,8 +53,8 @@ export const pointsHistoryResponse = z.object({
 export type PointsHistoryResponse = z.infer<typeof pointsHistoryResponse>;
 
 // ── CMS: News ─────────────────────────────────────────────────────────────
-// `imageUrl` holds an image link for now; it becomes a Supabase storage key +
-// resolved URL once storage is wired. Empty string → null on the wire.
+// `imageUrl` is either a pasted absolute URL or a /api/media/:id path for an
+// image uploaded to our own store. Empty string → null on the wire.
 
 const optionalUrl = z
   .string()
@@ -63,12 +63,24 @@ const optionalUrl = z
   .nullish()
   .or(z.literal("").transform(() => null));
 
+// Image reference: an absolute http(s) URL OR a relative /api/media/:id path
+// (uploads to our own store). Empty → null.
+const optionalImageRef = z
+  .string()
+  .trim()
+  .nullish()
+  .transform((v) => (v ? v : null))
+  .refine(
+    (v) => v === null || v.startsWith("/api/media/") || /^https?:\/\/\S+$/.test(v),
+    { message: "Enter a valid image URL" },
+  );
+
 /** Admin create/update payload for a news post. */
 export const newsInput = z.object({
   title: z.string().trim().min(1, "Title is required"),
   body: z.string().trim().min(1, "Body is required"),
   excerpt: z.string().trim().max(240).nullish(),
-  imageUrl: optionalUrl,
+  imageUrl: optionalImageRef,
   published: z.boolean().default(false),
   pinned: z.boolean().default(false),
 });
@@ -96,7 +108,7 @@ export type NewsListResponse = z.infer<typeof newsListResponse>;
 export const eventInput = z.object({
   title: z.string().trim().min(1, "Title is required"),
   description: z.string().trim().nullish(),
-  imageUrl: optionalUrl,
+  imageUrl: optionalImageRef,
   location: z.string().trim().nullish(),
   startsAt: z.string().min(1, "Start date is required"), // ISO; parsed server-side
   endsAt: z.string().nullish(),
@@ -128,7 +140,7 @@ export type EventListResponse = z.infer<typeof eventListResponse>;
 export const rewardInput = z.object({
   title: z.string().trim().min(1, "Title is required"),
   description: z.string().trim().nullish(),
-  imageUrl: optionalUrl,
+  imageUrl: optionalImageRef,
   costPoints: z.coerce.number().int().min(0, "Cost must be ≥ 0"),
   stock: z.coerce.number().int().min(0).nullish(), // null = unlimited
   active: z.boolean().default(true),

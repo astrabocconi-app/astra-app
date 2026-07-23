@@ -451,6 +451,17 @@ model NewsPost {
   @@index([published, pinned, publishedAt])
 }
 
+// Image bytes stored directly in Postgres (event/news/reward cover images).
+// Served via GET /api/media/:id. Small pilot-scale assets only; can be swapped
+// for Vercel Blob later without touching callers (they store /api/media/:id).
+model ImageAsset {
+  id        String   @id @default(cuid())
+  mimeType  String
+  data      Bytes
+  byteSize  Int
+  createdAt DateTime @default(now())
+}
+
 // ============================================================================
 // Materials (files via R2). Per-user access is recorded privately; only the
 // aggregate MaterialStats view is exposed (never per-user rows).

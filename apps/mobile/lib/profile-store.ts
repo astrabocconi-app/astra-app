@@ -20,13 +20,24 @@ export const COURSES: { code: string; name: string }[] = [
   { code: "BIEM", name: "International Economics & Management" },
   { code: "CLEF", name: "Economics & Finance" },
   { code: "BIEF", name: "International Economics & Finance" },
-  { code: "BEMACS", name: "Economic, Management & Computer Science" },
+  { code: "BEMACS", name: "Economics, Management & Computer Science" },
   { code: "WBB", name: "World Bachelor in Business" },
   { code: "CLES", name: "Economic & Social Sciences" },
   { code: "MSc Mgmt", name: "Management (Master)" },
   { code: "MSc Fin", name: "Finance (Master)" },
   { code: "MSc DSBA", name: "Data Science & Business Analytics (Master)" },
 ];
+
+// Render a stored course value as its acronym, whatever form it's in — a code
+// ("BEMACS"), a "Full Name (CODE)" string (legacy), or a bare full name.
+export function shortCourse(value: string | null): string | null {
+  if (!value) return null;
+  if (COURSES.some((c) => c.code === value)) return value;
+  const paren = value.match(/\(([^)]+)\)/);
+  if (paren?.[1]) return paren[1];
+  const byName = COURSES.find((c) => value.includes(c.name));
+  return byName ? byName.code : value;
+}
 
 export const YEARS: string[] = [
   "1st year",

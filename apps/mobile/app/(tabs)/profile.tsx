@@ -6,7 +6,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
 import { clearToken } from "../../lib/session";
-import { useProfileStore, COURSES, YEARS } from "../../lib/profile-store";
+import { useProfileStore, COURSES, YEARS, shortCourse } from "../../lib/profile-store";
 
 type Picker = "course" | "year" | null;
 
@@ -69,7 +69,7 @@ export default function ProfileScreen() {
           {/* Course · year shown next to the name once selected */}
           {course || year ? (
             <Text className="text-sm text-gray-500">
-              {[course, year].filter(Boolean).join(" · ")}
+              {[shortCourse(course), year].filter(Boolean).join(" · ")}
             </Text>
           ) : (
             <Text className="text-sm text-gray-400">Add your course & year below</Text>
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
           </View>
           <View className="flex-1">
             <Text className="text-xs text-gray-500">Course</Text>
-            <Text className="text-base font-semibold text-gray-900">{course ?? "Select your course"}</Text>
+            <Text className="text-base font-semibold text-gray-900">{shortCourse(course) ?? "Select your course"}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>

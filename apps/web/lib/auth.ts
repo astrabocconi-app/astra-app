@@ -227,6 +227,16 @@ export const auth = betterAuth({
   trustedOrigins,
   // We authenticate exclusively via email OTP; no passwords.
   emailAndPassword: { enabled: false },
+  // Long-lasting login: once a user signs in (OTP for students, code+password
+  // for partners), keep them signed in for a year, rolling the expiry forward
+  // each day they use the app. The mobile app already persists the bearer token
+  // in the OS keychain (apps/mobile/lib/session.ts) and restores it on boot, so
+  // this makes "sign in once" effectively permanent unless the app is untouched
+  // for a full year. The web dashboard cookie inherits the same lifetime.
+  session: {
+    expiresIn: 60 * 60 * 24 * 365, // 365 days
+    updateAge: 60 * 60 * 24, // roll the expiry forward at most once per day of activity
+  },
   // Hard gate: reject any OTP send/verify for non-@studbocconi.it emails at the
   // API boundary — before user-existence logic — so it can't be bypassed via
   // Better Auth's anti-enumeration "silent success" for unknown emails.

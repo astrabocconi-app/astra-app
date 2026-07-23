@@ -1,11 +1,17 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
 import { clearToken } from "../../lib/session";
+import { useProfileStore, COURSES, YEARS } from "../../lib/profile-store";
+
+type Picker = "course" | "year" | null;
 
 export default function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ["me"],
@@ -13,10 +19,24 @@ export default function ProfileScreen() {
     retry: false,
   });
 
+  const { course, year, hydrate, setCourse, setYear } = useProfileStore();
+  const [picker, setPicker] = useState<Picker>(null);
+
+  useEffect(() => {
+    void hydrate();
+  }, [hydrate]);
+
   async function signOut() {
     await clearToken();
     queryClient.clear();
     router.replace("/");
+  }
+
+  const pickerOptions = picker === "course" ? COURSES : YEARS;
+  async function choose(value: string) {
+    if (picker === "course") await setCourse(value);
+    else if (picker === "year") await setYear(value);
+    setPicker(null);
   }
 
   return (
@@ -33,12 +53,21 @@ export default function ProfileScreen() {
       )}
 
       {data && (
-        <View className="items-center gap-3 pt-4">
+        <View className="items-center gap-2 pt-4">
           <View className="h-20 w-20 items-center justify-center rounded-full bg-astra-light">
             <Ionicons name="person" size={36} color="#04107E" />
           </View>
-          <Text className="text-xl font-semibold text-gray-900">{data.name ?? "Student"}</Text>
-          <Text className="text-gray-500">{data.email}</Text>
+          <Text className="text-xl font-semibold text-gray-900">
+            {data.name?.split(" ")[0] ?? "Student"}
+          </Text>
+          {/* Course · year shown next to the name once selected */}
+          {course || year ? (
+            <Text className="text-sm text-gray-500">
+              {[course, year].filter(Boolean).join(" · ")}
+            </Text>
+          ) : (
+            <Text className="text-sm text-gray-400">Add your course & year below</Text>
+          )}
           <View className="mt-1 flex-row gap-2">
             {data.roles.map((r) => (
               <Text
@@ -51,6 +80,40 @@ export default function ProfileScreen() {
           </View>
         </View>
       )}
+
+      {/* Academic — course & year (filters materials to your course later) */}
+      <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+        Academic
+      </Text>
+      <View className="gap-2">
+        <Pressable
+          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          onPress={() => setPicker("course")}
+        >
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+            <Ionicons name="book-outline" size={22} color="#04107E" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-xs text-gray-500">Course</Text>
+            <Text className="text-base font-semibold text-gray-900">{course ?? "Select your course"}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        </Pressable>
+
+        <Pressable
+          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          onPress={() => setPicker("year")}
+        >
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+            <Ionicons name="calendar-outline" size={22} color="#04107E" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-xs text-gray-500">Year</Text>
+            <Text className="text-base font-semibold text-gray-900">{year ?? "Select your year"}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        </Pressable>
+      </View>
 
       {/* Services */}
       <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
@@ -72,13 +135,50 @@ export default function ProfileScreen() {
 
       <View className="flex-1" />
 
+      {/* Sign out — lifted clear of the tab bar, red outline */}
       <Pressable
-        className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3"
+        className="flex-row items-center justify-center gap-2 rounded-xl border-2 border-red-500 px-4 py-3 active:bg-red-50"
+        style={{ marginBottom: insets.bottom + 76 }}
         onPress={signOut}
       >
-        <Ionicons name="log-out-outline" size={18} color="#6B7280" />
-        <Text className="text-center font-medium text-gray-600">Sign out</Text>
+        <Ionicons name="log-out-outline" size={18} color="#DC2626" />
+        <Text className="text-center font-semibold text-red-600">Sign out</Text>
       </Pressable>
+
+      {/* Course / year picker */}
+      <Modal visible={picker !== null} transparent animationType="slide" onRequestClose={() => setPicker(null)}>
+        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setPicker(null)}>
+          <Pressable
+            className="rounded-t-3xl bg-white pt-3"
+            style={{ maxHeight: "70%", paddingBottom: insets.bottom + 12 }}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View className="mb-2 items-center">
+              <View className="h-1 w-10 rounded-full bg-gray-300" />
+            </View>
+            <Text className="px-5 pb-2 text-lg font-semibold text-gray-900">
+              {picker === "course" ? "Select your course" : "Select your year"}
+            </Text>
+            <ScrollView>
+              {pickerOptions.map((opt) => {
+                const selected = (picker === "course" ? course : year) === opt;
+                return (
+                  <Pressable
+                    key={opt}
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-gray-50"
+                    onPress={() => choose(opt)}
+                  >
+                    <Text className={`flex-1 pr-3 text-base ${selected ? "font-semibold text-astra-primary" : "text-gray-800"}`}>
+                      {opt}
+                    </Text>
+                    {selected && <Ionicons name="checkmark" size={20} color="#04107E" />}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }

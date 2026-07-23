@@ -5,6 +5,7 @@ import * as SecureStore from "expo-secure-store";
 
 const KEY = "astra_session_token";
 const TYPE_KEY = "astra_account_type";
+const CARD_KEY = "astra_card_token";
 let cachedToken: string | null = null;
 let cachedType: AccountType | null = null;
 
@@ -47,4 +48,14 @@ export function getAccountType(): AccountType | null {
 export async function setAccountType(type: AccountType): Promise<void> {
   cachedType = type;
   await SecureStore.setItemAsync(TYPE_KEY, type);
+}
+
+// Loyalty-card QR token — cached so the card still renders with no connection
+// (the token is refreshed from the server whenever the app is online).
+export async function saveCardToken(token: string): Promise<void> {
+  await SecureStore.setItemAsync(CARD_KEY, token);
+}
+
+export async function loadCardToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(CARD_KEY);
 }

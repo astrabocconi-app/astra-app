@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
-import { View, Pressable, StyleSheet, type ColorValue } from "react-native";
+import { View, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 
 const BRAND = "#04107E";
@@ -26,6 +27,8 @@ function tabIcon(name: IoniconName) {
 }
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -33,11 +36,36 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: INACTIVE,
         headerTitleStyle: { color: BRAND, fontWeight: "700" },
         headerShadowVisible: false,
-        tabBarStyle: styles.tabBar,
+        // Respect the home-indicator inset so the icons don't hug the bottom
+        // edge, and inset the bar horizontally so the outer tabs don't touch the
+        // screen sides.
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom + 8,
+            paddingHorizontal: 16,
+          },
+        ],
+        tabBarItemStyle: { paddingVertical: 2 },
         tabBarLabelStyle: { fontSize: 11 },
       }}
     >
-      <Tabs.Screen name="home" options={{ title: "Home", tabBarIcon: tabIcon("home-outline") }} />
+      <Tabs.Screen
+        name="home"
+        options={{
+          // Centered ASTRA wordmark instead of a "Home" title.
+          headerTitleAlign: "center",
+          headerTitle: () => (
+            <Image
+              source={require("../../assets/logo-horizontal.png")}
+              resizeMode="contain"
+              style={{ width: 132, height: 34 }}
+            />
+          ),
+          tabBarIcon: tabIcon("home-outline"),
+        }}
+      />
       <Tabs.Screen name="events" options={{ title: "Events", tabBarIcon: tabIcon("calendar-outline") }} />
       <Tabs.Screen
         name="card"
@@ -55,9 +83,8 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: 64,
-    paddingTop: 6,
     borderTopColor: "#E5E7EB",
+    paddingTop: 8,
   },
   centerWrap: {
     flex: 1,

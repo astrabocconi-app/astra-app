@@ -28,7 +28,13 @@ Blob / Sentry / EAS-build / store enrollment pending). Phase 13 partially done �
 **web dashboard + API are deployed and live on Vercel** (ASTRA team) with
 `/api/health` green and real OTP email working end-to-end; dedicated
 staging/prod Neon + CI migration wiring still TODO.
-**Next up → Phase 5 (loyalty card QR).** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
+Recent work: **long-lasting login** (365-day rolling session) landed, plus a
+**mobile UI/UX pass** — centered logo header, single-line greeting, full-width
+swipeable news carousel, compact event cards (cover-image ready), safe-area tab
+bar, QR card with a centered A-logo + offline token caching, a profile
+course/year selector (on-device placeholder until the real list + server field),
+and a red-outlined sign-out.
+**Next up → Phase 5 (loyalty card QR) hardening.** Legend: `[x]` done · `[~]` partial · `[ ]` todo.
 
 ---
 
@@ -60,6 +66,7 @@ staging/prod Neon + CI migration wiring still TODO.
 - [x] 🤖 `/api/me` returns the real user; `/api/health` verifies Neon (`SELECT 1`).
 - [x] 🤖 Real mobile OTP flow (SecureStore session) + Bearer auth header in the shared typed client.
 - [x] 🙋 **Milestone:** verified end to end (curl + on the iOS simulator).
+- [x] 🤖 **Long-lasting login:** 365-day rolling session (`updateAge` 1 day) in `lib/auth.ts`; the mobile app persists the bearer token in the OS keychain (`apps/mobile/lib/session.ts`), so students sign in once. Applies to the web dashboard cookie too.
 
 ### Phase 3 — Shells → real  ✅ DONE  *(🤖)*
 - [x] 🙋 Media kit (logos) added to `brand/` + `apps/mobile/assets/`. *(exact brand hexes/fonts optional refinement)*
@@ -80,9 +87,9 @@ staging/prod Neon + CI migration wiring still TODO.
 - [x] 🙋 Verified: earn 250 → spend 90 → balance 160; overspend rejected; API returns balance+history.
 
 ### Phase 5 — Loyalty card (scannable QR)  *(🤖 the earn mechanism)*
-- [ ] 🤖 HMAC-signed, short-lived rotating card token (`CARD_TOKEN_HMAC_SECRET`).
-- [ ] 🤖 Mobile "My Card" screen: renders the rotating QR offline.
-- [ ] 🤖 Scan/redeem endpoint (staff/partner) → verify token → `earn()` → ledger + audit.
+- [~] 🤖 HMAC-signed card token implemented (`lib/card-token.ts`, `CARD_TOKEN_HMAC_SECRET`). **Short-lived rotation + single-use/replay-block still pending** (token currently valid ~24h — a screenshot would still scan).
+- [~] 🤖 Mobile "My Card" screen: renders the QR with a **centered A-logo + offline token caching** and "refreshes automatically / works offline" copy (`apps/mobile/app/(tabs)/card.tsx`). True short-lived rotation still pending (see above).
+- [~] 🤖 Scan endpoint (staff/partner) → verify token → `earn()` → ledger is **live** (`/api/partner/scan`). **AuditLog write on scan still pending** (Phase 11 invariant).
 - [ ] 🙋 Test: show card, scan it from a second device, see points land.
 
 ### Phase 6 — Partners & discounts  *(🤖)*

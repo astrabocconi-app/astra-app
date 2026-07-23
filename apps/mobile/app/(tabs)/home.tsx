@@ -72,13 +72,28 @@ export default function HomeScreen() {
                   {n.imageUrl ? (
                     <View style={{ flex: 1 }}>
                       <Image source={{ uri: n.imageUrl }} resizeMode="cover" style={StyleSheet.absoluteFill} />
-                      {/* dim the picture so the title reads clearly on top */}
-                      <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.35)" }]} />
+                      {/* light dim; text shadows keep the title/eyebrow readable */}
+                      <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.22)" }]} />
                       <View className="flex-1 justify-end p-4">
-                        <Text className="text-[11px] font-medium uppercase tracking-wide text-white/80">
+                        <Text
+                          className="text-xs font-bold uppercase tracking-wider text-white"
+                          style={{
+                            textShadowColor: "rgba(0,0,0,0.75)",
+                            textShadowOffset: { width: 0, height: 1 },
+                            textShadowRadius: 4,
+                          }}
+                        >
                           News
                         </Text>
-                        <Text className="text-lg font-semibold text-white" numberOfLines={2}>
+                        <Text
+                          className="mt-1 text-xl font-bold text-white"
+                          numberOfLines={2}
+                          style={{
+                            textShadowColor: "rgba(0,0,0,0.75)",
+                            textShadowOffset: { width: 0, height: 1 },
+                            textShadowRadius: 5,
+                          }}
+                        >
                           {n.title}
                         </Text>
                       </View>

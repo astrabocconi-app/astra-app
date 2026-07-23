@@ -1,9 +1,44 @@
-import { View, Text, ScrollView, Pressable, Image, ActivityIndicator, Linking } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Image,
+  ActivityIndicator,
+  Linking,
+  ActionSheetIOS,
+  Alert,
+  Platform,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
+
+// Tap an address → bottom chooser to open it in Apple Maps or Google Maps.
+function openInMaps(address: string) {
+  const q = encodeURIComponent(address);
+  const apple = `http://maps.apple.com/?q=${q}`;
+  const google = `https://www.google.com/maps/search/?api=1&query=${q}`; // opens the app if installed, else web
+  const go = (url: string) => Linking.openURL(url);
+
+  if (Platform.OS === "ios") {
+    ActionSheetIOS.showActionSheetWithOptions(
+      { title: address, options: ["Apple Maps", "Google Maps", "Cancel"], cancelButtonIndex: 2 },
+      (i) => {
+        if (i === 0) go(apple);
+        else if (i === 1) go(google);
+      },
+    );
+  } else {
+    Alert.alert("Open location", address, [
+      { text: "Google Maps", onPress: () => go(google) },
+      { text: "Maps", onPress: () => go(apple) },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+}
 
 function formatWhen(iso: string) {
   const d = new Date(iso);
@@ -54,10 +89,16 @@ export default function EventDetailScreen() {
                 <Text className="text-sm text-gray-700">{formatWhen(event.startsAt)}</Text>
               </View>
               {event.location ? (
-                <View className="flex-row items-center gap-2">
+                <Pressable
+                  className="flex-row items-center gap-2 active:opacity-60"
+                  onPress={() => openInMaps(event.location!)}
+                >
                   <Ionicons name="location-outline" size={16} color="#04107E" />
-                  <Text className="text-sm text-gray-700">{event.location}</Text>
-                </View>
+                  <Text className="text-sm font-medium text-astra-primary underline">
+                    {event.location}
+                  </Text>
+                  <Ionicons name="open-outline" size={13} color="#04107E" />
+                </Pressable>
               ) : null}
             </View>
 

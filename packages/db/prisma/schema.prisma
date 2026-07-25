@@ -462,18 +462,10 @@ model ImageAsset {
   createdAt DateTime @default(now())
 }
 
-// RAG knowledge base for the "Ask ASTRA" chatbot. Chunks of scraped Bocconi /
-// ASTRA pages + their OpenAI embedding (text-embedding-3-small, 1536 dims).
-// Queried via prisma.$queryRaw with the cosine-distance `<=>` operator. Exact
-// (seq-scan) search for now — correct at small scale; add an HNSW index when
-// the corpus grows to thousands of rows (see the rag_drop_ivfflat migration).
-model Document {
-  id        String                       @id @default(cuid())
-  content   String
-  sourceUrl String
-  embedding Unsupported("vector(1536)")?
-  createdAt DateTime                     @default(now())
-}
+// NOTE: the "Ask ASTRA" RAG knowledge base (the Document table + pgvector) has
+// been SPLIT off this Neon app DB onto Supabase Postgres — see apps/web/lib/
+// rag-db.ts + bocconi-scraper/pipeline. It's queried there via `pg`, not Prisma,
+// so there is no Document model here anymore.
 
 // ============================================================================
 // Materials (files via R2). Per-user access is recorded privately; only the

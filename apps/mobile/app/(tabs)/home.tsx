@@ -165,6 +165,28 @@ export default function HomeScreen() {
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
+      {/* Materials — handouts & dispense */}
+      <Pressable
+        onPress={() => router.push("/materials")}
+        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
+        style={{
+          shadowColor: "#04107E",
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: 2,
+        }}
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+          <Ionicons name="library-outline" size={22} color="#04107E" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">Materials</Text>
+          <Text className="text-xs text-gray-500">Handouts & dispense by year and course</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+      </Pressable>
+
       {/* Your account */}
       <Text className="mt-6 px-5 text-lg font-semibold text-gray-900">Your account</Text>
       <View className="px-5 pt-3">

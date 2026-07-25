@@ -179,9 +179,40 @@ export const chatInput = z.object({
 });
 export type ChatInput = z.infer<typeof chatInput>;
 
+export const materialItem = z.object({
+  id: z.union([z.number(), z.string()]),
+  title: z.string(),
+  url: z.string(),
+  semester: z.string().nullish(),
+  examType: z.string().nullish(),
+});
+export const materialsResponse = z.object({
+  years: z.array(
+    z.object({
+      year: z.string(),
+      count: z.number(),
+      subjects: z.array(
+        z.object({
+          subject: z.string(),
+          items: z.array(materialItem),
+        }),
+      ),
+    }),
+  ),
+});
+export type MaterialsResponse = z.infer<typeof materialsResponse>;
+
 export const chatResponse = z.object({
   answer: z.string(),
-  sources: z.array(z.object({ url: z.string(), similarity: z.number() })),
+  sources: z.array(
+    z.object({
+      url: z.string(),
+      title: z.string().nullish(),
+      sourceType: z.string().nullish(),
+      page: z.number().nullish(),
+      similarity: z.number(),
+    }),
+  ),
   grounded: z.boolean(),
 });
 export type ChatResponse = z.infer<typeof chatResponse>;

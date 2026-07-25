@@ -6,6 +6,7 @@ import type {
   EventListResponse,
   RewardListResponse,
   ChatResponse,
+  MaterialsResponse,
 } from "../schemas";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
@@ -109,6 +110,11 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/rewards — active rewards catalog. */
     rewards: {
       list: async () => (await request<RewardListResponse>("/api/rewards")).data,
+    },
+
+    /** GET /api/materials — handouts catalogue (year → subject → items). */
+    materials: {
+      list: async () => (await request<MaterialsResponse>("/api/materials")).data,
     },
 
     /** Ask ASTRA — RAG chatbot over scraped Bocconi/ASTRA content. */

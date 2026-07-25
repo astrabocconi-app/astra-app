@@ -13,19 +13,39 @@ import * as SecureStore from "expo-secure-store";
 const COURSE_KEY = "astra_profile_course";
 const YEAR_KEY = "astra_profile_year";
 
-// Placeholder options — swap for the official list later. The profile shows the
-// `code` (acronym); the picker shows the full name so it's recognizable.
+// Bocconi programmes. Codes match the `subject` used by the materials/handouts
+// feed so Materials can filter to the student's course. The profile shows the
+// `code` (acronym); the picker shows the full name.
 export const COURSES: { code: string; name: string }[] = [
-  { code: "CLEAM", name: "Economics & Management" },
+  // ── Undergraduate ──
   { code: "BIEM", name: "International Economics & Management" },
-  { code: "CLEF", name: "Economics & Finance" },
+  { code: "CLEAM", name: "Economia e Management" },
   { code: "BIEF", name: "International Economics & Finance" },
+  { code: "BESS", name: "Economic & Social Sciences" },
   { code: "BEMACS", name: "Economics, Management & Computer Science" },
+  { code: "BAI", name: "Mathematical & Computing Sciences for AI" },
+  { code: "BIG", name: "International Politics & Government" },
   { code: "WBB", name: "World Bachelor in Business" },
-  { code: "CLES", name: "Economic & Social Sciences" },
-  { code: "MSc Mgmt", name: "Management (Master)" },
-  { code: "MSc Fin", name: "Finance (Master)" },
-  { code: "MSc DSBA", name: "Data Science & Business Analytics (Master)" },
+  { code: "BGL", name: "Bachelor in Global Law" },
+  { code: "CLEACC", name: "Management per l'Arte, la Cultura e la Comunicazione" },
+  { code: "BEMACC", name: "Economics & Management for Arts, Culture, Media" },
+  { code: "CLMG", name: "Giurisprudenza (ciclo unico, 5 anni)" },
+  // ── Graduate (MSc) ──
+  { code: "AFM", name: "MSc Accounting & Financial Management" },
+  { code: "AI", name: "MSc Artificial Intelligence" },
+  { code: "CYBER", name: "MSc Cyber Risk Strategy & Governance" },
+  { code: "DAIHS", name: "MSc Data Analytics & AI in Health Sciences" },
+  { code: "DSBA", name: "MSc Data Science & Business Analytics" },
+  { code: "ESS", name: "MSc Economic & Social Sciences" },
+  { code: "ACME", name: "MSc Economics & Management in Arts, Culture, Media & Entertainment" },
+  { code: "GIO", name: "MSc Economics & Management of Gov't & Int'l Organizations" },
+  { code: "FIN", name: "MSc Finance" },
+  { code: "EMIT", name: "MSc Innovation, Technology & Entrepreneurship" },
+  { code: "IM", name: "MSc International Management" },
+  { code: "MM", name: "MSc Marketing Management" },
+  { code: "PPA", name: "MSc Politics & Policy Analysis" },
+  { code: "TS", name: "MSc Transformative Sustainability" },
+  { code: "GLOBE", name: "MA Global Law for Organizations, Business & Institutions" },
 ];
 
 // Render a stored course value as its acronym, whatever form it's in — a code
@@ -43,6 +63,8 @@ export const YEARS: string[] = [
   "1st year",
   "2nd year",
   "3rd year",
+  "4th year", // CLMG (Giurisprudenza) is a 5-year single-cycle degree
+  "5th year",
   "1st year (Master)",
   "2nd year (Master)",
 ];

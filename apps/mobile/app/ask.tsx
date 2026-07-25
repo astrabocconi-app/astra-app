@@ -15,8 +15,26 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
 
-type Source = { url: string; similarity: number };
+type Source = {
+  url: string;
+  title?: string | null;
+  sourceType?: string | null;
+  page?: number | null;
+  similarity: number;
+};
 type Msg = { role: "user" | "assistant"; text: string; sources?: Source[] };
+
+const SOURCE_LABELS: Record<string, string> = {
+  guide: "Guide",
+  faq: "FAQ",
+  handout: "Handout",
+  about: "About ASTRA",
+  web: "Web",
+};
+function sourceLabel(s: Source): string {
+  if (s.sourceType && SOURCE_LABELS[s.sourceType]) return SOURCE_LABELS[s.sourceType];
+  return hostOf(s.url);
+}
 
 const SUGGESTIONS = [
   "How do I find a free classroom?",
@@ -113,15 +131,27 @@ export default function AskScreen() {
                 <Text className={m.role === "user" ? "text-white" : "text-gray-900"}>{m.text}</Text>
               </View>
               {m.sources && m.sources.length > 0 && (
-                <View className="mt-1.5 max-w-[85%] flex-row flex-wrap gap-1.5">
-                  {m.sources.slice(0, 3).map((s) => (
+                <View className="mt-2 w-full max-w-[92%] gap-1">
+                  <Text className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                    Sources
+                  </Text>
+                  {m.sources.map((s, idx) => (
                     <Pressable
-                      key={s.url}
+                      key={`${idx}-${s.url}`}
                       onPress={() => Linking.openURL(s.url)}
-                      className="flex-row items-center gap-1 rounded-full bg-astra-light px-2.5 py-1"
+                      className="flex-row items-center gap-2 rounded-xl bg-astra-light px-3 py-2 active:opacity-70"
                     >
-                      <Ionicons name="link-outline" size={11} color="#04107E" />
-                      <Text className="text-[11px] font-medium text-astra-primary">{hostOf(s.url)}</Text>
+                      <Text className="text-[11px] font-bold text-astra-primary">{idx + 1}</Text>
+                      <View className="flex-1">
+                        <Text numberOfLines={1} className="text-[12px] font-medium text-astra-primary">
+                          {s.title || hostOf(s.url)}
+                        </Text>
+                        <Text className="text-[10px] text-gray-400">
+                          {sourceLabel(s)}
+                          {s.page ? ` · p.${s.page}` : ""}
+                        </Text>
+                      </View>
+                      <Ionicons name="open-outline" size={14} color="#04107E" />
                     </Pressable>
                   ))}
                 </View>

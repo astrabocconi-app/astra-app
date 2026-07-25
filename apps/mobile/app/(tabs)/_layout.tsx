@@ -59,6 +59,8 @@ export default function TabsLayout() {
           headerTitleAlign: "center",
           headerTitle: () => (
             <Image
+              // Metro resolves bundled image assets through CommonJS.
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
               source={require("../../assets/logo-horizontal.png")}
               resizeMode="contain"
               style={{ width: 132, height: 34 }}

@@ -261,7 +261,6 @@ function adminLoginPlugin(): BetterAuthPlugin {
         // Dev affordance: print the admin OTP to the server console (never in
         // production), matching deliverOtp's dev fallback for students.
         if (process.env.NODE_ENV !== "production") {
-          // eslint-disable-next-line no-console
           console.log(`\n[auth] DEV admin OTP: ${otp}\n`);
         }
         await deliverOtp(adminEmail(), otp);

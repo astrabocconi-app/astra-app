@@ -1,13 +1,50 @@
 @import "tailwindcss";
 
-/* ASTRA theme tokens.
- * TODO(scaffold): replace these PLACEHOLDER brand colors with the real ASTRA
- * palette — flagged to the product owner. */
+/* ─────────────────────────────────────────────────────────────────────────
+ * ASTRA design system (web).
+ * Palette mirrors the mobile app (apps/mobile/tailwind.config.js) so the
+ * dashboard reads as the same product. `primary` is sampled from the logo.
+ * ──────────────────────────────────────────────────────────────────────── */
 @theme {
-  --color-astra-primary: #1a1a2e; /* PLACEHOLDER */
-  --color-astra-accent: #e94560; /* PLACEHOLDER */
+  --color-astra-primary: #04107e; /* brand deep blue (from logo) */
+  --color-astra-dark: #020a52; /* darker shade — pressed states, headers */
+  --color-astra-accent: #3b4ad0; /* lighter brand blue — highlights, links */
+  --color-astra-light: #edeff9; /* very light tint — surfaces, selected bg */
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+}
+
+html {
+  /* subtle brand-tinted page backdrop so cards lift off it */
+  background: linear-gradient(180deg, #f7f8fc 0%, #ffffff 340px);
+  background-attachment: fixed;
 }
 
 body {
-  @apply bg-white text-gray-900 antialiased;
+  @apply text-gray-900 antialiased;
+  font-family: var(--font-sans);
+}
+
+/* Brand focus ring across the app */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid var(--color-astra-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@keyframes astra-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.astra-fade-up {
+  animation: astra-fade-up 0.35s ease-out both;
 }

@@ -116,8 +116,59 @@ model User {
   pushTokens        PushToken[]
   materialAccesses  MaterialAccess[]
   auditLogs         AuditLog[]          @relation("AuditActor")
+  partnerMembership PartnerMembership?
+
+  // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
+  sessions Session[]
+  accounts Account[]
 
   @@index([deletedAt])
+}
+
+// ── Better Auth tables (email-OTP). Fields must match Better Auth's schema;
+//    regenerate with `npx @better-auth/cli generate` if the auth config changes.
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
 }
 
 /// An association sub-team / department. Content and authority are scoped to areas.
@@ -206,10 +257,29 @@ model Partner {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  area   Area?   @relation(fields: [areaId], references: [id])
-  offers Offer[]
+  area        Area?               @relation(fields: [areaId], references: [id])
+  offers      Offer[]
+  memberships PartnerMembership[]
 
   @@index([active, deletedAt])
+}
+
+/// Links a login account to a Partner venue (its staff). Carries the venue
+/// login code + password hash used by the in-app partner sign-in. A student
+/// account never has one of these; a partner account always does.
+model PartnerMembership {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  partnerId    String
+  loginCode    String   @unique // e.g. "casadimichele" — what staff type to sign in
+  passwordHash String // scrypt hash (salt:hash); issued by ASTRA, not self-set
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  partner Partner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@index([partnerId])
 }
 
 model Offer {
@@ -308,8 +378,9 @@ model Event {
   longitude       Float?
   startsAt        DateTime
   endsAt          DateTime?
-  capacity        Int? // null = unlimited
-  pointsOnCheckin Int       @default(0)
+  externalTicketUrl String? // advertise-only: link out to where tickets are sold
+  capacity        Int? // null = unlimited (legacy; unused in advertise-only v1)
+  pointsOnCheckin Int       @default(0) // legacy; unused in advertise-only v1
   areaId          String?
   published       Boolean   @default(false)
   createdAt       DateTime  @default(now())
@@ -379,6 +450,22 @@ model NewsPost {
 
   @@index([published, pinned, publishedAt])
 }
+
+// Image bytes stored directly in Postgres (event/news/reward cover images).
+// Served via GET /api/media/:id. Small pilot-scale assets only; can be swapped
+// for Vercel Blob later without touching callers (they store /api/media/:id).
+model ImageAsset {
+  id        String   @id @default(cuid())
+  mimeType  String
+  data      Bytes
+  byteSize  Int
+  createdAt DateTime @default(now())
+}
+
+// NOTE: the "Ask ASTRA" RAG knowledge base (the Document table + pgvector) has
+// been SPLIT off this Neon app DB onto Supabase Postgres — see apps/web/lib/
+// rag-db.ts + bocconi-scraper/pipeline. It's queried there via `pg`, not Prisma,
+// so there is no Document model here anymore.
 
 // ============================================================================
 // Materials (files via R2). Per-user access is recorded privately; only the

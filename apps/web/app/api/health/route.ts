@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@astra/db";
 import { newRequestId, log } from "@/lib/api";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// GET /api/health — liveness check.
-// TODO(scaffold): once packages/db exposes the Prisma client, verify Neon
-// connectivity here with `await prisma.$queryRaw\`SELECT 1\`` and report "db": "up".
+// GET /api/health — liveness + Neon connectivity check.
 export async function GET() {
   const requestId = newRequestId();
-  log("info", requestId, "health check");
+  let db: "up" | "down" = "down";
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    db = "up";
+  } catch (e) {
+    log("error", requestId, "health db check failed", { error: String(e) });
+  }
   return NextResponse.json(
-    { status: "ok", db: "unchecked", requestId, timestamp: new Date().toISOString() },
-    { headers: { "x-request-id": requestId } }
+    { status: "ok", db, requestId, timestamp: new Date().toISOString() },
+    { status: db === "up" ? 200 : 503, headers: { "x-request-id": requestId } }
   );
 }

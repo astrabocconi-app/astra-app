@@ -10,16 +10,17 @@ No `vercel.json` is required.
 2. **Root Directory:** `apps/web`.
 3. Framework preset: **Next.js** (auto-detected). Vercel runs the workspace-aware
    install from the repo root and builds `apps/web`.
-4. **Environment variables** — add everything from `apps/web/.env.example` for each
-   Vercel environment:
-   - **Production** → your prod Neon (pooled `DATABASE_URL` + `DIRECT_URL`), prod
-     Resend/R2/Sentry keys, `BETTER_AUTH_URL` = the production domain.
-   - **Preview** → staging Neon (or a per-PR **Neon branch** — see
-     [SETUP.md](SETUP.md)), staging secrets.
-   - **Development** (optional) → dev Neon.
-   > `DATABASE_URL` must be the **pooled** (`-pooler`) string on Vercel — serverless
-   > functions exhaust unpooled connections.
-5. Deploy. Smoke-test `https://<deployment>/api/health`.
+4. **Storage → Neon** (Postgres) and **Storage → Blob**, and the **Resend**
+   Marketplace integration — connect them to the project. These auto-inject their
+   env vars (DB connection strings, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`)
+   across environments. The DB layer reads whichever DB names are present.
+5. **Remaining env vars** you set manually (Project → Settings → Environment
+   Variables): `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` (= the deployment domain),
+   `CARD_TOKEN_HMAC_SECRET`, `ALLOWED_EMAIL_DOMAINS`, `MOBILE_ALLOWED_ORIGINS`,
+   `SENTRY_DSN`. Pull them locally with `vercel env pull apps/web/.env`.
+6. Deploy. Smoke-test `https://<deployment>/api/health` → `{"db":"up"}`.
+   > The runtime client uses the **pooled** DB connection automatically; migrations
+   > use the **direct** one. Both come from the injected Neon vars.
 
 ### Migrations on deploy
 Run migrations against the target DB **before/at** release using the **direct**
@@ -28,7 +29,8 @@ connection:
 DATABASE_URL=$DIRECT_URL npm run db:migrate:deploy -w @astra/db   # prisma migrate deploy
 ```
 Do this from CI or locally against staging/prod — not inside the Vercel build.
-(Deferred until the schema exists.)
+The schema exists and the dev DB is migrated; run this per environment (staging,
+prod) when you set them up.
 
 ### CORS
 Set `MOBILE_ALLOWED_ORIGINS` to the Expo dev-client origin(s) and the production app
@@ -52,6 +54,9 @@ eas submit --profile production  --platform android    # after verifying API 36
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs on PRs/pushes to `main` and `develop`:
-`npm ci` → `turbo run lint typecheck test build` → Prisma migration drift check.
-Branch protection on `main` requires this to be green + 1 approval.
+**Not wired yet.** The scaffold shipped a `.github/workflows/ci.yml`
+(`npm ci` → `turbo run lint typecheck test build` → Prisma drift check) but it
+failed on the still-scaffolded apps and was removed to unblock development. Also
+note: branch protection isn't available on this private repo's plan. Reintroduce
+a working pipeline (and a drift check with the Prisma 7 `--to-schema` flag +
+a Postgres service) once the apps build green — see `docs/ROADMAP.md` Phase 12.

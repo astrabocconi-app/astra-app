@@ -24,7 +24,7 @@ There are only two branches you need to know about:
    git push
    ```
 3. That's it. When a chunk of work is ready to ship, Michele reviews everything
-   on `develop` and promotes it to `main` (with an approval + green CI).
+   on `develop` and promotes it to `main`.
 
 You don't need to create your own branches or open PRs against `main`. Just work
 on `develop`. If you're ever unsure, ask before pushing.
@@ -61,9 +61,11 @@ npm run lint && npm run typecheck && npm run build
 
 Contributors don't do this — it's here so you know what happens to your work.
 
-When `develop` is ready to ship, Michele opens a release PR (`develop → main`),
-which requires **1 approval** and **green CI** before it merges. That's the only
-gate to production.
+When `develop` is ready to ship, Michele opens a release PR (`develop → main`)
+and reviews it before merging. (Automated CI checks are not wired yet — the
+scaffold workflow was removed because it failed on the still-scaffolded apps; a
+working pipeline will be reintroduced once the apps build green. Until then, run
+the "Before you push" checks locally.)
 
 ## Code rules (non-negotiable)
 

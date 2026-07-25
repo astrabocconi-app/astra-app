@@ -5,10 +5,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // TODO(scaffold): replace with the real ASTRA palette (flagged to owner).
+        // ASTRA brand palette. `primary` is sampled from the logo (#04107E).
+        // Swap in exact brand-guide hexes when available to fine-tune.
         astra: {
-          primary: "#1a1a2e", // PLACEHOLDER
-          accent: "#e94560", // PLACEHOLDER
+          primary: "#04107E", // brand deep blue (from logo)
+          dark: "#020A52", // darker shade (pressed states, headers)
+          accent: "#3B4AD0", // lighter brand blue (highlights, links)
+          light: "#EDEFF9", // very light tint (surfaces, selected bg)
         },
       },
     },

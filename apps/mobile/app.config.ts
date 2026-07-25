@@ -8,10 +8,10 @@ const APP_ENV = (process.env.APP_ENV ?? "development") as
   | "production";
 
 const API_URL: Record<typeof APP_ENV, string> = {
-  // TODO(scaffold): replace staging/prod with the real apps/web deployment URLs.
+  // Dev uses localhost (so the dev-login bypass works against the local API).
   development: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000",
-  staging: "https://astra-staging.vercel.app",
-  production: "https://astra.example.com",
+  staging: "https://astra-app-liard.vercel.app",
+  production: "https://astra-app-liard.vercel.app",
 };
 
 const config: ExpoConfig = {
@@ -21,17 +21,36 @@ const config: ExpoConfig = {
   version: "0.1.0",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
+  icon: "./assets/icon.png",
+  backgroundColor: "#FFFFFF",
+  // Splash screen is configured at build time (expo-splash-screen) — not shown
+  // in Expo Go. TODO(build): add the plugin with the brand splash asset.
   ios: {
     bundleIdentifier: "it.astrabocconi.app",
     supportsTablet: false,
+    infoPlist: {
+      // Required for the partner scanner (expo-camera). Kept here so every
+      // prebuild includes it regardless of plugin ordering.
+      NSCameraUsageDescription: "ASTRA uses the camera to scan member loyalty cards.",
+      NSMicrophoneUsageDescription:
+        "ASTRA uses the microphone only as part of the camera scanner.",
+    },
   },
   android: {
     package: "it.astrabocconi.app",
-    edgeToEdgeEnabled: true,
   },
   plugins: [
     "expo-router",
     "expo-secure-store",
+    "expo-notifications",
+    [
+      // Partner venues use the camera to scan members' loyalty-card QR codes.
+      "expo-camera",
+      {
+        cameraPermission: "ASTRA uses the camera to scan members' loyalty cards.",
+        recordAudioAndroid: false,
+      },
+    ],
     [
       // Android must target API 36 (required on Play as of 2026-08-31).
       // TODO(scaffold): verify the pinned Expo SDK 57 fully supports API 36.

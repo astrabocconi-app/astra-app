@@ -1,72 +1,70 @@
 # ASTRA — Setup
 
-Step-by-step for the external accounts and secrets. **Never commit a real `.env`.**
-Copy the `*.env.example` files and fill them in:
+**Infrastructure is managed by Vercel.** You provision the DB, email, and storage
+from the Vercel dashboard; env vars are injected there and pulled locally with one
+command — no hand-copying secrets. **Never commit a real `.env`.**
 
 ```bash
-cp apps/web/.env.example    apps/web/.env
-cp apps/mobile/.env.example apps/mobile/.env
+npm i -g vercel          # once
+vercel login
+vercel link              # from repo root → pick the astra-app project (Root Dir: apps/web)
+vercel env pull apps/web/.env   # writes all env vars locally
+cp apps/mobile/.env.example apps/mobile/.env   # mobile has no secrets; edit as needed
 ```
+
+Re-run `vercel env pull apps/web/.env` whenever the Vercel env changes.
 
 ---
 
-## 1. Neon (Postgres) — three databases: dev / staging / prod
+## 1. Database — Neon (via Vercel Storage)
 
-We use **three separate Neon projects (or three databases)**: `dev`, `staging`,
-`prod`. Do **not** share one across environments.
+Provision it **through Vercel** so the connection strings are injected automatically:
 
-For **each** environment:
+1. Vercel project → **Storage** → **Create** → **Neon** (Postgres). Pick a region
+   close to your functions (e.g. `eu-central-1`) and connect it to the project.
+2. Vercel injects the connection env vars (`DATABASE_URL`, `POSTGRES_PRISMA_URL`,
+   `DATABASE_URL_UNPOOLED` / `POSTGRES_URL_NON_POOLING`, …) into all environments.
+   Our DB layer reads whichever exists — **pooled** for the runtime client,
+   **unpooled/direct** for `prisma migrate` (see `packages/db/prisma.config.ts`).
+3. Pull them locally: `vercel env pull apps/web/.env`.
+4. Apply the schema to that DB: `npm run db:migrate` then `npm run db:seed`.
 
-1. Create a project at <https://console.neon.tech> (region close to your Vercel
-   region, e.g. `eu-central-1`).
-2. **Enable connection pooling** (Neon → project → *Settings* → *Connection
-   pooling*; PgBouncer is on by default). You will use two connection strings:
-   - **Pooled** — host contains **`-pooler`**. → `DATABASE_URL`. Used by the app at
-     runtime on Vercel. Serverless functions open many short-lived connections;
-     plain unpooled connections **exhaust** the server. Always pooled at runtime.
-   - **Direct / unpooled** — host **without** `-pooler`. → `DIRECT_URL`. Used **only**
-     by `prisma migrate` and introspection (migrations need a real session).
-3. Copy both strings from Neon → *Connection Details* (toggle "Pooled connection").
-4. Put them in the matching environment's env (local `.env`, or Vercel env vars for
-   staging/prod — see [DEPLOY.md](DEPLOY.md)).
+> Serverless functions must use the **pooled** connection (PgBouncer) at runtime;
+> `prisma migrate` uses the **direct/unpooled** one. Both are handled automatically
+> from the injected vars.
 
-> Prisma is already configured for this split in
-> `packages/db/prisma/schema.prisma` (`url = DATABASE_URL`, `directUrl = DIRECT_URL`).
+### Preview databases (per-PR branches)
+The Neon–Vercel integration can create a **branch DB per preview deployment**
+automatically — enable it in the integration settings once you deploy.
 
-### Per-PR preview databases (Neon branches)
-For preview deployments, create a **Neon branch** per PR (a copy-on-write branch of
-`dev`) and point that deploy's `DATABASE_URL`/`DIRECT_URL` at the branch. The
-[Neon–Vercel integration](https://neon.tech/docs/guides/vercel) can automate
-branch-per-preview; wire it up in the Vercel project settings.
-
-### Run migrations (once the schema exists — deferred now)
+### Run migrations
+The schema is already migrated on the shared dev DB, so you don't need this to
+start. Use it when you change the Prisma schema (uses `DIRECT_URL`):
 ```bash
-# uses DIRECT_URL
 npm run db:migrate      # prisma migrate dev
 npm run db:seed         # minimal fake data
 npm run db:studio       # browse
 ```
 
-## 2. Resend (email / OTP delivery)
+## 2. Email — Resend (OTP delivery)
 
-1. Create an account at <https://resend.com>, verify your sending domain.
-2. Create an API key: *API Keys* → *Create*. → `RESEND_API_KEY`.
-3. Better Auth uses this to send the OTP emails (custom SMTP/transactional).
+Install the **Resend** integration from the **Vercel Marketplace** (Project →
+Integrations) — it provisions Resend and injects `RESEND_API_KEY`. Verify a sending
+domain in Resend for real delivery. In **local dev** you don't need it: the OTP
+code is printed to the server console when `RESEND_API_KEY` is unset.
 
-## 3. Cloudflare R2 (file storage)
+## 3. File storage — Vercel Blob
 
-1. Cloudflare dashboard → **R2** → create a bucket (e.g. `astra-materials`).
-   → `R2_BUCKET`.
-2. R2 overview page shows the **Account ID** → `R2_ACCOUNT_ID`.
-3. *Manage R2 API Tokens* → create a token scoped to the bucket →
-   `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
-4. Access is via the S3-compatible SDK with **short-lived signed URLs** (never make
-   the bucket public).
+Vercel project → **Storage** → **Blob** → create a store and connect it. Vercel
+injects `BLOB_READ_WRITE_TOKEN`. Only needed once the Materials/News-image features
+land (Phase 9–10); no action required before then.
 
-## 4. Vercel (hosts apps/web = dashboard + API)
+## 4. Vercel (hosts everything: app + API + DB + Blob + email)
 
-See [DEPLOY.md](DEPLOY.md). In short: import the repo, set the **Root Directory** to
-`apps/web`, add all `apps/web/.env` variables per environment, deploy.
+See [DEPLOY.md](DEPLOY.md). Import the repo, set **Root Directory** = `apps/web`,
+connect the **Neon**, **Blob**, and **Resend** integrations (they inject their env
+vars), set the few manual secrets, and deploy. Pull env locally with
+`vercel env pull apps/web/.env`.
 
 ## 5. Expo / EAS (mobile)
 
@@ -92,15 +90,14 @@ See [DEPLOY.md](DEPLOY.md). In short: import the repo, set the **Root Directory*
 ### `apps/web/.env`
 | Var | What / where |
 |---|---|
-| `DATABASE_URL` | Neon **pooled** (`-pooler`) — runtime |
-| `DIRECT_URL` | Neon **direct** — migrations only |
-| `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | Public URL of this web app |
-| `RESEND_API_KEY` | Resend → API Keys |
-| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 |
-| `CARD_TOKEN_HMAC_SECRET` | `openssl rand -hex 32` — signs scannable card tokens |
-| `SENTRY_DSN` | Sentry (web) |
-| `ALLOWED_EMAIL_DOMAIN` | e.g. `studbocconi.it` — validated before OTP send |
+| DB connection (pooled + direct) | **injected by Vercel's Neon integration** (`DATABASE_URL`, `POSTGRES_PRISMA_URL`, `*_UNPOOLED`/`POSTGRES_URL_NON_POOLING`) |
+| `BETTER_AUTH_SECRET` | manual — `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | manual — public URL of this web app / deployment |
+| `RESEND_API_KEY` | injected by the Resend Marketplace integration |
+| `BLOB_READ_WRITE_TOKEN` | injected by the Vercel Blob store |
+| `CARD_TOKEN_HMAC_SECRET` | manual — `openssl rand -hex 32` (signs scannable card tokens) |
+| `SENTRY_DSN` | manual — Sentry (web) |
+| `ALLOWED_EMAIL_DOMAINS` | comma-separated, e.g. `studbocconi.it,unibocconi.it` — validated before OTP send |
 | `MOBILE_ALLOWED_ORIGINS` | CORS allow-list for `/api/*` |
 
 ### `apps/mobile/.env`

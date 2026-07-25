@@ -1,0 +1,16 @@
+{
+  "name": "bocconi-scraper",
+  "private": true,
+  "type": "module",
+  "description": "One-off tooling: crawl ASTRA/Bocconi pages to PDFs, then ingest them into Neon (pgvector) for the Ask-ASTRA RAG chatbot. NOT part of the app workspaces.",
+  "scripts": {
+    "crawl": "node crawl.mjs",
+    "ingest": "node ingest.mjs"
+  },
+  "dependencies": {
+    "openai": "^4.77.0",
+    "pdf-parse": "^1.1.1",
+    "pg": "^8.13.1",
+    "playwright": "^1.49.1"
+  }
+}

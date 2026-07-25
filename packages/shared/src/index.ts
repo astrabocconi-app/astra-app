@@ -6,8 +6,8 @@
 //   - domain constants (e.g. points rules)
 //   - the typed API client the mobile app uses to call apps/web
 //
-// TODO(scaffold): the real schemas/constants/client are deferred with the DB
-// work. See docs/ARCHITECTURE.md. Keep these barrels as the only public surface.
+// Keep these barrels as the only public surface.
 
 export * from "./schemas";
 export * from "./client";
+export * from "./domain";

@@ -32,8 +32,8 @@ const SOURCE_LABELS: Record<string, string> = {
   web: "Web",
 };
 function sourceLabel(s: Source): string {
-  if (s.sourceType && SOURCE_LABELS[s.sourceType]) return SOURCE_LABELS[s.sourceType];
-  return hostOf(s.url);
+  const label = s.sourceType ? SOURCE_LABELS[s.sourceType] : undefined;
+  return label ?? hostOf(s.url);
 }
 
 const SUGGESTIONS = [

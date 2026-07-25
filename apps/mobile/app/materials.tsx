@@ -15,8 +15,8 @@ type FlatItem = {
   title: string;
   url: string;
   year: string;
-  semester: string | null;
-  examType: string | null;
+  semester?: string | null;
+  examType?: string | null;
 };
 
 // Handouts (dispense) live in Supabase. This screen shows ONLY the student's own

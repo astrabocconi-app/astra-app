@@ -16,12 +16,72 @@ export const verifyOtpInput = z.object({
 });
 export type VerifyOtpInput = z.infer<typeof verifyOtpInput>;
 
+// ── Academic profile ────────────────────────────────────────────────────────
+
+export const academicClassGroup = z.object({
+  id: z.string(),
+  code: z.string(),
+  sourceUrl: z.string().url(),
+});
+
+export const academicTrack = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  sourceUrl: z.string().url(),
+});
+
+export const academicProgramme = z.object({
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  level: z.string(),
+  durationYears: z.number().int().positive(),
+  sourceUrl: z.string().url(),
+  legacy: z.boolean(),
+  classGroups: z.array(academicClassGroup),
+  tracks: z.array(academicTrack),
+});
+
+export const academicProfile = z.object({
+  programme: academicProgramme.omit({ classGroups: true, tracks: true }),
+  catalogue: z.object({
+    id: z.string(),
+    academicYear: z.string(),
+    version: z.string(),
+    sourceUrl: z.string().url(),
+  }),
+  studyYear: z.number().int().min(1).max(5),
+  track: academicTrack.nullable(),
+  classGroup: academicClassGroup.nullable(),
+  updatedAt: z.string(),
+});
+export type AcademicProfile = z.infer<typeof academicProfile>;
+
+export const academicCatalogueResponse = z.object({
+  id: z.string(),
+  academicYear: z.string(),
+  version: z.string(),
+  sourceUrl: z.string().url(),
+  programmes: z.array(academicProgramme),
+});
+export type AcademicCatalogueResponse = z.infer<typeof academicCatalogueResponse>;
+
+export const academicProfileInput = z.object({
+  programmeId: z.string().min(1),
+  studyYear: z.number().int().min(1).max(5),
+  trackId: z.string().min(1).nullable().optional(),
+  classGroupId: z.string().min(1).nullable().optional(),
+});
+export type AcademicProfileInput = z.infer<typeof academicProfileInput>;
+
 /** Shape returned by GET /api/me for the authenticated student. */
 export const meResponse = z.object({
   id: z.string(),
   email: z.string().email(),
   name: z.string().nullable(),
   roles: z.array(z.string()),
+  academicProfile: academicProfile.nullable(),
 });
 export type MeResponse = z.infer<typeof meResponse>;
 
@@ -70,10 +130,9 @@ const optionalImageRef = z
   .trim()
   .nullish()
   .transform((v) => (v ? v : null))
-  .refine(
-    (v) => v === null || v.startsWith("/api/media/") || /^https?:\/\/\S+$/.test(v),
-    { message: "Enter a valid image URL" },
-  );
+  .refine((v) => v === null || v.startsWith("/api/media/") || /^https?:\/\/\S+$/.test(v), {
+    message: "Enter a valid image URL",
+  });
 
 /** Admin create/update payload for a news post. */
 export const newsInput = z.object({
@@ -195,9 +254,9 @@ export const materialsResponse = z.object({
         z.object({
           subject: z.string(),
           items: z.array(materialItem),
-        }),
+        })
       ),
-    }),
+    })
   ),
 });
 export type MaterialsResponse = z.infer<typeof materialsResponse>;
@@ -211,7 +270,7 @@ export const chatResponse = z.object({
       sourceType: z.string().nullish(),
       page: z.number().nullish(),
       similarity: z.number(),
-    }),
+    })
   ),
   grounded: z.boolean(),
 });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { meResponse } from "@astra/shared";
 import { newRequestId, errorResponse, log } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
+import { getAcademicProfile, toAcademicProfile } from "@/lib/academic";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,11 +17,13 @@ export async function GET(req: Request) {
     return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
   }
 
+  const academic = await getAcademicProfile(session.user.id);
   const body = meResponse.parse({
     id: session.user.id,
     email: session.user.email,
     name: session.user.name,
     roles: session.user.roles,
+    academicProfile: academic ? toAcademicProfile(academic) : null,
   });
   log("info", requestId, "GET /api/me", { userId: session.user.id });
   return NextResponse.json(body, { headers: { "x-request-id": requestId } });

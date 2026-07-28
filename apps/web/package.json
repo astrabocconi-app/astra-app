@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types lib/card-token.test.mjs"
+    "test": "node --test --experimental-strip-types lib/*.test.mjs"
   },
   "dependencies": {
     "@astra/db": "*",

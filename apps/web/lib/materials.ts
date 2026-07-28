@@ -49,7 +49,8 @@ async function fetchTable<T>(table: string, query: string): Promise<T[]> {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
     next: { revalidate: 60 },
   });
-  if (!res.ok) throw new Error(`Supabase ${table} ${res.status}: ${await res.text().catch(() => "")}`);
+  if (!res.ok)
+    throw new Error(`Supabase ${table} ${res.status}: ${await res.text().catch(() => "")}`);
   return (await res.json()) as T[];
 }
 
@@ -92,11 +93,11 @@ export async function fetchMaterials(): Promise<MaterialYear[]> {
   const [handouts, clmg] = await Promise.all([
     fetchTable<HandoutRow>(
       "handouts",
-      "select=id,year,subject,filename,file_url,semester,exam_type&order=subject",
+      "select=id,year,subject,filename,file_url,semester,exam_type&order=subject"
     ),
     // CLMG (Giurisprudenza) — separate table/shape, folded in as the CLMG subject.
     fetchTable<ClmgRow>("clmg_handouts", "select=id,name,course_year,url,semester,exam_type").catch(
-      () => [] as ClmgRow[],
+      () => [] as ClmgRow[]
     ),
   ]);
 
@@ -149,4 +150,30 @@ export async function fetchMaterials(): Promise<MaterialYear[]> {
       const count = subjectList.reduce((n, s) => n + s.items.length, 0);
       return { year, count, subjects: subjectList };
     });
+}
+
+const PROFILE_YEAR = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year"];
+
+/** Limit the catalogue to the signed-in student's saved programme and study year. */
+export function filterMaterialsForAcademicProfile(
+  years: MaterialYear[],
+  programmeCode: string,
+  studyYear: number
+): MaterialYear[] {
+  const year = PROFILE_YEAR[studyYear - 1];
+  if (!year) return [];
+  return years
+    .filter((entry) => entry.year === year)
+    .map((entry) => {
+      const subjects = entry.subjects.filter(
+        (subject) =>
+          subject.subject === programmeCode || subject.subject.split("-").includes(programmeCode)
+      );
+      return {
+        ...entry,
+        count: subjects.reduce((total, subject) => total + subject.items.length, 0),
+        subjects,
+      };
+    })
+    .filter((entry) => entry.count > 0);
 }

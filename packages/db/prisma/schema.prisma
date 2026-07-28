@@ -105,18 +105,19 @@ model User {
   // relations
   areaMemberships   AreaMembership[]
   consents          Consent[]
-  ledgerEntries     PointsLedgerEntry[] @relation("LedgerOwner")
-  grantedEntries    PointsLedgerEntry[] @relation("LedgerGrantedBy")
+  ledgerEntries     PointsLedgerEntry[]     @relation("LedgerOwner")
+  grantedEntries    PointsLedgerEntry[]     @relation("LedgerGrantedBy")
   discountUsages    DiscountUsage[]
   rewardRedemptions RewardRedemption[]
   rsvps             Rsvp[]
   tickets           Ticket[]
-  checkedInTickets  Ticket[]            @relation("TicketCheckedInBy")
+  checkedInTickets  Ticket[]                @relation("TicketCheckedInBy")
   newsPosts         NewsPost[]
   pushTokens        PushToken[]
   materialAccesses  MaterialAccess[]
-  auditLogs         AuditLog[]          @relation("AuditActor")
+  auditLogs         AuditLog[]              @relation("AuditActor")
   partnerMembership PartnerMembership?
+  academicProfile   StudentAcademicProfile?
 
   // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
   sessions Session[]
@@ -210,6 +211,90 @@ model Consent {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// ============================================================================
+// Academic identity — public catalogue selections + private student profile
+// ============================================================================
+
+/// A reviewed snapshot of public Bocconi programme/class metadata.
+model AcademicCatalogue {
+  id           String   @id
+  academicYear String
+  version      String   @unique
+  sourceUrl    String
+  active       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  programmes AcademicProgramme[]
+}
+
+model AcademicProgramme {
+  id            String  @id
+  catalogueId   String
+  code          String
+  name          String
+  level         String
+  durationYears Int
+  sourceUrl     String
+  active        Boolean @default(true)
+  legacy        Boolean @default(false)
+
+  catalogue   AcademicCatalogue        @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+  classGroups AcademicClassGroup[]
+  tracks      AcademicTrack[]
+  profiles    StudentAcademicProfile[]
+
+  @@unique([catalogueId, code])
+  @@index([catalogueId, active])
+}
+
+model AcademicClassGroup {
+  id          String @id
+  programmeId String
+  code        String
+  sourceUrl   String
+
+  programme AcademicProgramme        @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  profiles  StudentAcademicProfile[]
+
+  @@unique([programmeId, code])
+  @@index([programmeId])
+}
+
+model AcademicTrack {
+  id          String  @id
+  programmeId String
+  code        String
+  name        String
+  sourceUrl   String
+  active      Boolean @default(true)
+
+  programme AcademicProgramme        @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  profiles  StudentAcademicProfile[]
+
+  @@unique([programmeId, code])
+  @@index([programmeId, active])
+}
+
+/// Student-managed academic selection. Grades belong to the later gradebook phase.
+model StudentAcademicProfile {
+  userId       String   @id
+  programmeId  String
+  trackId      String?
+  studyYear    Int
+  classGroupId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  programme  AcademicProgramme   @relation(fields: [programmeId], references: [id], onDelete: Restrict)
+  track      AcademicTrack?      @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  classGroup AcademicClassGroup? @relation(fields: [classGroupId], references: [id], onDelete: SetNull)
+
+  @@index([programmeId])
+  @@index([trackId])
+  @@index([classGroupId])
 }
 
 // ============================================================================
@@ -307,10 +392,10 @@ model Offer {
 /// (usedAt::date) — added in the raw-SQL migration — so the unique constraint
 /// enforces "once per user per offer per day".
 model DiscountUsage {
-  id      String   @id @default(cuid())
-  userId  String
-  offerId String
-  usedAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  offerId   String
+  usedAt    DateTime  @default(now())
   /// DB-generated STORED column (usedAt::date, UTC day). Prisma never writes it.
   /// Note: Postgres forbids STABLE functions in generated columns, so this is a
   /// UTC calendar day (not Rome-local). See prisma/sql/0001_views_and_immutability.sql.
@@ -369,23 +454,23 @@ model RewardRedemption {
 // ============================================================================
 
 model Event {
-  id              String    @id @default(cuid())
-  title           String
-  description     String?
-  coverImageKey   String?
-  location        String?
-  latitude        Float?
-  longitude       Float?
-  startsAt        DateTime
-  endsAt          DateTime?
+  id                String    @id @default(cuid())
+  title             String
+  description       String?
+  coverImageKey     String?
+  location          String?
+  latitude          Float?
+  longitude         Float?
+  startsAt          DateTime
+  endsAt            DateTime?
   externalTicketUrl String? // advertise-only: link out to where tickets are sold
-  capacity        Int? // null = unlimited (legacy; unused in advertise-only v1)
-  pointsOnCheckin Int       @default(0) // legacy; unused in advertise-only v1
-  areaId          String?
-  published       Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
+  capacity          Int? // null = unlimited (legacy; unused in advertise-only v1)
+  pointsOnCheckin   Int       @default(0) // legacy; unused in advertise-only v1
+  areaId            String?
+  published         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
 
   area    Area?    @relation(fields: [areaId], references: [id])
   rsvps   Rsvp[]

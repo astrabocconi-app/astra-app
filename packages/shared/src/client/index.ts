@@ -7,6 +7,9 @@ import type {
   RewardListResponse,
   ChatResponse,
   MaterialsResponse,
+  AcademicCatalogueResponse,
+  AcademicProfile,
+  AcademicProfileInput,
 } from "../schemas";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
@@ -42,10 +45,7 @@ function makeError(status: number, code: string | undefined, message: string): A
 export function createApiClient(options: ApiClientOptions) {
   const { baseUrl, getToken } = options;
 
-  async function request<T>(
-    path: string,
-    init?: RequestInit
-  ): Promise<{ data: T; res: Response }> {
+  async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; res: Response }> {
     const token = getToken?.();
     const res = await fetch(new URL(path, baseUrl), {
       ...init,
@@ -65,10 +65,8 @@ export function createApiClient(options: ApiClientOptions) {
 
     if (!res.ok) {
       const b = body as
-        | { error?: { code?: string; message?: string }; message?: string }
-        | undefined;
-      const message =
-        b?.error?.message ?? b?.message ?? `ASTRA API ${res.status} on ${path}`;
+        { error?: { code?: string; message?: string }; message?: string } | undefined;
+      const message = b?.error?.message ?? b?.message ?? `ASTRA API ${res.status} on ${path}`;
       throw makeError(res.status, b?.error?.code, message);
     }
     return { data: body as T, res };
@@ -76,25 +74,37 @@ export function createApiClient(options: ApiClientOptions) {
 
   return {
     /** GET /api/health — liveness + DB connectivity check. */
-    health: async () =>
-      (await request<{ status: string; db: string }>("/api/health")).data,
+    health: async () => (await request<{ status: string; db: string }>("/api/health")).data,
 
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
 
+    academic: {
+      /** Public Bocconi selection metadata reviewed for the active academic year. */
+      catalogue: async () =>
+        (await request<AcademicCatalogueResponse>("/api/academic/catalogue")).data,
+      /** The signed-in student's server-authoritative academic selection. */
+      profile: async () =>
+        (await request<{ profile: AcademicProfile | null }>("/api/me/academic-profile")).data,
+      updateProfile: async (input: AcademicProfileInput) =>
+        (
+          await request<{ profile: AcademicProfile }>("/api/me/academic-profile", {
+            method: "PUT",
+            body: JSON.stringify(input),
+          })
+        ).data,
+    },
+
     points: {
       /** GET /api/points/balance — current spendable balance. */
-      balance: async () =>
-        (await request<PointsBalanceResponse>("/api/points/balance")).data,
+      balance: async () => (await request<PointsBalanceResponse>("/api/points/balance")).data,
       /** GET /api/points/history — recent ledger entries, newest first. */
-      history: async () =>
-        (await request<PointsHistoryResponse>("/api/points/history")).data,
+      history: async () => (await request<PointsHistoryResponse>("/api/points/history")).data,
     },
 
     card: {
       /** GET /api/card/token — signed token to render in the student's card QR. */
-      token: async () =>
-        (await request<{ token: string }>("/api/card/token")).data,
+      token: async () => (await request<{ token: string }>("/api/card/token")).data,
     },
 
     /** GET /api/news — published news posts for the feed. */
@@ -170,7 +180,7 @@ export function createApiClient(options: ApiClientOptions) {
         (
           await request<{ awarded: number; student: { name: string | null }; balance: number }>(
             "/api/partner/scan",
-            { method: "POST", body: JSON.stringify({ token }) },
+            { method: "POST", body: JSON.stringify({ token }) }
           )
         ).data,
       /** GET /api/partner/stats — this venue's scan tallies. */

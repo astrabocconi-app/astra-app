@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView, Alert, Switch } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -8,6 +8,8 @@ import { api } from "../../lib/api";
 import { clearToken } from "../../lib/session";
 import { sendTestNotification } from "../../lib/push";
 import { useProfileStore, COURSES, YEARS, shortCourse } from "../../lib/profile-store";
+import { useLanguageStore } from "../../lib/language-store";
+import { useT } from "../../lib/i18n";
 
 type Picker = "course" | "year" | null;
 
@@ -21,6 +23,8 @@ export default function ProfileScreen() {
   });
 
   const { course, year, hydrate, setCourse, setYear } = useProfileStore();
+  const { language, setLanguage } = useLanguageStore();
+  const t = useT();
   const [picker, setPicker] = useState<Picker>(null);
 
   useEffect(() => {
@@ -54,7 +58,7 @@ export default function ProfileScreen() {
         <View className="gap-2">
           <Text className="text-red-600">{String((error as Error).message)}</Text>
           <Pressable className="rounded-lg border border-gray-300 px-4 py-3" onPress={() => refetch()}>
-            <Text className="text-center">Retry</Text>
+            <Text className="text-center">{t("common.retry")}</Text>
           </Pressable>
         </View>
       )}
@@ -65,7 +69,7 @@ export default function ProfileScreen() {
             <Ionicons name="person" size={36} color="#04107E" />
           </View>
           <Text className="text-xl font-semibold text-gray-900">
-            {data.name?.split(" ")[0] ?? "Student"}
+            {data.name?.split(" ")[0] ?? t("profile.student")}
           </Text>
           {/* Course · year shown next to the name once selected */}
           {course || year ? (
@@ -73,7 +77,7 @@ export default function ProfileScreen() {
               {[shortCourse(course), year].filter(Boolean).join(" · ")}
             </Text>
           ) : (
-            <Text className="text-sm text-gray-400">Add your course & year below</Text>
+            <Text className="text-sm text-gray-400">{t("profile.addCourseYear")}</Text>
           )}
           <View className="mt-1 flex-row gap-2">
             {data.roles.map((r) => (
@@ -90,7 +94,7 @@ export default function ProfileScreen() {
 
       {/* Academic — course & year (filters materials to your course later) */}
       <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-        Academic
+        {t("profile.academic")}
       </Text>
       <View className="gap-2">
         <Pressable
@@ -101,8 +105,8 @@ export default function ProfileScreen() {
             <Ionicons name="book-outline" size={22} color="#04107E" />
           </View>
           <View className="flex-1">
-            <Text className="text-xs text-gray-500">Course</Text>
-            <Text className="text-base font-semibold text-gray-900">{shortCourse(course) ?? "Select your course"}</Text>
+            <Text className="text-xs text-gray-500">{t("profile.course")}</Text>
+            <Text className="text-base font-semibold text-gray-900">{shortCourse(course) ?? t("profile.selectCourse")}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
@@ -115,8 +119,8 @@ export default function ProfileScreen() {
             <Ionicons name="calendar-outline" size={22} color="#04107E" />
           </View>
           <View className="flex-1">
-            <Text className="text-xs text-gray-500">Year</Text>
-            <Text className="text-base font-semibold text-gray-900">{year ?? "Select your year"}</Text>
+            <Text className="text-xs text-gray-500">{t("profile.year")}</Text>
+            <Text className="text-base font-semibold text-gray-900">{year ?? t("profile.selectYear")}</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
@@ -124,7 +128,7 @@ export default function ProfileScreen() {
 
       {/* Services */}
       <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-        Services
+        {t("profile.services")}
       </Text>
       <Pressable
         className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
@@ -134,25 +138,44 @@ export default function ProfileScreen() {
           <Ionicons name="school-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">Find a free classroom</Text>
-          <Text className="text-xs text-gray-500">Live room availability · Free@B</Text>
+          <Text className="text-base font-semibold text-gray-900">{t("profile.findClassroom")}</Text>
+          <Text className="text-xs text-gray-500">{t("profile.findClassroomSub")}</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
       <Pressable
         className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
-        onPress={async () => Alert.alert("Notifications", await sendTestNotification())}
+        onPress={async () => Alert.alert(t("profile.notificationsTitle"), await sendTestNotification())}
       >
         <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
           <Ionicons name="notifications-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">Send test notification</Text>
-          <Text className="text-xs text-gray-500">Preview how alerts appear</Text>
+          <Text className="text-base font-semibold text-gray-900">{t("profile.sendTestNotification")}</Text>
+          <Text className="text-xs text-gray-500">{t("profile.sendTestNotificationSub")}</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
+
+      <View className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4">
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+          <Ionicons name="language-outline" size={22} color="#04107E" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">{t("profile.language")}</Text>
+          <Text className="text-xs text-gray-500">{t("profile.languageSub")}</Text>
+        </View>
+        <View className="flex-row items-center gap-2">
+          <Text className={language === "it" ? "text-base" : "text-base opacity-40"}>🇮🇹</Text>
+          <Switch
+            value={language === "en"}
+            onValueChange={(value) => setLanguage(value ? "en" : "it")}
+            trackColor={{ false: "#04107E", true: "#04107E" }}
+          />
+          <Text className={language === "en" ? "text-base" : "text-base opacity-40"}>🇬🇧</Text>
+        </View>
+      </View>
 
       <View className="flex-1" />
 
@@ -163,7 +186,7 @@ export default function ProfileScreen() {
         onPress={signOut}
       >
         <Ionicons name="log-out-outline" size={18} color="#DC2626" />
-        <Text className="text-center font-semibold text-red-600">Sign out</Text>
+        <Text className="text-center font-semibold text-red-600">{t("common.signOut")}</Text>
       </Pressable>
 
       {/* Course / year picker */}
@@ -178,7 +201,7 @@ export default function ProfileScreen() {
               <View className="h-1 w-10 rounded-full bg-gray-300" />
             </View>
             <Text className="px-5 pb-2 text-lg font-semibold text-gray-900">
-              {picker === "course" ? "Select your course" : "Select your year"}
+              {picker === "course" ? t("profile.selectCourse") : t("profile.selectYear")}
             </Text>
             <ScrollView>
               {pickerOptions.map((opt) => {

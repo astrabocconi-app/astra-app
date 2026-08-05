@@ -9,6 +9,7 @@ import { initSentry } from "../lib/sentry";
 import { loadToken, loadAccountType } from "../lib/session";
 import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
+import { useLanguageStore } from "../lib/language-store";
 import BootOverlay from "../components/BootOverlay";
 
 initSentry();
@@ -23,7 +24,11 @@ export default function RootLayout() {
     // Restore the persisted session before showing any screen; if we already
     // have a token, route by account type — partners to their venue home,
     // students through the intro overlay to the tabbed home.
-    Promise.all([loadToken(), loadAccountType()]).then(([token, type]) => {
+    Promise.all([
+      loadToken(),
+      loadAccountType(),
+      useLanguageStore.getState().hydrate(),
+    ]).then(([token, type]) => {
       if (token) {
         if (type === "partner") {
           router.replace("/partner/home");

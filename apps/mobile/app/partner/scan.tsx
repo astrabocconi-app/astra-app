@@ -5,11 +5,13 @@ import { CameraView, useCameraPermissions, type BarcodeScanningResult } from "ex
 import { Ionicons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 
 type ScanResult = { ok: boolean; title: string; subtitle?: string };
 
 // Partner scanner — point the camera at a student's card QR to award points.
 export default function ScanScreen() {
+  const t = useT();
   const [permission, requestPermission] = useCameraPermissions();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
@@ -24,15 +26,17 @@ export default function ScanScreen() {
       const res = await api.partner.scan(data);
       setResult({
         ok: true,
-        title: "Scanned ✓",
-        subtitle: res.student.name ? `${res.student.name}'s card` : "Member card",
+        title: t("partnerScan.scannedTitle"),
+        subtitle: res.student.name
+          ? t("partnerScan.studentCard", { name: res.student.name })
+          : t("partnerScan.memberCard"),
       });
       qc.invalidateQueries({ queryKey: ["partner-stats"] });
     } catch (e) {
       setResult({
         ok: false,
-        title: "Couldn't award",
-        subtitle: e instanceof Error ? e.message : "Try again.",
+        title: t("partnerScan.failedTitle"),
+        subtitle: e instanceof Error ? e.message : t("partnerScan.tryAgain"),
       });
     } finally {
       setBusy(false);
@@ -51,10 +55,10 @@ export default function ScanScreen() {
       <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-white px-8">
         <Ionicons name="camera-outline" size={44} color="#04107E" />
         <Text className="text-center text-gray-700">
-          Camera access is needed to scan members' cards.
+          {t("partnerScan.cameraPermissionText")}
         </Text>
         <Pressable className="rounded-xl bg-astra-primary px-6 py-3" onPress={requestPermission}>
-          <Text className="font-semibold text-white">Grant camera access</Text>
+          <Text className="font-semibold text-white">{t("partnerScan.grantCameraAccess")}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -71,7 +75,7 @@ export default function ScanScreen() {
 
       <SafeAreaView className="flex-1" edges={["top"]}>
         <Text className="mt-4 text-center text-base font-semibold text-white">
-          Scan a member's card
+          {t("partnerScan.scanMemberCard")}
         </Text>
         <View className="flex-1 items-center justify-center">
           <View
@@ -120,7 +124,7 @@ export default function ScanScreen() {
               className="mt-6 w-full items-center rounded-xl bg-astra-primary px-6 py-3"
               onPress={reset}
             >
-              <Text className="font-semibold text-white">Scan next</Text>
+              <Text className="font-semibold text-white">{t("partnerScan.scanNext")}</Text>
             </Pressable>
           </View>
         </View>

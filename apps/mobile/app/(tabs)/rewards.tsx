@@ -2,8 +2,10 @@ import { View, Text, ScrollView, Image, ActivityIndicator } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 
 export default function RewardsScreen() {
+  const t = useT();
   const rewards = useQuery({ queryKey: ["rewards"], queryFn: () => api.rewards.list(), retry: false });
   const balance = useQuery({ queryKey: ["points-balance"], queryFn: () => api.points.balance(), retry: false });
   const items = rewards.data?.items ?? [];
@@ -22,7 +24,7 @@ export default function RewardsScreen() {
       {/* Balance banner */}
       <View className="flex-row items-center justify-between rounded-2xl bg-astra-primary px-5 py-4">
         <View>
-          <Text className="text-xs uppercase tracking-wide text-white/70">Your points</Text>
+          <Text className="text-xs uppercase tracking-wide text-white/70">{t("rewards.yourPoints")}</Text>
           <Text className="mt-0.5 text-2xl font-bold text-white">{points.toLocaleString()}</Text>
         </View>
         <Ionicons name="gift" size={26} color="rgba(255,255,255,0.85)" />
@@ -33,9 +35,9 @@ export default function RewardsScreen() {
           <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
             <Ionicons name="gift-outline" size={30} color="#04107E" />
           </View>
-          <Text className="text-xl font-semibold text-astra-primary">No rewards yet</Text>
+          <Text className="text-xl font-semibold text-astra-primary">{t("rewards.emptyTitle")}</Text>
           <Text className="text-center text-gray-500">
-            Rewards you can unlock with your points will appear here.
+            {t("rewards.emptyBody")}
           </Text>
         </View>
       ) : (
@@ -68,12 +70,14 @@ export default function RewardsScreen() {
                   </Text>
                 ) : null}
                 <Text className={`mt-1 text-xs font-medium ${affordable ? "text-green-600" : "text-gray-400"}`}>
-                  {affordable ? "You can redeem this" : `${(r.costPoints - points).toLocaleString()} more points`}
+                  {affordable
+                    ? t("rewards.redeemable")
+                    : t("rewards.morePoints", { points: (r.costPoints - points).toLocaleString() })}
                 </Text>
               </View>
               <View className="items-end">
                 <Text className="text-lg font-bold text-astra-primary">{r.costPoints.toLocaleString()}</Text>
-                <Text className="text-[11px] text-gray-400">points</Text>
+                <Text className="text-[11px] text-gray-400">{t("rewards.pointsLabel")}</Text>
               </View>
             </View>
           );

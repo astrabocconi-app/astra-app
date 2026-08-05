@@ -5,8 +5,10 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
 import { clearToken } from "../../lib/session";
+import { useT } from "../../lib/i18n";
 
 export default function PartnerProfileScreen() {
+  const t = useT();
   const qc = useQueryClient();
   const stats = useQuery({
     queryKey: ["partner-stats"],
@@ -27,10 +29,10 @@ export default function PartnerProfileScreen() {
           <Ionicons name="storefront" size={36} color="#04107E" />
         </View>
         <Text className="text-xl font-semibold text-gray-900">
-          {stats.data?.partner.name ?? "Partner venue"}
+          {stats.data?.partner.name ?? t("partnerProfile.partnerVenueFallback")}
         </Text>
         <Text className="rounded-full bg-astra-light px-3 py-1 text-xs font-medium text-astra-primary">
-          PARTNER VENUE
+          {t("partnerProfile.partnerVenueBadge")}
         </Text>
       </View>
 
@@ -41,7 +43,7 @@ export default function PartnerProfileScreen() {
         onPress={signOut}
       >
         <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-        <Text className="font-semibold text-red-600">Log out</Text>
+        <Text className="font-semibold text-red-600">{t("common.signOut")}</Text>
       </Pressable>
     </SafeAreaView>
   );

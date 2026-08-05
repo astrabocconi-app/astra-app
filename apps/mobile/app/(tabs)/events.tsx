@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 
 function formatWhen(iso: string) {
   const d = new Date(iso);
@@ -12,6 +13,7 @@ function formatWhen(iso: string) {
 }
 
 export default function EventsScreen() {
+  const t = useT();
   const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list(), retry: false });
   const items = events.data?.items ?? [];
 
@@ -29,9 +31,9 @@ export default function EventsScreen() {
         <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
           <Ionicons name="calendar-outline" size={30} color="#04107E" />
         </View>
-        <Text className="text-xl font-semibold text-astra-primary">No events yet</Text>
+        <Text className="text-xl font-semibold text-astra-primary">{t("events.emptyTitle")}</Text>
         <Text className="text-center text-gray-500">
-          Check back soon — upcoming ASTRA events will show up here.
+          {t("events.emptyBody")}
         </Text>
       </View>
     );

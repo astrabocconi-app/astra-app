@@ -13,12 +13,13 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
+import { useT } from "../lib/i18n";
 
 // Day options mirror Free@B's own selector.
 const DAYS = [
-  { key: "today", label: "Today" },
-  { key: "tomorrow", label: "Tomorrow" },
-  { key: "day-after", label: "In 2 days" },
+  { key: "today", labelKey: "classrooms.dayToday" },
+  { key: "tomorrow", labelKey: "classrooms.dayTomorrow" },
+  { key: "day-after", labelKey: "classrooms.dayAfter" },
 ] as const;
 
 // Half-hour time slots 08:00–21:30; "Now" (null) omits the param → current time.
@@ -32,6 +33,7 @@ const TIMES: string[] = (() => {
 
 // Free@B — live Bocconi free-classroom availability, rendered natively.
 export default function ClassroomsScreen() {
+  const t = useT();
   const [day, setDay] = useState<(typeof DAYS)[number]["key"]>("today");
   const [time, setTime] = useState<string | null>(null); // null = "Now"
   const [building, setBuilding] = useState("all");
@@ -68,8 +70,8 @@ export default function ClassroomsScreen() {
           <Ionicons name="chevron-back" size={26} color="#04107E" />
         </Pressable>
         <View>
-          <Text className="text-lg font-semibold text-astra-primary">Free classrooms</Text>
-          <Text className="text-xs text-gray-400">Live availability · Free@B</Text>
+          <Text className="text-lg font-semibold text-astra-primary">{t("classrooms.title")}</Text>
+          <Text className="text-xs text-gray-400">{t("classrooms.subtitle")}</Text>
         </View>
       </View>
 
@@ -83,7 +85,7 @@ export default function ClassroomsScreen() {
         >
           {DAYS.map((d) => (
             <Pressable key={d.key} onPress={() => setDay(d.key)} className={chip(day === d.key)}>
-              <Text className={chipText(day === d.key)}>{d.label}</Text>
+              <Text className={chipText(day === d.key)}>{t(d.labelKey)}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -97,12 +99,12 @@ export default function ClassroomsScreen() {
           <Pressable onPress={() => setTime(null)} className={chip(time === null)}>
             <View className="flex-row items-center gap-1">
               <Ionicons name="time-outline" size={14} color={time === null ? "#fff" : "#6B7280"} />
-              <Text className={chipText(time === null)}>Now</Text>
+              <Text className={chipText(time === null)}>{t("classrooms.now")}</Text>
             </View>
           </Pressable>
-          {TIMES.map((t) => (
-            <Pressable key={t} onPress={() => setTime(t)} className={chip(time === t)}>
-              <Text className={chipText(time === t)}>{t}</Text>
+          {TIMES.map((slot) => (
+            <Pressable key={slot} onPress={() => setTime(slot)} className={chip(time === slot)}>
+              <Text className={chipText(time === slot)}>{slot}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -115,7 +117,7 @@ export default function ClassroomsScreen() {
         >
           {["all", ...buildings].map((b) => (
             <Pressable key={b} onPress={() => setBuilding(b)} className={chip(building === b)}>
-              <Text className={chipText(building === b)}>{b === "all" ? "All buildings" : b}</Text>
+              <Text className={chipText(building === b)}>{b === "all" ? t("classrooms.allBuildings") : b}</Text>
             </Pressable>
           ))}
         </ScrollView>
@@ -131,7 +133,7 @@ export default function ClassroomsScreen() {
             size={20}
             color={studyOnly ? "#04107E" : "#9CA3AF"}
           />
-          <Text className="text-sm text-gray-700">Study rooms (aule studio) only</Text>
+          <Text className="text-sm text-gray-700">{t("classrooms.studyRoomsOnly")}</Text>
         </Pressable>
       </View>
 
@@ -143,7 +145,7 @@ export default function ClassroomsScreen() {
         <View className="flex-1 items-center justify-center gap-3 px-8">
           <Text className="text-center text-red-600">{String((error as Error).message)}</Text>
           <Pressable className="rounded-lg border border-gray-300 px-4 py-3" onPress={() => refetch()}>
-            <Text>Retry</Text>
+            <Text>{t("common.retry")}</Text>
           </Pressable>
         </View>
       ) : (
@@ -154,21 +156,21 @@ export default function ClassroomsScreen() {
           refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
           ListHeaderComponent={
             <Text className="mb-1 text-sm text-gray-500">
-              {visible.length} free {visible.length === 1 ? "room" : "rooms"}
-              {building !== "all" ? ` in ${building}` : ""}
-              {time ? ` at ${time}` : ""}
+              {visible.length === 1
+                ? t("classrooms.freeRoomsCountSingular", { count: String(visible.length) })
+                : t("classrooms.freeRoomsCountPlural", { count: String(visible.length) })}
+              {building !== "all" ? t("classrooms.inBuilding", { building }) : ""}
+              {time ? t("classrooms.atTime", { time }) : ""}
             </Text>
           }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center gap-2 px-10 pt-24">
               <Ionicons name="calendar-outline" size={34} color="#9CA3AF" />
               <Text className="text-center text-base font-semibold text-gray-700">
-                Not available yet
+                {t("classrooms.notAvailableYet")}
               </Text>
               <Text className="text-center text-sm leading-5 text-gray-400">
-                Live classroom availability is read from Bocconi&apos;s timetable, which has no
-                data for this time (weekends and outside term). Try another day or time — it
-                fills in automatically once the semester is running.
+                {t("classrooms.notAvailableDesc")}
               </Text>
             </View>
           }
@@ -179,7 +181,7 @@ export default function ClassroomsScreen() {
                   <Text className="text-base font-semibold text-gray-900">{item.name}</Text>
                   {item.isStudyRoom && (
                     <Text className="rounded-full bg-astra-light px-2 py-0.5 text-[10px] font-medium text-astra-primary">
-                      STUDY
+                      {t("classrooms.studyBadge")}
                     </Text>
                   )}
                 </View>
@@ -188,10 +190,10 @@ export default function ClassroomsScreen() {
               <View className="items-end">
                 <View className="flex-row items-center gap-1">
                   <View className="h-2 w-2 rounded-full bg-green-500" />
-                  <Text className="text-sm font-medium text-green-600">Free</Text>
+                  <Text className="text-sm font-medium text-green-600">{t("classrooms.freeStatus")}</Text>
                 </View>
                 {item.freeUntil && (
-                  <Text className="mt-0.5 text-xs text-gray-400">until {item.freeUntil}</Text>
+                  <Text className="mt-0.5 text-xs text-gray-400">{t("classrooms.untilTime", { time: item.freeUntil })}</Text>
                 )}
               </View>
             </View>
@@ -202,13 +204,11 @@ export default function ClassroomsScreen() {
               <View className="flex-row gap-2 rounded-xl bg-amber-50 px-3 py-3">
                 <Text className="text-base">⚠️</Text>
                 <Text className="flex-1 text-xs leading-4 text-amber-800">
-                  Please read: rooms may close for cleaning or events, and times include a 15-min
-                  buffer before the next class. Weekend and off-term data can be incomplete — always
-                  double-check before relying on a room. Powered by Free@B.
+                  {t("classrooms.disclaimer")}
                 </Text>
               </View>
               <Text className="text-center text-[11px] text-gray-400">
-                Free@B developed by Michele F. Matozza
+                {t("classrooms.credit")}
               </Text>
             </View>
           }

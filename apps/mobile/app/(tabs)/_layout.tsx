@@ -3,6 +3,7 @@ import { View, Pressable, StyleSheet, Image, type ColorValue } from "react-nativ
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
+import { useT } from "../../lib/i18n";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
@@ -28,6 +29,7 @@ function tabIcon(name: IoniconName) {
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const t = useT();
 
   return (
     <Tabs
@@ -66,17 +68,17 @@ export default function TabsLayout() {
           tabBarIcon: tabIcon("home-outline"),
         }}
       />
-      <Tabs.Screen name="events" options={{ title: "Events", tabBarIcon: tabIcon("calendar-outline") }} />
+      <Tabs.Screen name="events" options={{ title: t("tabs.events"), tabBarIcon: tabIcon("calendar-outline") }} />
       <Tabs.Screen
         name="card"
         options={{
-          title: "Card",
+          title: t("tabs.card"),
           tabBarLabel: () => null,
           tabBarButton: (props) => <CenterCardButton onPress={props.onPress ?? undefined} />,
         }}
       />
-      <Tabs.Screen name="rewards" options={{ title: "Rewards", tabBarIcon: tabIcon("gift-outline") }} />
-      <Tabs.Screen name="profile" options={{ title: "Profile", tabBarIcon: tabIcon("person-outline") }} />
+      <Tabs.Screen name="rewards" options={{ title: t("tabs.rewards"), tabBarIcon: tabIcon("gift-outline") }} />
+      <Tabs.Screen name="profile" options={{ title: t("tabs.profile"), tabBarIcon: tabIcon("person-outline") }} />
     </Tabs>
   );
 }

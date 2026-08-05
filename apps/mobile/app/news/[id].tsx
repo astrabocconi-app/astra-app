@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 
 export default function NewsDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list(), retry: false });
   const post = news.data?.items.find((n) => n.id === id);
+  const t = useT();
 
   const when = post?.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })
@@ -18,7 +20,7 @@ export default function NewsDetailScreen() {
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 px-4 py-2" hitSlop={8}>
         <Ionicons name="chevron-back" size={22} color="#04107E" />
-        <Text className="text-base font-medium text-astra-primary">Home</Text>
+        <Text className="text-base font-medium text-astra-primary">{t("news.back")}</Text>
       </Pressable>
 
       {news.isLoading ? (
@@ -27,7 +29,7 @@ export default function NewsDetailScreen() {
         </View>
       ) : !post ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-gray-500">This post is no longer available.</Text>
+          <Text className="text-center text-gray-500">{t("news.notAvailable")}</Text>
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>

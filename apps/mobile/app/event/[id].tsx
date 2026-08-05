@@ -15,9 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
+import { useT } from "../../lib/i18n";
 
 // Tap an address → bottom chooser to open it in Apple Maps or Google Maps.
-function openInMaps(address: string) {
+function openInMaps(address: string, t: ReturnType<typeof useT>) {
   const q = encodeURIComponent(address);
   const apple = `http://maps.apple.com/?q=${q}`;
   const google = `https://www.google.com/maps/search/?api=1&query=${q}`; // opens the app if installed, else web
@@ -25,17 +26,21 @@ function openInMaps(address: string) {
 
   if (Platform.OS === "ios") {
     ActionSheetIOS.showActionSheetWithOptions(
-      { title: address, options: ["Apple Maps", "Google Maps", "Cancel"], cancelButtonIndex: 2 },
+      {
+        title: address,
+        options: [t("event.appleMaps"), t("event.googleMaps"), t("common.cancel")],
+        cancelButtonIndex: 2,
+      },
       (i) => {
         if (i === 0) go(apple);
         else if (i === 1) go(google);
       },
     );
   } else {
-    Alert.alert("Open location", address, [
-      { text: "Google Maps", onPress: () => go(google) },
-      { text: "Maps", onPress: () => go(apple) },
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("event.openLocationTitle"), address, [
+      { text: t("event.googleMaps"), onPress: () => go(google) },
+      { text: t("event.appleMaps"), onPress: () => go(apple) },
+      { text: t("common.cancel"), style: "cancel" },
     ]);
   }
 }
@@ -53,13 +58,14 @@ export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list(), retry: false });
   const event = events.data?.items.find((e) => e.id === id);
+  const t = useT();
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       {/* Back */}
       <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 px-4 py-2" hitSlop={8}>
         <Ionicons name="chevron-back" size={22} color="#04107E" />
-        <Text className="text-base font-medium text-astra-primary">Events</Text>
+        <Text className="text-base font-medium text-astra-primary">{t("event.back")}</Text>
       </Pressable>
 
       {events.isLoading ? (
@@ -68,7 +74,7 @@ export default function EventDetailScreen() {
         </View>
       ) : !event ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-gray-500">This event is no longer available.</Text>
+          <Text className="text-center text-gray-500">{t("event.notAvailable")}</Text>
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -91,7 +97,7 @@ export default function EventDetailScreen() {
               {event.location ? (
                 <Pressable
                   className="flex-row items-center gap-2 active:opacity-60"
-                  onPress={() => openInMaps(event.location!)}
+                  onPress={() => openInMaps(event.location!, t)}
                 >
                   <Ionicons name="location-outline" size={16} color="#04107E" />
                   <Text className="text-sm font-medium text-astra-primary underline">
@@ -117,7 +123,7 @@ export default function EventDetailScreen() {
             onPress={() => Linking.openURL(event.externalTicketUrl!)}
           >
             <Ionicons name="ticket-outline" size={18} color="#fff" />
-            <Text className="text-base font-semibold text-white">Get tickets</Text>
+            <Text className="text-base font-semibold text-white">{t("event.getTickets")}</Text>
           </Pressable>
         </View>
       ) : null}

@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { View, Pressable, StyleSheet, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
+import { useT } from "../../lib/i18n";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
@@ -27,6 +28,7 @@ function tabIcon(name: IoniconName) {
 }
 
 export default function PartnerTabsLayout() {
+  const t = useT();
   return (
     <Tabs
       screenOptions={{
@@ -40,19 +42,19 @@ export default function PartnerTabsLayout() {
     >
       <Tabs.Screen
         name="home"
-        options={{ title: "Home", tabBarIcon: tabIcon("stats-chart-outline") }}
+        options={{ title: t("partnerTabs.home"), tabBarIcon: tabIcon("stats-chart-outline") }}
       />
       <Tabs.Screen
         name="scan"
         options={{
-          title: "Scan",
+          title: t("partnerTabs.scan"),
           tabBarLabel: () => null,
           tabBarButton: (props) => <CenterScanButton onPress={props.onPress ?? undefined} />,
         }}
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: "Profile", tabBarIcon: tabIcon("person-outline") }}
+        options={{ title: t("partnerTabs.profile"), tabBarIcon: tabIcon("person-outline") }}
       />
     </Tabs>
   );

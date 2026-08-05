@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
+import { useT } from "../lib/i18n";
 
 type Source = {
   url: string;
@@ -24,23 +25,17 @@ type Source = {
 };
 type Msg = { role: "user" | "assistant"; text: string; sources?: Source[] };
 
-const SOURCE_LABELS: Record<string, string> = {
-  guide: "Guide",
-  faq: "FAQ",
-  handout: "Handout",
-  about: "About ASTRA",
-  web: "Web",
-};
-function sourceLabel(s: Source): string {
+function sourceLabel(s: Source, t: ReturnType<typeof useT>): string {
+  const SOURCE_LABELS: Record<string, string> = {
+    guide: t("ask.sourceGuide"),
+    faq: t("ask.sourceFaq"),
+    handout: t("ask.sourceHandout"),
+    about: t("ask.sourceAbout"),
+    web: t("ask.sourceWeb"),
+  };
   const label = s.sourceType ? SOURCE_LABELS[s.sourceType] : undefined;
   return label ?? hostOf(s.url);
 }
-
-const SUGGESTIONS = [
-  "How do I find a free classroom?",
-  "When does the term start?",
-  "What student services are on campus?",
-];
 
 function hostOf(url: string) {
   try {
@@ -51,10 +46,17 @@ function hostOf(url: string) {
 }
 
 export default function AskScreen() {
+  const t = useT();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
+
+  const SUGGESTIONS = [
+    t("ask.suggestion1"),
+    t("ask.suggestion2"),
+    t("ask.suggestion3"),
+  ];
 
   async function send(text: string) {
     const q = text.trim();
@@ -69,7 +71,7 @@ export default function AskScreen() {
     } catch (e) {
       setMessages((m) => [
         ...m,
-        { role: "assistant", text: e instanceof Error ? e.message : "Something went wrong. Try again." },
+        { role: "assistant", text: e instanceof Error ? e.message : t("ask.errorFallback") },
       ]);
     } finally {
       setLoading(false);
@@ -85,8 +87,8 @@ export default function AskScreen() {
           <Ionicons name="chevron-back" size={26} color="#04107E" />
         </Pressable>
         <View>
-          <Text className="text-lg font-semibold text-astra-primary">Ask ASTRA</Text>
-          <Text className="text-xs text-gray-400">Answers about Bocconi & ASTRA</Text>
+          <Text className="text-lg font-semibold text-astra-primary">{t("ask.title")}</Text>
+          <Text className="text-xs text-gray-400">{t("ask.subtitle")}</Text>
         </View>
       </View>
 
@@ -102,10 +104,10 @@ export default function AskScreen() {
                 <Ionicons name="sparkles" size={30} color="#04107E" />
               </View>
               <Text className="text-center text-lg font-semibold text-gray-900">
-                Ask us anything
+                {t("ask.emptyTitle")}
               </Text>
               <Text className="text-center text-sm text-gray-500">
-                ASTRA is here for you. Ask about campus, programs, services and more.
+                {t("ask.emptyDescription")}
               </Text>
               <View className="mt-2 w-full gap-2">
                 {SUGGESTIONS.map((s) => (
@@ -133,7 +135,7 @@ export default function AskScreen() {
               {m.sources && m.sources.length > 0 && (
                 <View className="mt-2 w-full max-w-[92%] gap-1">
                   <Text className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
-                    Sources
+                    {t("ask.sourcesLabel")}
                   </Text>
                   {m.sources.map((s, idx) => (
                     <Pressable
@@ -147,8 +149,8 @@ export default function AskScreen() {
                           {s.title || hostOf(s.url)}
                         </Text>
                         <Text className="text-[10px] text-gray-400">
-                          {sourceLabel(s)}
-                          {s.page ? ` · p.${s.page}` : ""}
+                          {sourceLabel(s, t)}
+                          {s.page ? t("ask.pageSuffix", { page: String(s.page) }) : ""}
                         </Text>
                       </View>
                       <Ionicons name="open-outline" size={14} color="#04107E" />
@@ -172,7 +174,7 @@ export default function AskScreen() {
         <View className="flex-row items-end gap-2 border-t border-gray-100 px-3 py-2">
           <TextInput
             className="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-base"
-            placeholder="Ask a question…"
+            placeholder={t("ask.inputPlaceholder")}
             value={input}
             onChangeText={setInput}
             multiline

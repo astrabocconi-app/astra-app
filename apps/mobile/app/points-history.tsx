@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
+import { useT } from "../lib/i18n";
 
 function formatDate(iso: string): string {
   const d = new Date(iso);
@@ -16,6 +17,7 @@ export default function PointsHistoryScreen() {
     queryFn: () => api.points.history(),
     retry: false,
   });
+  const t = useT();
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
@@ -24,7 +26,7 @@ export default function PointsHistoryScreen() {
         <Pressable onPress={() => router.back()} hitSlop={10}>
           <Ionicons name="chevron-back" size={26} color="#04107E" />
         </Pressable>
-        <Text className="text-lg font-semibold text-astra-primary">Points history</Text>
+        <Text className="text-lg font-semibold text-astra-primary">{t("pointsHistory.title")}</Text>
       </View>
 
       {isLoading && (
@@ -37,7 +39,7 @@ export default function PointsHistoryScreen() {
         <View className="flex-1 items-center justify-center gap-3 px-8">
           <Text className="text-center text-red-600">{String((error as Error).message)}</Text>
           <Pressable className="rounded-lg border border-gray-300 px-4 py-3" onPress={() => refetch()}>
-            <Text>Retry</Text>
+            <Text>{t("common.retry")}</Text>
           </Pressable>
         </View>
       )}
@@ -50,7 +52,7 @@ export default function PointsHistoryScreen() {
           ListEmptyComponent={
             <View className="items-center gap-2 pt-16">
               <Ionicons name="sparkles-outline" size={28} color="#9CA3AF" />
-              <Text className="text-gray-400">No points activity yet.</Text>
+              <Text className="text-gray-400">{t("pointsHistory.empty")}</Text>
             </View>
           }
           renderItem={({ item }) => (

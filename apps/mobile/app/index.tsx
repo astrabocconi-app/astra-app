@@ -15,6 +15,7 @@ import { api } from "../lib/api";
 import { setToken, setAccountType } from "../lib/session";
 import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
+import { useT } from "../lib/i18n";
 
 // Student: play the logo-morph intro overlay over home, then navigate there.
 async function enterStudentApp() {
@@ -31,6 +32,7 @@ type Step = "email" | "code";
 type Mode = "student" | "partner";
 
 export default function LoginScreen() {
+  const t = useT();
   const [mode, setMode] = useState<Mode>("student");
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -56,7 +58,7 @@ export default function LoginScreen() {
     try {
       if (isDevBypass) {
         const { token } = await api.auth.devLogin(email.trim());
-        if (!token) throw new Error("Dev login failed.");
+        if (!token) throw new Error(t("login.errorDevLoginFailed"));
         await setToken(token);
         await enterStudentApp();
         return;
@@ -64,7 +66,7 @@ export default function LoginScreen() {
       await api.auth.sendOtp(email.trim());
       setStep("code");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't send the code.");
+      setError(e instanceof Error ? e.message : t("login.errorSendCode"));
     } finally {
       setLoading(false);
     }
@@ -75,11 +77,11 @@ export default function LoginScreen() {
     setError(null);
     try {
       const { token } = await api.auth.verifyOtp(email.trim(), code.trim());
-      if (!token) throw new Error("No session token returned.");
+      if (!token) throw new Error(t("login.errorNoToken"));
       await setToken(token);
       await enterStudentApp();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Invalid or expired code.");
+      setError(e instanceof Error ? e.message : t("login.errorInvalidCode"));
     } finally {
       setLoading(false);
     }
@@ -90,12 +92,12 @@ export default function LoginScreen() {
     setError(null);
     try {
       const { token } = await api.auth.partnerLogin(partnerCode.trim(), partnerPassword);
-      if (!token) throw new Error("Login failed.");
+      if (!token) throw new Error(t("login.errorLoginFailed"));
       await setToken(token);
       await setAccountType("partner");
       router.replace("/partner/home");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Invalid code or password.");
+      setError(e instanceof Error ? e.message : t("login.errorInvalidCodeOrPassword"));
     } finally {
       setLoading(false);
     }
@@ -126,8 +128,10 @@ export default function LoginScreen() {
               <>
                 <Text className="text-center text-sm text-gray-600">
                   {step === "email"
-                    ? `Sign in with your ${ALLOWED_EMAIL_DOMAINS.map((d) => "@" + d).join(" or ")} email.`
-                    : `Enter the 6-digit code sent to ${email}.`}
+                    ? t("login.signInWithEmail", {
+                        domains: ALLOWED_EMAIL_DOMAINS.map((d) => "@" + d).join(" or "),
+                      })
+                    : t("login.enterCode", { email })}
                 </Text>
 
                 {step === "email" ? (
@@ -168,9 +172,9 @@ export default function LoginScreen() {
                     <Text className="text-center font-semibold text-white">
                       {step === "email"
                         ? isDevBypass
-                          ? "Dev sign in"
-                          : "Send code"
-                        : "Verify & continue"}
+                          ? t("login.devSignIn")
+                          : t("login.sendCode")
+                        : t("login.verifyContinue")}
                     </Text>
                   )}
                 </Pressable>
@@ -183,19 +187,19 @@ export default function LoginScreen() {
                       setError(null);
                     }}
                   >
-                    <Text className="text-center text-sm text-gray-500">Use a different email</Text>
+                    <Text className="text-center text-sm text-gray-500">{t("login.useDifferentEmail")}</Text>
                   </Pressable>
                 )}
               </>
             ) : (
               <>
                 <Text className="text-center text-sm text-gray-600">
-                  Partner venue sign-in. Use the code and password ASTRA gave you.
+                  {t("login.partnerSignInDesc")}
                 </Text>
 
                 <TextInput
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center"
-                  placeholder="Venue code"
+                  placeholder={t("login.venueCodePlaceholder")}
                   autoCapitalize="none"
                   autoCorrect={false}
                   value={partnerCode}
@@ -204,7 +208,7 @@ export default function LoginScreen() {
                 />
                 <TextInput
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center"
-                  placeholder="Password"
+                  placeholder={t("login.passwordPlaceholder")}
                   secureTextEntry
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -224,7 +228,7 @@ export default function LoginScreen() {
                   {loading ? (
                     <ActivityIndicator color="#fff" />
                   ) : (
-                    <Text className="text-center font-semibold text-white">Partner sign in</Text>
+                    <Text className="text-center font-semibold text-white">{t("login.partnerSignIn")}</Text>
                   )}
                 </Pressable>
               </>
@@ -237,7 +241,7 @@ export default function LoginScreen() {
                 onPress={() => switchMode(mode === "student" ? "partner" : "student")}
               >
                 <Text className="text-center text-sm font-medium text-astra-primary">
-                  {mode === "student" ? "I'm a partner venue →" : "← Back to student sign-in"}
+                  {mode === "student" ? t("login.imPartner") : t("login.backToStudent")}
                 </Text>
               </Pressable>
             )}

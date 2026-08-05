@@ -6,9 +6,28 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
 import { useProfileStore, shortCourse } from "../lib/profile-store";
+import { useT, type TranslationKey } from "../lib/i18n";
 
 const ALL_MATERIALS_URL = "https://www.astrabocconi.com/dispense";
 const YEAR_ORDER = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year"];
+
+// Maps the API's (English) year values to translation keys — the values
+// themselves stay in YEAR_ORDER/matching logic untouched since they must
+// match what the backend returns.
+const YEAR_FULL_KEYS: Record<string, TranslationKey> = {
+  "First Year": "materials.yearFirstFull",
+  "Second Year": "materials.yearSecondFull",
+  "Third Year": "materials.yearThirdFull",
+  "Fourth Year": "materials.yearFourthFull",
+  "Fifth Year": "materials.yearFifthFull",
+};
+const YEAR_SHORT_KEYS: Record<string, TranslationKey> = {
+  "First Year": "materials.yearFirstShort",
+  "Second Year": "materials.yearSecondShort",
+  "Third Year": "materials.yearThirdShort",
+  "Fourth Year": "materials.yearFourthShort",
+  "Fifth Year": "materials.yearFifthShort",
+};
 
 type FlatItem = {
   id: string | number;
@@ -23,6 +42,7 @@ type FlatItem = {
 // course, filterable by year and semester, and links straight to each file —
 // nothing is bundled. Everything else lives on the ASTRA website (see-all link).
 export default function MaterialsScreen() {
+  const t = useT();
   const { course, hydrated, hydrate } = useProfileStore();
   useEffect(() => {
     if (!hydrated) void hydrate();
@@ -106,16 +126,16 @@ export default function MaterialsScreen() {
           <Ionicons name="chevron-back" size={26} color="#04107E" />
         </Pressable>
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-astra-primary">Materials</Text>
+          <Text className="text-lg font-semibold text-astra-primary">{t("materials.title")}</Text>
           <Text className="text-xs text-gray-400">
-            {myCourse ? `${myCourse} handouts` : "Your course handouts"}
+            {myCourse ? t("materials.courseHandouts", { course: myCourse }) : t("materials.yourCourseHandouts")}
           </Text>
         </View>
         <Pressable
           onPress={() => Linking.openURL(ALL_MATERIALS_URL)}
           className="flex-row items-center gap-1 rounded-full border border-astra-primary/20 px-3 py-1.5 active:opacity-70"
         >
-          <Text className="text-xs font-semibold text-astra-primary">See all</Text>
+          <Text className="text-xs font-semibold text-astra-primary">{t("materials.seeAll")}</Text>
           <Ionicons name="open-outline" size={13} color="#04107E" />
         </Pressable>
       </View>
@@ -124,17 +144,17 @@ export default function MaterialsScreen() {
         <View className="flex-1 items-center justify-center gap-3 px-8">
           <Ionicons name="school-outline" size={30} color="#9CA3AF" />
           <Text className="text-center text-gray-600">
-            Set your course in your profile to see your handouts here.
+            {t("materials.setCourseYear")}
           </Text>
           <Pressable
             onPress={() => router.push("/(tabs)/profile")}
             className="mt-1 rounded-full bg-astra-primary px-5 py-2"
           >
-            <Text className="font-medium text-white">Go to profile</Text>
+            <Text className="font-medium text-white">{t("materials.goToProfile")}</Text>
           </Pressable>
           <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="mt-1">
             <Text className="text-sm font-medium text-astra-primary underline">
-              Or browse all materials
+              {t("materials.browseAllMaterials")}
             </Text>
           </Pressable>
         </View>
@@ -145,18 +165,18 @@ export default function MaterialsScreen() {
       ) : q.isError ? (
         <View className="flex-1 items-center justify-center gap-2 px-8">
           <Ionicons name="cloud-offline-outline" size={28} color="#9CA3AF" />
-          <Text className="text-center text-gray-500">Couldn't load materials.</Text>
+          <Text className="text-center text-gray-500">{t("materials.loadError")}</Text>
           <Pressable onPress={() => q.refetch()} className="mt-2 rounded-full bg-astra-primary px-5 py-2">
-            <Text className="font-medium text-white">Retry</Text>
+            <Text className="font-medium text-white">{t("common.retry")}</Text>
           </Pressable>
         </View>
       ) : mine.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-3 px-8">
           <Text className="text-center text-gray-500">
-            No handouts for {myCourse} yet.
+            {t("materials.noHandoutsForCourse", { course: myCourse })}
           </Text>
           <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="rounded-full bg-astra-primary px-5 py-2">
-            <Text className="font-medium text-white">See all materials</Text>
+            <Text className="font-medium text-white">{t("materials.seeAllMaterials")}</Text>
           </Pressable>
         </View>
       ) : (
@@ -166,11 +186,11 @@ export default function MaterialsScreen() {
             <View className="gap-2 px-4 py-3">
               {availYears.length > 1 && (
                 <View className="flex-row flex-wrap gap-2">
-                  <Chip label="All years" active={!yearFilter} onPress={() => setYearFilter(null)} />
+                  <Chip label={t("materials.allYears")} active={!yearFilter} onPress={() => setYearFilter(null)} />
                   {availYears.map((y) => (
                     <Chip
                       key={y}
-                      label={y.replace(" Year", "")}
+                      label={t(YEAR_SHORT_KEYS[y]!)}
                       active={yearFilter === y}
                       onPress={() => setYearFilter(y)}
                     />
@@ -179,11 +199,11 @@ export default function MaterialsScreen() {
               )}
               {availSemesters.length > 1 && (
                 <View className="flex-row flex-wrap gap-2">
-                  <Chip label="All sems" active={!semFilter} onPress={() => setSemFilter(null)} />
+                  <Chip label={t("materials.allSems")} active={!semFilter} onPress={() => setSemFilter(null)} />
                   {availSemesters.map((s) => (
                     <Chip
                       key={s}
-                      label={`Sem ${s}`}
+                      label={t("materials.semLabel", { sem: s })}
                       active={semFilter === s}
                       onPress={() => setSemFilter(s)}
                     />
@@ -197,7 +217,7 @@ export default function MaterialsScreen() {
             {grouped.map(([year, items]) => (
               <View key={year}>
                 <Text className="mb-1.5 text-sm font-bold uppercase tracking-wide text-astra-primary">
-                  {year}
+                  {t(YEAR_FULL_KEYS[year]!)}
                 </Text>
                 <View className="gap-1.5">
                   {items.map((it) => (
@@ -215,7 +235,7 @@ export default function MaterialsScreen() {
                         </Text>
                         {(it.semester || it.examType) && (
                           <Text className="text-[11px] text-gray-400">
-                            {[it.examType, it.semester ? `Sem ${it.semester}` : null]
+                            {[it.examType, it.semester ? t("materials.semLabel", { sem: it.semester }) : null]
                               .filter(Boolean)
                               .join(" · ")}
                           </Text>
@@ -231,7 +251,7 @@ export default function MaterialsScreen() {
               onPress={() => Linking.openURL(ALL_MATERIALS_URL)}
               className="mt-2 flex-row items-center justify-center gap-2 rounded-xl border border-astra-primary/20 py-3 active:opacity-70"
             >
-              <Text className="text-sm font-semibold text-astra-primary">See all materials</Text>
+              <Text className="text-sm font-semibold text-astra-primary">{t("materials.seeAllMaterials")}</Text>
               <Ionicons name="open-outline" size={15} color="#04107E" />
             </Pressable>
             <View className="h-6" />

@@ -24,8 +24,6 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
   icon: "./assets/icon.png",
   backgroundColor: "#FFFFFF",
-  // Splash screen is configured at build time (expo-splash-screen) — not shown
-  // in Expo Go. TODO(build): add the plugin with the brand splash asset.
   ios: {
     bundleIdentifier: "it.astrabocconi.app",
     supportsTablet: false,
@@ -44,6 +42,15 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-secure-store",
     "expo-notifications",
+    [
+      "expo-splash-screen",
+      {
+        image: "./assets/splash-icon.png",
+        imageWidth: 200,
+        resizeMode: "contain",
+        backgroundColor: "#FFFFFF",
+      },
+    ],
     [
       // Partner venues use the camera to scan members' loyalty-card QR codes.
       "expo-camera",

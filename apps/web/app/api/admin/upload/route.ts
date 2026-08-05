@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newRequestId, errorResponse } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
+import { optimizeImage } from "@/lib/image";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,9 +35,20 @@ export async function POST(req: Request) {
     return errorResponse(400, "PAYLOAD_TOO_LARGE", "Image must be 5 MB or smaller.", requestId);
   }
 
-  const bytes = Buffer.from(await file.arrayBuffer());
+  const raw = Buffer.from(await file.arrayBuffer());
+
+  // Downscale + re-encode before storing: /api/media serves these bytes as-is,
+  // so an unoptimized original would be re-downloaded in full by every client.
+  let bytes: Uint8Array<ArrayBuffer>;
+  let mimeType: string;
+  try {
+    ({ data: bytes, mimeType } = await optimizeImage(raw, file.type));
+  } catch {
+    return errorResponse(400, "BAD_REQUEST", "Could not read that image.", requestId);
+  }
+
   const asset = await prisma.imageAsset.create({
-    data: { mimeType: file.type, data: bytes, byteSize: bytes.length },
+    data: { mimeType, data: bytes, byteSize: bytes.length },
     select: { id: true },
   });
   return NextResponse.json(

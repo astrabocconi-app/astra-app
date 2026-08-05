@@ -51,7 +51,10 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white p-5">
+    <ScrollView
+      className="flex-1 bg-white"
+      contentContainerStyle={{ padding: 20, flexGrow: 1 }}
+    >
       {isLoading && <ActivityIndicator />}
 
       {error && (
@@ -223,6 +226,6 @@ export default function ProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }

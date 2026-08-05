@@ -17,6 +17,7 @@ const API_URL: Record<typeof APP_ENV, string> = {
 const config: ExpoConfig = {
   name: APP_ENV === "production" ? "ASTRA" : `ASTRA (${APP_ENV})`,
   slug: "astra-app",
+  owner: "mfmatozza",
   scheme: "astra",
   version: "0.1.0",
   orientation: "portrait",
@@ -68,8 +69,7 @@ const config: ExpoConfig = {
     apiUrl: API_URL[APP_ENV],
     appEnv: APP_ENV,
     eas: {
-      // TODO(scaffold): set your EAS projectId (from `eas init`).
-      projectId: "REPLACE_WITH_EAS_PROJECT_ID",
+      projectId: "69b09e81-0608-41b8-8979-fd3e854ab3d5",
     },
   },
   experiments: {

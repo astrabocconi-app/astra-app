@@ -42,6 +42,43 @@ export function moduleParent(title: string): string | null {
 
 const titleOf = (record: Measurable) => record.course?.title ?? record.customTitle ?? "";
 
+// A course name may end in a sequence numeral — ARTS I and ARTS II are two
+// different courses, not one misspelt. That numeral has to match exactly.
+const SEQUENCE_NUMERAL = /\s+([IVX]+|\d+)$/;
+
+/** True when two strings are equal or one typed character apart. */
+function withinOneEdit(a: string, b: string): boolean {
+  if (Math.abs(a.length - b.length) > 1) return false;
+  let head = 0;
+  while (head < a.length && head < b.length && a[head] === b[head]) head++;
+  let tail = 0;
+  while (
+    tail < a.length - head &&
+    tail < b.length - head &&
+    a[a.length - 1 - tail] === b[b.length - 1 - tail]
+  )
+    tail++;
+  return a.length - head - tail <= 1 && b.length - head - tail <= 1;
+}
+
+/**
+ * Whether two parent names are the same course. Bocconi's own catalogue
+ * misspells one of them — `MANAGEMENT AND ECONOMICS FOR SUSTAINABILTY` module 1
+ * against `...SUSTAINABILITY` module 2 — so an exact match would split a course
+ * in half. One typo is forgiven; a differing sequence numeral never is.
+ */
+function sameParent(a: string, b: string): boolean {
+  if (a === b) return true;
+  const [aName, aNumeral] = splitSequence(a);
+  const [bName, bNumeral] = splitSequence(b);
+  return aNumeral === bNumeral && withinOneEdit(aName, bName);
+}
+
+function splitSequence(parent: string): [string, string] {
+  const numeral = parent.match(SEQUENCE_NUMERAL);
+  return numeral ? [parent.slice(0, numeral.index), numeral[1]!] : [parent, ""];
+}
+
 /** A passed exam that carries a grade — the only kind the average is built on. */
 function gradeOf(record: Measurable): number | null {
   if (record.status !== "PASSED" || record.passFail || record.grade == null) return null;
@@ -66,11 +103,14 @@ export function gradebookStats(records: readonly Measurable[]) {
   // have to sit: the catalogue lists elective module pools, lone modules whose
   // sibling ran in another year, and the same parent split differently between
   // programmes, so "the required modules" isn't a fact it can answer.
-  const unfinished = new Set<string>();
+  // ponytail: a list scanned per passed module, not a hash set, because names
+  // are matched with a typo tolerance. A gradebook holds tens of exams; if that
+  // ever stops being true, bucket by first word before scanning.
+  const unfinished: string[] = [];
   for (const record of records) {
     if (record.status !== "PLANNED") continue;
     const parent = moduleParent(titleOf(record));
-    if (parent) unfinished.add(parent);
+    if (parent && !unfinished.some((seen) => sameParent(seen, parent))) unfinished.push(parent);
   }
 
   let completedPoints = 0;
@@ -91,7 +131,7 @@ export function gradebookStats(records: readonly Measurable[]) {
       gradedCredits += record.credits;
 
       const parent = moduleParent(titleOf(record));
-      if (!parent || !unfinished.has(parent)) {
+      if (!parent || !unfinished.some((pending) => sameParent(pending, parent))) {
         completedPoints += grade * record.credits;
         completedCredits += record.credits;
       }

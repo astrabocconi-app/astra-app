@@ -163,3 +163,28 @@ test("modules entered as free text group the same way", () => {
   ]);
   assert.equal(stats.completedCourseAverage, null);
 });
+
+test("a typo in the catalogue doesn't split a modular course in two", () => {
+  // 20818/20819 really are spelled differently in the 2027 catalogue.
+  const stats = gradebookStats([
+    titled("MANAGEMENT AND ECONOMICS FOR SUSTAINABILTY - MODULE 1 (GOVERNANCE)", { grade: 30 }),
+    titled("MANAGEMENT AND ECONOMICS FOR SUSTAINABILITY - MODULE 2 (CLIMATE)", {
+      grade: null,
+      status: "PLANNED",
+    }),
+  ]);
+  assert.equal(stats.weightedAverage, 30);
+  assert.equal(stats.completedCourseAverage, null); // one course, still half-done
+});
+
+test("courses that differ only by a roman numeral stay separate", () => {
+  // ARTS I and ARTS II are a sequence, not a typo — one letter apart.
+  const stats = gradebookStats([
+    titled("CRITICAL APPROACHES TO THE ARTS I - MODULE I (CINEMA)", { grade: 30 }),
+    titled("CRITICAL APPROACHES TO THE ARTS II - MODULE I (MODERN ART)", {
+      grade: null,
+      status: "PLANNED",
+    }),
+  ]);
+  assert.equal(stats.completedCourseAverage, 30); // ARTS I is finished
+});

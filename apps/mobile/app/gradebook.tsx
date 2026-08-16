@@ -9,19 +9,22 @@ import {
   TextInput,
   Switch,
   Alert,
+  useWindowDimensions,
 } from "react-native";
+import Svg, { Polyline } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { gradebookStats, averageTrend } from "@astra/shared";
 import type { ExamRecord, ExamRecordInput } from "@astra/shared";
 import { api } from "../lib/api";
 
 // The student's private gradebook. Everything here is self-only: the app talks
 // to /api/me/gradebook, which never exposes another student's records.
 //
-// Averages and selection-score estimates are deliberately absent — they arrive
-// with the analytics phase, once there are real records to compute them from.
+// The averages come from @astra/shared so Home can show the same numbers.
+// Exchange/MSc selection-score estimates are deliberately still absent.
 
 const STATUSES = [
   { value: "PLANNED", label: "Planned" },
@@ -82,6 +85,72 @@ function gradeLabel(record: ExamRecord): string | null {
   if (record.passFail) return record.status === "PASSED" ? "Pass" : null;
   if (record.grade == null) return null;
   return record.lode ? "30L" : String(record.grade);
+}
+
+/** How the average has moved, one point per dated graded exam. */
+function TrendLine({ points }: { points: { date: string; average: number }[] }) {
+  const { width } = useWindowDimensions();
+  const W = width - 40 - 32; // screen px-5 (2×20) + card p-4 (2×16)
+  const H = 56;
+  // A flat run would divide by zero; a one-point span is drawn as a flat line.
+  const values = points.map((p) => p.average);
+  const min = Math.min(...values);
+  const span = Math.max(...values) - min || 1;
+  const line = points
+    .map((p, i) => {
+      const x = (W * i) / Math.max(1, points.length - 1);
+      const y = 4 + (1 - (p.average - min) / span) * (H - 8);
+      return `${x},${y}`;
+    })
+    .join(" ");
+
+  return (
+    <Svg width={W} height={H}>
+      <Polyline points={line} fill="none" stroke="#04107E" strokeWidth={2} strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/**
+ * The student's own numbers, computed from their own records — deliberately
+ * not called a transcript, and no selection-score estimate in sight.
+ */
+function Summary({ records }: { records: ExamRecord[] }) {
+  const stats = useMemo(() => gradebookStats(records), [records]);
+  const trend = useMemo(() => averageTrend(records), [records]);
+
+  return (
+    <View className="mx-5 mt-5 rounded-2xl bg-gray-50 p-4">
+      <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+        Weighted average
+      </Text>
+      <View className="flex-row items-end gap-2">
+        <Text className="text-3xl font-semibold text-astra-primary">
+          {stats.weightedAverage?.toFixed(2) ?? "—"}
+        </Text>
+        <Text className="pb-1.5 text-xs text-gray-400">
+          {stats.gradedCredits > 0
+            ? `over ${stats.gradedCredits} graded credits`
+            : "no graded exams yet"}
+        </Text>
+      </View>
+
+      {trend.length > 1 ? <TrendLine points={trend} /> : null}
+
+      <View className="mt-3 flex-row justify-between border-t border-gray-200 pt-3">
+        {[
+          { label: "Credits", value: stats.earnedCredits },
+          { label: "Passed", value: stats.passedCount },
+          { label: "Planned", value: stats.plannedCount },
+        ].map((cell) => (
+          <View key={cell.label} className="items-center">
+            <Text className="text-base font-semibold text-gray-900">{cell.value}</Text>
+            <Text className="text-[10px] uppercase tracking-wide text-gray-400">{cell.label}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
 }
 
 export default function GradebookScreen() {
@@ -219,6 +288,7 @@ export default function GradebookScreen() {
         </View>
       ) : (
         <ScrollView contentContainerClassName="pb-16">
+          <Summary records={gradebook.data?.records ?? []} />
           {grouped.map(([year, semesters]) => (
             <View key={year} className="px-5 pt-5">
               <Text className="text-lg font-semibold text-gray-900">

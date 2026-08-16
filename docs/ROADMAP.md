@@ -61,11 +61,13 @@ course list is scraped from `didattica.unibocconi.eu` into a committed
 `bocconi-scraper/courses-<year>.json`, seeded into `AcademicCourse` /
 `AcademicCourseProgramme`, and searchable via `/api/academic/courses`. Students
 record their own exams through self-only `/api/me/gradebook` endpoints and a
-mobile `/gradebook` screen (attempts preserved, one accepted pass per course).
-**Averages, credit progress and the Exchange/MSc score estimates are Phase 10C
-and deliberately absent** for now.
-**Parallel next tracks → reward redemption (spend), plus academic analytics
-(10C) and profile-driven surfaces (10D); then News push + profile targeting.**
+mobile `/gradebook` screen (one row per exam: planned until passed). The
+weighted average, credit totals and average trend are computed in
+`@astra/shared` and shown on that screen. **The Exchange and MSc selection-score
+estimates are the rest of 10C and deliberately absent** until the official
+rules are in hand.
+**Parallel next tracks → reward redemption (spend), plus the 10C estimators and
+profile-driven surfaces (10D); then News push + profile targeting.**
 Legend:
 `[x]` done · `[~]` partial · `[ ]` todo.
 
@@ -207,13 +209,13 @@ out to wherever tickets are actually sold. (The `Rsvp`/`Ticket` models, the
 
 ### Phase 10C — Academic analytics _(🤖; estimates, not official rankings)_
 
-- [ ] 🤖 Implement pure, tested calculation functions for credit-weighted average, completed/planned credits, passed/remaining exams, and average trend.
-- [ ] 🤖 Show two deliberate views: **module-inclusive average** includes each completed module immediately; **completed-course average** excludes a modular parent course until all required modules are complete, then uses its combined credit-weighted result.
+- [x] 🤖 Pure, tested calculation functions in `packages/shared/src/gradebook-stats.ts` — credit-weighted average (`30 e lode` = 31), graded vs earned credits, planned credits, passed/planned counts, and the running average trend. No endpoint and no query: mobile already holds every record.
+- [ ] 🤖 Show two deliberate views: **module-inclusive average** includes each completed module immediately; **completed-course average** excludes a modular parent course until all required modules are complete, then uses its combined credit-weighted result. **Blocked:** module parent/child was skipped in 10A and the scrape captured no module structure, so nothing can tell a module from a standalone course yet.
 - [ ] 🤖 Add an undergraduate Exchange score estimate using academic-year/programme-specific coefficients, credit scope, minimum-credit threshold, and deadline rules.
 - [ ] 🤖 Add an internal Bocconi MSc admission score estimate using the applicable round threshold, weighted average converted to 110, module treatment, extra-credit adjustment, and `in corso` status.
-- [ ] 🤖 Store each rule's academic year, programme/level, selection round, effective dates, official source URL, and version; never hard-code one formula as timeless policy.
+- [ ] 🤖 Store each rule's academic year, programme/level, selection round, effective dates, official source URL, and version; never hard-code one formula as timeless policy. **Decided:** committed constants keyed by year and round, like `courses-<year>.json` — git is the version history, a rule change is a reviewed PR. No rules table, no admin UI.
 - [ ] 🤖 Label every selection score as an estimate and show the formula inputs/as-of deadline so students can reconcile it with their transcript.
-- [ ] 🤖 Test honors, pass/fail activities, modules, partial courses, zero graded credits, exchange scope/deadlines, programme coefficients, MSc rounds, and rounding.
+- [~] 🤖 Test honors, pass/fail activities, modules, partial courses, zero graded credits, exchange scope/deadlines, programme coefficients, MSc rounds, and rounding. _(Done for the averages: `packages/shared/src/gradebook-stats.test.mjs`. The estimator cases land with the estimators.)_
 - [ ] 🙋 Validate sample calculations against the current [Exchange criteria](https://www.unibocconi.it/en/current-students/international-mobility/exchange-program/undergraduate-selection-criteria) and [MSc admission rules](https://www.unibocconi.it/en/current-students/application-and-admissions).
 
 ### Phase 10D — Profile-driven academic experience _(🤖)_

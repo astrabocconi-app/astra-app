@@ -90,9 +90,6 @@ enum Platform {
 enum ExamStatus {
   PLANNED
   PASSED
-  FAILED
-  /// Passed but refused, so the student can retake it.
-  REJECTED
 }
 
 // ============================================================================
@@ -340,7 +337,7 @@ model ExamRecord {
   studyYear   Int
   semester    String?
   status      ExamStatus @default(PLANNED)
-  grade       Int? // 18–30; null while PLANNED, FAILED or pass/fail
+  grade       Int? // 18–30; null while PLANNED or for pass/fail
   lode        Boolean    @default(false)
   passFail    Boolean    @default(false)
   examDate    DateTime?

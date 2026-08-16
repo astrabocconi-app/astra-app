@@ -197,8 +197,8 @@ out to wherever tickets are actually sold. (The `Rsvp`/`Ticket` models, the
 ### Phase 10B — Personal gradebook _(🤖; private student-owned data)_
 
 - [x] 🤖 `ExamRecord` covers official courses (`courseId`) plus custom/elective/exchange ones (`customTitle`).
-- [x] 🤖 Tracks planned/passed/failed/refused status, exam date, credits, grade (18–30), `30 e lode`, pass/fail, notes, study year and semester. _(Registration date and per-course class override skipped — nothing reads them yet.)_
-- [x] 🤖 Attempts are rows, never overwrites: a retake is a new record and the previous one is marked `REJECTED`. A partial unique index allows at most one `PASSED` row per course, so the accepted attempt is explicit without an extra flag.
+- [x] 🤖 Tracks planned/passed status, exam date, credits, grade (18–30), `30 e lode`, pass/fail, notes, study year and semester. _(Registration date and per-course class override skipped — nothing reads them yet.)_
+- [~] 🤖 **Attempt history was dropped as a non-goal:** a failed sitting leaves no trace on the transcript and a grade cannot be refused, so `FAILED`/`REJECTED` had nothing to describe. An exam is `PLANNED` until it is `PASSED`, one row per exam, enforced by a partial unique index.
 - [~] 🤖 Profile changes never touch gradebook records (nothing cascades from the profile). **Pre-seeding a plan from the programme's compulsory courses is not built** — students add exams themselves.
 - [x] 🤖 Self-only `GET/POST /api/me/gradebook` and `PUT/DELETE /api/me/gradebook/:id` + `GET /api/academic/courses`, Zod contracts in `@astra/shared`, `self:read`/`self:write` through `lib/authz.ts`, ownership enforced inside the query.
 - [x] 🤖 Standalone mobile `/gradebook` screen linked from Home and Profile (no sixth tab), grouped by year then semester.

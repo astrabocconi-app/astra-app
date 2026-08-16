@@ -98,10 +98,10 @@ export type AcademicCourseSearchResponse = z.infer<typeof academicCourseSearchRe
 
 // ── Gradebook (private, self-only) ──────────────────────────────────────────
 
-export const examStatus = z.enum(["PLANNED", "PASSED", "FAILED", "REJECTED"]);
+export const examStatus = z.enum(["PLANNED", "PASSED"]);
 export type ExamStatus = z.infer<typeof examStatus>;
 
-/** One exam attempt. Each retake is its own record, never an overwrite. */
+/** One exam: planned until it's passed. Failed sittings are not recorded. */
 export const examRecord = z.object({
   id: z.string(),
   course: z
@@ -121,7 +121,7 @@ export const examRecord = z.object({
 });
 export type ExamRecord = z.infer<typeof examRecord>;
 
-/** GET /api/me/gradebook — every attempt the student has recorded. */
+/** GET /api/me/gradebook — every exam the student has recorded. */
 export const gradebookResponse = z.object({
   records: z.array(examRecord),
 });
@@ -156,11 +156,9 @@ export const examRecordInput = z
   })
   .refine(
     (v) =>
-      (v.status === "PASSED" || v.status === "REJECTED") && !v.passFail
-        ? typeof v.grade === "number"
-        : v.grade == null,
+      v.status === "PASSED" && !v.passFail ? typeof v.grade === "number" : v.grade == null,
     {
-      message: "A graded pass needs a grade of 18–30; planned, failed and pass/fail exams take none.",
+      message: "A graded pass needs a grade of 18–30; planned and pass/fail exams take none.",
       path: ["grade"],
     }
   );

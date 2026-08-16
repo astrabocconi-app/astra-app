@@ -26,8 +26,6 @@ import { api } from "../lib/api";
 const STATUSES = [
   { value: "PLANNED", label: "Planned" },
   { value: "PASSED", label: "Passed" },
-  { value: "FAILED", label: "Failed" },
-  { value: "REJECTED", label: "Refused" },
 ] as const;
 
 const YEAR_LABEL = ["", "First year", "Second year", "Third year", "Fourth year", "Fifth year", "Sixth year"];
@@ -143,7 +141,7 @@ export default function GradebookScreen() {
       setError("Credits must be a whole number.");
       return;
     }
-    const graded = (draft.status === "PASSED" || draft.status === "REJECTED") && !draft.passFail;
+    const graded = draft.status === "PASSED" && !draft.passFail;
     const grade = graded ? Number(draft.grade) : null;
     if (graded && (!Number.isInteger(grade) || grade! < 18 || grade! > 30)) {
       setError("A passed exam needs a grade between 18 and 30.");
@@ -320,7 +318,7 @@ function ExamSheet({
     enabled: !draft.courseId && search.trim().length >= 2,
   });
 
-  const graded = (draft.status === "PASSED" || draft.status === "REJECTED") && !draft.passFail;
+  const graded = draft.status === "PASSED" && !draft.passFail;
 
   return (
     <Modal visible animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setDraft(null)}>
@@ -481,11 +479,6 @@ function ExamSheet({
                 />
               ))}
             </View>
-            {draft.status === "REJECTED" ? (
-              <Text className="mt-1.5 text-xs text-gray-400">
-                Refused keeps the attempt on record so you can add the retake.
-              </Text>
-            ) : null}
           </View>
 
           <View className="flex-row items-center justify-between">

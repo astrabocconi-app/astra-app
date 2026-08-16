@@ -16,9 +16,9 @@ test("a graded pass carries 18-30; everything else carries no grade", () => {
   assert.equal(parse({ courseId: "c1", status: "PASSED" }).success, false);
   assert.equal(parse({ courseId: "c1", status: "PASSED", grade: 17 }).success, false);
   assert.equal(parse({ courseId: "c1", status: "PLANNED", grade: 28 }).success, false);
-  assert.equal(parse({ courseId: "c1", status: "FAILED" }).success, true);
-  // A refused pass keeps the grade it refused.
-  assert.equal(parse({ courseId: "c1", status: "REJECTED", grade: 22 }).success, true);
+  // Planned and passed are the only statuses; a failed sitting is not recorded.
+  assert.equal(parse({ courseId: "c1", status: "FAILED" }).success, false);
+  assert.equal(parse({ courseId: "c1", status: "REJECTED", grade: 22 }).success, false);
 });
 
 test("pass/fail activities never carry a grade", () => {

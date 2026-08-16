@@ -68,16 +68,14 @@ function toRow(input: ExamRecordInput) {
   };
 }
 
-// The one PASSED-attempt-per-course rule is a partial unique index, so it
-// surfaces as a write conflict rather than a validation error.
+// The one-row-per-exam rule is a partial unique index, so it surfaces as a
+// write conflict rather than a validation error.
 async function write<T>(run: () => Promise<T>): Promise<T> {
   try {
     return await run();
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      throw new GradebookError(
-        "This exam is already recorded as passed. Mark the earlier attempt as refused before adding a new pass."
-      );
+      throw new GradebookError("This exam is already in your gradebook. Edit that record instead.");
     }
     throw error;
   }

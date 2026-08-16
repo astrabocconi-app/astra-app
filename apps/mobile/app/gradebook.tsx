@@ -135,6 +135,14 @@ function Summary({ records }: { records: ExamRecord[] }) {
         </Text>
       </View>
 
+      {/* Only worth a line when a modular course is still half-done. */}
+      {stats.completedCourseAverage !== stats.weightedAverage ? (
+        <Text className="mt-0.5 text-xs text-gray-500">
+          {stats.completedCourseAverage?.toFixed(2) ?? "—"} counting only the modular courses
+          you've finished
+        </Text>
+      ) : null}
+
       {trend.length > 1 ? <TrendLine points={trend} /> : null}
 
       <View className="mt-3 flex-row justify-between border-t border-gray-200 pt-3">

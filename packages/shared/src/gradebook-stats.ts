@@ -13,8 +13,34 @@ export const LODE_GRADE = 31;
 /** Only these fields matter here; anything shaped like this can be measured. */
 type Measurable = Pick<
   ExamRecord,
-  "status" | "credits" | "grade" | "lode" | "passFail" | "examDate"
+  "status" | "credits" | "grade" | "lode" | "passFail" | "examDate" | "course" | "customTitle"
 >;
+
+// "POLITICAL SCIENCE - MODULE 2 (INTERNATIONAL RELATIONS)" → the separator, the
+// module number, an optional letter (MODULE II A). The `?` is the en-dash a few
+// catalogue titles arrive mangled with, and `MODULO` is the Italian spelling.
+const MODULE_MARKER = /\s*[-–—?]\s*MODUL[OE]\s+(?:[IVX]+|\d+)\s*[A-Z]?\b/i;
+
+/**
+ * The parent course a modular exam belongs to, or null if it isn't a module.
+ *
+ * Modules of one parent don't share a parenthetical — MODULE 1 might be
+ * "(WEB ANALYTICS)" and MODULE 2 "(DATA & ANALYTICS)" — so those are dropped
+ * before comparing. Case and spacing are normalised because free-text titles
+ * are typed by hand while catalogue titles arrive shouting.
+ */
+export function moduleParent(title: string): string | null {
+  const marker = title.match(MODULE_MARKER);
+  if (!marker) return null;
+  return title
+    .slice(0, marker.index)
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ");
+}
+
+const titleOf = (record: Measurable) => record.course?.title ?? record.customTitle ?? "";
 
 /** A passed exam that carries a grade — the only kind the average is built on. */
 function gradeOf(record: Measurable): number | null {
@@ -35,6 +61,21 @@ export function gradebookStats(records: readonly Measurable[]) {
   let passedCount = 0;
   let plannedCount = 0;
 
+  // A modular course is unfinished while any of its modules is still planned.
+  // The student's own gradebook is the only thing that knows which modules they
+  // have to sit: the catalogue lists elective module pools, lone modules whose
+  // sibling ran in another year, and the same parent split differently between
+  // programmes, so "the required modules" isn't a fact it can answer.
+  const unfinished = new Set<string>();
+  for (const record of records) {
+    if (record.status !== "PLANNED") continue;
+    const parent = moduleParent(titleOf(record));
+    if (parent) unfinished.add(parent);
+  }
+
+  let completedPoints = 0;
+  let completedCredits = 0;
+
   for (const record of records) {
     if (record.status === "PLANNED") {
       plannedCredits += record.credits;
@@ -48,11 +89,25 @@ export function gradebookStats(records: readonly Measurable[]) {
     if (grade != null) {
       points += grade * record.credits;
       gradedCredits += record.credits;
+
+      const parent = moduleParent(titleOf(record));
+      if (!parent || !unfinished.has(parent)) {
+        completedPoints += grade * record.credits;
+        completedCredits += record.credits;
+      }
     }
   }
 
   return {
+    /** Every passed module counts the day it is passed. */
     weightedAverage: average(points, gradedCredits),
+    /**
+     * The same average with half-finished modular courses left out. Identical
+     * to `weightedAverage` once the modules are done — credit-weighting makes a
+     * parent's combined result the weighted mean of its modules — so the two
+     * numbers only ever differ mid-course.
+     */
+    completedCourseAverage: average(completedPoints, completedCredits),
     /** Credits behind the average — pass/fail passes are not in here. */
     gradedCredits,
     /** Credits actually earned towards the degree, graded or not. */

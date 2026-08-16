@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { LODE_GRADE, gradebookStats, averageTrend } from "./gradebook-stats.ts";
+import { LODE_GRADE, gradebookStats, averageTrend, moduleParent } from "./gradebook-stats.ts";
 
 // Only the fields the maths reads; the API returns more.
 const exam = (patch) => ({
@@ -10,8 +10,13 @@ const exam = (patch) => ({
   lode: false,
   passFail: false,
   examDate: "2026-01-15T00:00:00.000Z",
+  course: null,
+  customTitle: "An exam",
   ...patch,
 });
+
+/** Titles below are verbatim from courses-2027.json, mojibake included. */
+const titled = (title, patch) => exam({ course: { id: title, code: "x", title }, ...patch });
 
 test("the average is credit-weighted, not a mean of grades", () => {
   const stats = gradebookStats([
@@ -76,4 +81,85 @@ test("an exam with no date can't be placed on the trend but still counts", () =>
   const records = [exam({ grade: 24, examDate: null }), exam({ grade: 30 })];
   assert.equal(averageTrend(records).length, 1);
   assert.equal(gradebookStats(records).passedCount, 2);
+});
+
+test("a module title reduces to the parent course it belongs to", () => {
+  assert.equal(
+    moduleParent("POLITICAL SCIENCE - MODULE 2 (INTERNATIONAL RELATIONS AND POLITICS)"),
+    "POLITICAL SCIENCE"
+  );
+  // The parenthetical differs between modules of the same parent.
+  assert.equal(
+    moduleParent("STRATEGIC MARKETING AND ANALYTICS (WEB ANALYTICS) - MODULE 2"),
+    moduleParent("STRATEGIC MARKETING AND ANALYTICS (DATA & ANALYTICS) - MODULE 1")
+  );
+  // Roman numerals, a trailing letter, and the en-dash the source mangles.
+  assert.equal(
+    moduleParent("FOUNDATIONS OF SOCIAL SCIENCES ? MODULE II A (INSTITUTIONS)"),
+    "FOUNDATIONS OF SOCIAL SCIENCES"
+  );
+  assert.equal(moduleParent("MICROECONOMICS"), null);
+});
+
+test("a modular course sits out the completed-course average until it is done", () => {
+  const records = [
+    titled("QUANTITATIVE FINANCE AND DERIVATIVES - MODULE 1", { credits: 7, grade: 30 }),
+    titled("QUANTITATIVE FINANCE AND DERIVATIVES - MODULE 2", {
+      credits: 6,
+      grade: null,
+      status: "PLANNED",
+    }),
+    titled("MICROECONOMICS", { credits: 8, grade: 24 }),
+  ];
+  const stats = gradebookStats(records);
+  assert.equal(stats.weightedAverage, 26.8); // (7*30 + 8*24) / 15
+  assert.equal(stats.completedCourseAverage, 24); // the half-done course sits out
+  assert.equal(stats.earnedCredits, 7 + 8); // it still earned its credits
+});
+
+test("once every module is passed the two averages agree", () => {
+  const records = [
+    titled("POLITICAL SCIENCE - MODULE 1 (COMPARATIVE POLITICS)", { grade: 30 }),
+    titled("POLITICAL SCIENCE - MODULE 2 (INTERNATIONAL RELATIONS)", { grade: 24 }),
+  ];
+  const stats = gradebookStats(records);
+  assert.equal(stats.weightedAverage, 27);
+  assert.equal(stats.completedCourseAverage, 27);
+});
+
+test("a module with no sibling in the gradebook is a finished course", () => {
+  // 50213 really is a lone MODULE 2 in the 2027 catalogue.
+  const stats = gradebookStats([
+    titled("ROMAN LAW - MODULE 2 (ROMAN FOUNDATIONS OF EUROPEAN LAW)", { grade: 28 }),
+  ]);
+  assert.equal(stats.completedCourseAverage, 28);
+});
+
+test("an elective module pool follows what the student actually enrolled in", () => {
+  // Three MODULE I options and three MODULE II exist; the student picks one each.
+  const stats = gradebookStats([
+    titled("CRITICAL APPROACHES TO THE ARTS II - MODULE I (CINEMA)", { grade: 30 }),
+    titled("CRITICAL APPROACHES TO THE ARTS II - MODULE II (MODERN ART)", {
+      grade: null,
+      status: "PLANNED",
+    }),
+  ]);
+  assert.equal(stats.weightedAverage, 30);
+  assert.equal(stats.completedCourseAverage, null);
+});
+
+test("an ordinary planned exam holds nothing back", () => {
+  const stats = gradebookStats([
+    titled("MICROECONOMICS", { grade: 26 }),
+    titled("MACROECONOMICS", { grade: null, status: "PLANNED" }),
+  ]);
+  assert.equal(stats.completedCourseAverage, 26);
+});
+
+test("modules entered as free text group the same way", () => {
+  const stats = gradebookStats([
+    exam({ customTitle: "Exchange: Game Theory - Module 1", grade: 30 }),
+    exam({ customTitle: "Exchange: Game Theory - Module 2", grade: null, status: "PLANNED" }),
+  ]);
+  assert.equal(stats.completedCourseAverage, null);
 });

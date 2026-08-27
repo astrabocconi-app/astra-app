@@ -147,19 +147,21 @@ export default function ProfileScreen() {
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
-      <Pressable
-        className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
-        onPress={async () => Alert.alert(t("profile.notificationsTitle"), await sendTestNotification())}
-      >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="notifications-outline" size={22} color="#04107E" />
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{t("profile.sendTestNotification")}</Text>
-          <Text className="text-xs text-gray-500">{t("profile.sendTestNotificationSub")}</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-      </Pressable>
+      {__DEV__ && (
+        <Pressable
+          className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          onPress={async () => Alert.alert(t("profile.notificationsTitle"), await sendTestNotification())}
+        >
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+            <Ionicons name="notifications-outline" size={22} color="#04107E" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-gray-900">{t("profile.sendTestNotification")}</Text>
+            <Text className="text-xs text-gray-500">{t("profile.sendTestNotificationSub")}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        </Pressable>
+      )}
 
       <View className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4">
         <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
@@ -184,7 +186,7 @@ export default function ProfileScreen() {
 
       {/* Sign out — lifted clear of the tab bar, red outline */}
       <Pressable
-        className="flex-row items-center justify-center gap-2 rounded-xl border-2 border-red-500 px-4 py-3 active:bg-red-50"
+        className="mt-6 flex-row items-center justify-center gap-2 rounded-xl border-2 border-red-500 px-4 py-3 active:bg-red-50"
         style={{ marginBottom: insets.bottom + 76 }}
         onPress={signOut}
       >

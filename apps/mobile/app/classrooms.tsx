@@ -137,6 +137,12 @@ export default function ClassroomsScreen() {
         </Pressable>
       </View>
 
+      {/* Disclaimer — static above the results, flagged with ⚠️ so students actually read it */}
+      <View className="flex-row gap-2 bg-amber-50 px-4 py-3">
+        <Text className="text-base">⚠️</Text>
+        <Text className="flex-1 text-xs leading-4 text-amber-800">{t("classrooms.disclaimer")}</Text>
+      </View>
+
       {isLoading ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
@@ -199,18 +205,9 @@ export default function ClassroomsScreen() {
             </View>
           )}
           ListFooterComponent={
-            <View className="mt-4 gap-3">
-              {/* Disclaimer — flagged with ⚠️ so students actually read it */}
-              <View className="flex-row gap-2 rounded-xl bg-amber-50 px-3 py-3">
-                <Text className="text-base">⚠️</Text>
-                <Text className="flex-1 text-xs leading-4 text-amber-800">
-                  {t("classrooms.disclaimer")}
-                </Text>
-              </View>
-              <Text className="text-center text-[11px] text-gray-400">
-                {t("classrooms.credit")}
-              </Text>
-            </View>
+            <Text className="mt-4 text-center text-[11px] text-gray-400">
+              {t("classrooms.credit")}
+            </Text>
           }
         />
       )}

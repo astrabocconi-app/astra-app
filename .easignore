@@ -1,0 +1,10 @@
+# Exclude workspaces the mobile app doesn't depend on, so `eas build` for
+# apps/mobile doesn't have to install apps/web's deps (notably sharp, which
+# fails to build from source on the EAS macOS iOS build image). Nothing in
+# the workspace graph depends on @astra/web besides itself.
+apps/web
+bocconi-scraper
+
+# Never let a local dev-only .env leak into a cloud build (use .env.local
+# instead, which Expo's own convention already keeps out of EAS Build).
+apps/mobile/.env

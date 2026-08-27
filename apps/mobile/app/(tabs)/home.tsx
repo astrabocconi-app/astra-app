@@ -23,7 +23,12 @@ export default function HomeScreen() {
   const t = useT();
   const { width } = useWindowDimensions();
   const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
-  const balance = useQuery({ queryKey: ["points-balance"], queryFn: () => api.points.balance(), retry: false });
+  const balance = useQuery({
+    queryKey: ["points-balance"],
+    queryFn: () => api.points.balance(),
+    retry: false,
+    refetchInterval: 30_000, // catch a partner scan awarded while this screen is open
+  });
   const history = useQuery({ queryKey: ["points-history"], queryFn: () => api.points.history(), retry: false });
   const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list(), retry: false });
 

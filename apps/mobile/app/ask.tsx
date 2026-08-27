@@ -10,7 +10,7 @@ import {
   Platform,
   Linking,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
@@ -47,6 +47,7 @@ function hostOf(url: string) {
 
 export default function AskScreen() {
   const t = useT();
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -170,8 +171,11 @@ export default function AskScreen() {
           )}
         </ScrollView>
 
-        {/* Input */}
-        <View className="flex-row items-end gap-2 border-t border-gray-100 px-3 py-2">
+        {/* Input — bottom padding clears the home indicator on notch iPhones */}
+        <View
+          className="flex-row items-end gap-2 border-t border-gray-100 px-3 pt-2"
+          style={{ paddingBottom: Math.max(insets.bottom, 8) }}
+        >
           <TextInput
             className="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-base"
             placeholder={t("ask.inputPlaceholder")}

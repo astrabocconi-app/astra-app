@@ -7,7 +7,12 @@ import { useT } from "../../lib/i18n";
 export default function RewardsScreen() {
   const t = useT();
   const rewards = useQuery({ queryKey: ["rewards"], queryFn: () => api.rewards.list(), retry: false });
-  const balance = useQuery({ queryKey: ["points-balance"], queryFn: () => api.points.balance(), retry: false });
+  const balance = useQuery({
+    queryKey: ["points-balance"],
+    queryFn: () => api.points.balance(),
+    retry: false,
+    refetchInterval: 30_000, // catch a partner scan awarded while this screen is open
+  });
   const items = rewards.data?.items ?? [];
   const points = balance.data?.balance ?? 0;
 

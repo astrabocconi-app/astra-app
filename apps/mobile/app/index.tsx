@@ -133,6 +133,11 @@ export default function LoginScreen() {
                       })
                     : t("login.enterCode", { email })}
                 </Text>
+                {step === "code" && (
+                  <Text className="-mt-2 text-center text-xs text-gray-400">
+                    {t("login.checkJunkFolder")}
+                  </Text>
+                )}
 
                 {step === "email" ? (
                   <TextInput
@@ -150,6 +155,8 @@ export default function LoginScreen() {
                     className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-xl tracking-[8px]"
                     placeholder="000000"
                     keyboardType="number-pad"
+                    textContentType="oneTimeCode"
+                    autoComplete="one-time-code"
                     maxLength={6}
                     value={code}
                     onChangeText={setCode}

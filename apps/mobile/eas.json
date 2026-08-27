@@ -13,16 +13,29 @@
     },
     "preview": {
       "distribution": "internal",
-      "env": { "APP_ENV": "staging" },
+      "env": {
+        "APP_ENV": "staging",
+        "EXPO_PUBLIC_API_URL": "https://astra-app-cyan.vercel.app"
+      },
       "android": { "buildType": "apk" }
     },
     "production": {
       "autoIncrement": true,
-      "env": { "APP_ENV": "production" },
+      "env": {
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://astra-app-cyan.vercel.app"
+      },
       "android": { "buildType": "app-bundle" }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "ascAppId": "6805444602",
+        "ascApiKeyPath": "./secrets/AuthKey_J652YD626G.p8",
+        "ascApiKeyId": "J652YD626G",
+        "ascApiKeyIssuerId": "b69cd1eb-92f9-488a-b0cb-9a45717b11ed"
+      }
+    }
   }
 }

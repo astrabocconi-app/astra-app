@@ -10,8 +10,8 @@ const APP_ENV = (process.env.APP_ENV ?? "development") as
 const API_URL: Record<typeof APP_ENV, string> = {
   // Dev uses localhost (so the dev-login bypass works against the local API).
   development: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000",
-  staging: "https://astra-app-liard.vercel.app",
-  production: "https://astra-app-liard.vercel.app",
+  staging: "https://astra-app-cyan.vercel.app",
+  production: "https://astra-app-cyan.vercel.app",
 };
 
 const config: ExpoConfig = {
@@ -33,6 +33,11 @@ const config: ExpoConfig = {
       NSCameraUsageDescription: "ASTRA uses the camera to scan member loyalty cards.",
       NSMicrophoneUsageDescription:
         "ASTRA uses the microphone only as part of the camera scanner.",
+      // The app only makes standard HTTPS calls (no custom/non-exempt encryption),
+      // so it qualifies for the export compliance exemption. Without this, every
+      // build sits in "Missing Compliance" in App Store Connect and can't be
+      // distributed to TestFlight testers until answered manually.
+      ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {

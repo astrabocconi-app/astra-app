@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { View, Pressable, StyleSheet, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
 
@@ -23,11 +24,12 @@ function CenterScanButton({ onPress }: { onPress?: (e: any) => void }) {
 
 function tabIcon(name: IoniconName) {
   return ({ color, size }: { color: ColorValue; size: number }) => (
-    <Ionicons name={name} color={color as string} size={size} />
+    <Ionicons name={name} color={color as string} size={size + 2} />
   );
 }
 
 export default function PartnerTabsLayout() {
+  const insets = useSafeAreaInsets();
   const t = useT();
   return (
     <Tabs
@@ -36,7 +38,15 @@ export default function PartnerTabsLayout() {
         tabBarInactiveTintColor: INACTIVE,
         headerTitleStyle: { color: BRAND, fontWeight: "700" },
         headerShadowVisible: false,
-        tabBarStyle: styles.tabBar,
+        // Respect the home-indicator inset so the icons don't hug the bottom edge.
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            height: 64 + insets.bottom,
+            paddingBottom: insets.bottom + 8,
+          },
+        ],
+        tabBarItemStyle: { paddingVertical: 4 },
         tabBarLabelStyle: { fontSize: 11 },
       }}
     >
@@ -62,9 +72,8 @@ export default function PartnerTabsLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    height: 64,
-    paddingTop: 6,
     borderTopColor: "#E5E7EB",
+    paddingTop: 8,
   },
   centerWrap: {
     flex: 1,

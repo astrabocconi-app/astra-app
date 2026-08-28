@@ -145,7 +145,7 @@ export default function MaterialsScreen() {
             {t("materials.setCourseYear")}
           </Text>
           <Pressable
-            onPress={() => router.push("/(tabs)/profile")}
+            onPress={() => router.push("/profile")}
             className="mt-1 rounded-full bg-astra-primary px-5 py-2"
           >
             <Text className="font-medium text-white">{t("materials.goToProfile")}</Text>

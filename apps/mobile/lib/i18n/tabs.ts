@@ -3,6 +3,7 @@ export const en = {
   "tabs.card": "Card",
   "tabs.rewards": "Rewards",
   "tabs.discounts": "Discounts",
+  "tabs.academics": "Academics",
   "tabs.profile": "Profile",
 };
 
@@ -11,5 +12,6 @@ export const it: Record<keyof typeof en, string> = {
   "tabs.card": "Carta",
   "tabs.rewards": "Premi",
   "tabs.discounts": "Sconti",
+  "tabs.academics": "Didattica",
   "tabs.profile": "Profilo",
 };

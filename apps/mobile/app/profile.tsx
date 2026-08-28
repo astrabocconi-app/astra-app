@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView, Alert, Switch } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { api } from "../../lib/api";
-import { clearToken } from "../../lib/session";
-import { sendTestNotification } from "../../lib/push";
-import { clearLegacyAcademicProfile, loadLegacyAcademicProfile } from "../../lib/profile-store";
-import { useLanguageStore } from "../../lib/language-store";
-import { useT } from "../../lib/i18n";
+import { api } from "../lib/api";
+import { clearToken } from "../lib/session";
+import { sendTestNotification } from "../lib/push";
+import { clearLegacyAcademicProfile, loadLegacyAcademicProfile } from "../lib/profile-store";
+import { useLanguageStore } from "../lib/language-store";
+import { useT } from "../lib/i18n";
 
 type Picker = "programme" | "track" | "year" | "class" | null;
 
@@ -135,10 +135,20 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView
-      className="flex-1 bg-white"
-      contentContainerStyle={{ padding: 20, flexGrow: 1 }}
-    >
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+      {/* Reached from the Home header rather than a tab, so it carries its own
+          back affordance like the other pushed screens. */}
+      <View className="flex-row items-center gap-2 border-b border-gray-100 px-4 py-3">
+        <Pressable onPress={() => router.back()} hitSlop={10}>
+          <Ionicons name="chevron-back" size={26} color="#04107E" />
+        </Pressable>
+        <Text className="text-lg font-semibold text-astra-primary">{t("tabs.profile")}</Text>
+      </View>
+
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ padding: 20, flexGrow: 1 }}
+      >
       {isLoading && <ActivityIndicator />}
 
       {error && (
@@ -320,7 +330,7 @@ export default function ProfileScreen() {
       {/* Sign out — lifted clear of the tab bar, red outline */}
       <Pressable
         className="mt-6 flex-row items-center justify-center gap-2 rounded-xl border-2 border-red-500 px-4 py-3 active:bg-red-50"
-        style={{ marginBottom: insets.bottom + 76 }}
+        style={{ marginBottom: insets.bottom + 16 }}
         onPress={signOut}
       >
         <Ionicons name="log-out-outline" size={18} color="#DC2626" />
@@ -373,7 +383,8 @@ export default function ProfileScreen() {
             </ScrollView>
           </Pressable>
         </Pressable>
-      </Modal>
-    </ScrollView>
+        </Modal>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

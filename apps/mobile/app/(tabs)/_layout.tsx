@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
-import { View, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
+import { Tabs, router } from "expo-router";
+import { View, Text, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
@@ -7,6 +7,7 @@ import { useT } from "../../lib/i18n";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
+const DISABLED = "#C4C8D4";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
@@ -25,6 +26,27 @@ function CenterCardButton({ onPress }: { onPress?: PressableOnPress }) {
 function tabIcon(name: IoniconName) {
   return ({ color, size }: { color: ColorValue; size: number }) => (
     <Ionicons name={name} color={color as string} size={size} />
+  );
+}
+
+/**
+ * A tab that's visible but inert, flagged with a small "Soon!" ribbon.
+ *
+ * Rendered as a plain View rather than a disabled Pressable so there's no
+ * press feedback at all — tapping it should feel like nothing is there yet,
+ * not like a broken button.
+ */
+function ComingSoonTab({ label, flag }: { label: string; flag: string }) {
+  return (
+    <View style={styles.soonWrap} pointerEvents="none">
+      <View>
+        <Ionicons name="school-outline" size={26} color={DISABLED} />
+        <View style={styles.soonFlag}>
+          <Text style={styles.soonFlagText}>{flag}</Text>
+        </View>
+      </View>
+      <Text style={styles.soonLabel}>{label}</Text>
+    </View>
   );
 }
 
@@ -69,6 +91,18 @@ export default function TabsLayout() {
             />
           ),
           tabBarIcon: tabIcon("home-outline"),
+          // Profile moved off the tab bar to make room for Academics; it lives
+          // here, where a profile avatar is conventionally found.
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push("/profile")}
+              hitSlop={10}
+              className="mr-4 h-9 w-9 items-center justify-center rounded-full bg-astra-light active:opacity-70"
+              accessibilityLabel={t("tabs.profile")}
+            >
+              <Ionicons name="person" size={19} color={BRAND} />
+            </Pressable>
+          ),
         }}
       />
       <Tabs.Screen name="events" options={{ title: t("tabs.events"), tabBarIcon: tabIcon("calendar-outline") }} />
@@ -89,7 +123,17 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
-      <Tabs.Screen name="profile" options={{ title: t("tabs.profile"), tabBarIcon: tabIcon("person-outline") }} />
+      <Tabs.Screen
+        name="academics"
+        options={{
+          title: t("tabs.academics"),
+          // Inert until the section exists: swapping the button for a plain
+          // view means no navigation and no press feedback.
+          tabBarButton: () => (
+            <ComingSoonTab label={t("tabs.academics")} flag={t("academics.soonFlag")} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
@@ -102,6 +146,31 @@ const styles = StyleSheet.create({
   centerWrap: {
     flex: 1,
     alignItems: "center",
+  },
+  soonWrap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 2,
+    gap: 2,
+  },
+  soonFlag: {
+    position: "absolute",
+    top: -7,
+    left: 15,
+    backgroundColor: "#FFCC00",
+    borderRadius: 999,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+  },
+  soonFlagText: {
+    fontSize: 8,
+    fontWeight: "800",
+    color: BRAND,
+  },
+  soonLabel: {
+    fontSize: 11,
+    color: DISABLED,
   },
   centerButton: {
     top: -22,

@@ -65,6 +65,16 @@ const config: ExpoConfig = {
       },
     ],
     [
+      // Native Mapbox SDK for the Discounts map. The iOS/Android SDKs live in
+      // Mapbox's private registry, so the BUILD machine needs a secret token
+      // with the DOWNLOADS:READ scope (MAPBOX_DOWNLOAD_TOKEN / ~/.netrc). The
+      // public pk.* token used at runtime is separate — see lib/config.ts.
+      "@rnmapbox/maps",
+      {
+        RNMapboxMapsDownloadToken: process.env.MAPBOX_DOWNLOAD_TOKEN,
+      },
+    ],
+    [
       // Android must target API 36 (required on Play as of 2026-08-31).
       // TODO(scaffold): verify the pinned Expo SDK 57 fully supports API 36.
       "expo-build-properties",
@@ -80,6 +90,9 @@ const config: ExpoConfig = {
   extra: {
     apiUrl: API_URL[APP_ENV],
     appEnv: APP_ENV,
+    // Public Mapbox token (pk.*), baked in per build so standalone/TestFlight
+    // builds render the map without relying on a local .env.
+    mapboxToken: process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "",
     eas: {
       projectId: "69b09e81-0608-41b8-8979-fd3e854ab3d5",
     },

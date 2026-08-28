@@ -80,7 +80,15 @@ export default function TabsLayout() {
           tabBarButton: (props) => <CenterCardButton onPress={props.onPress ?? undefined} />,
         }}
       />
-      <Tabs.Screen name="rewards" options={{ title: t("tabs.rewards"), tabBarIcon: tabIcon("gift-outline") }} />
+      <Tabs.Screen
+        name="discounts"
+        options={{
+          title: t("tabs.discounts"),
+          tabBarIcon: tabIcon("pricetags-outline"),
+          // The screen renders its own title + segmented switch.
+          headerShown: false,
+        }}
+      />
       <Tabs.Screen name="profile" options={{ title: t("tabs.profile"), tabBarIcon: tabIcon("person-outline") }} />
     </Tabs>
   );

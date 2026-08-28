@@ -5,6 +5,7 @@ import type {
   NewsListResponse,
   EventListResponse,
   RewardListResponse,
+  PartnerListResponse,
   ChatResponse,
   MaterialsResponse,
   AcademicCatalogueResponse,
@@ -120,6 +121,11 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/rewards — active rewards catalog. */
     rewards: {
       list: async () => (await request<RewardListResponse>("/api/rewards")).data,
+    },
+
+    /** GET /api/partners — active partner venues + their discounts (Discounts screen). */
+    partners: {
+      list: async () => (await request<PartnerListResponse>("/api/partners")).data,
     },
 
     /** GET /api/materials — handouts catalogue (year → subject → items). */

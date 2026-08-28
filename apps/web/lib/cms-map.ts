@@ -6,8 +6,8 @@
 // resolved to absolute so the client can load them directly; without it (the
 // dashboard edit forms) the raw stored value is returned so re-saving is stable.
 
-import type { NewsItem, EventItem, RewardItem } from "@astra/shared";
-import type { NewsPost, Event as EventRow, Reward } from "@astra/db";
+import type { NewsItem, EventItem, RewardItem, PartnerItem, PartnerOffer } from "@astra/shared";
+import type { NewsPost, Event as EventRow, Reward, Partner, Offer } from "@astra/db";
 
 export function resolveImageUrl(value: string | null, origin?: string): string | null {
   if (!value) return null;
@@ -63,5 +63,55 @@ export function toRewardItem(r: Reward, origin?: string): RewardItem {
     stock: r.stock,
     active: r.active,
     createdAt: r.createdAt.toISOString(),
+  };
+}
+
+/**
+ * Compact badge for an offer ("20% off", "€5 off", "Free"). Built server-side
+ * so the map callout, the list row and the dashboard all read identically.
+ * Falls back to the offer title when the type carries no numeric meaning.
+ */
+export function offerLabel(o: Pick<Offer, "title" | "discountType" | "discountValue">): string {
+  const v = o.discountValue;
+  switch (o.discountType) {
+    case "PERCENT":
+      return v == null ? o.title : `${v}% off`;
+    case "FIXED":
+      // discountValue is cents; drop the decimals when it's a round euro amount.
+      if (v == null) return o.title;
+      return `€${v % 100 === 0 ? v / 100 : (v / 100).toFixed(2)} off`;
+    case "FREEBIE":
+      return "Free";
+    default:
+      return o.title;
+  }
+}
+
+export function toPartnerOffer(o: Offer): PartnerOffer {
+  return {
+    id: o.id,
+    title: o.title,
+    description: o.description,
+    discountType: o.discountType,
+    discountValue: o.discountValue,
+    label: offerLabel(o),
+  };
+}
+
+export function toPartnerItem(
+  p: Partner & { offers?: Offer[] },
+  origin?: string,
+): PartnerItem {
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    category: p.category,
+    address: p.address,
+    latitude: p.latitude,
+    longitude: p.longitude,
+    logoUrl: resolveImageUrl(p.logoKey, origin),
+    active: p.active,
+    offers: (p.offers ?? []).map(toPartnerOffer),
   };
 }

@@ -1,5 +1,10 @@
 /** Form primitives for the dashboard CMS — labelled inputs matching the UI kit. */
-import type { InputHTMLAttributes, TextareaHTMLAttributes, ReactNode } from "react";
+import type {
+  InputHTMLAttributes,
+  TextareaHTMLAttributes,
+  SelectHTMLAttributes,
+  ReactNode,
+} from "react";
 
 const base =
   "w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition-colors focus:border-astra-accent disabled:opacity-50";
@@ -33,6 +38,10 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
 
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...props} className={`${base} min-h-[110px] resize-y ${props.className ?? ""}`} />;
+}
+
+export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select {...props} className={`${base} bg-white ${props.className ?? ""}`} />;
 }
 
 export function Toggle({

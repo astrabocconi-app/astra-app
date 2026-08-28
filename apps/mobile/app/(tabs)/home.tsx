@@ -43,16 +43,27 @@ export default function HomeScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ paddingBottom: 32 }}>
-      {/* Greeting — welcome + name on one line, softer weight */}
-      <Text className="px-5 pt-4 text-2xl font-semibold text-gray-800">
-        {t("home.welcome")}
-        {firstName ? (
-          <>
-            , <Text className="text-astra-primary">{firstName}</Text>
-          </>
-        ) : null}{" "}
-        👋
-      </Text>
+      {/* Greeting — welcome + name on one line, with the profile button on the
+          same baseline rather than up in the header. */}
+      <View className="flex-row items-center gap-3 px-5 pt-4">
+        <Text className="flex-1 text-2xl font-semibold text-gray-800">
+          {t("home.welcome")}
+          {firstName ? (
+            <>
+              , <Text className="text-astra-primary">{firstName}</Text>
+            </>
+          ) : null}{" "}
+          👋
+        </Text>
+        <Pressable
+          onPress={() => router.push("/profile")}
+          hitSlop={10}
+          accessibilityLabel={t("tabs.profile")}
+          className="h-10 w-10 items-center justify-center rounded-full bg-astra-light active:opacity-70"
+        >
+          <Ionicons name="person" size={20} color="#04107E" />
+        </Pressable>
+      </View>
 
       {/* News feed — full-width, swipe sideways between stories */}
       {newsItems.length > 0 && (

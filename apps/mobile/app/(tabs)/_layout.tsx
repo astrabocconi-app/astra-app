@@ -1,5 +1,5 @@
-import { Tabs, router } from "expo-router";
-import { View, Text, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
+import { Tabs } from "expo-router";
+import { View, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
@@ -29,26 +29,6 @@ function tabIcon(name: IoniconName) {
   );
 }
 
-/**
- * A tab that's visible but inert, flagged with a small "Soon!" ribbon.
- *
- * Rendered as a plain View rather than a disabled Pressable so there's no
- * press feedback at all — tapping it should feel like nothing is there yet,
- * not like a broken button.
- */
-function ComingSoonTab({ label, flag }: { label: string; flag: string }) {
-  return (
-    <View style={styles.soonWrap} pointerEvents="none">
-      <View>
-        <Ionicons name="school-outline" size={26} color={DISABLED} />
-        <View style={styles.soonFlag}>
-          <Text style={styles.soonFlagText}>{flag}</Text>
-        </View>
-      </View>
-      <Text style={styles.soonLabel}>{label}</Text>
-    </View>
-  );
-}
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
@@ -91,18 +71,6 @@ export default function TabsLayout() {
             />
           ),
           tabBarIcon: tabIcon("home-outline"),
-          // Profile moved off the tab bar to make room for Academics; it lives
-          // here, where a profile avatar is conventionally found.
-          headerRight: () => (
-            <Pressable
-              onPress={() => router.push("/profile")}
-              hitSlop={10}
-              className="mr-4 h-9 w-9 items-center justify-center rounded-full bg-astra-light active:opacity-70"
-              accessibilityLabel={t("tabs.profile")}
-            >
-              <Ionicons name="person" size={19} color={BRAND} />
-            </Pressable>
-          ),
         }}
       />
       <Tabs.Screen name="events" options={{ title: t("tabs.events"), tabBarIcon: tabIcon("calendar-outline") }} />
@@ -127,11 +95,20 @@ export default function TabsLayout() {
         name="academics"
         options={{
           title: t("tabs.academics"),
-          // Inert until the section exists: swapping the button for a plain
-          // view means no navigation and no press feedback.
-          tabBarButton: () => (
-            <ComingSoonTab label={t("tabs.academics")} flag={t("academics.soonFlag")} />
+          // Rendered by the navigator like every other tab so the icon and
+          // label sit on exactly the same baseline — a hand-rolled button was
+          // always a pixel or two out. Greyed out, with the "Soon!" ribbon as
+          // a badge, and inert via the tabPress listener below.
+          tabBarIcon: ({ size }) => (
+            <Ionicons name="school-outline" size={size} color={DISABLED} />
           ),
+          tabBarLabelStyle: { fontSize: 11, color: DISABLED },
+          tabBarBadge: t("academics.soonFlag"),
+          tabBarBadgeStyle: styles.soonBadge,
+        }}
+        listeners={{
+          // Visible but not yet navigable.
+          tabPress: (e) => e.preventDefault(),
         }}
       />
     </Tabs>
@@ -147,30 +124,19 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
-  soonWrap: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 2,
-    gap: 2,
-  },
-  soonFlag: {
-    position: "absolute",
-    top: -7,
-    left: 15,
-    backgroundColor: "#FFCC00",
-    borderRadius: 999,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-  },
-  soonFlagText: {
-    fontSize: 8,
-    fontWeight: "800",
+  soonBadge: {
+    backgroundColor: "#FFCC00", // brand gold, against the brand blue text
     color: BRAND,
-  },
-  soonLabel: {
-    fontSize: 11,
-    color: DISABLED,
+    fontSize: 9,
+    fontWeight: "800",
+    // The badge is built for short counts and clips a word to "So…", so it
+    // needs an explicit width and its own radius rather than the derived one.
+    lineHeight: 15,
+    height: 15,
+    minWidth: 38,
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    overflow: "hidden",
   },
   centerButton: {
     top: -22,

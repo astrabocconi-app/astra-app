@@ -1,4 +1,6 @@
 export const en = {
+  "rewards.title": "Rewards",
+  "rewards.subtitle": "Spend your points",
   "rewards.yourPoints": "Your points",
   "rewards.emptyTitle": "No rewards yet",
   "rewards.emptyBody": "Rewards you can unlock with your points will appear here.",
@@ -8,6 +10,8 @@ export const en = {
 };
 
 export const it: Record<keyof typeof en, string> = {
+  "rewards.title": "Premi",
+  "rewards.subtitle": "Usa i tuoi punti",
   "rewards.yourPoints": "I tuoi punti",
   "rewards.emptyTitle": "Ancora nessun premio",
   "rewards.emptyBody": "I premi che potrai sbloccare con i tuoi punti appariranno qui.",

@@ -1,8 +1,10 @@
-import { View, Text, ScrollView, Image, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Image, ActivityIndicator, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { api } from "../../lib/api";
-import { useT } from "../../lib/i18n";
+import { api } from "../lib/api";
+import { useT } from "../lib/i18n";
 
 export default function RewardsScreen() {
   const t = useT();
@@ -16,16 +18,35 @@ export default function RewardsScreen() {
   const items = rewards.data?.items ?? [];
   const points = balance.data?.balance ?? 0;
 
+  // Reached from the Home screen rather than a tab, so it carries its own
+  // header and back affordance like the other pushed screens.
+  const header = (
+    <View className="flex-row items-center gap-2 border-b border-gray-100 px-4 py-3">
+      <Pressable onPress={() => router.back()} hitSlop={10}>
+        <Ionicons name="chevron-back" size={26} color="#04107E" />
+      </Pressable>
+      <View>
+        <Text className="text-lg font-semibold text-astra-primary">{t("rewards.title")}</Text>
+        <Text className="text-xs text-gray-400">{t("rewards.subtitle")}</Text>
+      </View>
+    </View>
+  );
+
   if (rewards.isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator />
-      </View>
+      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+        {header}
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator color="#04107E" />
+        </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 20, gap: 14 }}>
+    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+      {header}
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, gap: 14 }}>
       {/* Balance banner */}
       <View className="flex-row items-center justify-between rounded-2xl bg-astra-primary px-5 py-4">
         <View>
@@ -88,6 +109,7 @@ export default function RewardsScreen() {
           );
         })
       )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

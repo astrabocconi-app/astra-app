@@ -194,6 +194,29 @@ export default function HomeScreen() {
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
+      {/* Rewards — no longer a tab (Discounts took its place), so this is the
+          way students reach the catalogue. */}
+      <Pressable
+        onPress={() => router.push("/rewards")}
+        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
+        style={{
+          shadowColor: "#04107E",
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: 2,
+        }}
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+          <Ionicons name="gift-outline" size={22} color="#04107E" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">{t("home.rewards")}</Text>
+          <Text className="text-xs text-gray-500">{t("home.rewardsSub")}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+      </Pressable>
+
       {/* Your account */}
       <Text className="mt-6 px-5 text-lg font-semibold text-gray-900">{t("home.yourAccount")}</Text>
       <View className="px-5 pt-3">

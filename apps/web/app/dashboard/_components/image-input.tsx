@@ -47,7 +47,6 @@ export function ImageInput({
       <div className="flex items-start gap-4">
         <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
           {preview ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt="" className="h-full w-full object-cover" />
           ) : (
             <span className="px-2 text-center text-[11px] text-gray-400">No image</span>

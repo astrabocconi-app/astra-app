@@ -186,7 +186,6 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
     return;
   }
   // 3) Dev fallback: no provider configured — print the code so we can test.
-  // eslint-disable-next-line no-console
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }
 
@@ -262,7 +261,6 @@ function adminLoginPlugin(): BetterAuthPlugin {
         // Dev affordance: print the admin OTP to the server console (never in
         // production), matching deliverOtp's dev fallback for students.
         if (process.env.NODE_ENV !== "production") {
-          // eslint-disable-next-line no-console
           console.log(`\n[auth] DEV admin OTP: ${otp}\n`);
         }
         await deliverOtp(adminEmail(), otp);

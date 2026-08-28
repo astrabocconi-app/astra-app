@@ -358,6 +358,12 @@ model PartnerMembership {
   partnerId    String
   loginCode    String   @unique // e.g. "casadimichele" — what staff type to sign in
   passwordHash String // scrypt hash (salt:hash); issued by ASTRA, not self-set
+  /// Scan-only accounts reach the scanner and nothing else. Venues asked for
+  /// this so floor staff can award points without seeing takings/analytics.
+  scanOnly     Boolean  @default(false)
+  /// Human label so a venue with several logins can tell them apart
+  /// ("Front desk", "Bar"). Not used for authentication.
+  label        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

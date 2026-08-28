@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { isAllowedEmail, isDevLoginUsername, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { api } from "../lib/api";
-import { setToken, setAccountType } from "../lib/session";
+import { setToken, setAccountType, setPartnerScanOnly } from "../lib/session";
 import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
 import { useT } from "../lib/i18n";
@@ -91,11 +91,16 @@ export default function LoginScreen() {
     setLoading(true);
     setError(null);
     try {
-      const { token } = await api.auth.partnerLogin(partnerCode.trim(), partnerPassword);
+      const { token, scanOnly } = await api.auth.partnerLogin(
+        partnerCode.trim(),
+        partnerPassword,
+      );
       if (!token) throw new Error(t("login.errorLoginFailed"));
       await setToken(token);
       await setAccountType("partner");
-      router.replace("/partner/home");
+      await setPartnerScanOnly(scanOnly);
+      // Scan-only staff have no home screen to land on.
+      router.replace(scanOnly ? "/partner/scan" : "/partner/home");
     } catch (e) {
       setError(e instanceof Error ? e.message : t("login.errorInvalidCodeOrPassword"));
     } finally {

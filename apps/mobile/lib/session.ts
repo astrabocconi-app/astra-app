@@ -6,8 +6,10 @@ import * as SecureStore from "expo-secure-store";
 const KEY = "astra_session_token";
 const TYPE_KEY = "astra_account_type";
 const CARD_KEY = "astra_card_token";
+const SCAN_ONLY_KEY = "astra_partner_scan_only";
 let cachedToken: string | null = null;
 let cachedType: AccountType | null = null;
+let cachedScanOnly = false;
 
 export type AccountType = "student" | "partner";
 
@@ -30,8 +32,10 @@ export async function setToken(token: string): Promise<void> {
 export async function clearToken(): Promise<void> {
   cachedToken = null;
   cachedType = null;
+  cachedScanOnly = false;
   await SecureStore.deleteItemAsync(KEY);
   await SecureStore.deleteItemAsync(TYPE_KEY);
+  await SecureStore.deleteItemAsync(SCAN_ONLY_KEY);
 }
 
 // Account type — persisted so cold-boot can route partner vs student without a
@@ -48,6 +52,24 @@ export function getAccountType(): AccountType | null {
 export async function setAccountType(type: AccountType): Promise<void> {
   cachedType = type;
   await SecureStore.setItemAsync(TYPE_KEY, type);
+}
+
+// Scan-only partner logins: staff who can award points but must not see the
+// venue's takings. Persisted alongside the account type so a cold boot routes
+// straight to the scanner. This is a UI convenience only — /api/partner/stats
+// refuses these accounts server-side regardless of what the app believes.
+export async function loadPartnerScanOnly(): Promise<boolean> {
+  cachedScanOnly = (await SecureStore.getItemAsync(SCAN_ONLY_KEY)) === "true";
+  return cachedScanOnly;
+}
+
+export function getPartnerScanOnly(): boolean {
+  return cachedScanOnly;
+}
+
+export async function setPartnerScanOnly(scanOnly: boolean): Promise<void> {
+  cachedScanOnly = scanOnly;
+  await SecureStore.setItemAsync(SCAN_ONLY_KEY, scanOnly ? "true" : "false");
 }
 
 // Loyalty-card QR token — cached so the card still renders with no connection

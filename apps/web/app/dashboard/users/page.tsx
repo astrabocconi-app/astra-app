@@ -3,7 +3,6 @@ import { PageHeader } from "@/app/_ui/page-header";
 import { Badge } from "@/app/_ui/badge";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { UsersIcon } from "@/app/_ui/icons";
-import { RoleEditor } from "./role-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +56,7 @@ export default async function UsersPage({
     <>
       <PageHeader
         title="Users"
-        subtitle={`Everyone who has signed in. Showing up to ${PAGE_SIZE}.`}
+        subtitle={`Students who have signed in. Venue accounts live under Partner logins. Showing up to ${PAGE_SIZE}.`}
       />
 
       <form method="GET" className="mb-4 flex gap-2">
@@ -103,7 +102,6 @@ export default async function UsersPage({
                 <th className="px-4 py-3 font-medium">Points</th>
                 <th className="px-4 py-3 font-medium">Joined</th>
                 <th className="px-4 py-3 font-medium">Roles</th>
-                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -134,9 +132,6 @@ export default async function UsersPage({
                           </Badge>
                         ))}
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <RoleEditor userId={u.id} roles={u.roles} />
                     </td>
                   </tr>
                 );

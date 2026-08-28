@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
+import { getPartnerScanOnly } from "../../lib/session";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
@@ -32,6 +33,10 @@ function tabIcon(name: IoniconName) {
 export default function PartnerTabsLayout() {
   const insets = useSafeAreaInsets();
   const t = useT();
+  // Scan-only logins exist so floor staff can award points without seeing the
+  // venue's takings, so the analytics tab is removed entirely rather than
+  // shown-and-blocked. /api/partner/stats refuses them server-side too.
+  const scanOnly = getPartnerScanOnly();
   return (
     <Tabs
       screenOptions={{
@@ -53,7 +58,11 @@ export default function PartnerTabsLayout() {
     >
       <Tabs.Screen
         name="home"
-        options={{ title: t("partnerTabs.home"), tabBarIcon: tabIcon("stats-chart-outline") }}
+        options={{
+          title: t("partnerTabs.home"),
+          tabBarIcon: tabIcon("stats-chart-outline"),
+          href: scanOnly ? null : undefined,
+        }}
       />
       <Tabs.Screen
         name="scan"

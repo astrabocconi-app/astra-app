@@ -224,6 +224,9 @@ function partnerLoginPlugin(): BetterAuthPlugin {
           token: session.token,
           user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
           partner: { id: membership.partner.id, name: membership.partner.name },
+          // Lets the app send scan-only staff straight to the scanner. The
+          // server enforces it too — see /api/partner/stats.
+          scanOnly: membership.scanOnly,
         });
       }),
     },

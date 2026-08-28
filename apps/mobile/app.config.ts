@@ -33,6 +33,12 @@ const config: ExpoConfig = {
       NSCameraUsageDescription: "ASTRA uses the camera to scan member loyalty cards.",
       NSMicrophoneUsageDescription:
         "ASTRA uses the microphone only as part of the camera scanner.",
+      // Required by Apple (ITMS-90683): the bundled Mapbox SDK references the
+      // location APIs, so the purpose string must be present even though ASTRA
+      // never asks for location — the Discounts map only shows partner pins and
+      // the campus, and no permission prompt is triggered.
+      NSLocationWhenInUseUsageDescription:
+        "ASTRA can show your position on the Discounts map to help you find nearby partner venues. The map works fine without it.",
       // The app only makes standard HTTPS calls (no custom/non-exempt encryption),
       // so it qualifies for the export compliance exemption. Without this, every
       // build sits in "Missing Compliance" in App Store Connect and can't be

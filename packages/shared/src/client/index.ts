@@ -240,12 +240,19 @@ export function createApiClient(options: ApiClientOptions) {
           token?: string;
           user?: MeResponse;
           partner?: { id: string; name: string };
+          /** Scan-only staff logins never see takings — the API enforces it too. */
+          scanOnly?: boolean;
         }>("/api/auth/partner-login", {
           method: "POST",
           body: JSON.stringify({ code, password }),
         });
         const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
-        return { token, user: data?.user ?? null, partner: data?.partner ?? null };
+        return {
+          token,
+          user: data?.user ?? null,
+          partner: data?.partner ?? null,
+          scanOnly: data?.scanOnly ?? false,
+        };
       },
     },
   };

@@ -15,7 +15,8 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthEndpoint, createAuthMiddleware } from "better-auth/api";
 import { setSessionCookie } from "better-auth/cookies";
 import { emailOTP, bearer } from "better-auth/plugins";
-import { prisma, Role } from "@astra/db";
+import { prisma, Role, LedgerSource } from "@astra/db";
+import { earn } from "./points";
 import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
 import nodemailer, { type Transporter } from "nodemailer";
@@ -292,6 +293,22 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   trustedOrigins,
+  // Welcome bonus: +50 points the first time a real student account is
+  // created via email-OTP sign-in. Only fires for Better Auth's own
+  // adapter-driven user creation — dev-login, partner, and admin accounts are
+  // all provisioned through separate direct-Prisma paths and never hit this.
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await earn(user.id, 50, {
+            source: LedgerSource.SIGNUP,
+            reason: "Welcome bonus for joining ASTRA",
+          });
+        },
+      },
+    },
+  },
   // We authenticate exclusively via email OTP; no passwords.
   emailAndPassword: { enabled: false },
   // Long-lasting login: once a user signs in (OTP for students, code+password

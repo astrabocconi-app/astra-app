@@ -22,7 +22,9 @@ export async function POST(req: Request) {
     return errorResponse(403, "FORBIDDEN", "Not a partner account.", requestId);
   }
 
-  const body = (await req.json().catch(() => null)) as { token?: string } | null;
+  const body = (await req.json().catch(() => null)) as
+    | { token?: string; offerId?: string | null }
+    | null;
   const token = body?.token;
   if (typeof token !== "string" || !token) {
     return errorResponse(400, "BAD_REQUEST", "Missing card token.", requestId);
@@ -31,6 +33,25 @@ export async function POST(req: Request) {
   const verified = verifyCardToken(token);
   if (!verified) {
     return errorResponse(400, "INVALID_CODE", "Invalid or expired code.", requestId);
+  }
+
+  // Which promotion this scan was for. Validated against THIS venue's live
+  // offers so a client can't attribute a scan to another partner's promotion
+  // (or to a retired one) by passing an arbitrary id.
+  let offer: { id: string; title: string } | null = null;
+  if (body?.offerId) {
+    offer = await prisma.offer.findFirst({
+      where: {
+        id: body.offerId,
+        partnerId: membership.partnerId,
+        active: true,
+        deletedAt: null,
+      },
+      select: { id: true, title: true },
+    });
+    if (!offer) {
+      return errorResponse(400, "BAD_REQUEST", "That offer isn't available here.", requestId);
+    }
   }
 
   const student = await prisma.user.findFirst({
@@ -46,10 +67,17 @@ export async function POST(req: Request) {
     partnerUserId: session.user.id,
     partnerId: membership.partnerId,
     partnerName: membership.partner.name,
+    offerId: offer?.id ?? null,
+    offerTitle: offer?.title ?? null,
   });
 
   return NextResponse.json(
-    { awarded: POINTS_PER_SCAN, student: { name: student.name }, balance },
+    {
+      awarded: POINTS_PER_SCAN,
+      student: { name: student.name },
+      balance,
+      offer: offer ? { id: offer.id, title: offer.title } : null,
+    },
     { headers: { "x-request-id": requestId } },
   );
 }

@@ -310,17 +310,24 @@ model PointsLedgerEntry {
   reason      String
   refType     String? // e.g. "Event", "Offer", "Reward", "Ticket"
   refId       String?
+  /// Which partner offer this scan was for, when the venue runs more than one.
+  /// RESTRICT, not SetNull: the ledger is append-only at the DB level, so a
+  /// cascading null would fire the blocked-UPDATE trigger. Offers are only ever
+  /// soft-deleted anyway.
+  offerId     String?
   grantedById String? // admin/staff who created a manual entry, if any
   createdAt   DateTime     @default(now())
 
-  user      User  @relation("LedgerOwner", fields: [userId], references: [id], onDelete: Cascade)
-  grantedBy User? @relation("LedgerGrantedBy", fields: [grantedById], references: [id])
+  user      User   @relation("LedgerOwner", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User?  @relation("LedgerGrantedBy", fields: [grantedById], references: [id])
+  offer     Offer? @relation(fields: [offerId], references: [id], onDelete: Restrict)
 
   // Immutability (block UPDATE/DELETE) is enforced by a DB trigger in the
   // raw-SQL migration — NOT by application code. See header notes.
   @@index([userId, kind])
   @@index([refType, refId])
   @@index([createdAt])
+  @@index([offerId])
 }
 
 // ============================================================================
@@ -388,8 +395,9 @@ model Offer {
   updatedAt     DateTime     @updatedAt
   deletedAt     DateTime?
 
-  partner Partner         @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-  usages  DiscountUsage[]
+  partner       Partner             @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  usages        DiscountUsage[]
+  ledgerEntries PointsLedgerEntry[]
 
   @@index([partnerId, active])
 }

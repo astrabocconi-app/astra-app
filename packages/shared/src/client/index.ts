@@ -181,15 +181,32 @@ export function createApiClient(options: ApiClientOptions) {
     },
 
     partner: {
-      /** POST /api/partner/scan — award points for a scanned student card token. */
-      scan: async (token: string) =>
+      /**
+       * POST /api/partner/scan — award points for a scanned student card token.
+       * `offerId` records which promotion the scan was for; the server checks
+       * it belongs to this venue.
+       */
+      scan: async (token: string, offerId?: string | null) =>
         (
-          await request<{ awarded: number; student: { name: string | null }; balance: number }>(
-            "/api/partner/scan",
-            { method: "POST", body: JSON.stringify({ token }) }
-          )
+          await request<{
+            awarded: number;
+            student: { name: string | null };
+            balance: number;
+            offer: { id: string; title: string } | null;
+          }>("/api/partner/scan", {
+            method: "POST",
+            body: JSON.stringify({ token, offerId: offerId ?? null }),
+          })
         ).data,
-      /** GET /api/partner/stats — this venue's scan tallies. */
+      /** GET /api/partner/offers — live promotions, to ask which one a scan is for. */
+      offers: async () =>
+        (
+          await request<{
+            partner: { id: string; name: string };
+            offers: { id: string; title: string; label: string }[];
+          }>("/api/partner/offers")
+        ).data,
+      /** GET /api/partner/stats — this venue's scan tallies, split by promotion. */
       stats: async () =>
         (
           await request<{
@@ -198,6 +215,8 @@ export function createApiClient(options: ApiClientOptions) {
             scansTotal: number;
             pointsToday: number;
             scansByDay: { date: string; count: number }[];
+            perOffer: { offerId: string; title: string; scans: number }[];
+            unattributed: number;
           }>("/api/partner/stats")
         ).data,
     },

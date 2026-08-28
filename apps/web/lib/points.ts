@@ -22,6 +22,8 @@ interface LedgerOpts {
   reason: string;
   refType?: string;
   refId?: string;
+  /** Partner offer this entry is attributed to, for per-promotion reporting. */
+  offerId?: string | null;
   grantedById?: string;
   kind?: PointsKind;
 }
@@ -49,6 +51,7 @@ export async function earn(userId: string, amount: number, opts: LedgerOpts) {
       reason: opts.reason,
       refType: opts.refType,
       refId: opts.refId,
+      offerId: opts.offerId ?? null,
       grantedById: opts.grantedById,
     },
   });

@@ -105,6 +105,45 @@ export default function PartnerHomeScreen() {
         </Text>
       </View>
 
+      {/* Which promotion the scans were actually for. Shown only when the venue
+          runs more than one — with a single offer the split says nothing the
+          all-time total doesn't already. */}
+      {s?.perOffer && s.perOffer.length > 1 && (
+        <View className="mt-4 rounded-2xl border border-gray-100 p-4">
+          <Text className="text-xs uppercase tracking-wide text-gray-400">
+            {t("partnerHome.byOffer")}
+          </Text>
+          <View className="mt-3 gap-2.5">
+            {s.perOffer.map((o) => {
+              // Share of attributed scans, so the bars compare like with like.
+              const attributed = s.perOffer.reduce((n, x) => n + x.scans, 0);
+              const pct = attributed > 0 ? Math.round((o.scans / attributed) * 100) : 0;
+              return (
+                <View key={o.offerId} className="gap-1">
+                  <View className="flex-row items-center justify-between gap-3">
+                    <Text className="flex-1 text-[13px] text-gray-700" numberOfLines={1}>
+                      {o.title}
+                    </Text>
+                    <Text className="text-[13px] font-semibold text-gray-900">{o.scans}</Text>
+                  </View>
+                  <View className="h-1.5 overflow-hidden rounded-full bg-gray-100">
+                    <View
+                      className="h-full rounded-full bg-astra-primary"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+          {s.unattributed > 0 && (
+            <Text className="mt-3 text-[11px] text-gray-400">
+              {t("partnerHome.unattributed", { count: String(s.unattributed) })}
+            </Text>
+          )}
+        </View>
+      )}
+
       {stats.isError && (
         <View className="mt-6 items-center gap-2">
           <Text className="text-red-600">{t("partnerHome.loadStatsError")}</Text>

@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   if (membership.scanOnly) {
     return errorResponse(403, "FORBIDDEN", "This account can only scan.", requestId);
   }
-  const stats = await partnerStats(session.user.id);
+  const stats = await partnerStats(membership.partnerId);
   return NextResponse.json(
     { partner: { id: membership.partnerId, name: membership.partner.name }, ...stats },
     { headers: { "x-request-id": requestId } },

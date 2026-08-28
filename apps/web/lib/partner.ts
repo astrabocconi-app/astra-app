@@ -40,28 +40,52 @@ export async function awardScan(params: {
   partnerUserId: string;
   partnerId: string;
   partnerName: string;
+  /** Which promotion the scan was for, when the venue runs more than one. */
+  offerId?: string | null;
+  offerTitle?: string | null;
 }): Promise<number> {
   await earn(params.studentId, POINTS_PER_SCAN, {
     source: LedgerSource.PARTNER_SCAN,
-    reason: `Scanned at ${params.partnerName}`,
+    // Name the offer in the reason so the student's own history reads usefully
+    // ("Scanned at Casa di Michele · 20% off any coffee").
+    reason: params.offerTitle
+      ? `Scanned at ${params.partnerName} · ${params.offerTitle}`
+      : `Scanned at ${params.partnerName}`,
     refType: "Partner",
     refId: params.partnerId,
+    offerId: params.offerId ?? null,
     grantedById: params.partnerUserId,
   });
   return getBalance(params.studentId);
 }
 
 /** Per-venue scan tallies for the partner dashboard/home. */
-export async function partnerStats(partnerUserId: string) {
+/**
+ * Scan tallies for a whole venue.
+ *
+ * Aggregated across every login the venue has, not just the one asking: a
+ * manager checking the numbers needs the till's and the bar's scans too, and
+ * with several logins per venue a per-account total would badly understate it.
+ */
+export async function partnerStats(partnerId: string) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-  const where = { grantedById: partnerUserId, source: LedgerSource.PARTNER_SCAN } as const;
+
+  const memberships = await prisma.partnerMembership.findMany({
+    where: { partnerId },
+    select: { userId: true },
+  });
+  const userIds = memberships.map((m) => m.userId);
+  const where = {
+    grantedById: { in: userIds },
+    source: LedgerSource.PARTNER_SCAN,
+  } as const;
 
   // Per-day scan counts over the last 7 calendar days (for the home line chart).
   const rows = await prisma.$queryRaw<{ day: Date; n: number }[]>`
     SELECT date_trunc('day', "createdAt") AS day, count(*)::int AS n
     FROM "PointsLedgerEntry"
-    WHERE "grantedById" = ${partnerUserId}
+    WHERE "grantedById" = ANY(${userIds}::text[])
       AND source = 'PARTNER_SCAN'
       AND "createdAt" >= (CURRENT_DATE - INTERVAL '6 days')
     GROUP BY day
@@ -76,13 +100,42 @@ export async function partnerStats(partnerUserId: string) {
     scansByDay.push({ date: key, count: byDay.get(key) ?? 0 });
   }
 
-  const [scansTotal, scansToday, todaySum] = await Promise.all([
+  const [scansTotal, scansToday, todaySum, perOfferRaw, offers] = await Promise.all([
     prisma.pointsLedgerEntry.count({ where }),
     prisma.pointsLedgerEntry.count({ where: { ...where, createdAt: { gte: start } } }),
     prisma.pointsLedgerEntry.aggregate({
       _sum: { delta: true },
       where: { ...where, createdAt: { gte: start } },
     }),
+    prisma.pointsLedgerEntry.groupBy({
+      by: ["offerId"],
+      _count: { _all: true },
+      where,
+    }),
+    prisma.offer.findMany({
+      where: { partnerId, deletedAt: null },
+      select: { id: true, title: true },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
-  return { scansTotal, scansToday, pointsToday: todaySum._sum.delta ?? 0, scansByDay };
+
+  // Split by promotion. Every current offer is listed even at zero, so a venue
+  // can see which of its promotions isn't landing; scans recorded before an
+  // offer was chosen (or with none) collect under "unattributed".
+  const countByOffer = new Map(perOfferRaw.map((r) => [r.offerId, r._count._all]));
+  const perOffer = offers.map((o) => ({
+    offerId: o.id,
+    title: o.title,
+    scans: countByOffer.get(o.id) ?? 0,
+  }));
+  const unattributed = countByOffer.get(null) ?? 0;
+
+  return {
+    scansTotal,
+    scansToday,
+    pointsToday: todaySum._sum.delta ?? 0,
+    scansByDay,
+    perOffer,
+    unattributed,
+  };
 }

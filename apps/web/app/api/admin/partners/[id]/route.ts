@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toPartnerItem } from "@/lib/cms-map";
 import { syncPartnerOffers } from "@/lib/partners";
+import { resolveCoordinates } from "@/lib/partner-location";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,6 +31,18 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   }
   const d = parsed.data;
 
+  // Location: explicit coordinates win; otherwise a changed address re-derives
+  // the pin. When neither is in the payload the existing pin is left alone.
+  const explicitCoords = d.latitude != null && d.longitude != null;
+  const addressChanged = d.address !== undefined && (d.address ?? null) !== existing.address;
+  let location: { latitude: number | null; longitude: number | null } | null = null;
+  if (explicitCoords) {
+    location = { latitude: d.latitude ?? null, longitude: d.longitude ?? null };
+  } else if (addressChanged) {
+    const coords = await resolveCoordinates({ address: d.address, latitude: null, longitude: null });
+    location = { latitude: coords.latitude, longitude: coords.longitude };
+  }
+
   const updated = await prisma.$transaction(async (tx) => {
     await tx.partner.update({
       where: { id },
@@ -38,8 +51,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         ...(d.description !== undefined ? { description: d.description ?? null } : {}),
         ...(d.category !== undefined ? { category: d.category ?? null } : {}),
         ...(d.address !== undefined ? { address: d.address ?? null } : {}),
-        ...(d.latitude !== undefined ? { latitude: d.latitude ?? null } : {}),
-        ...(d.longitude !== undefined ? { longitude: d.longitude ?? null } : {}),
+        ...(location ?? {}),
         ...(d.logoUrl !== undefined ? { logoKey: d.logoUrl ?? null } : {}),
         ...(d.active !== undefined ? { active: d.active } : {}),
       },

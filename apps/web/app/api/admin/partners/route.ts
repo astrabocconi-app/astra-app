@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toPartnerItem } from "@/lib/cms-map";
 import { syncPartnerOffers } from "@/lib/partners";
+import { resolveCoordinates } from "@/lib/partner-location";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,6 +43,12 @@ export async function POST(req: Request) {
     return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
   }
   const d = parsed.data;
+  // Pin comes from the address unless coordinates were given explicitly.
+  const coords = await resolveCoordinates({
+    address: d.address,
+    latitude: d.latitude,
+    longitude: d.longitude,
+  });
 
   const created = await prisma.$transaction(async (tx) => {
     const partner = await tx.partner.create({
@@ -50,8 +57,8 @@ export async function POST(req: Request) {
         description: d.description ?? null,
         category: d.category ?? null,
         address: d.address ?? null,
-        latitude: d.latitude ?? null,
-        longitude: d.longitude ?? null,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
         logoKey: d.logoUrl ?? null,
         active: d.active,
       },

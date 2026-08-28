@@ -82,6 +82,34 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCoords, setShowCoords] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [located, setLocated] = useState<string | null>(null);
+  const [locateError, setLocateError] = useState<string | null>(null);
+
+  /** Resolve the typed address to a pin so it can be checked before saving. */
+  async function lookUpAddress() {
+    setLocating(true);
+    setLocated(null);
+    setLocateError(null);
+    try {
+      const res = await fetch("/api/admin/geocode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ address }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error?.message ?? "Couldn't find that address.");
+      setLatitude(String(data.latitude));
+      setLongitude(String(data.longitude));
+      setLocated(data.matchedAddress);
+    } catch (e) {
+      setLocateError(e instanceof Error ? e.message : "Couldn't find that address.");
+    } finally {
+      setLocating(false);
+    }
+  }
 
   function patchOffer(index: number, patch: Partial<OfferDraft>) {
     setOffers((prev) => prev.map((o, i) => (i === index ? { ...o, ...patch } : o)));
@@ -161,37 +189,75 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
             ))}
           </datalist>
         </Field>
-        <Field label="Address">
+        <Field
+          label="Address"
+          hint="The map pin is worked out from this automatically when you save."
+        >
           <Input
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={(e) => {
+              setAddress(e.target.value);
+              setLocated(null);
+              setLocateError(null);
+            }}
             placeholder="e.g. Via Sarfatti 25, Milano"
           />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Latitude" hint="Leave both blank to omit the map pin.">
-            <Input
-              type="number"
-              step="any"
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-              placeholder="45.4478"
-            />
-          </Field>
-          <Field label="Longitude">
-            <Input
-              type="number"
-              step="any"
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-              placeholder="9.1885"
-            />
-          </Field>
+
+        <div className="-mt-2 flex flex-wrap items-center gap-3">
+          <Button variant="secondary" onClick={lookUpAddress} disabled={locating || !address.trim()}>
+            {locating ? "Looking up…" : "Check pin"}
+          </Button>
+          {located && (
+            <span className="text-xs text-green-700">
+              Found <span className="font-medium">{located}</span>
+              {latitude && longitude && (
+                <span className="text-gray-400">
+                  {" "}
+                  ({Number(latitude).toFixed(5)}, {Number(longitude).toFixed(5)})
+                </span>
+              )}
+            </span>
+          )}
+          {locateError && <span className="text-xs text-red-600">{locateError}</span>}
+          <button
+            type="button"
+            onClick={() => setShowCoords((v) => !v)}
+            className="ml-auto text-xs font-medium text-gray-500 hover:text-gray-700"
+          >
+            {showCoords ? "Hide coordinates" : "Set coordinates manually"}
+          </button>
         </div>
-        <p className="-mt-2 text-xs text-gray-400">
-          Tip: right-click the spot in Google Maps and click the coordinates to copy them, then paste
-          latitude into the first box and longitude into the second.
-        </p>
+
+        {showCoords && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Latitude">
+                <Input
+                  type="number"
+                  step="any"
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  placeholder="45.4488"
+                />
+              </Field>
+              <Field label="Longitude">
+                <Input
+                  type="number"
+                  step="any"
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  placeholder="9.1887"
+                />
+              </Field>
+            </div>
+            <p className="-mt-2 text-xs text-gray-400">
+              Only needed when the lookup puts the pin in the wrong spot — a courtyard entrance, say.
+              Filled in here, these win over the address. Right-click the exact spot in Google Maps
+              and click the numbers to copy them.
+            </p>
+          </>
+        )}
         <Field label="Logo">
           <ImageInput value={logoUrl} onChange={setLogoUrl} hint="Recommended: 400 × 400 px (square)" />
         </Field>

@@ -74,9 +74,17 @@ type ProfileState = {
   year: string | null;
   hydrated: boolean;
   hydrate: () => Promise<void>;
-  setCourse: (course: string) => Promise<void>;
-  setYear: (year: string) => Promise<void>;
+  setCourse: (course: string) => void;
+  setYear: (year: string) => void;
 };
+
+// ponytail: a failed write only means the choice doesn't survive a restart, and
+// the user re-picks in two taps. Not worth a retry queue.
+function persist(key: string, value: string) {
+  void SecureStore.setItemAsync(key, value).catch((error) =>
+    console.warn(`profile-store: could not persist ${key}`, error)
+  );
+}
 
 export const useProfileStore = create<ProfileState>((set) => ({
   course: null,
@@ -89,12 +97,14 @@ export const useProfileStore = create<ProfileState>((set) => ({
     ]);
     set({ course: course ?? null, year: year ?? null, hydrated: true });
   },
-  setCourse: async (course) => {
-    await SecureStore.setItemAsync(COURSE_KEY, course);
+  // The keychain write is a native round-trip; awaiting it before set() left the
+  // picker visibly stuck on tap. Update state first, persist behind it.
+  setCourse: (course) => {
     set({ course });
+    persist(COURSE_KEY, course);
   },
-  setYear: async (year) => {
-    await SecureStore.setItemAsync(YEAR_KEY, year);
+  setYear: (year) => {
     set({ year });
+    persist(YEAR_KEY, year);
   },
 }));

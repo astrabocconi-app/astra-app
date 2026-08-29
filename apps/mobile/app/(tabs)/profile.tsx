@@ -22,14 +22,14 @@ export default function ProfileScreen() {
     retry: false,
   });
 
-  const { course, year, hydrate, setCourse, setYear } = useProfileStore();
+  const { course, year, hydrated, hydrate, setCourse, setYear } = useProfileStore();
   const { language, setLanguage } = useLanguageStore();
   const t = useT();
   const [picker, setPicker] = useState<Picker>(null);
 
   useEffect(() => {
-    void hydrate();
-  }, [hydrate]);
+    if (!hydrated) void hydrate();
+  }, [hydrated, hydrate]);
 
   async function signOut() {
     await clearToken();
@@ -44,9 +44,9 @@ export default function ProfileScreen() {
       : YEARS.map((y) => ({ value: y, label: y }));
   const currentValue = picker === "course" ? course : year;
 
-  async function choose(value: string) {
-    if (picker === "course") await setCourse(value);
-    else if (picker === "year") await setYear(value);
+  function choose(value: string) {
+    if (picker === "course") setCourse(value);
+    else if (picker === "year") setYear(value);
     setPicker(null);
   }
 

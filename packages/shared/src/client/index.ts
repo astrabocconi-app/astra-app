@@ -118,9 +118,38 @@ export function createApiClient(options: ApiClientOptions) {
       list: async () => (await request<EventListResponse>("/api/events")).data,
     },
 
-    /** GET /api/rewards — active rewards catalog. */
     rewards: {
+      /** GET /api/rewards — active rewards catalog. */
       list: async () => (await request<RewardListResponse>("/api/rewards")).data,
+      /**
+       * POST /api/rewards/:id/redeem — spend points on a reward. Returns a
+       * single-use voucher when the reward has a code pool, otherwise a
+       * pending claim for staff to fulfil.
+       */
+      redeem: async (rewardId: string) =>
+        (
+          await request<{
+            redemptionId: string;
+            code: string | null;
+            status: "PENDING" | "FULFILLED" | "CANCELLED";
+            costPoints: number;
+            balance: number;
+          }>(`/api/rewards/${rewardId}/redeem`, { method: "POST" })
+        ).data,
+      /** GET /api/me/redemptions — the student's own vouchers. */
+      redemptions: async () =>
+        (
+          await request<{
+            items: {
+              id: string;
+              rewardTitle: string;
+              costPoints: number;
+              status: "PENDING" | "FULFILLED" | "CANCELLED";
+              code: string | null;
+              createdAt: string;
+            }[];
+          }>("/api/me/redemptions")
+        ).data,
     },
 
     /** GET /api/partners — active partner venues + their discounts (Discounts screen). */

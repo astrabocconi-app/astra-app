@@ -441,8 +441,29 @@ model Reward {
 
   area        Area?              @relation(fields: [areaId], references: [id])
   redemptions RewardRedemption[]
+  codes       RewardCode[]
 
   @@index([active, deletedAt])
+}
+
+/// A pool of pre-issued vouchers for a reward — typically Eventbrite discount
+/// codes for our own events. Each is handed to exactly one redemption, so a
+/// single-use code can never be given to two students. Rewards without a pool
+/// simply redeem to a PENDING redemption that staff fulfil by hand.
+model RewardCode {
+  id           String    @id @default(cuid())
+  rewardId     String
+  code         String
+  /// Set the moment it is handed out; NULL means still available.
+  claimedAt    DateTime?
+  redemptionId String?   @unique
+  createdAt    DateTime  @default(now())
+
+  reward     Reward            @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  redemption RewardRedemption? @relation(fields: [redemptionId], references: [id])
+
+  @@unique([rewardId, code])
+  @@index([rewardId, claimedAt])
 }
 
 model RewardRedemption {
@@ -456,8 +477,9 @@ model RewardRedemption {
   createdAt     DateTime         @default(now())
   fulfilledAt   DateTime?
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reward Reward @relation(fields: [rewardId], references: [id])
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward     Reward      @relation(fields: [rewardId], references: [id])
+  rewardCode RewardCode?
 
   @@index([userId])
   @@index([rewardId, status])

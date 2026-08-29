@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { initSentry } from "../lib/sentry";
-import { loadToken, loadAccountType } from "../lib/session";
+import { loadToken, loadAccountType, loadPartnerScanOnly } from "../lib/session";
 import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
 import { useLanguageStore } from "../lib/language-store";
@@ -41,11 +41,13 @@ export default function RootLayout() {
     Promise.all([
       loadToken(),
       loadAccountType(),
+      loadPartnerScanOnly(),
       useLanguageStore.getState().hydrate(),
-    ]).then(([token, type]) => {
+    ]).then(([token, type, scanOnly]) => {
       if (token) {
         if (type === "partner") {
-          router.replace("/partner/home");
+          // Scan-only staff have no home screen — go straight to the scanner.
+          router.replace(scanOnly ? "/partner/scan" : "/partner/home");
         } else {
           useBootStore.getState().trigger();
           router.replace("/home");

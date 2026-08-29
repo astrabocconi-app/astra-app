@@ -5,6 +5,14 @@ export const en = {
   "partnerHome.tapToScan": "Tap to scan a member's card",
   "partnerHome.scansThisWeek": "Scans this week",
   "partnerHome.scansAllTime": "Scans all-time",
+  "partnerHome.scansOverTime": "Scans over time",
+  "partnerHome.noOfferSeries": "No specific offer",
+  "partnerHome.range1w": "1W",
+  "partnerHome.range2w": "2W",
+  "partnerHome.range1m": "1M",
+  "partnerHome.range3m": "3M",
+  "partnerHome.byOffer": "Scans by offer",
+  "partnerHome.unattributed": "{count} not linked to a specific offer",
   "partnerHome.loadStatsError": "Couldn't load stats.",
 };
 
@@ -15,5 +23,13 @@ export const it: Record<keyof typeof en, string> = {
   "partnerHome.tapToScan": "Tocca per scansionare la tessera di un membro",
   "partnerHome.scansThisWeek": "Scansioni questa settimana",
   "partnerHome.scansAllTime": "Scansioni totali",
+  "partnerHome.scansOverTime": "Scansioni nel tempo",
+  "partnerHome.noOfferSeries": "Nessuna offerta specifica",
+  "partnerHome.range1w": "1S",
+  "partnerHome.range2w": "2S",
+  "partnerHome.range1m": "1M",
+  "partnerHome.range3m": "3M",
+  "partnerHome.byOffer": "Scansioni per offerta",
+  "partnerHome.unattributed": "{count} non collegate a un'offerta specifica",
   "partnerHome.loadStatsError": "Impossibile caricare le statistiche.",
 };

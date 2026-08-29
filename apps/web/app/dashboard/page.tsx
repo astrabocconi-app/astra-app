@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { headers } from "next/headers";
+import { prisma } from "@astra/db";
 import { getSessionUser } from "@/lib/session";
 import { PageHeader } from "@/app/_ui/page-header";
 import { StatCard } from "@/app/_ui/card";
@@ -24,9 +25,25 @@ const QUICK_LINKS: { href: string; label: string; desc: string; icon: ReactNode 
   { href: "/dashboard/materials", label: "Materials", desc: "Shared resources", icon: <BookIcon size={22} /> },
 ];
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardHome() {
   const session = await getSessionUser(await headers());
   const firstName = session?.user.name?.split(" ")[0];
+
+  // Same "still upcoming" rule the app and the Events page use: keep same-day
+  // events counted until the day is over.
+  const dayStart = new Date();
+  dayStart.setHours(0, 0, 0, 0);
+
+  const [issued, members, upcomingEvents] = await Promise.all([
+    // Only positive deltas — what's been handed out, not the net balance.
+    prisma.pointsLedgerEntry.aggregate({ _sum: { delta: true }, where: { delta: { gt: 0 } } }),
+    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.event.count({
+      where: { deletedAt: null, published: true, startsAt: { gte: dayStart } },
+    }),
+  ]);
 
   return (
     <>
@@ -39,20 +56,20 @@ export default async function DashboardHome() {
         <StatCard
           tone="brand"
           label="Points issued"
-          value="—"
-          hint="Coming soon"
+          value={(issued._sum.delta ?? 0).toLocaleString()}
+          hint="All time, awards only"
           icon={<CoinsIcon size={22} />}
         />
         <StatCard
-          label="Active members"
-          value="—"
-          hint="Coming soon"
+          label="Members"
+          value={members.toLocaleString()}
+          hint="Signed in at least once"
           icon={<UsersIcon size={22} />}
         />
         <StatCard
           label="Upcoming events"
-          value="—"
-          hint="Coming soon"
+          value={upcomingEvents.toLocaleString()}
+          hint="Published & still to come"
           icon={<CalendarIcon size={22} />}
         />
       </div>

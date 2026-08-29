@@ -2,14 +2,28 @@
 //
 // token = base64url(payload) "." base64url(HMAC-SHA256(payload)) where payload
 // is { uid, iat }. The venue scanner submits it; the server verifies the
-// signature and extracts the user. For now the token is long-lived (demo);
-// short rotation + nonce replay-block + cooldown are the Phase-5 follow-ups.
+// signature and extracts the user.
 
 import crypto from "node:crypto";
 
 const SECRET = process.env.CARD_TOKEN_HMAC_SECRET ?? "";
-// Lenient window for the demo so a shown card keeps working; tighten later.
-const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * How long a card QR stays valid.
+ *
+ * The app draws a fresh code every 60s, but that alone protected nothing while
+ * old codes stayed valid for a day — a screenshot sent to a friend worked all
+ * afternoon. Fifteen minutes makes a shared screenshot useless quickly while
+ * still tolerating a student whose phone briefly lost signal on the way in
+ * (the card is cached for offline display, so the token in hand may be a few
+ * minutes old).
+ *
+ * Note this is a validity window, not a replay block: within it, the same code
+ * can be presented more than once. Repeat awards are prevented separately by
+ * the per-offer cooldown in lib/partner.ts, which is keyed on the student
+ * rather than the code and so survives rotation.
+ */
+const MAX_AGE_MS = 15 * 60 * 1000;
 
 function hmac(input: string): string {
   return crypto.createHmac("sha256", SECRET).update(input).digest("base64url");

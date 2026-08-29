@@ -24,6 +24,7 @@ const NAV: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/dashboard/materials", label: "Materials", icon: <BookIcon size={20} /> },
   { href: "/dashboard/points", label: "Points", icon: <CoinsIcon size={20} /> },
   { href: "/dashboard/partners", label: "Partners", icon: <StoreIcon size={20} /> },
+  { href: "/dashboard/partner-logins", label: "Partner logins", icon: <UsersIcon size={20} /> },
   { href: "/dashboard/audit", label: "Audit log", icon: <AuditIcon size={20} /> },
 ];
 

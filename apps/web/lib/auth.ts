@@ -15,7 +15,8 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthEndpoint, createAuthMiddleware } from "better-auth/api";
 import { setSessionCookie } from "better-auth/cookies";
 import { emailOTP, bearer } from "better-auth/plugins";
-import { prisma, Role } from "@astra/db";
+import { prisma, Role, LedgerSource } from "@astra/db";
+import { earn } from "./points";
 import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
 import nodemailer, { type Transporter } from "nodemailer";
@@ -185,8 +186,18 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
     });
     return;
   }
-  // 3) Dev fallback: no provider configured — print the code so we can test.
-  // eslint-disable-next-line no-console
+  // 3) No provider configured.
+  //
+  // In development that's fine — print the code so the flow is testable without
+  // an inbox. In production it is NOT: silently "succeeding" here made the app
+  // report that a code had been sent when nothing left the server, and the only
+  // symptom was students never receiving an email. Fail loudly instead, so a
+  // misconfigured deployment is obvious immediately rather than looking healthy.
+  if (process.env.NODE_ENV === "production") {
+    throw new APIError("INTERNAL_SERVER_ERROR", {
+      message: "Email isn't configured on the server, so no code could be sent.",
+    });
+  }
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }
 
@@ -224,6 +235,9 @@ function partnerLoginPlugin(): BetterAuthPlugin {
           token: session.token,
           user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
           partner: { id: membership.partner.id, name: membership.partner.name },
+          // Lets the app send scan-only staff straight to the scanner. The
+          // server enforces it too — see /api/partner/stats.
+          scanOnly: membership.scanOnly,
         });
       }),
     },
@@ -262,7 +276,6 @@ function adminLoginPlugin(): BetterAuthPlugin {
         // Dev affordance: print the admin OTP to the server console (never in
         // production), matching deliverOtp's dev fallback for students.
         if (process.env.NODE_ENV !== "production") {
-          // eslint-disable-next-line no-console
           console.log(`\n[auth] DEV admin OTP: ${otp}\n`);
         }
         await deliverOtp(adminEmail(), otp);
@@ -294,6 +307,22 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   trustedOrigins,
+  // Welcome bonus: +50 points the first time a real student account is
+  // created via email-OTP sign-in. Only fires for Better Auth's own
+  // adapter-driven user creation — dev-login, partner, and admin accounts are
+  // all provisioned through separate direct-Prisma paths and never hit this.
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await earn(user.id, 50, {
+            source: LedgerSource.SIGNUP,
+            reason: "Welcome bonus for joining ASTRA",
+          });
+        },
+      },
+    },
+  },
   // We authenticate exclusively via email OTP; no passwords.
   emailAndPassword: { enabled: false },
   // Long-lasting login: once a user signs in (OTP for students, code+password

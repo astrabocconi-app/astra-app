@@ -17,7 +17,13 @@ export async function GET(req: Request) {
   if (!membership || !session.user.roles.includes("PARTNER_MANAGER")) {
     return errorResponse(403, "FORBIDDEN", "Not a partner account.", requestId);
   }
-  const stats = await partnerStats(session.user.id);
+  // Enforced here, not just hidden in the app: a scan-only login must not be
+  // able to read takings by calling the API directly.
+  if (membership.scanOnly) {
+    return errorResponse(403, "FORBIDDEN", "This account can only scan.", requestId);
+  }
+  const days = Number(new URL(req.url).searchParams.get("days") ?? 7);
+  const stats = await partnerStats(membership.partnerId, days);
   return NextResponse.json(
     { partner: { id: membership.partnerId, name: membership.partner.name }, ...stats },
     { headers: { "x-request-id": requestId } },

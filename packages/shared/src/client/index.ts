@@ -5,8 +5,12 @@ import type {
   NewsListResponse,
   EventListResponse,
   RewardListResponse,
+  PartnerListResponse,
   ChatResponse,
   MaterialsResponse,
+  AcademicCatalogueResponse,
+  AcademicProfile,
+  AcademicProfileInput,
 } from "../schemas";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
@@ -42,10 +46,7 @@ function makeError(status: number, code: string | undefined, message: string): A
 export function createApiClient(options: ApiClientOptions) {
   const { baseUrl, getToken } = options;
 
-  async function request<T>(
-    path: string,
-    init?: RequestInit
-  ): Promise<{ data: T; res: Response }> {
+  async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; res: Response }> {
     const token = getToken?.();
     const res = await fetch(new URL(path, baseUrl), {
       ...init,
@@ -65,10 +66,8 @@ export function createApiClient(options: ApiClientOptions) {
 
     if (!res.ok) {
       const b = body as
-        | { error?: { code?: string; message?: string }; message?: string }
-        | undefined;
-      const message =
-        b?.error?.message ?? b?.message ?? `ASTRA API ${res.status} on ${path}`;
+        { error?: { code?: string; message?: string }; message?: string } | undefined;
+      const message = b?.error?.message ?? b?.message ?? `ASTRA API ${res.status} on ${path}`;
       throw makeError(res.status, b?.error?.code, message);
     }
     return { data: body as T, res };
@@ -76,25 +75,37 @@ export function createApiClient(options: ApiClientOptions) {
 
   return {
     /** GET /api/health — liveness + DB connectivity check. */
-    health: async () =>
-      (await request<{ status: string; db: string }>("/api/health")).data,
+    health: async () => (await request<{ status: string; db: string }>("/api/health")).data,
 
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
 
+    academic: {
+      /** Public Bocconi selection metadata reviewed for the active academic year. */
+      catalogue: async () =>
+        (await request<AcademicCatalogueResponse>("/api/academic/catalogue")).data,
+      /** The signed-in student's server-authoritative academic selection. */
+      profile: async () =>
+        (await request<{ profile: AcademicProfile | null }>("/api/me/academic-profile")).data,
+      updateProfile: async (input: AcademicProfileInput) =>
+        (
+          await request<{ profile: AcademicProfile }>("/api/me/academic-profile", {
+            method: "PUT",
+            body: JSON.stringify(input),
+          })
+        ).data,
+    },
+
     points: {
       /** GET /api/points/balance — current spendable balance. */
-      balance: async () =>
-        (await request<PointsBalanceResponse>("/api/points/balance")).data,
+      balance: async () => (await request<PointsBalanceResponse>("/api/points/balance")).data,
       /** GET /api/points/history — recent ledger entries, newest first. */
-      history: async () =>
-        (await request<PointsHistoryResponse>("/api/points/history")).data,
+      history: async () => (await request<PointsHistoryResponse>("/api/points/history")).data,
     },
 
     card: {
       /** GET /api/card/token — signed token to render in the student's card QR. */
-      token: async () =>
-        (await request<{ token: string }>("/api/card/token")).data,
+      token: async () => (await request<{ token: string }>("/api/card/token")).data,
     },
 
     /** GET /api/news — published news posts for the feed. */
@@ -112,9 +123,20 @@ export function createApiClient(options: ApiClientOptions) {
       list: async () => (await request<RewardListResponse>("/api/rewards")).data,
     },
 
+    /** GET /api/partners — active partner venues + their discounts (Discounts screen). */
+    partners: {
+      list: async () => (await request<PartnerListResponse>("/api/partners")).data,
+    },
+
     /** GET /api/materials — handouts catalogue (year → subject → items). */
     materials: {
-      list: async () => (await request<MaterialsResponse>("/api/materials")).data,
+      /** `allYears` widens the result from the student's year to their whole programme. */
+      list: async (opts?: { allYears?: boolean }) =>
+        (
+          await request<MaterialsResponse>(
+            `/api/materials${opts?.allYears ? "?allYears=1" : ""}`,
+          )
+        ).data,
     },
 
     /** Ask ASTRA — RAG chatbot over scraped Bocconi/ASTRA content. */
@@ -165,24 +187,49 @@ export function createApiClient(options: ApiClientOptions) {
     },
 
     partner: {
-      /** POST /api/partner/scan — award points for a scanned student card token. */
-      scan: async (token: string) =>
+      /**
+       * POST /api/partner/scan — award points for a scanned student card token.
+       * `offerId` records which promotion the scan was for; the server checks
+       * it belongs to this venue.
+       */
+      scan: async (token: string, offerId?: string | null) =>
         (
-          await request<{ awarded: number; student: { name: string | null }; balance: number }>(
-            "/api/partner/scan",
-            { method: "POST", body: JSON.stringify({ token }) },
-          )
+          await request<{
+            awarded: number;
+            student: { name: string | null };
+            balance: number;
+            offer: { id: string; title: string } | null;
+          }>("/api/partner/scan", {
+            method: "POST",
+            body: JSON.stringify({ token, offerId: offerId ?? null }),
+          })
         ).data,
-      /** GET /api/partner/stats — this venue's scan tallies. */
-      stats: async () =>
+      /** GET /api/partner/offers — live promotions, to ask which one a scan is for. */
+      offers: async () =>
         (
           await request<{
             partner: { id: string; name: string };
+            offers: { id: string; title: string; label: string }[];
+          }>("/api/partner/offers")
+        ).data,
+      /**
+       * GET /api/partner/stats — the venue's scan tallies over `days`,
+       * bucketed for charting with one series per promotion.
+       */
+      stats: async (days = 7) =>
+        (
+          await request<{
+            partner: { id: string; name: string };
+            range: { days: number; bucket: "day" | "week" };
+            buckets: string[];
+            series: { offerId: string | null; title: string; counts: number[]; total: number }[];
             scansToday: number;
             scansTotal: number;
+            scansInRange: number;
             pointsToday: number;
-            scansByDay: { date: string; count: number }[];
-          }>("/api/partner/stats")
+            perOffer: { offerId: string; title: string; scans: number }[];
+            unattributed: number;
+          }>(`/api/partner/stats?days=${days}`)
         ).data,
     },
 
@@ -224,12 +271,19 @@ export function createApiClient(options: ApiClientOptions) {
           token?: string;
           user?: MeResponse;
           partner?: { id: string; name: string };
+          /** Scan-only staff logins never see takings — the API enforces it too. */
+          scanOnly?: boolean;
         }>("/api/auth/partner-login", {
           method: "POST",
           body: JSON.stringify({ code, password }),
         });
         const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
-        return { token, user: data?.user ?? null, partner: data?.partner ?? null };
+        return {
+          token,
+          user: data?.user ?? null,
+          partner: data?.partner ?? null,
+          scanOnly: data?.scanOnly ?? false,
+        };
       },
     },
   };

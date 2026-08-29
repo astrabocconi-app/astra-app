@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { newRequestId, errorResponse } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
-import { fetchMaterials, isConfigured } from "@/lib/materials";
+import { fetchMaterials, filterMaterialsForAcademicProfile, isConfigured } from "@/lib/materials";
+import { getAcademicProfile } from "@/lib/academic";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,14 +19,28 @@ export async function GET(req: Request) {
   }
 
   try {
-    const years = await fetchMaterials();
+    const [allYears, academic] = await Promise.all([
+      fetchMaterials(),
+      getAcademicProfile(session.user.id),
+    ]);
+    // ?allYears=1 widens the result to the student's whole programme rather
+    // than only their current year.
+    const wantsAllYears = new URL(req.url).searchParams.get("allYears") === "1";
+    const years = academic
+      ? filterMaterialsForAcademicProfile(
+          allYears,
+          academic.programme.code,
+          academic.studyYear,
+          { allYears: wantsAllYears },
+        )
+      : [];
     return NextResponse.json({ years }, { headers: { "x-request-id": requestId } });
   } catch (e) {
     return errorResponse(
       502,
       "UPSTREAM_ERROR",
       e instanceof Error ? e.message : "Couldn't load materials.",
-      requestId,
+      requestId
     );
   }
 }

@@ -8,3 +8,11 @@ bocconi-scraper
 # Never let a local dev-only .env leak into a cloud build (use .env.local
 # instead, which Expo's own convention already keeps out of EAS Build).
 apps/mobile/.env
+
+# Native dirs are generated (CNG) — building a local dev client with
+# `expo run:ios` creates apps/mobile/ios. Uploading that to EAS makes the build
+# reuse a machine-specific project (absolute local paths get baked into its
+# build scripts), which previously broke the archive step. Let EAS prebuild
+# these itself, every time.
+apps/mobile/ios
+apps/mobile/android

@@ -105,18 +105,19 @@ model User {
   // relations
   areaMemberships   AreaMembership[]
   consents          Consent[]
-  ledgerEntries     PointsLedgerEntry[] @relation("LedgerOwner")
-  grantedEntries    PointsLedgerEntry[] @relation("LedgerGrantedBy")
+  ledgerEntries     PointsLedgerEntry[]     @relation("LedgerOwner")
+  grantedEntries    PointsLedgerEntry[]     @relation("LedgerGrantedBy")
   discountUsages    DiscountUsage[]
   rewardRedemptions RewardRedemption[]
   rsvps             Rsvp[]
   tickets           Ticket[]
-  checkedInTickets  Ticket[]            @relation("TicketCheckedInBy")
+  checkedInTickets  Ticket[]                @relation("TicketCheckedInBy")
   newsPosts         NewsPost[]
   pushTokens        PushToken[]
   materialAccesses  MaterialAccess[]
-  auditLogs         AuditLog[]          @relation("AuditActor")
+  auditLogs         AuditLog[]              @relation("AuditActor")
   partnerMembership PartnerMembership?
+  academicProfile   StudentAcademicProfile?
 
   // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
   sessions Session[]
@@ -213,6 +214,90 @@ model Consent {
 }
 
 // ============================================================================
+// Academic identity — public catalogue selections + private student profile
+// ============================================================================
+
+/// A reviewed snapshot of public Bocconi programme/class metadata.
+model AcademicCatalogue {
+  id           String   @id
+  academicYear String
+  version      String   @unique
+  sourceUrl    String
+  active       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  programmes AcademicProgramme[]
+}
+
+model AcademicProgramme {
+  id            String  @id
+  catalogueId   String
+  code          String
+  name          String
+  level         String
+  durationYears Int
+  sourceUrl     String
+  active        Boolean @default(true)
+  legacy        Boolean @default(false)
+
+  catalogue   AcademicCatalogue        @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+  classGroups AcademicClassGroup[]
+  tracks      AcademicTrack[]
+  profiles    StudentAcademicProfile[]
+
+  @@unique([catalogueId, code])
+  @@index([catalogueId, active])
+}
+
+model AcademicClassGroup {
+  id          String @id
+  programmeId String
+  code        String
+  sourceUrl   String
+
+  programme AcademicProgramme        @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  profiles  StudentAcademicProfile[]
+
+  @@unique([programmeId, code])
+  @@index([programmeId])
+}
+
+model AcademicTrack {
+  id          String  @id
+  programmeId String
+  code        String
+  name        String
+  sourceUrl   String
+  active      Boolean @default(true)
+
+  programme AcademicProgramme        @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  profiles  StudentAcademicProfile[]
+
+  @@unique([programmeId, code])
+  @@index([programmeId, active])
+}
+
+/// Student-managed academic selection. Grades belong to the later gradebook phase.
+model StudentAcademicProfile {
+  userId       String   @id
+  programmeId  String
+  trackId      String?
+  studyYear    Int
+  classGroupId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  programme  AcademicProgramme   @relation(fields: [programmeId], references: [id], onDelete: Restrict)
+  track      AcademicTrack?      @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  classGroup AcademicClassGroup? @relation(fields: [classGroupId], references: [id], onDelete: SetNull)
+
+  @@index([programmeId])
+  @@index([trackId])
+  @@index([classGroupId])
+}
+
+// ============================================================================
 // Points — append-only ledger (NO balance column; balance = PointsBalance view)
 // ============================================================================
 
@@ -225,17 +310,24 @@ model PointsLedgerEntry {
   reason      String
   refType     String? // e.g. "Event", "Offer", "Reward", "Ticket"
   refId       String?
+  /// Which partner offer this scan was for, when the venue runs more than one.
+  /// RESTRICT, not SetNull: the ledger is append-only at the DB level, so a
+  /// cascading null would fire the blocked-UPDATE trigger. Offers are only ever
+  /// soft-deleted anyway.
+  offerId     String?
   grantedById String? // admin/staff who created a manual entry, if any
   createdAt   DateTime     @default(now())
 
-  user      User  @relation("LedgerOwner", fields: [userId], references: [id], onDelete: Cascade)
-  grantedBy User? @relation("LedgerGrantedBy", fields: [grantedById], references: [id])
+  user      User   @relation("LedgerOwner", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User?  @relation("LedgerGrantedBy", fields: [grantedById], references: [id])
+  offer     Offer? @relation(fields: [offerId], references: [id], onDelete: Restrict)
 
   // Immutability (block UPDATE/DELETE) is enforced by a DB trigger in the
   // raw-SQL migration — NOT by application code. See header notes.
   @@index([userId, kind])
   @@index([refType, refId])
   @@index([createdAt])
+  @@index([offerId])
 }
 
 // ============================================================================
@@ -273,6 +365,12 @@ model PartnerMembership {
   partnerId    String
   loginCode    String   @unique // e.g. "casadimichele" — what staff type to sign in
   passwordHash String // scrypt hash (salt:hash); issued by ASTRA, not self-set
+  /// Scan-only accounts reach the scanner and nothing else. Venues asked for
+  /// this so floor staff can award points without seeing takings/analytics.
+  scanOnly     Boolean  @default(false)
+  /// Human label so a venue with several logins can tell them apart
+  /// ("Front desk", "Bar"). Not used for authentication.
+  label        String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -297,8 +395,9 @@ model Offer {
   updatedAt     DateTime     @updatedAt
   deletedAt     DateTime?
 
-  partner Partner         @relation(fields: [partnerId], references: [id], onDelete: Cascade)
-  usages  DiscountUsage[]
+  partner       Partner             @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  usages        DiscountUsage[]
+  ledgerEntries PointsLedgerEntry[]
 
   @@index([partnerId, active])
 }
@@ -307,10 +406,10 @@ model Offer {
 /// (usedAt::date) — added in the raw-SQL migration — so the unique constraint
 /// enforces "once per user per offer per day".
 model DiscountUsage {
-  id      String   @id @default(cuid())
-  userId  String
-  offerId String
-  usedAt  DateTime @default(now())
+  id        String    @id @default(cuid())
+  userId    String
+  offerId   String
+  usedAt    DateTime  @default(now())
   /// DB-generated STORED column (usedAt::date, UTC day). Prisma never writes it.
   /// Note: Postgres forbids STABLE functions in generated columns, so this is a
   /// UTC calendar day (not Rome-local). See prisma/sql/0001_views_and_immutability.sql.
@@ -369,23 +468,23 @@ model RewardRedemption {
 // ============================================================================
 
 model Event {
-  id              String    @id @default(cuid())
-  title           String
-  description     String?
-  coverImageKey   String?
-  location        String?
-  latitude        Float?
-  longitude       Float?
-  startsAt        DateTime
-  endsAt          DateTime?
+  id                String    @id @default(cuid())
+  title             String
+  description       String?
+  coverImageKey     String?
+  location          String?
+  latitude          Float?
+  longitude         Float?
+  startsAt          DateTime
+  endsAt            DateTime?
   externalTicketUrl String? // advertise-only: link out to where tickets are sold
-  capacity        Int? // null = unlimited (legacy; unused in advertise-only v1)
-  pointsOnCheckin Int       @default(0) // legacy; unused in advertise-only v1
-  areaId          String?
-  published       Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
+  capacity          Int? // null = unlimited (legacy; unused in advertise-only v1)
+  pointsOnCheckin   Int       @default(0) // legacy; unused in advertise-only v1
+  areaId            String?
+  published         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
 
   area    Area?    @relation(fields: [areaId], references: [id])
   rsvps   Rsvp[]

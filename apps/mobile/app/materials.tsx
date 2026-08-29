@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
-import { useProfileStore, shortCourse } from "../lib/profile-store";
 import { useT, type TranslationKey } from "../lib/i18n";
 
 const ALL_MATERIALS_URL = "https://www.astrabocconi.com/dispense";
@@ -43,13 +42,17 @@ type FlatItem = {
 // nothing is bundled. Everything else lives on the ASTRA website (see-all link).
 export default function MaterialsScreen() {
   const t = useT();
-  const { course, hydrated, hydrate } = useProfileStore();
-  useEffect(() => {
-    if (!hydrated) void hydrate();
-  }, [hydrated, hydrate]);
-
-  const myCourse = shortCourse(course);
-  const q = useQuery({ queryKey: ["materials"], queryFn: () => api.materials.list(), retry: 1 });
+  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
+  const myCourse = me.data?.academicProfile?.programme.code ?? null;
+  // Students revisit earlier years when resitting or revising, and look ahead
+  // before picking electives, so the whole programme is one tap away.
+  const [allYears, setAllYears] = useState(false);
+  const q = useQuery({
+    queryKey: ["materials", allYears],
+    queryFn: () => api.materials.list({ allYears }),
+    retry: 1,
+    enabled: Boolean(myCourse),
+  });
 
   // Flatten this student's course into a single list carrying year + semester.
   const mine = useMemo<FlatItem[]>(() => {
@@ -57,7 +60,6 @@ export default function MaterialsScreen() {
     const out: FlatItem[] = [];
     for (const y of q.data.years) {
       for (const s of y.subjects) {
-        if (s.subject !== myCourse) continue;
         for (const it of s.items) {
           out.push({ ...it, year: y.year });
         }
@@ -68,11 +70,11 @@ export default function MaterialsScreen() {
 
   const availYears = useMemo(
     () => YEAR_ORDER.filter((y) => mine.some((it) => it.year === y)),
-    [mine],
+    [mine]
   );
   const availSemesters = useMemo(
     () => [...new Set(mine.map((it) => it.semester).filter(Boolean))].sort() as string[],
-    [mine],
+    [mine]
   );
 
   const [yearFilter, setYearFilter] = useState<string | null>(null);
@@ -81,10 +83,9 @@ export default function MaterialsScreen() {
   const filtered = useMemo(
     () =>
       mine.filter(
-        (it) =>
-          (!yearFilter || it.year === yearFilter) && (!semFilter || it.semester === semFilter),
+        (it) => (!yearFilter || it.year === yearFilter) && (!semFilter || it.semester === semFilter)
       ),
-    [mine, yearFilter, semFilter],
+    [mine, yearFilter, semFilter]
   );
 
   // Group filtered items by year for display.
@@ -95,7 +96,7 @@ export default function MaterialsScreen() {
       byYear.get(it.year)!.push(it);
     }
     return [...byYear.entries()].sort(
-      (a, b) => YEAR_ORDER.indexOf(a[0]) - YEAR_ORDER.indexOf(b[0]),
+      (a, b) => YEAR_ORDER.indexOf(a[0]) - YEAR_ORDER.indexOf(b[0])
     );
   }, [filtered]);
 
@@ -147,7 +148,7 @@ export default function MaterialsScreen() {
             {t("materials.setCourseYear")}
           </Text>
           <Pressable
-            onPress={() => router.push("/(tabs)/profile")}
+            onPress={() => router.push("/profile")}
             className="mt-1 rounded-full bg-astra-primary px-5 py-2"
           >
             <Text className="font-medium text-white">{t("materials.goToProfile")}</Text>
@@ -181,6 +182,26 @@ export default function MaterialsScreen() {
         </View>
       ) : (
         <>
+          {/* Scope: just my year, or the whole programme */}
+          <View className="flex-row gap-2 px-4 pt-3">
+            <Chip
+              label={t("materials.myYear")}
+              active={!allYears}
+              onPress={() => {
+                setAllYears(false);
+                setYearFilter(null);
+              }}
+            />
+            <Chip
+              label={t("materials.allYearsOfCourse")}
+              active={allYears}
+              onPress={() => {
+                setAllYears(true);
+                setYearFilter(null);
+              }}
+            />
+          </View>
+
           {/* Filters */}
           {(availYears.length > 1 || availSemesters.length > 1) && (
             <View className="gap-2 px-4 py-3">
@@ -213,7 +234,10 @@ export default function MaterialsScreen() {
             </View>
           )}
 
-          <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 16 }}>
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 16 }}
+          >
             {grouped.map(([year, items]) => (
               <View key={year}>
                 <Text className="mb-1.5 text-sm font-bold uppercase tracking-wide text-astra-primary">

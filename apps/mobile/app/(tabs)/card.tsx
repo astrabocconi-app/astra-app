@@ -62,6 +62,8 @@ export default function CardScreen() {
               size={224}
               color="#04107E"
               backgroundColor="#fff"
+              // Metro resolves bundled image assets through CommonJS.
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
               logo={require("../../assets/logo-icon.png")}
               logoSize={52}
               logoBackgroundColor="#fff"

@@ -3,11 +3,16 @@ export const en = {
   "partnerScan.studentCard": "{name}'s card",
   "partnerScan.memberCard": "Member card",
   "partnerScan.failedTitle": "Couldn't award",
+  "partnerScan.alreadyUsedTitle": "Already used",
   "partnerScan.tryAgain": "Try again.",
   "partnerScan.cameraPermissionText": "Camera access is needed to scan members' cards.",
   "partnerScan.grantCameraAccess": "Grant camera access",
   "partnerScan.scanMemberCard": "Scan a member's card",
+  "partnerScan.preparing": "Getting ready…",
   "partnerScan.scanNext": "Scan next",
+  "partnerScan.whichOfferTitle": "Which offer?",
+  "partnerScan.whichOfferBody": "Pick what this scan was for, so it counts towards the right promotion.",
+  "partnerScan.noSpecificOffer": "No specific offer",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -15,9 +20,14 @@ export const it: Record<keyof typeof en, string> = {
   "partnerScan.studentCard": "Tessera di {name}",
   "partnerScan.memberCard": "Tessera membro",
   "partnerScan.failedTitle": "Impossibile assegnare punti",
+  "partnerScan.alreadyUsedTitle": "Già utilizzata",
   "partnerScan.tryAgain": "Riprova.",
   "partnerScan.cameraPermissionText": "È necessario l'accesso alla fotocamera per scansionare le tessere dei membri.",
   "partnerScan.grantCameraAccess": "Consenti l'accesso alla fotocamera",
   "partnerScan.scanMemberCard": "Scansiona la tessera di un membro",
+  "partnerScan.preparing": "Preparazione…",
   "partnerScan.scanNext": "Scansiona il prossimo",
+  "partnerScan.whichOfferTitle": "Quale offerta?",
+  "partnerScan.whichOfferBody": "Scegli a cosa si riferisce questa scansione, così conta per la promozione giusta.",
+  "partnerScan.noSpecificOffer": "Nessuna offerta specifica",
 };

@@ -43,16 +43,27 @@ export default function HomeScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={{ paddingBottom: 32 }}>
-      {/* Greeting — welcome + name on one line, softer weight */}
-      <Text className="px-5 pt-4 text-2xl font-semibold text-gray-800">
-        {t("home.welcome")}
-        {firstName ? (
-          <>
-            , <Text className="text-astra-primary">{firstName}</Text>
-          </>
-        ) : null}{" "}
-        👋
-      </Text>
+      {/* Greeting — welcome + name on one line, with the profile button on the
+          same baseline rather than up in the header. */}
+      <View className="flex-row items-center gap-3 px-5 pt-4">
+        <Text className="flex-1 text-2xl font-semibold text-gray-800">
+          {t("home.welcome")}
+          {firstName ? (
+            <>
+              , <Text className="text-astra-primary">{firstName}</Text>
+            </>
+          ) : null}{" "}
+          👋
+        </Text>
+        <Pressable
+          onPress={() => router.push("/profile")}
+          hitSlop={10}
+          accessibilityLabel={t("tabs.profile")}
+          className="h-10 w-10 items-center justify-center rounded-full bg-astra-light active:opacity-70"
+        >
+          <Ionicons name="person" size={20} color="#04107E" />
+        </Pressable>
+      </View>
 
       {/* News feed — full-width, swipe sideways between stories */}
       {newsItems.length > 0 && (
@@ -190,6 +201,29 @@ export default function HomeScreen() {
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-900">{t("home.materials")}</Text>
           <Text className="text-xs text-gray-500">{t("home.materialsSub")}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+      </Pressable>
+
+      {/* Rewards — no longer a tab (Discounts took its place), so this is the
+          way students reach the catalogue. */}
+      <Pressable
+        onPress={() => router.push("/rewards")}
+        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
+        style={{
+          shadowColor: "#04107E",
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: 2,
+        }}
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
+          <Ionicons name="gift-outline" size={22} color="#04107E" />
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">{t("home.rewards")}</Text>
+          <Text className="text-xs text-gray-500">{t("home.rewardsSub")}</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>

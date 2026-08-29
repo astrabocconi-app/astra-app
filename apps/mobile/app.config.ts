@@ -33,6 +33,12 @@ const config: ExpoConfig = {
       NSCameraUsageDescription: "ASTRA uses the camera to scan member loyalty cards.",
       NSMicrophoneUsageDescription:
         "ASTRA uses the microphone only as part of the camera scanner.",
+      // Required by Apple (ITMS-90683): the bundled Mapbox SDK references the
+      // location APIs, so the purpose string must be present even though ASTRA
+      // never asks for location — the Discounts map only shows partner pins and
+      // the campus, and no permission prompt is triggered.
+      NSLocationWhenInUseUsageDescription:
+        "ASTRA can show your position on the Discounts map to help you find nearby partner venues. The map works fine without it.",
       // The app only makes standard HTTPS calls (no custom/non-exempt encryption),
       // so it qualifies for the export compliance exemption. Without this, every
       // build sits in "Missing Compliance" in App Store Connect and can't be
@@ -64,6 +70,14 @@ const config: ExpoConfig = {
         recordAudioAndroid: false,
       },
     ],
+    // Native Mapbox SDK for the Discounts map. The iOS/Android SDKs live in
+    // Mapbox's private registry, so the BUILD machine needs a secret token with
+    // the DOWNLOADS:READ scope. It is supplied ONLY through the
+    // RNMAPBOX_MAPS_DOWNLOAD_TOKEN environment variable, never as a plugin
+    // option: plugin options are serialised into the app config that ships
+    // inside the IPA, which would leak the secret to anyone who unzips the app.
+    // The public pk.* token used at runtime is separate — see lib/config.ts.
+    "@rnmapbox/maps",
     [
       // Android must target API 36 (required on Play as of 2026-08-31).
       // TODO(scaffold): verify the pinned Expo SDK 57 fully supports API 36.
@@ -80,6 +94,9 @@ const config: ExpoConfig = {
   extra: {
     apiUrl: API_URL[APP_ENV],
     appEnv: APP_ENV,
+    // Public Mapbox token (pk.*), baked in per build so standalone/TestFlight
+    // builds render the map without relying on a local .env.
+    mapboxToken: process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "",
     eas: {
       projectId: "69b09e81-0608-41b8-8979-fd3e854ab3d5",
     },

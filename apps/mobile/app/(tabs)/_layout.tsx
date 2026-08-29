@@ -7,11 +7,13 @@ import { useT } from "../../lib/i18n";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
+const DISABLED = "#C4C8D4";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
+type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
 
 // Raised circular button for the center "Card" (QR) tab — big + easy to reach.
-function CenterCardButton({ onPress }: { onPress?: (e: any) => void }) {
+function CenterCardButton({ onPress }: { onPress?: PressableOnPress }) {
   return (
     <View style={styles.centerWrap} pointerEvents="box-none">
       <Pressable onPress={onPress} style={styles.centerButton} hitSlop={12}>
@@ -26,6 +28,7 @@ function tabIcon(name: IoniconName) {
     <Ionicons name={name} color={color as string} size={size} />
   );
 }
+
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
@@ -60,6 +63,8 @@ export default function TabsLayout() {
           headerTitleAlign: "center",
           headerTitle: () => (
             <Image
+              // Metro resolves bundled image assets through CommonJS.
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
               source={require("../../assets/logo-horizontal.png")}
               resizeMode="contain"
               style={{ width: 132, height: 34 }}
@@ -77,8 +82,35 @@ export default function TabsLayout() {
           tabBarButton: (props) => <CenterCardButton onPress={props.onPress ?? undefined} />,
         }}
       />
-      <Tabs.Screen name="rewards" options={{ title: t("tabs.rewards"), tabBarIcon: tabIcon("gift-outline") }} />
-      <Tabs.Screen name="profile" options={{ title: t("tabs.profile"), tabBarIcon: tabIcon("person-outline") }} />
+      <Tabs.Screen
+        name="discounts"
+        options={{
+          title: t("tabs.discounts"),
+          tabBarIcon: tabIcon("pricetags-outline"),
+          // The screen renders its own title + segmented switch.
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="academics"
+        options={{
+          title: t("tabs.academics"),
+          // Rendered by the navigator like every other tab so the icon and
+          // label sit on exactly the same baseline — a hand-rolled button was
+          // always a pixel or two out. Greyed out, with the "Soon!" ribbon as
+          // a badge, and inert via the tabPress listener below.
+          tabBarIcon: ({ size }) => (
+            <Ionicons name="school-outline" size={size} color={DISABLED} />
+          ),
+          tabBarLabelStyle: { fontSize: 11, color: DISABLED },
+          tabBarBadge: t("academics.soonFlag"),
+          tabBarBadgeStyle: styles.soonBadge,
+        }}
+        listeners={{
+          // Visible but not yet navigable.
+          tabPress: (e) => e.preventDefault(),
+        }}
+      />
     </Tabs>
   );
 }
@@ -91,6 +123,20 @@ const styles = StyleSheet.create({
   centerWrap: {
     flex: 1,
     alignItems: "center",
+  },
+  soonBadge: {
+    backgroundColor: "#FFCC00", // brand gold, against the brand blue text
+    color: BRAND,
+    fontSize: 9,
+    fontWeight: "800",
+    // The badge is built for short counts and clips a word to "So…", so it
+    // needs an explicit width and its own radius rather than the derived one.
+    lineHeight: 15,
+    height: 15,
+    minWidth: 38,
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    overflow: "hidden",
   },
   centerButton: {
     top: -22,

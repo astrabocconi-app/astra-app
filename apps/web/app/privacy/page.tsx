@@ -169,6 +169,12 @@ export default function PrivacyPolicyPage() {
             OpenAI, L.L.C. — elaborazione del testo delle domande inviate tramite
             l&apos;assistente virtuale &ldquo;Ask ASTRA&rdquo;, se utilizzato dall&apos;Utente;
           </li>
+          <li>
+            Mapbox, Inc. — fornitura delle mappe della sezione &ldquo;Sconti&rdquo;. Il
+            caricamento delle mappe comporta il trattamento dell&apos;indirizzo IP e di dati
+            tecnici del dispositivo da parte del fornitore. La raccolta di dati di utilizzo a
+            fini statistici (telemetria) è disattivata nell&apos;App;
+          </li>
           <li>consulenti, professionisti e autorità pubbliche, nei limiti degli obblighi di legge.</li>
         </ul>
         <p>
@@ -180,11 +186,13 @@ export default function PrivacyPolicyPage() {
 
       <Section n={7} title="Trasferimento dei dati extra UE">
         <p>
-          OpenAI, L.L.C., con sede negli Stati Uniti, tratta il testo delle domande inviate tramite
-          &ldquo;Ask ASTRA&rdquo;. Tale trasferimento avviene sulla base delle garanzie adottate
-          dal fornitore, quali le Clausole Contrattuali Standard adottate dalla Commissione europea
-          e/o l&apos;adesione al Data Privacy Framework UE-USA (art. 46 GDPR). Gli altri fornitori
-          indicati al paragrafo 6 trattano i dati all&apos;interno dello Spazio Economico Europeo.
+          OpenAI, L.L.C. e Mapbox, Inc., entrambe con sede negli Stati Uniti, trattano
+          rispettivamente il testo delle domande inviate tramite &ldquo;Ask ASTRA&rdquo; e i dati
+          tecnici necessari al caricamento delle mappe. Tali trasferimenti avvengono sulla base
+          delle garanzie adottate dai fornitori, quali le Clausole Contrattuali Standard adottate
+          dalla Commissione europea e/o l&apos;adesione al Data Privacy Framework UE-USA (art. 46
+          GDPR). Gli altri fornitori indicati al paragrafo 6 trattano i dati all&apos;interno dello
+          Spazio Economico Europeo.
         </p>
       </Section>
 

@@ -1,62 +1,22 @@
-import { View, Text, ScrollView, Pressable, ActivityIndicator, useWindowDimensions } from "react-native";
-import Svg, { Polyline, Circle, Path } from "react-native-svg";
+import { useState } from "react";
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
+import { ScanChart, seriesColor } from "../../components/ScanChart";
+import { SegmentedToggle } from "../../components/SegmentedToggle";
 
-const BRAND = "#04107E";
-
-// Simple week line chart of daily scans — built with react-native-svg (no dep).
-function WeekChart({ data }: { data: { date: string; count: number }[] }) {
-  const { width } = useWindowDimensions();
-  const W = width - 40 - 32; // screen px-5 (2×20) + card p-4 (2×16)
-  const H = 150;
-  const padT = 18;
-  const padB = 8;
-  const padX = 6;
-  const n = data.length;
-  const max = Math.max(1, ...data.map((d) => d.count));
-  const x = (i: number) => padX + ((W - 2 * padX) * i) / Math.max(1, n - 1);
-  const y = (c: number) => padT + (1 - c / max) * (H - padT - padB);
-  const pts = data.map((d, i) => ({ x: x(i), y: y(d.count) }));
-  if (pts.length === 0) return null;
-  const first = pts[0]!;
-  const last = pts[pts.length - 1]!;
-  const line = pts.map((p) => `${p.x},${p.y}`).join(" ");
-  const area =
-    `M ${first.x},${H} ` + pts.map((p) => `L ${p.x},${p.y}`).join(" ") + ` L ${last.x},${H} Z`;
-  const label = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { weekday: "short" });
-
-  return (
-    <View>
-      <Svg width={W} height={H}>
-        <Path d={area} fill={BRAND} opacity={0.08} />
-        <Polyline points={line} fill="none" stroke={BRAND} strokeWidth={2.5} strokeLinejoin="round" />
-        {pts.map((p, i) => (
-          <Circle key={i} cx={p.x} cy={p.y} r={3.5} fill={BRAND} />
-        ))}
-      </Svg>
-      <View style={{ width: W }} className="mt-1 flex-row justify-between">
-        {data.map((d, i) => (
-          <View key={i} className="items-center">
-            <Text className="text-sm font-semibold text-gray-800">{d.count}</Text>
-            <Text className="text-[10px] uppercase text-gray-400">{label(d.date)}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
+type RangeDays = 7 | 14 | 30 | 90;
 
 // Partner venue home — how many codes this venue has scanned.
 export default function PartnerHomeScreen() {
   const t = useT();
+  const [days, setDays] = useState<RangeDays>(7);
   const stats = useQuery({
-    queryKey: ["partner-stats"],
-    queryFn: () => api.partner.stats(),
+    queryKey: ["partner-stats", days],
+    queryFn: () => api.partner.stats(days),
     retry: false,
     refetchInterval: 15_000,
   });
@@ -87,12 +47,57 @@ export default function PartnerHomeScreen() {
         </View>
       </Pressable>
 
-      {/* This week — daily scans line chart */}
-      <View className="mt-4 rounded-2xl border border-gray-100 p-4">
-        <Text className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          {t("partnerHome.scansThisWeek")}
-        </Text>
-        {s?.scansByDay ? <WeekChart data={s.scansByDay} /> : <ActivityIndicator className="my-8" />}
+      {/* Range picker */}
+      <View className="mt-5">
+        <SegmentedToggle
+          value={String(days)}
+          onChange={(v) => setDays(Number(v) as RangeDays)}
+          options={[
+            { value: "7", label: t("partnerHome.range1w") },
+            { value: "14", label: t("partnerHome.range2w") },
+            { value: "30", label: t("partnerHome.range1m") },
+            { value: "90", label: t("partnerHome.range3m") },
+          ]}
+        />
+      </View>
+
+      {/* Scans over time, stacked by promotion */}
+      <View className="mt-3 rounded-2xl border border-gray-100 p-4">
+        <View className="mb-3 flex-row items-baseline justify-between">
+          <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            {t("partnerHome.scansOverTime")}
+          </Text>
+          <Text className="text-lg font-bold text-gray-900">{s?.scansInRange ?? 0}</Text>
+        </View>
+
+        {s ? (
+          <ScanChart buckets={s.buckets} series={s.series} bucket={s.range.bucket} />
+        ) : (
+          <ActivityIndicator className="my-8" />
+        )}
+
+        {/* Legend doubles as the table view: the lighter hues fall below 3:1 on
+            white, so identity is never left to colour alone. */}
+        {s && s.series.length > 0 && (
+          <View className="mt-4 gap-2">
+            {s.series.map((series, i) => (
+              <View key={series.offerId ?? "none"} className="flex-row items-center gap-2">
+                <View
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: 3,
+                    backgroundColor: seriesColor(series, i),
+                  }}
+                />
+                <Text className="flex-1 text-[13px] text-gray-700" numberOfLines={1}>
+                  {series.offerId === null ? t("partnerHome.noOfferSeries") : series.title}
+                </Text>
+                <Text className="text-[13px] font-semibold text-gray-900">{series.total}</Text>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
 
       {/* Scans all-time */}

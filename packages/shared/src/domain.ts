@@ -20,3 +20,15 @@ export const DEV_LOGIN_USERNAMES = ["blabmerda"] as const;
 export function isDevLoginUsername(input: string): boolean {
   return (DEV_LOGIN_USERNAMES as readonly string[]).includes(input.trim().toLowerCase());
 }
+
+/**
+ * Centre of the Bocconi grounds — the midpoint of the historic Sarfatti block
+ * and the Nuovo Campus, derived from the real OSM footprint (see the mobile
+ * app's lib/campus-geo.ts). The Discounts map opens centred here with the
+ * campus highlighted, so partner pins are always read relative to it.
+ */
+export const BOCCONI_CAMPUS = {
+  name: "Università Bocconi",
+  latitude: 45.4488,
+  longitude: 9.1887,
+} as const;

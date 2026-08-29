@@ -11,6 +11,8 @@ import * as event from "./event";
 import * as partnerHome from "./partnerHome";
 import * as card from "./card";
 import * as rewards from "./rewards";
+import * as discounts from "./discounts";
+import * as academics from "./academics";
 import * as events from "./events";
 import * as pointsHistory from "./pointsHistory";
 import * as partnerProfile from "./partnerProfile";
@@ -31,6 +33,8 @@ const namespaces = [
   partnerHome,
   card,
   rewards,
+  discounts,
+  academics,
   events,
   pointsHistory,
   partnerProfile,

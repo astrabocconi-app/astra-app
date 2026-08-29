@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { View, Text, Pressable, StyleSheet, Linking, Platform } from "react-native";
 import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "./Icon";
 import { BOCCONI_CAMPUS, type PartnerItem } from "@astra/shared";
 import { MAPBOX_TOKEN } from "../lib/config";
 import { CAMPUS_SHAPE, CAMPUS_LABEL_POINT } from "../lib/campus-geo";
@@ -44,12 +44,12 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
 
   if (!MAPBOX_TOKEN) {
     return (
-      <View className="flex-1 items-center justify-center gap-2 bg-gray-50 px-10">
-        <Ionicons name="map-outline" size={32} color="#9CA3AF" />
-        <Text className="text-center text-base font-semibold text-gray-700">
+      <View className="flex-1 items-center justify-center gap-2 bg-gray-50 dark:bg-white/5 px-10">
+        <Icon name="map-outline" size={32} color="#9CA3AF" />
+        <Text className="text-center text-base font-semibold text-gray-700 dark:text-gray-200">
           {t("discounts.mapUnavailable")}
         </Text>
-        <Text className="text-center text-sm text-gray-400">{t("discounts.mapNeedsToken")}</Text>
+        <Text className="text-center text-sm text-gray-400 dark:text-white/60">{t("discounts.mapNeedsToken")}</Text>
       </View>
     );
   }
@@ -94,7 +94,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
             is fine and keeps the map tight. */}
         <MarkerView coordinate={CAMPUS_LABEL_POINT} anchor={{ x: 0.5, y: 0.5 }}>
           <View style={styles.campus} pointerEvents="none">
-            <Ionicons name="school" size={14} color="#fff" />
+            <Icon name="school" size={14} color="#fff" />
             <Text style={styles.campusLabel}>{t("discounts.campus")}</Text>
           </View>
         </MarkerView>
@@ -110,7 +110,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
             >
               <Pressable onPress={() => setSelected(p)} hitSlop={8}>
                 <View style={[styles.pin, active && styles.pinActive]}>
-                  <Ionicons name="pricetag" size={13} color="#fff" />
+                  <Icon name="pricetag" size={13} color="#fff" />
                 </View>
                 <View style={[styles.pinTail, active && styles.pinTailActive]} />
               </Pressable>
@@ -121,24 +121,24 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
 
       {/* Re-centre control */}
       <Pressable onPress={recenter} style={styles.recenter} hitSlop={8}>
-        <Ionicons name="locate" size={20} color={BRAND} />
+        <Icon name="locate" size={20} color={BRAND} />
       </Pressable>
 
       {/* Detail card for the tapped pin */}
       {selected && (
         <View style={styles.card}>
           <View className="flex-row items-start gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light">
-              <Ionicons name="storefront" size={20} color={BRAND} />
+            <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+              <Icon name="storefront" size={20} color={BRAND} />
             </View>
             <View className="flex-1">
-              <Text className="text-base font-semibold text-gray-900">{selected.name}</Text>
-              <Text className="mt-0.5 text-xs text-gray-500">
+              <Text className="text-base font-semibold text-gray-900 dark:text-white">{selected.name}</Text>
+              <Text className="mt-0.5 text-xs text-gray-500 dark:text-gray-300">
                 {selected.address ?? t("discounts.noAddress")}
               </Text>
             </View>
             <Pressable onPress={() => setSelected(null)} hitSlop={10}>
-              <Ionicons name="close" size={20} color="#9CA3AF" />
+              <Icon name="close" size={20} color="#9CA3AF" />
             </Pressable>
           </View>
 
@@ -146,25 +146,25 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
             <View className="mt-3 gap-1.5">
               {selected.offers.map((o) => (
                 <View key={o.id} className="flex-row items-center gap-2">
-                  <Text className="rounded-full bg-astra-primary px-2 py-0.5 text-[11px] font-bold text-white">
+                  <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
                     {o.label}
                   </Text>
-                  <Text className="flex-1 text-[13px] text-gray-700" numberOfLines={1}>
+                  <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200" numberOfLines={1}>
                     {o.title}
                   </Text>
                 </View>
               ))}
             </View>
           ) : (
-            <Text className="mt-3 text-[13px] text-gray-400">{t("discounts.noDiscount")}</Text>
+            <Text className="mt-3 text-[13px] text-gray-400 dark:text-white/60">{t("discounts.noDiscount")}</Text>
           )}
 
           <Pressable
             onPress={() => openDirections(selected)}
-            className="mt-3 flex-row items-center justify-center gap-1.5 rounded-xl bg-astra-light py-2.5 active:opacity-70"
+            className="mt-3 flex-row items-center justify-center gap-1.5 rounded-xl bg-astra-light dark:bg-white/10 py-2.5 active:opacity-70"
           >
-            <Ionicons name="navigate" size={15} color={BRAND} />
-            <Text className="text-sm font-semibold text-astra-primary">
+            <Icon name="navigate" size={15} color={BRAND} />
+            <Text className="text-sm font-semibold text-astra-primary dark:text-white">
               {t("discounts.openInMaps")}
             </Text>
           </Pressable>

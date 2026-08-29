@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../../components/Icon";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 
@@ -61,11 +61,11 @@ export default function EventDetailScreen() {
   const t = useT();
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {/* Back */}
       <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 px-4 py-2" hitSlop={8}>
-        <Ionicons name="chevron-back" size={22} color="#04107E" />
-        <Text className="text-base font-medium text-astra-primary">{t("event.back")}</Text>
+        <Icon name="chevron-back" size={22} color="#04107E" />
+        <Text className="text-base font-medium text-astra-primary dark:text-white">{t("event.back")}</Text>
       </Pressable>
 
       {events.isLoading ? (
@@ -74,7 +74,7 @@ export default function EventDetailScreen() {
         </View>
       ) : !event ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-gray-500">{t("event.notAvailable")}</Text>
+          <Text className="text-center text-gray-500 dark:text-gray-300">{t("event.notAvailable")}</Text>
         </View>
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -82,34 +82,34 @@ export default function EventDetailScreen() {
             <Image source={{ uri: event.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
           ) : (
             <View style={{ height: 120, backgroundColor: "#04107E" }} className="items-center justify-center">
-              <Ionicons name="sparkles" size={34} color="rgba(255,255,255,0.9)" />
+              <Icon name="sparkles" size={34} color="rgba(255,255,255,0.9)" />
             </View>
           )}
 
           <View className="px-5 pt-5">
-            <Text className="text-2xl font-bold text-gray-900">{event.title}</Text>
+            <Text className="text-2xl font-bold text-gray-900 dark:text-white">{event.title}</Text>
 
             <View className="mt-3 gap-2">
               <View className="flex-row items-center gap-2">
-                <Ionicons name="time-outline" size={16} color="#04107E" />
-                <Text className="text-sm text-gray-700">{formatWhen(event.startsAt)}</Text>
+                <Icon name="time-outline" size={16} color="#04107E" />
+                <Text className="text-sm text-gray-700 dark:text-gray-200">{formatWhen(event.startsAt)}</Text>
               </View>
               {event.location ? (
                 <Pressable
                   className="flex-row items-center gap-2 active:opacity-60"
                   onPress={() => openInMaps(event.location!, t)}
                 >
-                  <Ionicons name="location-outline" size={16} color="#04107E" />
-                  <Text className="text-sm font-medium text-astra-primary underline">
+                  <Icon name="location-outline" size={16} color="#04107E" />
+                  <Text className="text-sm font-medium text-astra-primary dark:text-white underline">
                     {event.location}
                   </Text>
-                  <Ionicons name="open-outline" size={13} color="#04107E" />
+                  <Icon name="open-outline" size={13} color="#04107E" />
                 </Pressable>
               ) : null}
             </View>
 
             {event.description ? (
-              <Text className="mt-4 text-base leading-6 text-gray-600">{event.description}</Text>
+              <Text className="mt-4 text-base leading-6 text-gray-600 dark:text-gray-300">{event.description}</Text>
             ) : null}
           </View>
         </ScrollView>
@@ -117,12 +117,12 @@ export default function EventDetailScreen() {
 
       {/* Get tickets */}
       {event?.externalTicketUrl ? (
-        <View className="border-t border-gray-100 px-5 pb-2 pt-3">
+        <View className="border-t border-gray-100 dark:border-white/10 px-5 pb-2 pt-3">
           <Pressable
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary py-3.5 active:opacity-90"
+            className="flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-astra-dark py-3.5 active:opacity-90"
             onPress={() => Linking.openURL(event.externalTicketUrl!)}
           >
-            <Ionicons name="ticket-outline" size={18} color="#fff" />
+            <Icon name="ticket-outline" size={18} color="#fff" />
             <Text className="text-base font-semibold text-white">{t("event.getTickets")}</Text>
           </Pressable>
         </View>

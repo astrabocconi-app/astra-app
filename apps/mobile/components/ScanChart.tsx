@@ -106,7 +106,7 @@ export function ScanChart({
       <View style={{ width: W }} className="mt-1 flex-row">
         {buckets.map((b, i) => (
           <View key={b} style={{ width: slot }} className="items-center">
-            <Text className="text-[10px] text-gray-400">
+            <Text className="text-[10px] text-gray-400 dark:text-white/60">
               {i % labelEvery === 0 ? bucketLabel(b, bucket) : ""}
             </Text>
           </View>

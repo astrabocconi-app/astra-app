@@ -3,6 +3,7 @@ import { View, Text, Pressable, ActivityIndicator, ScrollView, StyleSheet } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../../components/Icon";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
@@ -117,12 +118,12 @@ export default function ScanScreen() {
 
   if (!permission.granted) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-white px-8">
-        <Ionicons name="camera-outline" size={44} color="#04107E" />
-        <Text className="text-center text-gray-700">
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-white dark:bg-astra-primary px-8">
+        <Icon name="camera-outline" size={44} color="#04107E" />
+        <Text className="text-center text-gray-700 dark:text-gray-200">
           {t("partnerScan.cameraPermissionText")}
         </Text>
-        <Pressable className="rounded-xl bg-astra-primary px-6 py-3" onPress={requestPermission}>
+        <Pressable className="rounded-xl bg-astra-primary dark:bg-astra-dark px-6 py-3" onPress={requestPermission}>
           <Text className="font-semibold text-white">{t("partnerScan.grantCameraAccess")}</Text>
         </Pressable>
       </SafeAreaView>
@@ -171,11 +172,11 @@ export default function ScanScreen() {
             { backgroundColor: "rgba(0,0,0,0.75)", padding: 24 },
           ]}
         >
-          <View className="w-full rounded-3xl bg-white p-6" style={{ maxWidth: 360 }}>
-            <Text className="text-xl font-bold text-gray-900">
+          <View className="w-full rounded-3xl bg-white dark:bg-astra-primary p-6" style={{ maxWidth: 360 }}>
+            <Text className="text-xl font-bold text-gray-900 dark:text-white">
               {t("partnerScan.whichOfferTitle")}
             </Text>
-            <Text className="mt-1 text-sm text-gray-500">{t("partnerScan.whichOfferBody")}</Text>
+            <Text className="mt-1 text-sm text-gray-500 dark:text-gray-300">{t("partnerScan.whichOfferBody")}</Text>
 
             <ScrollView style={{ maxHeight: 320 }} className="mt-4">
               <View className="gap-2">
@@ -183,13 +184,13 @@ export default function ScanScreen() {
                   <Pressable
                     key={o.id}
                     onPress={() => award(pendingToken, o.id)}
-                    className="flex-row items-center gap-3 rounded-2xl border border-gray-200 p-4 active:bg-gray-50"
+                    className="flex-row items-center gap-3 rounded-2xl border border-gray-200 dark:border-white/15 p-4 active:bg-gray-50"
                   >
-                    <Text className="rounded-full bg-astra-primary px-2 py-0.5 text-[11px] font-bold text-white">
+                    <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
                       {o.label}
                     </Text>
-                    <Text className="flex-1 text-[15px] font-medium text-gray-900">{o.title}</Text>
-                    <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+                    <Text className="flex-1 text-[15px] font-medium text-gray-900 dark:text-white">{o.title}</Text>
+                    <Icon name="chevron-forward" size={18} color="#9CA3AF" />
                   </Pressable>
                 ))}
               </View>
@@ -197,14 +198,14 @@ export default function ScanScreen() {
 
             <Pressable
               onPress={() => award(pendingToken, null)}
-              className="mt-3 items-center rounded-xl bg-astra-light py-3 active:opacity-70"
+              className="mt-3 items-center rounded-xl bg-astra-light dark:bg-white/10 py-3 active:opacity-70"
             >
-              <Text className="text-sm font-semibold text-astra-primary">
+              <Text className="text-sm font-semibold text-astra-primary dark:text-white">
                 {t("partnerScan.noSpecificOffer")}
               </Text>
             </Pressable>
             <Pressable onPress={cancelPending} className="mt-2 items-center py-2">
-              <Text className="text-sm text-gray-500">{t("common.cancel")}</Text>
+              <Text className="text-sm text-gray-500 dark:text-gray-300">{t("common.cancel")}</Text>
             </Pressable>
           </View>
         </View>
@@ -218,7 +219,7 @@ export default function ScanScreen() {
             { backgroundColor: "rgba(0,0,0,0.75)", padding: 32 },
           ]}
         >
-          <View className="w-full items-center rounded-3xl bg-white p-8" style={{ maxWidth: 340 }}>
+          <View className="w-full items-center rounded-3xl bg-white dark:bg-astra-primary p-8" style={{ maxWidth: 340 }}>
             <View
               className={`h-16 w-16 items-center justify-center rounded-full ${
                 result.outcome === "ok"
@@ -246,12 +247,12 @@ export default function ScanScreen() {
                 }
               />
             </View>
-            <Text className="mt-4 text-2xl font-bold text-gray-900">{result.title}</Text>
+            <Text className="mt-4 text-2xl font-bold text-gray-900 dark:text-white">{result.title}</Text>
             {result.subtitle && (
-              <Text className="mt-1 text-center text-gray-500">{result.subtitle}</Text>
+              <Text className="mt-1 text-center text-gray-500 dark:text-gray-300">{result.subtitle}</Text>
             )}
             <Pressable
-              className="mt-6 w-full items-center rounded-xl bg-astra-primary px-6 py-3"
+              className="mt-6 w-full items-center rounded-xl bg-astra-primary dark:bg-astra-dark px-6 py-3"
               onPress={reset}
             >
               <Text className="font-semibold text-white">{t("partnerScan.scanNext")}</Text>

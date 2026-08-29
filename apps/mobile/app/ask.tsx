@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -81,15 +81,15 @@ export default function AskScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {/* Header */}
-      <View className="flex-row items-center gap-2 border-b border-gray-100 px-4 py-3">
+      <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="chevron-back" size={26} color="#04107E" />
+          <Icon name="chevron-back" size={26} color="#04107E" />
         </Pressable>
         <View>
-          <Text className="text-lg font-semibold text-astra-primary">{t("ask.title")}</Text>
-          <Text className="text-xs text-gray-400">{t("ask.subtitle")}</Text>
+          <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("ask.title")}</Text>
+          <Text className="text-xs text-gray-400 dark:text-white/60">{t("ask.subtitle")}</Text>
         </View>
       </View>
 
@@ -101,13 +101,13 @@ export default function AskScreen() {
         <ScrollView ref={scrollRef} className="flex-1" contentContainerStyle={{ padding: 16, gap: 12 }}>
           {messages.length === 0 && (
             <View className="mt-8 items-center gap-4 px-4">
-              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
-                <Ionicons name="sparkles" size={30} color="#04107E" />
+              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
+                <Icon name="sparkles" size={30} color="#04107E" />
               </View>
-              <Text className="text-center text-lg font-semibold text-gray-900">
+              <Text className="text-center text-lg font-semibold text-gray-900 dark:text-white">
                 {t("ask.emptyTitle")}
               </Text>
-              <Text className="text-center text-sm text-gray-500">
+              <Text className="text-center text-sm text-gray-500 dark:text-gray-300">
                 {t("ask.emptyDescription")}
               </Text>
               <View className="mt-2 w-full gap-2">
@@ -115,9 +115,9 @@ export default function AskScreen() {
                   <Pressable
                     key={s}
                     onPress={() => send(s)}
-                    className="rounded-xl border border-gray-200 px-4 py-3 active:bg-gray-50"
+                    className="rounded-xl border border-gray-200 dark:border-white/15 px-4 py-3 active:bg-gray-50"
                   >
-                    <Text className="text-sm text-gray-700">{s}</Text>
+                    <Text className="text-sm text-gray-700 dark:text-gray-200">{s}</Text>
                   </Pressable>
                 ))}
               </View>
@@ -128,33 +128,33 @@ export default function AskScreen() {
             <View key={i} className={m.role === "user" ? "items-end" : "items-start"}>
               <View
                 className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                  m.role === "user" ? "bg-astra-primary" : "border border-gray-100 bg-gray-50"
+                  m.role === "user" ? "bg-astra-primary dark:bg-astra-dark" : "border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5"
                 }`}
               >
-                <Text className={m.role === "user" ? "text-white" : "text-gray-900"}>{m.text}</Text>
+                <Text className={m.role === "user" ? "text-white" : "text-gray-900 dark:text-white"}>{m.text}</Text>
               </View>
               {m.sources && m.sources.length > 0 && (
                 <View className="mt-2 w-full max-w-[92%] gap-1">
-                  <Text className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                  <Text className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
                     {t("ask.sourcesLabel")}
                   </Text>
                   {m.sources.map((s, idx) => (
                     <Pressable
                       key={`${idx}-${s.url}`}
                       onPress={() => Linking.openURL(s.url)}
-                      className="flex-row items-center gap-2 rounded-xl bg-astra-light px-3 py-2 active:opacity-70"
+                      className="flex-row items-center gap-2 rounded-xl bg-astra-light dark:bg-white/10 px-3 py-2 active:opacity-70"
                     >
-                      <Text className="text-[11px] font-bold text-astra-primary">{idx + 1}</Text>
+                      <Text className="text-[11px] font-bold text-astra-primary dark:text-white">{idx + 1}</Text>
                       <View className="flex-1">
-                        <Text numberOfLines={1} className="text-[12px] font-medium text-astra-primary">
+                        <Text numberOfLines={1} className="text-[12px] font-medium text-astra-primary dark:text-white">
                           {s.title || hostOf(s.url)}
                         </Text>
-                        <Text className="text-[10px] text-gray-400">
+                        <Text className="text-[10px] text-gray-400 dark:text-white/60">
                           {sourceLabel(s, t)}
                           {s.page ? t("ask.pageSuffix", { page: String(s.page) }) : ""}
                         </Text>
                       </View>
-                      <Ionicons name="open-outline" size={14} color="#04107E" />
+                      <Icon name="open-outline" size={14} color="#04107E" />
                     </Pressable>
                   ))}
                 </View>
@@ -164,7 +164,7 @@ export default function AskScreen() {
 
           {loading && (
             <View className="items-start">
-              <View className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3">
+              <View className="rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-4 py-3">
                 <ActivityIndicator color="#04107E" />
               </View>
             </View>
@@ -173,11 +173,11 @@ export default function AskScreen() {
 
         {/* Input — bottom padding clears the home indicator on notch iPhones */}
         <View
-          className="flex-row items-end gap-2 border-t border-gray-100 px-3 pt-2"
+          className="flex-row items-end gap-2 border-t border-gray-100 dark:border-white/10 px-3 pt-2"
           style={{ paddingBottom: Math.max(insets.bottom, 8) }}
         >
           <TextInput
-            className="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-2.5 text-base"
+            className="flex-1 rounded-2xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-2.5 text-base"
             placeholder={t("ask.inputPlaceholder")}
             value={input}
             onChangeText={setInput}
@@ -191,7 +191,7 @@ export default function AskScreen() {
             className="h-11 w-11 items-center justify-center rounded-full"
             style={{ backgroundColor: loading || !input.trim() ? "#A9B0D8" : "#04107E" }}
           >
-            <Ionicons name="arrow-up" size={20} color="#fff" />
+            <Icon name="arrow-up" size={20} color="#fff" />
           </Pressable>
         </View>
       </KeyboardAvoidingView>

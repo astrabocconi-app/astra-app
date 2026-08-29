@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -59,24 +60,24 @@ export default function ClassroomsScreen() {
   );
 
   const chip = (active: boolean) =>
-    `rounded-full px-4 py-1.5 ${active ? "bg-astra-primary" : "bg-gray-100"}`;
-  const chipText = (active: boolean) => (active ? "font-medium text-white" : "text-gray-600");
+    `rounded-full px-4 py-1.5 ${active ? "bg-astra-primary dark:bg-astra-dark" : "bg-gray-100"}`;
+  const chipText = (active: boolean) => (active ? "font-medium text-white" : "text-gray-600 dark:text-gray-300");
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {/* Header */}
-      <View className="flex-row items-center gap-3 border-b border-gray-100 px-4 py-3">
+      <View className="flex-row items-center gap-3 border-b border-gray-100 dark:border-white/10 px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="chevron-back" size={26} color="#04107E" />
+          <Icon name="chevron-back" size={26} color="#04107E" />
         </Pressable>
         <View>
-          <Text className="text-lg font-semibold text-astra-primary">{t("classrooms.title")}</Text>
-          <Text className="text-xs text-gray-400">{t("classrooms.subtitle")}</Text>
+          <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("classrooms.title")}</Text>
+          <Text className="text-xs text-gray-400 dark:text-white/60">{t("classrooms.subtitle")}</Text>
         </View>
       </View>
 
       {/* Filters */}
-      <View className="border-b border-gray-100 pb-3">
+      <View className="border-b border-gray-100 dark:border-white/10 pb-3">
         {/* Day */}
         <ScrollView
           horizontal
@@ -98,7 +99,7 @@ export default function ClassroomsScreen() {
         >
           <Pressable onPress={() => setTime(null)} className={chip(time === null)}>
             <View className="flex-row items-center gap-1">
-              <Ionicons name="time-outline" size={14} color={time === null ? "#fff" : "#6B7280"} />
+              <Icon name="time-outline" size={14} color={time === null ? "#fff" : "#6B7280"} />
               <Text className={chipText(time === null)}>{t("classrooms.now")}</Text>
             </View>
           </Pressable>
@@ -133,7 +134,7 @@ export default function ClassroomsScreen() {
             size={20}
             color={studyOnly ? "#04107E" : "#9CA3AF"}
           />
-          <Text className="text-sm text-gray-700">{t("classrooms.studyRoomsOnly")}</Text>
+          <Text className="text-sm text-gray-700 dark:text-gray-200">{t("classrooms.studyRoomsOnly")}</Text>
         </Pressable>
       </View>
 
@@ -161,7 +162,7 @@ export default function ClassroomsScreen() {
           contentContainerStyle={{ padding: 16, gap: 8, flexGrow: 1 }}
           refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} />}
           ListHeaderComponent={
-            <Text className="mb-1 text-sm text-gray-500">
+            <Text className="mb-1 text-sm text-gray-500 dark:text-gray-300">
               {visible.length === 1
                 ? t("classrooms.freeRoomsCountSingular", { count: String(visible.length) })
                 : t("classrooms.freeRoomsCountPlural", { count: String(visible.length) })}
@@ -171,27 +172,27 @@ export default function ClassroomsScreen() {
           }
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center gap-2 px-10 pt-24">
-              <Ionicons name="calendar-outline" size={34} color="#9CA3AF" />
-              <Text className="text-center text-base font-semibold text-gray-700">
+              <Icon name="calendar-outline" size={34} color="#9CA3AF" />
+              <Text className="text-center text-base font-semibold text-gray-700 dark:text-gray-200">
                 {t("classrooms.notAvailableYet")}
               </Text>
-              <Text className="text-center text-sm leading-5 text-gray-400">
+              <Text className="text-center text-sm leading-5 text-gray-400 dark:text-white/60">
                 {t("classrooms.notAvailableDesc")}
               </Text>
             </View>
           }
           renderItem={({ item }) => (
-            <View className="flex-row items-center justify-between rounded-xl border border-gray-100 bg-white p-4">
+            <View className="flex-row items-center justify-between rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4">
               <View className="flex-1 pr-3">
                 <View className="flex-row items-center gap-2">
-                  <Text className="text-base font-semibold text-gray-900">{item.name}</Text>
+                  <Text className="text-base font-semibold text-gray-900 dark:text-white">{item.name}</Text>
                   {item.isStudyRoom && (
-                    <Text className="rounded-full bg-astra-light px-2 py-0.5 text-[10px] font-medium text-astra-primary">
+                    <Text className="rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5 text-[10px] font-medium text-astra-primary dark:text-white">
                       {t("classrooms.studyBadge")}
                     </Text>
                   )}
                 </View>
-                <Text className="mt-0.5 text-xs text-gray-400">{item.building}</Text>
+                <Text className="mt-0.5 text-xs text-gray-400 dark:text-white/60">{item.building}</Text>
               </View>
               <View className="items-end">
                 <View className="flex-row items-center gap-1">
@@ -199,13 +200,13 @@ export default function ClassroomsScreen() {
                   <Text className="text-sm font-medium text-green-600">{t("classrooms.freeStatus")}</Text>
                 </View>
                 {item.freeUntil && (
-                  <Text className="mt-0.5 text-xs text-gray-400">{t("classrooms.untilTime", { time: item.freeUntil })}</Text>
+                  <Text className="mt-0.5 text-xs text-gray-400 dark:text-white/60">{t("classrooms.untilTime", { time: item.freeUntil })}</Text>
                 )}
               </View>
             </View>
           )}
           ListFooterComponent={
-            <Text className="mt-4 text-center text-[11px] text-gray-400">
+            <Text className="mt-4 text-center text-[11px] text-gray-400 dark:text-white/60">
               {t("classrooms.credit")}
             </Text>
           }

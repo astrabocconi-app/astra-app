@@ -2,7 +2,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
 import { useT } from "../lib/i18n";
 
@@ -20,13 +20,13 @@ export default function PointsHistoryScreen() {
   const t = useT();
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {/* Header */}
-      <View className="flex-row items-center gap-3 border-b border-gray-100 px-4 py-3">
+      <View className="flex-row items-center gap-3 border-b border-gray-100 dark:border-white/10 px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="chevron-back" size={26} color="#04107E" />
+          <Icon name="chevron-back" size={26} color="#04107E" />
         </Pressable>
-        <Text className="text-lg font-semibold text-astra-primary">{t("pointsHistory.title")}</Text>
+        <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("pointsHistory.title")}</Text>
       </View>
 
       {isLoading && (
@@ -51,15 +51,15 @@ export default function PointsHistoryScreen() {
           contentContainerStyle={{ padding: 16, gap: 8 }}
           ListEmptyComponent={
             <View className="items-center gap-2 pt-16">
-              <Ionicons name="sparkles-outline" size={28} color="#9CA3AF" />
-              <Text className="text-gray-400">{t("pointsHistory.empty")}</Text>
+              <Icon name="sparkles-outline" size={28} color="#9CA3AF" />
+              <Text className="text-gray-400 dark:text-white/60">{t("pointsHistory.empty")}</Text>
             </View>
           }
           renderItem={({ item }) => (
-            <View className="flex-row items-center justify-between rounded-xl border border-gray-100 bg-white p-4">
+            <View className="flex-row items-center justify-between rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4">
               <View className="flex-1 pr-3">
-                <Text className="font-medium text-gray-900">{item.reason}</Text>
-                <Text className="mt-0.5 text-xs uppercase tracking-wide text-gray-400">
+                <Text className="font-medium text-gray-900 dark:text-white">{item.reason}</Text>
+                <Text className="mt-0.5 text-xs uppercase tracking-wide text-gray-400 dark:text-white/60">
                   {item.source} · {formatDate(item.createdAt)}
                 </Text>
               </View>

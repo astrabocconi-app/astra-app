@@ -24,15 +24,15 @@ export default function PartnerHomeScreen() {
   const s = stats.data;
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ padding: 20, paddingTop: 12 }}>
-      <Text className="text-sm font-medium text-gray-500">{t("partnerHome.welcomeBack")}</Text>
-      <Text className="text-3xl font-bold text-astra-primary">
+    <ScrollView className="flex-1 bg-white dark:bg-astra-primary" contentContainerStyle={{ padding: 20, paddingTop: 12 }}>
+      <Text className="text-sm font-medium text-gray-500 dark:text-gray-300">{t("partnerHome.welcomeBack")}</Text>
+      <Text className="text-3xl font-bold text-astra-primary dark:text-white">
         {s?.partner.name ?? t("partnerHome.partnerFallback")}
       </Text>
 
       {/* Big scans-today card */}
       <Pressable
-        className="mt-6 rounded-3xl bg-astra-primary p-6 active:opacity-90"
+        className="mt-6 rounded-3xl bg-astra-primary dark:bg-astra-dark p-6 active:opacity-90"
         onPress={() => router.push("/partner/scan")}
       >
         <Text className="text-xs uppercase tracking-wide text-white/70">
@@ -62,12 +62,12 @@ export default function PartnerHomeScreen() {
       </View>
 
       {/* Scans over time, stacked by promotion */}
-      <View className="mt-3 rounded-2xl border border-gray-100 p-4">
+      <View className="mt-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4">
         <View className="mb-3 flex-row items-baseline justify-between">
-          <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
             {t("partnerHome.scansOverTime")}
           </Text>
-          <Text className="text-lg font-bold text-gray-900">{s?.scansInRange ?? 0}</Text>
+          <Text className="text-lg font-bold text-gray-900 dark:text-white">{s?.scansInRange ?? 0}</Text>
         </View>
 
         {s ? (
@@ -90,10 +90,10 @@ export default function PartnerHomeScreen() {
                     backgroundColor: seriesColor(series, i),
                   }}
                 />
-                <Text className="flex-1 text-[13px] text-gray-700" numberOfLines={1}>
+                <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200" numberOfLines={1}>
                   {series.offerId === null ? t("partnerHome.noOfferSeries") : series.title}
                 </Text>
-                <Text className="text-[13px] font-semibold text-gray-900">{series.total}</Text>
+                <Text className="text-[13px] font-semibold text-gray-900 dark:text-white">{series.total}</Text>
               </View>
             ))}
           </View>
@@ -101,11 +101,11 @@ export default function PartnerHomeScreen() {
       </View>
 
       {/* Scans all-time */}
-      <View className="mt-4 rounded-2xl border border-gray-100 p-4">
-        <Text className="text-xs uppercase tracking-wide text-gray-400">
+      <View className="mt-4 rounded-2xl border border-gray-100 dark:border-white/10 p-4">
+        <Text className="text-xs uppercase tracking-wide text-gray-400 dark:text-white/60">
           {t("partnerHome.scansAllTime")}
         </Text>
-        <Text className="mt-1 text-2xl font-bold text-gray-900">
+        <Text className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
           {stats.isLoading ? "…" : (s?.scansTotal ?? 0)}
         </Text>
       </View>

@@ -130,7 +130,13 @@ export function createApiClient(options: ApiClientOptions) {
 
     /** GET /api/materials — handouts catalogue (year → subject → items). */
     materials: {
-      list: async () => (await request<MaterialsResponse>("/api/materials")).data,
+      /** `allYears` widens the result from the student's year to their whole programme. */
+      list: async (opts?: { allYears?: boolean }) =>
+        (
+          await request<MaterialsResponse>(
+            `/api/materials${opts?.allYears ? "?allYears=1" : ""}`,
+          )
+        ).data,
     },
 
     /** Ask ASTRA — RAG chatbot over scraped Bocconi/ASTRA content. */

@@ -44,9 +44,12 @@ export default function MaterialsScreen() {
   const t = useT();
   const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
   const myCourse = me.data?.academicProfile?.programme.code ?? null;
+  // Students revisit earlier years when resitting or revising, and look ahead
+  // before picking electives, so the whole programme is one tap away.
+  const [allYears, setAllYears] = useState(false);
   const q = useQuery({
-    queryKey: ["materials"],
-    queryFn: () => api.materials.list(),
+    queryKey: ["materials", allYears],
+    queryFn: () => api.materials.list({ allYears }),
     retry: 1,
     enabled: Boolean(myCourse),
   });
@@ -179,6 +182,26 @@ export default function MaterialsScreen() {
         </View>
       ) : (
         <>
+          {/* Scope: just my year, or the whole programme */}
+          <View className="flex-row gap-2 px-4 pt-3">
+            <Chip
+              label={t("materials.myYear")}
+              active={!allYears}
+              onPress={() => {
+                setAllYears(false);
+                setYearFilter(null);
+              }}
+            />
+            <Chip
+              label={t("materials.allYearsOfCourse")}
+              active={allYears}
+              onPress={() => {
+                setAllYears(true);
+                setYearFilter(null);
+              }}
+            />
+          </View>
+
           {/* Filters */}
           {(availYears.length > 1 || availSemesters.length > 1) && (
             <View className="gap-2 px-4 py-3">

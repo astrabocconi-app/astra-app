@@ -23,8 +23,16 @@ export async function GET(req: Request) {
       fetchMaterials(),
       getAcademicProfile(session.user.id),
     ]);
+    // ?allYears=1 widens the result to the student's whole programme rather
+    // than only their current year.
+    const wantsAllYears = new URL(req.url).searchParams.get("allYears") === "1";
     const years = academic
-      ? filterMaterialsForAcademicProfile(allYears, academic.programme.code, academic.studyYear)
+      ? filterMaterialsForAcademicProfile(
+          allYears,
+          academic.programme.code,
+          academic.studyYear,
+          { allYears: wantsAllYears },
+        )
       : [];
     return NextResponse.json({ years }, { headers: { "x-request-id": requestId } });
   } catch (e) {

@@ -7,6 +7,10 @@ import {
   ActivityIndicator,
   Image,
   ImageBackground,
+  Keyboard,
+  ScrollView,
+  InputAccessoryView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -28,6 +32,9 @@ async function enterStudentApp() {
 // Login against apps/web (Better Auth). Two modes:
 //   • Student — email-OTP (@studbocconi.it) → tabbed home
 //   • Partner — login code + password (issued by ASTRA) → venue home
+// iOS-only accessory bar so the numeric OTP keypad can be dismissed.
+const OTP_ACCESSORY_ID = "astra-otp-accessory";
+
 type Step = "email" | "code";
 type Mode = "student" | "partner";
 
@@ -123,7 +130,20 @@ export default function LoginScreen() {
       style={{ flex: 1, backgroundColor: "#FFFFFF" }}
     >
       <SafeAreaView className="flex-1">
-        <View className="flex-1 items-center justify-center px-8">
+        {/* The keyboard covers the sign-in button and had no way out: no
+            return key that dismisses, nothing tappable behind it. Tapping the
+            background or dragging the content now closes it. */}
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          showsVerticalScrollIndicator={false}
+        >
+        <Pressable
+          className="flex-1 items-center justify-center px-8"
+          onPress={Keyboard.dismiss}
+          accessible={false}
+        >
           <Image
             // Metro's static asset loading uses CommonJS require.
             // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -155,6 +175,8 @@ export default function LoginScreen() {
                     autoCapitalize="none"
                     autoCorrect={false}
                     keyboardType="email-address"
+                    returnKeyType="go"
+                    onSubmitEditing={() => !studentDisabled && sendCode()}
                     value={email}
                     onChangeText={setEmail}
                     editable={!loading}
@@ -171,6 +193,9 @@ export default function LoginScreen() {
                     onChangeText={setCode}
                     editable={!loading}
                     autoFocus
+                    // A number pad has no return key, so iOS needs an explicit
+                    // way to dismiss it.
+                    inputAccessoryViewID={OTP_ACCESSORY_ID}
                   />
                 )}
 
@@ -228,6 +253,8 @@ export default function LoginScreen() {
                   secureTextEntry
                   autoCapitalize="none"
                   autoCorrect={false}
+                  returnKeyType="go"
+                  onSubmitEditing={() => !partnerDisabled && partnerSignIn()}
                   value={partnerPassword}
                   onChangeText={setPartnerPassword}
                   editable={!loading}
@@ -262,7 +289,20 @@ export default function LoginScreen() {
               </Pressable>
             )}
           </View>
-        </View>
+        </Pressable>
+        </ScrollView>
+
+        {Platform.OS === "ios" && (
+          <InputAccessoryView nativeID={OTP_ACCESSORY_ID}>
+            <View className="flex-row justify-end border-t border-gray-200 bg-gray-50 px-4 py-2">
+              <Pressable onPress={Keyboard.dismiss} hitSlop={8}>
+                <Text className="text-base font-semibold text-astra-primary">
+                  {t("common.done")}
+                </Text>
+              </Pressable>
+            </View>
+          </InputAccessoryView>
+        )}
       </SafeAreaView>
     </ImageBackground>
   );

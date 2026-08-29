@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, ActivityIndicator, Modal, ScrollView, Alert, Switch } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  ActivityIndicator,
+  Modal,
+  ScrollView,
+  Alert,
+  Switch,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -103,35 +113,43 @@ export default function ProfileScreen() {
 
   async function choose(value: string) {
     if (!catalogue.data) return;
+    const current = picker;
     const programme =
-      picker === "programme"
+      current === "programme"
         ? catalogue.data.programmes.find((item) => item.id === value)
         : selectedProgramme;
     if (!programme) return;
-    await api.academic.updateProfile({
-      programmeId: programme.id,
-      studyYear:
-        picker === "year"
-          ? Number(value)
-          : Math.min(academic?.studyYear ?? 1, programme.durationYears),
-      trackId:
-        picker === "track"
-          ? value
-          : picker === "programme"
-            ? null
-            : (academic?.track?.id ?? null),
-      classGroupId:
-        picker === "class"
-          ? value
-          : picker === "programme"
-            ? null
-            : (academic?.classGroup?.id ?? null),
-    });
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ["me"] }),
-      queryClient.invalidateQueries({ queryKey: ["materials"] }),
-    ]);
+
+    // Close first. Waiting for the write and the refetches before dismissing
+    // made the sheet sit there for seconds and feel broken.
     setPicker(null);
+
+    try {
+      await api.academic.updateProfile({
+        programmeId: programme.id,
+        studyYear:
+          current === "year"
+            ? Number(value)
+            : Math.min(academic?.studyYear ?? 1, programme.durationYears),
+        trackId:
+          current === "track" ? value : current === "programme" ? null : (academic?.track?.id ?? null),
+        classGroupId:
+          current === "class"
+            ? value
+            : current === "programme"
+              ? null
+              : (academic?.classGroup?.id ?? null),
+      });
+    } catch (e) {
+      Alert.alert(
+        t("profile.saveFailedTitle"),
+        e instanceof Error ? e.message : t("profile.saveFailedBody"),
+      );
+    } finally {
+      // Refresh in the background — the sheet is already gone.
+      void queryClient.invalidateQueries({ queryKey: ["me"] });
+      void queryClient.invalidateQueries({ queryKey: ["materials"] });
+    }
   }
 
   return (
@@ -344,11 +362,18 @@ export default function ProfileScreen() {
         animationType="slide"
         onRequestClose={() => setPicker(null)}
       >
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setPicker(null)}>
+        {/* Backdrop is a SIBLING behind the sheet, not its parent: nesting the
+            sheet inside a Pressable meant the parent intercepted taps and the
+            options often didn't register. */}
+        <View className="flex-1 justify-end">
           <Pressable
+            style={StyleSheet.absoluteFill}
+            className="bg-black/40"
+            onPress={() => setPicker(null)}
+          />
+          <View
             className="rounded-t-3xl bg-white pt-3"
             style={{ maxHeight: "70%", paddingBottom: insets.bottom + 12 }}
-            onPress={(e) => e.stopPropagation()}
           >
             <View className="mb-2 items-center">
               <View className="h-1 w-10 rounded-full bg-gray-300" />
@@ -381,8 +406,8 @@ export default function ProfileScreen() {
                 );
               })}
             </ScrollView>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
         </Modal>
       </ScrollView>
     </SafeAreaView>

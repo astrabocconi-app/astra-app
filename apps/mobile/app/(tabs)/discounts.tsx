@@ -9,6 +9,7 @@ import {
   Modal,
   Linking,
   Platform,
+  StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
@@ -191,11 +192,17 @@ export default function DiscountsScreen() {
         animationType="slide"
         onRequestClose={() => setPickerOpen(false)}
       >
-        <Pressable className="flex-1 justify-end bg-black/40" onPress={() => setPickerOpen(false)}>
+        {/* Backdrop sits behind the sheet as a sibling — nesting the sheet in a
+            Pressable made the parent intercept taps meant for the options. */}
+        <View className="flex-1 justify-end">
           <Pressable
+            style={StyleSheet.absoluteFill}
+            className="bg-black/40"
+            onPress={() => setPickerOpen(false)}
+          />
+          <View
             className="rounded-t-3xl bg-white pt-3"
             style={{ maxHeight: "70%", paddingBottom: insets.bottom + 12 }}
-            onPress={(e) => e.stopPropagation()}
           >
             <View className="mb-2 items-center">
               <View className="h-1 w-10 rounded-full bg-gray-300" />
@@ -225,8 +232,8 @@ export default function DiscountsScreen() {
                 );
               })}
             </ScrollView>
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );

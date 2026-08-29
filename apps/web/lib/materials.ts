@@ -158,12 +158,18 @@ const PROFILE_YEAR = ["First Year", "Second Year", "Third Year", "Fourth Year", 
 export function filterMaterialsForAcademicProfile(
   years: MaterialYear[],
   programmeCode: string,
-  studyYear: number
+  studyYear: number,
+  /**
+   * Return every year of the student's programme instead of just their own.
+   * Students revisit earlier years' handouts when resitting or revising, and
+   * look ahead before choosing electives.
+   */
+  options?: { allYears?: boolean }
 ): MaterialYear[] {
   const year = PROFILE_YEAR[studyYear - 1];
-  if (!year) return [];
+  if (!options?.allYears && !year) return [];
   return years
-    .filter((entry) => entry.year === year)
+    .filter((entry) => (options?.allYears ? true : entry.year === year))
     .map((entry) => {
       const subjects = entry.subjects.filter(
         (subject) =>

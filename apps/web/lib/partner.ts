@@ -103,58 +103,55 @@ export async function awardScan(params: {
   return getBalance(params.studentId);
 }
 
+/** Ranges the venue analytics can be viewed over. */
+export const STATS_RANGES = [7, 14, 30, 90] as const;
+export type StatsRange = (typeof STATS_RANGES)[number];
+
 /**
- * Scan tallies for a whole venue.
+ * Scan tallies for a whole venue, bucketed for charting.
  *
  * Covers every login the venue has, not just the one asking: a manager needs
  * the till's and the bar's scans too, and a per-account total would badly
  * understate the venue.
+ *
+ * Buckets by day for short ranges and by week beyond a fortnight, so the chart
+ * always has roughly 7-13 columns — 90 daily bars on a phone is unreadable.
  */
-export async function partnerStats(partnerId: string) {
+export async function partnerStats(partnerId: string, days: number = 7) {
+  const range: number = (STATS_RANGES as readonly number[]).includes(days) ? days : 7;
+  const unit: "day" | "week" = range <= 14 ? "day" : "week";
+
   const start = new Date();
   start.setHours(0, 0, 0, 0);
 
-  // Attributed to the VENUE, not to whichever logins currently exist. Keying on
-  // the staff accounts meant revoking a login (someone leaves) silently erased
-  // their past scans from the venue's totals. Every scan stamps the partner id,
-  // so that survives login churn.
+  const since = new Date();
+  since.setHours(0, 0, 0, 0);
+  since.setDate(since.getDate() - (range - 1));
+
   const where = {
     source: LedgerSource.PARTNER_SCAN,
     refType: "Partner",
     refId: partnerId,
   } as const;
 
-  // Per-day scan counts over the last 7 calendar days (for the home line chart).
-  const rows = await prisma.$queryRaw<{ day: Date; n: number }[]>`
-    SELECT date_trunc('day', "createdAt") AS day, count(*)::int AS n
-    FROM "PointsLedgerEntry"
-    WHERE "refType" = 'Partner'
-      AND "refId" = ${partnerId}
-      AND source = 'PARTNER_SCAN'
-      AND "createdAt" >= (CURRENT_DATE - INTERVAL '6 days')
-    GROUP BY day
-  `;
-  const byDay = new Map<string, number>();
-  for (const r of rows) byDay.set(new Date(r.day).toISOString().slice(0, 10), Number(r.n));
-  const scansByDay: { date: string; count: number }[] = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0, 10);
-    scansByDay.push({ date: key, count: byDay.get(key) ?? 0 });
-  }
-
-  const [scansTotal, scansToday, todaySum, perOfferRaw, offers] = await Promise.all([
+  const [rows, scansTotal, scansToday, todaySum, offers] = await Promise.all([
+    // One pass for the whole grid: bucket × offer.
+    prisma.$queryRaw<{ bucket: Date; offerId: string | null; n: number }[]>`
+      SELECT date_trunc(${unit}::text, "createdAt")::date AS bucket,
+             "offerId",
+             count(*)::int AS n
+      FROM "PointsLedgerEntry"
+      WHERE "refType" = 'Partner'
+        AND "refId" = ${partnerId}
+        AND source = 'PARTNER_SCAN'
+        AND "createdAt" >= ${since}
+      GROUP BY bucket, "offerId"
+    `,
     prisma.pointsLedgerEntry.count({ where }),
     prisma.pointsLedgerEntry.count({ where: { ...where, createdAt: { gte: start } } }),
     prisma.pointsLedgerEntry.aggregate({
       _sum: { delta: true },
       where: { ...where, createdAt: { gte: start } },
-    }),
-    prisma.pointsLedgerEntry.groupBy({
-      by: ["offerId"],
-      _count: { _all: true },
-      where,
     }),
     prisma.offer.findMany({
       where: { partnerId, deletedAt: null },
@@ -163,23 +160,54 @@ export async function partnerStats(partnerId: string) {
     }),
   ]);
 
-  // Split by promotion. Every current offer is listed even at zero, so a venue
-  // can see which of its promotions isn't landing; scans recorded before an
-  // offer was chosen (or with none) collect under "unattributed".
-  const countByOffer = new Map(perOfferRaw.map((r) => [r.offerId, r._count._all]));
-  const perOffer = offers.map((o) => ({
-    offerId: o.id,
-    title: o.title,
-    scans: countByOffer.get(o.id) ?? 0,
-  }));
-  const unattributed = countByOffer.get(null) ?? 0;
+  // Every bucket in the window, so quiet periods read as zero rather than
+  // vanishing and compressing the axis.
+  const buckets: string[] = [];
+  const cursor = new Date(since);
+  if (unit === "week") {
+    // Postgres truncates weeks to Monday; match it so keys line up.
+    const weekday = (cursor.getUTCDay() + 6) % 7;
+    cursor.setUTCDate(cursor.getUTCDate() - weekday);
+  }
+  const last = new Date();
+  while (cursor <= last) {
+    buckets.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + (unit === "week" ? 7 : 1));
+  }
+
+  const key = (offerId: string | null, bucket: string) => `${offerId ?? "-"}|${bucket}`;
+  const counts = new Map<string, number>();
+  for (const r of rows) {
+    counts.set(key(r.offerId, new Date(r.bucket).toISOString().slice(0, 10)), Number(r.n));
+  }
+
+  const seriesFor = (offerId: string | null, title: string) => ({
+    offerId,
+    title,
+    counts: buckets.map((b) => counts.get(key(offerId, b)) ?? 0),
+    total: buckets.reduce((n, b) => n + (counts.get(key(offerId, b)) ?? 0), 0),
+  });
+
+  const offerSeries = offers.map((o) => seriesFor(o.id, o.title));
+  const unattributedSeries = seriesFor(null, "");
+  const series = [
+    ...offerSeries,
+    // Only surface the catch-all when it actually has scans in this window.
+    ...(unattributedSeries.total > 0 ? [unattributedSeries] : []),
+  ];
+
+  const scansInRange = series.reduce((n, s) => n + s.total, 0);
 
   return {
+    range: { days: range, bucket: unit },
+    buckets,
+    series,
     scansTotal,
     scansToday,
+    scansInRange,
     pointsToday: todaySum._sum.delta ?? 0,
-    scansByDay,
-    perOffer,
-    unattributed,
+    // Kept for the existing summary list beneath the chart.
+    perOffer: offerSeries.map((s) => ({ offerId: s.offerId as string, title: s.title, scans: s.total })),
+    unattributed: unattributedSeries.total,
   };
 }

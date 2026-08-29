@@ -212,18 +212,24 @@ export function createApiClient(options: ApiClientOptions) {
             offers: { id: string; title: string; label: string }[];
           }>("/api/partner/offers")
         ).data,
-      /** GET /api/partner/stats — this venue's scan tallies, split by promotion. */
-      stats: async () =>
+      /**
+       * GET /api/partner/stats — the venue's scan tallies over `days`,
+       * bucketed for charting with one series per promotion.
+       */
+      stats: async (days = 7) =>
         (
           await request<{
             partner: { id: string; name: string };
+            range: { days: number; bucket: "day" | "week" };
+            buckets: string[];
+            series: { offerId: string | null; title: string; counts: number[]; total: number }[];
             scansToday: number;
             scansTotal: number;
+            scansInRange: number;
             pointsToday: number;
-            scansByDay: { date: string; count: number }[];
             perOffer: { offerId: string; title: string; scans: number }[];
             unattributed: number;
-          }>("/api/partner/stats")
+          }>(`/api/partner/stats?days=${days}`)
         ).data,
     },
 

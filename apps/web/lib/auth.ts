@@ -198,7 +198,6 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
       message: "Email isn't configured on the server, so no code could be sent.",
     });
   }
-  // eslint-disable-next-line no-console
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }
 

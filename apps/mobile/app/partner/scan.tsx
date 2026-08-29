@@ -31,6 +31,16 @@ export default function ScanScreen() {
     staleTime: 5 * 60_000,
   });
   const offers: Offer[] = offersQuery.data?.offers ?? [];
+  // Nothing may be scanned until we know the venue's offers. Otherwise a scan
+  // taken while this was still loading saw an empty list, concluded there was
+  // nothing to ask about, and silently awarded with no offer attached.
+  const offersReady = offersQuery.isFetched || offersQuery.isError;
+
+  // The same card sitting in front of the lens fires the barcode callback many
+  // times a second, and re-fires the moment the success overlay is dismissed.
+  // Remember the last code so it can't be awarded twice in a row by accident.
+  const lastScan = useRef<{ token: string; at: number } | null>(null);
+  const SAME_CODE_COOLDOWN_MS = 6000;
 
   async function award(token: string, offerId: string | null) {
     setBusy(true);
@@ -58,14 +68,24 @@ export default function ScanScreen() {
     } finally {
       setBusy(false);
       setPendingToken(null);
+      // Start the cooldown when the scan finishes, not when it began, so it
+      // covers the moment staff dismiss the overlay with the card still in view.
+      lastScan.current = { token, at: Date.now() };
     }
   }
 
   async function onScan({ data }: BarcodeScanningResult) {
     if (lock.current || busy || result || pendingToken) return;
+    // Wait for the offer list before deciding whether to ask.
+    if (!offersReady) return;
+    const previous = lastScan.current;
+    if (previous?.token === data && Date.now() - previous.at < SAME_CODE_COOLDOWN_MS) return;
+
     lock.current = true;
-    // One promotion (or none) needs no question — award straight away and keep
-    // the queue moving. Only ask when the venue actually runs several.
+    lastScan.current = { token: data, at: Date.now() };
+    // Ask which promotion first, then award — never the other way round. With
+    // one offer (or none) there's nothing to ask, so award straight away and
+    // keep the queue moving.
     if (offers.length > 1) {
       setPendingToken(data);
       return;
@@ -73,10 +93,19 @@ export default function ScanScreen() {
     await award(data, offers[0]?.id ?? null);
   }
 
+  /** After an award — the cooldown stands, so the same card isn't counted twice. */
   function reset() {
     setResult(null);
     setPendingToken(null);
     lock.current = false;
+  }
+
+  /** Backing out of the offer picker: nothing was awarded, so allow an
+   *  immediate re-scan of the same card rather than making staff wait. */
+  function cancelPending() {
+    setPendingToken(null);
+    lock.current = false;
+    lastScan.current = null;
   }
 
   if (!permission) return <View style={{ flex: 1, backgroundColor: "#000" }} />;
@@ -101,12 +130,12 @@ export default function ScanScreen() {
         style={StyleSheet.absoluteFill}
         facing="back"
         barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
-        onBarcodeScanned={result || pendingToken ? undefined : onScan}
+        onBarcodeScanned={result || pendingToken || !offersReady ? undefined : onScan}
       />
 
       <SafeAreaView className="flex-1" edges={["top"]}>
         <Text className="mt-4 text-center text-base font-semibold text-white">
-          {t("partnerScan.scanMemberCard")}
+          {offersReady ? t("partnerScan.scanMemberCard") : t("partnerScan.preparing")}
         </Text>
         <View className="flex-1 items-center justify-center">
           <View
@@ -169,7 +198,7 @@ export default function ScanScreen() {
                 {t("partnerScan.noSpecificOffer")}
               </Text>
             </Pressable>
-            <Pressable onPress={reset} className="mt-2 items-center py-2">
+            <Pressable onPress={cancelPending} className="mt-2 items-center py-2">
               <Text className="text-sm text-gray-500">{t("common.cancel")}</Text>
             </Pressable>
           </View>

@@ -186,7 +186,19 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
     });
     return;
   }
-  // 3) Dev fallback: no provider configured — print the code so we can test.
+  // 3) No provider configured.
+  //
+  // In development that's fine — print the code so the flow is testable without
+  // an inbox. In production it is NOT: silently "succeeding" here made the app
+  // report that a code had been sent when nothing left the server, and the only
+  // symptom was students never receiving an email. Fail loudly instead, so a
+  // misconfigured deployment is obvious immediately rather than looking healthy.
+  if (process.env.NODE_ENV === "production") {
+    throw new APIError("INTERNAL_SERVER_ERROR", {
+      message: "Email isn't configured on the server, so no code could be sent.",
+    });
+  }
+  // eslint-disable-next-line no-console
   console.log(`\n[auth] DEV OTP for ${email}: ${otp}\n`);
 }
 

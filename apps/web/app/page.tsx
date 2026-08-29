@@ -100,13 +100,13 @@ export default function LandingPage() {
           {/* Phones */}
           <div className="astra-fade-up relative mx-auto flex h-[520px] w-full max-w-md items-center justify-center lg:h-[620px]">
             <PhoneFrame
-              src="/screens/points.png"
-              alt="ASTRA app — points history screen"
+              src="/screens/discounts.png"
+              alt="ASTRA app — map of partner venues offering student discounts"
               className="absolute right-2 top-6 w-40 rotate-6 opacity-90 sm:w-52 lg:right-0"
             />
             <PhoneFrame
               src="/screens/home.png"
-              alt="ASTRA app — home screen"
+              alt="ASTRA app — home screen with points, news and shortcuts"
               className="relative w-56 -rotate-3 sm:w-64 lg:w-72"
             />
           </div>

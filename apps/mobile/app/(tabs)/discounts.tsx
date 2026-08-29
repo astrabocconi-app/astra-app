@@ -12,6 +12,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import type { PartnerItem } from "@astra/shared";
@@ -83,7 +84,10 @@ function PartnerRow({ partner, onDirections }: { partner: PartnerItem; onDirecti
 export default function DiscountsScreen() {
   const t = useT();
   const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<ViewMode>("map");
+  // Deep-linkable so a link can open straight to the list, e.g.
+  // astra://discounts?view=list — handy for sharing and for screenshots.
+  const params = useLocalSearchParams<{ view?: string }>();
+  const [mode, setMode] = useState<ViewMode>(params.view === "list" ? "list" : "map");
   const [category, setCategory] = useState<string>(ALL);
   const [pickerOpen, setPickerOpen] = useState(false);
 

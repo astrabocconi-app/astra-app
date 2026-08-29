@@ -7,7 +7,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 
-type ScanResult = { ok: boolean; title: string; subtitle?: string };
+// "tooSoon" is not a failure: the card is valid, the perk was simply used
+// recently. Staff need to tell those apart at a glance.
+type ScanOutcome = "ok" | "tooSoon" | "error";
+type ScanResult = { outcome: ScanOutcome; title: string; subtitle?: string };
 type Offer = { id: string; title: string; label: string };
 
 // Partner scanner — point the camera at a student's card QR to award points.
@@ -47,7 +50,7 @@ export default function ScanScreen() {
     try {
       const res = await api.partner.scan(token, offerId);
       setResult({
-        ok: true,
+        outcome: "ok",
         title: t("partnerScan.scannedTitle"),
         subtitle: [
           res.student.name
@@ -60,9 +63,11 @@ export default function ScanScreen() {
       });
       qc.invalidateQueries({ queryKey: ["partner-stats"] });
     } catch (e) {
+      const code = (e as { code?: string })?.code;
       setResult({
-        ok: false,
-        title: t("partnerScan.failedTitle"),
+        outcome: code === "TOO_SOON" ? "tooSoon" : "error",
+        title:
+          code === "TOO_SOON" ? t("partnerScan.alreadyUsedTitle") : t("partnerScan.failedTitle"),
         subtitle: e instanceof Error ? e.message : t("partnerScan.tryAgain"),
       });
     } finally {
@@ -216,13 +221,29 @@ export default function ScanScreen() {
           <View className="w-full items-center rounded-3xl bg-white p-8" style={{ maxWidth: 340 }}>
             <View
               className={`h-16 w-16 items-center justify-center rounded-full ${
-                result.ok ? "bg-green-100" : "bg-red-100"
+                result.outcome === "ok"
+                  ? "bg-green-100"
+                  : result.outcome === "tooSoon"
+                    ? "bg-amber-100"
+                    : "bg-red-100"
               }`}
             >
               <Ionicons
-                name={result.ok ? "checkmark" : "close"}
+                name={
+                  result.outcome === "ok"
+                    ? "checkmark"
+                    : result.outcome === "tooSoon"
+                      ? "time-outline"
+                      : "close"
+                }
                 size={36}
-                color={result.ok ? "#16a34a" : "#dc2626"}
+                color={
+                  result.outcome === "ok"
+                    ? "#16a34a"
+                    : result.outcome === "tooSoon"
+                      ? "#d97706"
+                      : "#dc2626"
+                }
               />
             </View>
             <Text className="mt-4 text-2xl font-bold text-gray-900">{result.title}</Text>

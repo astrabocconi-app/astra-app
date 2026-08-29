@@ -3,7 +3,8 @@
 // Partner accounts sign in with a login code + password (issued by ASTRA, not
 // self-set). Passwords are scrypt-hashed. A partner scans a student's card QR
 // to award points; scans are recorded as ledger entries (source PARTNER_SCAN)
-// with grantedById = the partner account, which is how we tally per-venue.
+// stamped with the venue (refType/refId) for reporting and with grantedById =
+// the specific login that made them, for traceability.
 
 import crypto from "node:crypto";
 import { prisma, LedgerSource } from "@astra/db";
@@ -34,6 +35,49 @@ export async function getPartnerForUser(userId: string) {
   });
 }
 
+/**
+ * How long a student must wait before the same perk counts again.
+ *
+ * Enforced per (student, offer) — the venue's promotion is what's being used,
+ * so a student can take the lunch deal and the evening deal in the same hour,
+ * but not the same one twice. Scans with no offer fall back to per-venue.
+ */
+export const SCAN_COOLDOWN_MS = 60 * 60 * 1000;
+
+/**
+ * Has this student already used this perk inside the cooldown?
+ *
+ * Server-side on purpose: a client-side guard only stops accidental
+ * double-taps. It can't survive the card QR rotating (a new token looks like a
+ * new code), a second staff phone scanning the same student, or a client that
+ * simply doesn't cooperate. Returns when the next scan becomes allowed.
+ */
+export async function findRecentScan(params: {
+  studentId: string;
+  partnerId: string;
+  offerId?: string | null;
+}): Promise<{ lastAt: Date; nextAllowedAt: Date } | null> {
+  const since = new Date(Date.now() - SCAN_COOLDOWN_MS);
+  const previous = await prisma.pointsLedgerEntry.findFirst({
+    where: {
+      userId: params.studentId,
+      source: LedgerSource.PARTNER_SCAN,
+      createdAt: { gte: since },
+      // Same promotion when one was chosen; otherwise same venue.
+      ...(params.offerId
+        ? { offerId: params.offerId }
+        : { refType: "Partner", refId: params.partnerId, offerId: null }),
+    },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true },
+  });
+  if (!previous) return null;
+  return {
+    lastAt: previous.createdAt,
+    nextAllowedAt: new Date(previous.createdAt.getTime() + SCAN_COOLDOWN_MS),
+  };
+}
+
 /** Award a scan to a student on behalf of a partner. Returns the new balance. */
 export async function awardScan(params: {
   studentId: string;
@@ -59,33 +103,33 @@ export async function awardScan(params: {
   return getBalance(params.studentId);
 }
 
-/** Per-venue scan tallies for the partner dashboard/home. */
 /**
  * Scan tallies for a whole venue.
  *
- * Aggregated across every login the venue has, not just the one asking: a
- * manager checking the numbers needs the till's and the bar's scans too, and
- * with several logins per venue a per-account total would badly understate it.
+ * Covers every login the venue has, not just the one asking: a manager needs
+ * the till's and the bar's scans too, and a per-account total would badly
+ * understate the venue.
  */
 export async function partnerStats(partnerId: string) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
 
-  const memberships = await prisma.partnerMembership.findMany({
-    where: { partnerId },
-    select: { userId: true },
-  });
-  const userIds = memberships.map((m) => m.userId);
+  // Attributed to the VENUE, not to whichever logins currently exist. Keying on
+  // the staff accounts meant revoking a login (someone leaves) silently erased
+  // their past scans from the venue's totals. Every scan stamps the partner id,
+  // so that survives login churn.
   const where = {
-    grantedById: { in: userIds },
     source: LedgerSource.PARTNER_SCAN,
+    refType: "Partner",
+    refId: partnerId,
   } as const;
 
   // Per-day scan counts over the last 7 calendar days (for the home line chart).
   const rows = await prisma.$queryRaw<{ day: Date; n: number }[]>`
     SELECT date_trunc('day', "createdAt") AS day, count(*)::int AS n
     FROM "PointsLedgerEntry"
-    WHERE "grantedById" = ANY(${userIds}::text[])
+    WHERE "refType" = 'Partner'
+      AND "refId" = ${partnerId}
       AND source = 'PARTNER_SCAN'
       AND "createdAt" >= (CURRENT_DATE - INTERVAL '6 days')
     GROUP BY day

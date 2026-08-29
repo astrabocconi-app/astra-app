@@ -10,6 +10,7 @@ import { loadToken, loadAccountType, loadPartnerScanOnly } from "../lib/session"
 import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
 import { useLanguageStore } from "../lib/language-store";
+import { useEggStore } from "../lib/egg-store";
 import BootOverlay from "../components/BootOverlay";
 
 initSentry();
@@ -19,6 +20,7 @@ const queryClient = new QueryClient();
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const booting = useBootStore((s) => s.booting);
+  const inverted = useEggStore((s) => s.inverted);
 
   useEffect(() => {
     // React Query's refetch-on-focus needs to be told about app foreground/
@@ -43,6 +45,8 @@ export default function RootLayout() {
       loadAccountType(),
       loadPartnerScanOnly(),
       useLanguageStore.getState().hydrate(),
+      // Before the first screen paints, or the app flashes light then flips.
+      useEggStore.getState().hydrate(),
     ]).then(([token, type, scanOnly]) => {
       if (token) {
         if (type === "partner") {
@@ -60,7 +64,7 @@ export default function RootLayout() {
 
   if (!ready) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-white dark:bg-astra-primary">
         <ActivityIndicator />
       </View>
     );
@@ -69,7 +73,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <StatusBar style="auto" />
+        <StatusBar style={inverted ? "light" : "dark"} />
         <Stack screenOptions={{ headerShown: false }} />
         {booting && <BootOverlay />}
       </SafeAreaProvider>

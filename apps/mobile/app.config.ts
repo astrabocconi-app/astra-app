@@ -79,6 +79,25 @@ const config: ExpoConfig = {
     // The public pk.* token used at runtime is separate — see lib/config.ts.
     "@rnmapbox/maps",
     [
+      // Alternate launcher icon for the hidden inverted mode (lib/egg-store.ts).
+      // The icon set is copied into the native projects at prebuild, so the
+      // swap only works in a build made after this plugin was added.
+      "expo-alternate-app-icons",
+      [
+        {
+          name: "Inverted",
+          ios: "./assets/icon-inverted.png",
+          // ponytail: the same square feeds the Android adaptive foreground.
+          // If it ends up cropped in the launcher mask, cut a padded
+          // foreground-only variant rather than adding tooling for it.
+          android: {
+            foregroundImage: "./assets/icon-inverted.png",
+            backgroundColor: "#04107E",
+          },
+        },
+      ],
+    ],
+    [
       // Android must target API 36 (required on Play as of 2026-08-31).
       // TODO(scaffold): verify the pinned Expo SDK 57 fully supports API 36.
       "expo-build-properties",

@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/**/*.{js,jsx,ts,tsx}"],
+  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+  // Driven by the hidden inverted mode (lib/egg-store.ts), not by the OS
+  // setting — the app has one look until someone finds the egg.
+  darkMode: "class",
   presets: [require("nativewind/preset")],
   theme: {
     extend: {

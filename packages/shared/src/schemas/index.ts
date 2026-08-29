@@ -202,6 +202,8 @@ export const rewardInput = z.object({
   imageUrl: optionalImageRef,
   costPoints: z.coerce.number().int().min(0, "Cost must be ≥ 0"),
   stock: z.coerce.number().int().min(0).nullish(), // null = unlimited
+  /** How many times one account may redeem this. null = no limit. */
+  perUserLimit: z.coerce.number().int().min(1).nullish(),
   active: z.boolean().default(true),
 });
 export type RewardInput = z.infer<typeof rewardInput>;
@@ -213,6 +215,7 @@ export const rewardItem = z.object({
   imageUrl: z.string().nullable(),
   costPoints: z.number().int(),
   stock: z.number().int().nullable(),
+  perUserLimit: z.number().int().nullable(),
   active: z.boolean(),
   createdAt: z.string(),
 });

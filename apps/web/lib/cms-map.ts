@@ -61,6 +61,7 @@ export function toRewardItem(r: Reward, origin?: string): RewardItem {
     imageUrl: resolveImageUrl(r.imageKey, origin),
     costPoints: r.costPoints,
     stock: r.stock,
+    perUserLimit: r.perUserLimit,
     active: r.active,
     createdAt: r.createdAt.toISOString(),
   };

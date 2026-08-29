@@ -43,6 +43,7 @@ export async function POST(req: Request) {
       imageKey: d.imageUrl ?? null,
       costPoints: d.costPoints,
       stock: d.stock ?? null,
+      perUserLimit: d.perUserLimit ?? null,
       active: d.active,
     },
   });

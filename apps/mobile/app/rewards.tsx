@@ -201,6 +201,10 @@ export default function RewardsScreen() {
           items.map((r) => {
             const affordable = points >= r.costPoints;
             const soldOut = r.stock !== null && r.stock <= 0;
+            // Show the per-account cap up front rather than letting them tap
+            // through and fail — they'd have no idea why.
+            const minesCount = redemptions.filter((x) => x.rewardId === r.id).length;
+            const capped = r.perUserLimit !== null && minesCount >= r.perUserLimit;
             const busy = busyId === r.id;
             return (
               <View
@@ -248,11 +252,11 @@ export default function RewardsScreen() {
                 </View>
 
                 <Pressable
-                  disabled={!affordable || soldOut || busy}
+                  disabled={!affordable || soldOut || capped || busy}
                   onPress={() => confirm(r)}
                   className="items-center rounded-xl py-3 active:opacity-80"
                   style={{
-                    backgroundColor: !affordable || soldOut ? "#E5E7EB" : "#04107E",
+                    backgroundColor: !affordable || soldOut || capped ? "#E5E7EB" : "#04107E",
                   }}
                 >
                   {busy ? (
@@ -260,16 +264,18 @@ export default function RewardsScreen() {
                   ) : (
                     <Text
                       className={`text-sm font-semibold ${
-                        !affordable || soldOut ? "text-gray-500" : "text-white"
+                        !affordable || soldOut || capped ? "text-gray-500" : "text-white"
                       }`}
                     >
-                      {soldOut
-                        ? t("rewards.soldOut")
-                        : affordable
-                          ? t("rewards.redeem")
-                          : t("rewards.morePoints", {
-                              points: (r.costPoints - points).toLocaleString(),
-                            })}
+                      {capped
+                        ? t("rewards.alreadyRedeemed")
+                        : soldOut
+                          ? t("rewards.soldOut")
+                          : affordable
+                            ? t("rewards.redeem")
+                            : t("rewards.morePoints", {
+                                points: (r.costPoints - points).toLocaleString(),
+                              })}
                     </Text>
                   )}
                 </Pressable>

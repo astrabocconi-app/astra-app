@@ -7,6 +7,7 @@ import {
   OutOfStockError,
   RewardUnavailableError,
   RedeemBusyError,
+  PerUserLimitError,
 } from "@/lib/rewards";
 
 export const runtime = "nodejs";
@@ -31,6 +32,9 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
         `You need ${e.required - e.balance} more points.`,
         requestId,
       );
+    }
+    if (e instanceof PerUserLimitError) {
+      return errorResponse(409, "PER_USER_LIMIT", e.message, requestId);
     }
     if (e instanceof OutOfStockError) {
       return errorResponse(409, "OUT_OF_STOCK", "This reward has just run out.", requestId);

@@ -142,6 +142,7 @@ export function createApiClient(options: ApiClientOptions) {
           await request<{
             items: {
               id: string;
+              rewardId: string;
               rewardTitle: string;
               costPoints: number;
               status: "PENDING" | "FULFILLED" | "CANCELLED";

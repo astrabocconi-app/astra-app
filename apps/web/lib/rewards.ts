@@ -35,6 +35,16 @@ export class RedeemBusyError extends Error {
     this.name = "RedeemBusyError";
   }
 }
+export class PerUserLimitError extends Error {
+  constructor(public limit: number) {
+    super(
+      limit === 1
+        ? "You've already redeemed this reward."
+        : `You've already redeemed this reward ${limit} times.`,
+    );
+    this.name = "PerUserLimitError";
+  }
+}
 
 /**
  * Serializable transactions legitimately abort when two of them touch the same
@@ -80,6 +90,18 @@ async function attemptRedeem(userId: string, rewardId: string): Promise<RedeemRe
         where: { id: rewardId, active: true, deletedAt: null },
       });
       if (!reward) throw new RewardUnavailableError();
+
+      // Per-account cap. Counted inside the Serializable transaction so a
+      // student firing several redeems at once can't slip past it — the same
+      // reason stock uses a conditional update rather than read-then-write.
+      if (reward.perUserLimit !== null) {
+        const mine = await tx.rewardRedemption.count({
+          where: { userId, rewardId },
+        });
+        if (mine >= reward.perUserLimit) {
+          throw new PerUserLimitError(reward.perUserLimit);
+        }
+      }
 
       // Balance is derived from the append-only ledger, never a stored column.
       const rows = await tx.$queryRaw<{ balance: bigint }[]>`
@@ -169,6 +191,7 @@ export async function listRedemptions(userId: string) {
   });
   return rows.map((r) => ({
     id: r.id,
+    rewardId: r.rewardId,
     rewardTitle: r.reward.title,
     costPoints: r.costPoints,
     status: r.status,

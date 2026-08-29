@@ -32,6 +32,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       ...(d.imageUrl !== undefined ? { imageKey: d.imageUrl ?? null } : {}),
       ...(d.costPoints !== undefined ? { costPoints: d.costPoints } : {}),
       ...(d.stock !== undefined ? { stock: d.stock ?? null } : {}),
+      ...(d.perUserLimit !== undefined ? { perUserLimit: d.perUserLimit ?? null } : {}),
       ...(d.active !== undefined ? { active: d.active } : {}),
     },
   });

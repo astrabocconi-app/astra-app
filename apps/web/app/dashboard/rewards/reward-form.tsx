@@ -28,6 +28,11 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
   const [costPoints, setCostPoints] = useState(initial ? String(initial.costPoints) : "");
   const [unlimited, setUnlimited] = useState(initial ? initial.stock === null : true);
   const [stock, setStock] = useState(initial?.stock != null ? String(initial.stock) : "");
+  // Default new rewards to one per account — the safe setting for ticket codes.
+  const [capPerUser, setCapPerUser] = useState(initial ? initial.perUserLimit !== null : true);
+  const [perUserLimit, setPerUserLimit] = useState(
+    initial?.perUserLimit != null ? String(initial.perUserLimit) : "1",
+  );
   const [active, setActive] = useState(initial?.active ?? true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +47,7 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
         imageUrl,
         costPoints: Number(costPoints),
         stock: unlimited ? null : Number(stock),
+        perUserLimit: capPerUser ? Number(perUserLimit) : null,
         active,
       };
       if (id) await send(`/api/admin/rewards/${id}`, "PATCH", payload);
@@ -97,6 +103,23 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
           />
         </Field>
       </div>
+      <Field
+        label="Max per account"
+        hint={
+          capPerUser
+            ? "Stops one student redeeming this over and over to collect codes."
+            : "No limit — one account can redeem this as often as it can afford."
+        }
+      >
+        <Input
+          type="number"
+          min={1}
+          value={perUserLimit}
+          onChange={(e) => setPerUserLimit(e.target.value)}
+          disabled={!capPerUser}
+          placeholder="e.g. 1"
+        />
+      </Field>
       <Field label="Image">
         <ImageInput
           value={imageUrl}
@@ -106,6 +129,12 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
         <Toggle label="Unlimited stock" checked={unlimited} onChange={setUnlimited} />
+        <Toggle
+          label="Limit per account"
+          hint="Recommended for ticket codes"
+          checked={capPerUser}
+          onChange={setCapPerUser}
+        />
         <Toggle label="Active" hint="Visible in the app" checked={active} onChange={setActive} />
       </div>
 

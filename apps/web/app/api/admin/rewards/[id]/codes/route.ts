@@ -4,6 +4,7 @@ import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
+import { deleteDiscount } from "@/lib/eventbrite";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -91,8 +92,25 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }
   const { id } = await ctx.params;
 
   // Claimed codes are never removed — a student is holding them.
+  const doomed = await prisma.rewardCode.findMany({
+    where: { rewardId: id, claimedAt: null },
+    select: { id: true, externalId: true },
+  });
+
   const result = await prisma.rewardCode.deleteMany({
     where: { rewardId: id, claimedAt: null },
   });
-  return NextResponse.json({ removed: result.count }, { headers: { "x-request-id": requestId } });
+
+  // Codes generated through the API exist on Eventbrite too. Dropping our row
+  // without revoking there would leave a live, redeemable discount that ASTRA
+  // no longer tracks. Best-effort: the pool is already correct either way.
+  const external = doomed.map((c) => c.externalId).filter((x): x is string => x !== null);
+  const revoked = external.length
+    ? (await Promise.all(external.map((x) => deleteDiscount(x)))).filter(Boolean).length
+    : 0;
+
+  return NextResponse.json(
+    { removed: result.count, revoked, revokeFailed: external.length - revoked },
+    { headers: { "x-request-id": requestId } },
+  );
 }

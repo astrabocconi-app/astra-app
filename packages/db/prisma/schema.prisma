@@ -433,6 +433,10 @@ model Reward {
   imageKey    String? // R2 object key
   costPoints  Int
   stock       Int? // null = unlimited
+  /// How many times ONE account may redeem this reward. null = no limit.
+  /// Stops a single student farming free-ticket codes; stock caps the total
+  /// across everyone, this caps it per person.
+  perUserLimit Int?
   active      Boolean   @default(true)
   areaId      String?
   createdAt   DateTime  @default(now())
@@ -459,6 +463,13 @@ model RewardCode {
   redemptionId String?   @unique
   createdAt    DateTime  @default(now())
 
+  /// Eventbrite discount id, when the code was generated through the API
+  /// rather than pasted in by hand. Without it, removing an unused code would
+  /// leave a live discount on Eventbrite that nothing points at any more.
+  externalId      String? @unique
+  /// The Eventbrite event the discount is scoped to.
+  externalEventId String?
+
   reward     Reward            @relation(fields: [rewardId], references: [id], onDelete: Cascade)
   redemption RewardRedemption? @relation(fields: [redemptionId], references: [id])
 
@@ -483,6 +494,8 @@ model RewardRedemption {
 
   @@index([userId])
   @@index([rewardId, status])
+  /// Counting a student's prior redemptions is on the redeem path (perUserLimit).
+  @@index([userId, rewardId])
 }
 
 // ============================================================================

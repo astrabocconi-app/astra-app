@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, ActivityIndicator, Linking } from "r
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
 import { useT, type TranslationKey } from "../lib/i18n";
 
@@ -111,24 +111,24 @@ export default function MaterialsScreen() {
   }) => (
     <Pressable
       onPress={onPress}
-      className={`rounded-full px-3 py-1.5 ${active ? "bg-astra-primary" : "bg-astra-light"}`}
+      className={`rounded-full px-3 py-1.5 ${active ? "bg-astra-primary dark:bg-astra-dark" : "bg-astra-light dark:bg-white/10"}`}
     >
-      <Text className={`text-xs font-semibold ${active ? "text-white" : "text-astra-primary"}`}>
+      <Text className={`text-xs font-semibold ${active ? "text-white" : "text-astra-primary dark:text-white"}`}>
         {label}
       </Text>
     </Pressable>
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {/* Header */}
-      <View className="flex-row items-center gap-2 border-b border-gray-100 px-4 py-3">
+      <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="chevron-back" size={26} color="#04107E" />
+          <Icon name="chevron-back" size={26} color="#04107E" />
         </Pressable>
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-astra-primary">{t("materials.title")}</Text>
-          <Text className="text-xs text-gray-400">
+          <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("materials.title")}</Text>
+          <Text className="text-xs text-gray-400 dark:text-white/60">
             {myCourse ? t("materials.courseHandouts", { course: myCourse }) : t("materials.yourCourseHandouts")}
           </Text>
         </View>
@@ -136,25 +136,25 @@ export default function MaterialsScreen() {
           onPress={() => Linking.openURL(ALL_MATERIALS_URL)}
           className="flex-row items-center gap-1 rounded-full border border-astra-primary/20 px-3 py-1.5 active:opacity-70"
         >
-          <Text className="text-xs font-semibold text-astra-primary">{t("materials.seeAll")}</Text>
-          <Ionicons name="open-outline" size={13} color="#04107E" />
+          <Text className="text-xs font-semibold text-astra-primary dark:text-white">{t("materials.seeAll")}</Text>
+          <Icon name="open-outline" size={13} color="#04107E" />
         </Pressable>
       </View>
 
       {!myCourse ? (
         <View className="flex-1 items-center justify-center gap-3 px-8">
-          <Ionicons name="school-outline" size={30} color="#9CA3AF" />
-          <Text className="text-center text-gray-600">
+          <Icon name="school-outline" size={30} color="#9CA3AF" />
+          <Text className="text-center text-gray-600 dark:text-gray-300">
             {t("materials.setCourseYear")}
           </Text>
           <Pressable
             onPress={() => router.push("/profile")}
-            className="mt-1 rounded-full bg-astra-primary px-5 py-2"
+            className="mt-1 rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2"
           >
             <Text className="font-medium text-white">{t("materials.goToProfile")}</Text>
           </Pressable>
           <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="mt-1">
-            <Text className="text-sm font-medium text-astra-primary underline">
+            <Text className="text-sm font-medium text-astra-primary dark:text-white underline">
               {t("materials.browseAllMaterials")}
             </Text>
           </Pressable>
@@ -165,18 +165,18 @@ export default function MaterialsScreen() {
         </View>
       ) : q.isError ? (
         <View className="flex-1 items-center justify-center gap-2 px-8">
-          <Ionicons name="cloud-offline-outline" size={28} color="#9CA3AF" />
-          <Text className="text-center text-gray-500">{t("materials.loadError")}</Text>
-          <Pressable onPress={() => q.refetch()} className="mt-2 rounded-full bg-astra-primary px-5 py-2">
+          <Icon name="cloud-offline-outline" size={28} color="#9CA3AF" />
+          <Text className="text-center text-gray-500 dark:text-gray-300">{t("materials.loadError")}</Text>
+          <Pressable onPress={() => q.refetch()} className="mt-2 rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2">
             <Text className="font-medium text-white">{t("common.retry")}</Text>
           </Pressable>
         </View>
       ) : mine.length === 0 ? (
         <View className="flex-1 items-center justify-center gap-3 px-8">
-          <Text className="text-center text-gray-500">
+          <Text className="text-center text-gray-500 dark:text-gray-300">
             {t("materials.noHandoutsForCourse", { course: myCourse })}
           </Text>
-          <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="rounded-full bg-astra-primary px-5 py-2">
+          <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2">
             <Text className="font-medium text-white">{t("materials.seeAllMaterials")}</Text>
           </Pressable>
         </View>
@@ -240,7 +240,7 @@ export default function MaterialsScreen() {
           >
             {grouped.map(([year, items]) => (
               <View key={year}>
-                <Text className="mb-1.5 text-sm font-bold uppercase tracking-wide text-astra-primary">
+                <Text className="mb-1.5 text-sm font-bold uppercase tracking-wide text-astra-primary dark:text-white">
                   {t(YEAR_FULL_KEYS[year]!)}
                 </Text>
                 <View className="gap-1.5">
@@ -248,24 +248,24 @@ export default function MaterialsScreen() {
                     <Pressable
                       key={String(it.id)}
                       onPress={() => Linking.openURL(it.url)}
-                      className="flex-row items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-3 py-3 active:opacity-70"
+                      className="flex-row items-center gap-3 rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-3 active:opacity-70"
                     >
-                      <View className="h-9 w-9 items-center justify-center rounded-lg bg-astra-light">
-                        <Ionicons name="document-text-outline" size={18} color="#04107E" />
+                      <View className="h-9 w-9 items-center justify-center rounded-lg bg-astra-light dark:bg-white/10">
+                        <Icon name="document-text-outline" size={18} color="#04107E" />
                       </View>
                       <View className="flex-1">
-                        <Text numberOfLines={2} className="text-[13px] font-medium text-gray-900">
+                        <Text numberOfLines={2} className="text-[13px] font-medium text-gray-900 dark:text-white">
                           {it.title.replace(/\.pdf$/i, "")}
                         </Text>
                         {(it.semester || it.examType) && (
-                          <Text className="text-[11px] text-gray-400">
+                          <Text className="text-[11px] text-gray-400 dark:text-white/60">
                             {[it.examType, it.semester ? t("materials.semLabel", { sem: it.semester }) : null]
                               .filter(Boolean)
                               .join(" · ")}
                           </Text>
                         )}
                       </View>
-                      <Ionicons name="download-outline" size={18} color="#04107E" />
+                      <Icon name="download-outline" size={18} color="#04107E" />
                     </Pressable>
                   ))}
                 </View>
@@ -275,8 +275,8 @@ export default function MaterialsScreen() {
               onPress={() => Linking.openURL(ALL_MATERIALS_URL)}
               className="mt-2 flex-row items-center justify-center gap-2 rounded-xl border border-astra-primary/20 py-3 active:opacity-70"
             >
-              <Text className="text-sm font-semibold text-astra-primary">{t("materials.seeAllMaterials")}</Text>
-              <Ionicons name="open-outline" size={15} color="#04107E" />
+              <Text className="text-sm font-semibold text-astra-primary dark:text-white">{t("materials.seeAllMaterials")}</Text>
+              <Icon name="open-outline" size={15} color="#04107E" />
             </Pressable>
             <View className="h-6" />
           </ScrollView>

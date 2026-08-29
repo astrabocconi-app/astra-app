@@ -73,40 +73,48 @@ export async function saveAcademicProfile(userId: string, input: AcademicProfile
     );
   }
 
-  if (input.trackId) {
-    const track = await prisma.academicTrack.findFirst({
-      where: { id: input.trackId, programmeId: programme.id, active: true },
-      select: { id: true },
-    });
-    if (!track) throw new AcademicSelectionError("Track does not belong to programme.");
+  // Both checks hang off the same programme, so there is no reason to pay for
+  // two sequential round trips.
+  const [track, classGroup] = await Promise.all([
+    input.trackId
+      ? prisma.academicTrack.findFirst({
+          where: { id: input.trackId, programmeId: programme.id, active: true },
+          select: { id: true },
+        })
+      : null,
+    input.classGroupId
+      ? prisma.academicClassGroup.findFirst({
+          where: { id: input.classGroupId, programmeId: programme.id },
+          select: { id: true },
+        })
+      : null,
+  ]);
+  if (input.trackId && !track) {
+    throw new AcademicSelectionError("Track does not belong to programme.");
+  }
+  if (input.classGroupId && !classGroup) {
+    throw new AcademicSelectionError("Class group does not belong to programme.");
   }
 
-  if (input.classGroupId) {
-    const classGroup = await prisma.academicClassGroup.findFirst({
-      where: { id: input.classGroupId, programmeId: programme.id },
-      select: { id: true },
-    });
-    if (!classGroup) throw new AcademicSelectionError("Class group does not belong to programme.");
-  }
+  const selection = {
+    programmeId: programme.id,
+    trackId: input.trackId ?? null,
+    studyYear: input.studyYear,
+    classGroupId: input.classGroupId ?? null,
+  };
 
-  await prisma.studentAcademicProfile.upsert({
+  // Same include as getAcademicProfile, so the write returns the row to render
+  // and the caller skips a follow-up read.
+  return prisma.studentAcademicProfile.upsert({
     where: { userId },
-    update: {
-      programmeId: programme.id,
-      trackId: input.trackId ?? null,
-      studyYear: input.studyYear,
-      classGroupId: input.classGroupId ?? null,
-    },
-    create: {
-      userId,
-      programmeId: programme.id,
-      trackId: input.trackId ?? null,
-      studyYear: input.studyYear,
-      classGroupId: input.classGroupId ?? null,
+    update: selection,
+    create: { userId, ...selection },
+    include: {
+      programme: { include: { catalogue: true } },
+      track: true,
+      classGroup: true,
     },
   });
-
-  return (await getAcademicProfile(userId))!;
 }
 
 export class AcademicSelectionError extends Error {}

@@ -1,5 +1,5 @@
 import { View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../../components/Icon";
 import { useT } from "../../lib/i18n";
 
 /**
@@ -13,12 +13,12 @@ import { useT } from "../../lib/i18n";
 export default function AcademicsScreen() {
   const t = useT();
   return (
-    <View className="flex-1 items-center justify-center gap-3 bg-white px-10">
-      <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
-        <Ionicons name="school-outline" size={30} color="#04107E" />
+    <View className="flex-1 items-center justify-center gap-3 bg-white dark:bg-astra-primary px-10">
+      <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
+        <Icon name="school-outline" size={30} color="#04107E" />
       </View>
-      <Text className="text-xl font-semibold text-astra-primary">{t("academics.title")}</Text>
-      <Text className="text-center text-gray-500">{t("academics.comingSoonBody")}</Text>
+      <Text className="text-xl font-semibold text-astra-primary dark:text-white">{t("academics.title")}</Text>
+      <Text className="text-center text-gray-500 dark:text-gray-300">{t("academics.comingSoonBody")}</Text>
     </View>
   );
 }

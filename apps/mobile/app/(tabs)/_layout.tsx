@@ -4,10 +4,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
+import { useEggStore } from "../../lib/egg-store";
+import { useSecretTaps } from "../../lib/use-secret-taps";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
 const DISABLED = "#C4C8D4";
+
+// Inverted mode is the brand the other way round: white on blue.
+const INVERTED_BG = BRAND;
+const INVERTED_BAR = "#020A52";
+const INVERTED_INACTIVE = "rgba(255,255,255,0.55)";
+const INVERTED_DISABLED = "rgba(255,255,255,0.3)";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
@@ -33,13 +41,26 @@ function tabIcon(name: IoniconName) {
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const t = useT();
+  const inverted = useEggStore((s) => s.inverted);
+  const toggleInverted = useEggStore((s) => s.toggleInverted);
+
+  // Two hidden gestures, both on this bar: eight taps on the wordmark invert
+  // the app, ten on the greyed-out Academics tab open it anyway.
+  const tapLogo = useSecretTaps(8);
+  const tapAcademics = useSecretTaps(10);
+
+  const fg = inverted ? "#FFFFFF" : BRAND;
+  const barBg = inverted ? INVERTED_BAR : "#FFFFFF";
+  const disabled = inverted ? INVERTED_DISABLED : DISABLED;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: BRAND,
-        tabBarInactiveTintColor: INACTIVE,
-        headerTitleStyle: { color: BRAND, fontWeight: "700" },
+        tabBarActiveTintColor: fg,
+        tabBarInactiveTintColor: inverted ? INVERTED_INACTIVE : INACTIVE,
+        headerTitleStyle: { color: fg, fontWeight: "700" },
+        headerStyle: { backgroundColor: inverted ? INVERTED_BG : "#FFFFFF" },
+        headerTintColor: fg,
         headerShadowVisible: false,
         // Respect the home-indicator inset so the icons don't hug the bottom
         // edge, and inset the bar horizontally so the outer tabs don't touch the
@@ -47,6 +68,8 @@ export default function TabsLayout() {
         tabBarStyle: [
           styles.tabBar,
           {
+            backgroundColor: barBg,
+            borderTopColor: inverted ? "rgba(255,255,255,0.12)" : "#E5E7EB",
             height: 60 + insets.bottom,
             paddingBottom: insets.bottom + 8,
             paddingHorizontal: 16,
@@ -62,13 +85,20 @@ export default function TabsLayout() {
           // Centered ASTRA wordmark instead of a "Home" title.
           headerTitleAlign: "center",
           headerTitle: () => (
-            <Image
-              // Metro resolves bundled image assets through CommonJS.
-              // eslint-disable-next-line @typescript-eslint/no-require-imports
-              source={require("../../assets/logo-horizontal.png")}
-              resizeMode="contain"
-              style={{ width: 132, height: 34 }}
-            />
+            <Pressable onPress={() => tapLogo() && toggleInverted()} hitSlop={12}>
+              <Image
+                // Metro resolves bundled image assets through CommonJS.
+                source={
+                  inverted
+                    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+                      require("../../assets/logo-horizontal-white.png")
+                    : // eslint-disable-next-line @typescript-eslint/no-require-imports
+                      require("../../assets/logo-horizontal.png")
+                }
+                resizeMode="contain"
+                style={{ width: 132, height: 34 }}
+              />
+            </Pressable>
           ),
           tabBarIcon: tabIcon("home-outline"),
         }}
@@ -100,15 +130,18 @@ export default function TabsLayout() {
           // always a pixel or two out. Greyed out, with the "Soon!" ribbon as
           // a badge, and inert via the tabPress listener below.
           tabBarIcon: ({ size }) => (
-            <Ionicons name="school-outline" size={size} color={DISABLED} />
+            <Ionicons name="school-outline" size={size} color={disabled} />
           ),
-          tabBarLabelStyle: { fontSize: 11, color: DISABLED },
+          tabBarLabelStyle: { fontSize: 11, color: disabled },
           tabBarBadge: t("academics.soonFlag"),
           tabBarBadgeStyle: styles.soonBadge,
         }}
         listeners={{
-          // Visible but not yet navigable.
-          tabPress: (e) => e.preventDefault(),
+          // Visible but not yet navigable — except to whoever taps it ten times.
+          // Let the tenth tap through and the navigator does the rest.
+          tabPress: (e) => {
+            if (!tapAcademics()) e.preventDefault();
+          },
         }}
       />
     </Tabs>
@@ -117,7 +150,6 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    borderTopColor: "#E5E7EB",
     paddingTop: 8,
   },
   centerWrap: {

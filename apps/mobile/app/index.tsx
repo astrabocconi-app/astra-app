@@ -155,7 +155,7 @@ export default function LoginScreen() {
           <View className="w-full items-center gap-4" style={{ maxWidth: 360 }}>
             {mode === "student" ? (
               <>
-                <Text className="text-center text-sm text-gray-600">
+                <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
                   {step === "email"
                     ? t("login.signInWithEmail", {
                         domains: ALLOWED_EMAIL_DOMAINS.map((d) => "@" + d).join(" or "),
@@ -163,14 +163,14 @@ export default function LoginScreen() {
                     : t("login.enterCode", { email })}
                 </Text>
                 {step === "code" && (
-                  <Text className="-mt-2 text-center text-xs text-gray-400">
+                  <Text className="-mt-2 text-center text-xs text-gray-400 dark:text-white/60">
                     {t("login.checkJunkFolder")}
                   </Text>
                 )}
 
                 {step === "email" ? (
                   <TextInput
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center"
+                    className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center"
                     placeholder="name@studbocconi.it"
                     autoCapitalize="none"
                     autoCorrect={false}
@@ -183,7 +183,7 @@ export default function LoginScreen() {
                   />
                 ) : (
                   <TextInput
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center text-xl tracking-[8px]"
+                    className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center text-xl tracking-[8px]"
                     placeholder="000000"
                     keyboardType="number-pad"
                     textContentType="oneTimeCode"
@@ -228,18 +228,18 @@ export default function LoginScreen() {
                       setError(null);
                     }}
                   >
-                    <Text className="text-center text-sm text-gray-500">{t("login.useDifferentEmail")}</Text>
+                    <Text className="text-center text-sm text-gray-500 dark:text-gray-300">{t("login.useDifferentEmail")}</Text>
                   </Pressable>
                 )}
               </>
             ) : (
               <>
-                <Text className="text-center text-sm text-gray-600">
+                <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
                   {t("login.partnerSignInDesc")}
                 </Text>
 
                 <TextInput
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center"
+                  className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center"
                   placeholder={t("login.venueCodePlaceholder")}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -248,7 +248,7 @@ export default function LoginScreen() {
                   editable={!loading}
                 />
                 <TextInput
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-center"
+                  className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center"
                   placeholder={t("login.passwordPlaceholder")}
                   secureTextEntry
                   autoCapitalize="none"
@@ -283,7 +283,7 @@ export default function LoginScreen() {
                 className="mt-2"
                 onPress={() => switchMode(mode === "student" ? "partner" : "student")}
               >
-                <Text className="text-center text-sm font-medium text-astra-primary">
+                <Text className="text-center text-sm font-medium text-astra-primary dark:text-white">
                   {mode === "student" ? t("login.imPartner") : t("login.backToStudent")}
                 </Text>
               </Pressable>
@@ -294,9 +294,9 @@ export default function LoginScreen() {
 
         {Platform.OS === "ios" && (
           <InputAccessoryView nativeID={OTP_ACCESSORY_ID}>
-            <View className="flex-row justify-end border-t border-gray-200 bg-gray-50 px-4 py-2">
+            <View className="flex-row justify-end border-t border-gray-200 dark:border-white/15 bg-gray-50 dark:bg-white/5 px-4 py-2">
               <Pressable onPress={Keyboard.dismiss} hitSlop={8}>
-                <Text className="text-base font-semibold text-astra-primary">
+                <Text className="text-base font-semibold text-astra-primary dark:text-white">
                   {t("common.done")}
                 </Text>
               </Pressable>

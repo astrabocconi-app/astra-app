@@ -14,9 +14,9 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import * as Clipboard from "expo-clipboard";
-import { Ionicons } from "@expo/vector-icons";
 import { api } from "../lib/api";
 import { useT } from "../lib/i18n";
+import { Icon } from "../components/Icon";
 import { SegmentedToggle } from "../components/SegmentedToggle";
 
 type Voucher = { code: string | null; title: string };
@@ -84,20 +84,22 @@ export default function RewardsScreen() {
   }
 
   const header = (
-    <View className="flex-row items-center gap-2 border-b border-gray-100 px-4 py-3">
+    <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
       <Pressable onPress={() => router.back()} hitSlop={10}>
-        <Ionicons name="chevron-back" size={26} color="#04107E" />
+        <Icon name="chevron-back" size={26} color="#04107E" />
       </Pressable>
       <View>
-        <Text className="text-lg font-semibold text-astra-primary">{t("rewards.title")}</Text>
-        <Text className="text-xs text-gray-400">{t("rewards.subtitle")}</Text>
+        <Text className="text-lg font-semibold text-astra-primary dark:text-white">
+          {t("rewards.title")}
+        </Text>
+        <Text className="text-xs text-gray-400 dark:text-white/60">{t("rewards.subtitle")}</Text>
       </View>
     </View>
   );
 
   if (rewards.isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+      <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
         {header}
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#04107E" />
@@ -107,21 +109,21 @@ export default function RewardsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {header}
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 14 }}
       >
         {/* Balance banner */}
-        <View className="flex-row items-center justify-between rounded-2xl bg-astra-primary px-5 py-4">
+        <View className="flex-row items-center justify-between rounded-2xl bg-astra-primary dark:bg-astra-dark px-5 py-4">
           <View>
             <Text className="text-xs uppercase tracking-wide text-white/70">
               {t("rewards.yourPoints")}
             </Text>
             <Text className="mt-0.5 text-2xl font-bold text-white">{points.toLocaleString()}</Text>
           </View>
-          <Ionicons name="gift" size={26} color="rgba(255,255,255,0.85)" />
+          <Icon name="gift" size={26} color="rgba(255,255,255,0.85)" />
         </View>
 
         <SegmentedToggle
@@ -136,24 +138,31 @@ export default function RewardsScreen() {
         {tab === "redeemed" ? (
           redemptions.length === 0 ? (
             <View className="mt-10 items-center gap-3 px-4">
-              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
-                <Ionicons name="ticket-outline" size={30} color="#04107E" />
+              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
+                <Icon name="ticket-outline" size={30} color="#04107E" />
               </View>
-              <Text className="text-xl font-semibold text-astra-primary">
+              <Text className="text-xl font-semibold text-astra-primary dark:text-white">
                 {t("rewards.noneRedeemedTitle")}
               </Text>
-              <Text className="text-center text-gray-500">{t("rewards.noneRedeemedBody")}</Text>
+              <Text className="text-center text-gray-500 dark:text-gray-300">
+                {t("rewards.noneRedeemedBody")}
+              </Text>
             </View>
           ) : (
             redemptions.map((r) => (
-              <View key={r.id} className="rounded-2xl border border-gray-100 bg-white p-4">
+              <View
+                key={r.id}
+                className="rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4"
+              >
                 <View className="flex-row items-start gap-3">
-                  <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-                    <Ionicons name="ticket" size={21} color="#04107E" />
+                  <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+                    <Icon name="ticket" size={21} color="#04107E" />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-gray-900">{r.rewardTitle}</Text>
-                    <Text className="mt-0.5 text-xs text-gray-400">
+                    <Text className="text-base font-semibold text-gray-900 dark:text-white">
+                      {r.rewardTitle}
+                    </Text>
+                    <Text className="mt-0.5 text-xs text-gray-400 dark:text-white/60">
                       {new Date(r.createdAt).toLocaleDateString()} ·{" "}
                       {t("rewards.spentPoints", { points: r.costPoints.toLocaleString() })}
                     </Text>
@@ -161,8 +170,8 @@ export default function RewardsScreen() {
                 </View>
 
                 {r.code ? (
-                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-astra-light px-3 py-2.5">
-                    <Text className="flex-1 font-mono text-[15px] font-bold text-astra-primary">
+                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-astra-light dark:bg-white/10 px-3 py-2.5">
+                    <Text className="flex-1 font-mono text-[15px] font-bold text-astra-primary dark:text-white">
                       {r.code}
                     </Text>
                     <Pressable
@@ -171,15 +180,15 @@ export default function RewardsScreen() {
                         Alert.alert(t("rewards.copiedTitle"));
                       }}
                       hitSlop={8}
-                      className="rounded-lg bg-astra-primary px-3 py-1.5 active:opacity-80"
+                      className="rounded-lg bg-astra-primary dark:bg-astra-dark px-3 py-1.5 active:opacity-80"
                     >
                       <Text className="text-xs font-semibold text-white">{t("common.copy")}</Text>
                     </Pressable>
                   </View>
                 ) : (
-                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-amber-50 px-3 py-2.5">
-                    <Ionicons name="time-outline" size={16} color="#d97706" />
-                    <Text className="flex-1 text-[13px] text-amber-800">
+                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-500/15 px-3 py-2.5">
+                    <Icon name="time-outline" size={16} color="#d97706" />
+                    <Text className="flex-1 text-[13px] text-amber-800 dark:text-amber-200">
                       {t("rewards.pendingFulfilment")}
                     </Text>
                   </View>
@@ -189,13 +198,15 @@ export default function RewardsScreen() {
           )
         ) : items.length === 0 ? (
           <View className="mt-10 items-center gap-3 px-4">
-            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
-              <Ionicons name="gift-outline" size={30} color="#04107E" />
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
+              <Icon name="gift-outline" size={30} color="#04107E" />
             </View>
-            <Text className="text-xl font-semibold text-astra-primary">
+            <Text className="text-xl font-semibold text-astra-primary dark:text-white">
               {t("rewards.emptyTitle")}
             </Text>
-            <Text className="text-center text-gray-500">{t("rewards.emptyBody")}</Text>
+            <Text className="text-center text-gray-500 dark:text-gray-300">
+              {t("rewards.emptyBody")}
+            </Text>
           </View>
         ) : (
           items.map((r) => {
@@ -209,7 +220,7 @@ export default function RewardsScreen() {
             return (
               <View
                 key={r.id}
-                className="gap-3 rounded-2xl border border-gray-100 bg-white p-4"
+                className="gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4"
                 style={{
                   shadowColor: "#04107E",
                   shadowOpacity: 0.06,
@@ -226,28 +237,35 @@ export default function RewardsScreen() {
                       style={{ width: 64, height: 64, borderRadius: 14 }}
                     />
                   ) : (
-                    <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light">
-                      <Ionicons name="gift-outline" size={26} color="#04107E" />
+                    <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
+                      <Icon name="gift-outline" size={26} color="#04107E" />
                     </View>
                   )}
                   <View className="flex-1">
-                    <Text className="text-base font-semibold text-gray-900">{r.title}</Text>
+                    <Text className="text-base font-semibold text-gray-900 dark:text-white">
+                      {r.title}
+                    </Text>
                     {r.description ? (
-                      <Text className="mt-0.5 text-xs text-gray-500" numberOfLines={2}>
+                      <Text
+                        className="mt-0.5 text-xs text-gray-500 dark:text-gray-300"
+                        numberOfLines={2}
+                      >
                         {r.description}
                       </Text>
                     ) : null}
                     {r.stock !== null && r.stock > 0 && (
-                      <Text className="mt-1 text-[11px] text-gray-400">
+                      <Text className="mt-1 text-[11px] text-gray-400 dark:text-white/60">
                         {t("rewards.leftCount", { count: String(r.stock) })}
                       </Text>
                     )}
                   </View>
                   <View className="items-end">
-                    <Text className="text-lg font-bold text-astra-primary">
+                    <Text className="text-lg font-bold text-astra-primary dark:text-white">
                       {r.costPoints.toLocaleString()}
                     </Text>
-                    <Text className="text-[11px] text-gray-400">{t("rewards.pointsLabel")}</Text>
+                    <Text className="text-[11px] text-gray-400 dark:text-white/60">
+                      {t("rewards.pointsLabel")}
+                    </Text>
                   </View>
                 </View>
 
@@ -288,21 +306,26 @@ export default function RewardsScreen() {
       {/* Voucher handed out */}
       <Modal visible={voucher !== null} transparent animationType="fade">
         <View style={[StyleSheet.absoluteFill, styles.center, { backgroundColor: "rgba(0,0,0,0.6)", padding: 28 }]}>
-          <View className="w-full items-center rounded-3xl bg-white p-7" style={{ maxWidth: 340 }}>
-            <View className="h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <Ionicons name="checkmark" size={34} color="#16a34a" />
+          <View
+            className="w-full items-center rounded-3xl bg-white dark:bg-astra-dark p-7"
+            style={{ maxWidth: 340 }}
+          >
+            <View className="h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
+              <Icon name="checkmark" size={34} color="#16a34a" />
             </View>
-            <Text className="mt-4 text-center text-xl font-bold text-gray-900">
+            <Text className="mt-4 text-center text-xl font-bold text-gray-900 dark:text-white">
               {t("rewards.redeemedTitle")}
             </Text>
-            <Text className="mt-1 text-center text-sm text-gray-500">{voucher?.title}</Text>
+            <Text className="mt-1 text-center text-sm text-gray-500 dark:text-gray-300">
+              {voucher?.title}
+            </Text>
 
             {voucher?.code ? (
               <>
-                <Text className="mt-5 text-[11px] uppercase tracking-wide text-gray-400">
+                <Text className="mt-5 text-[11px] uppercase tracking-wide text-gray-400 dark:text-white/60">
                   {t("rewards.yourCode")}
                 </Text>
-                <Text className="mt-1 text-center font-mono text-xl font-bold text-astra-primary">
+                <Text className="mt-1 text-center font-mono text-xl font-bold text-astra-primary dark:text-white">
                   {voucher.code}
                 </Text>
                 <Pressable
@@ -310,25 +333,25 @@ export default function RewardsScreen() {
                     await Clipboard.setStringAsync(voucher.code!);
                     Alert.alert(t("rewards.copiedTitle"));
                   }}
-                  className="mt-3 w-full items-center rounded-xl bg-astra-light py-2.5 active:opacity-70"
+                  className="mt-3 w-full items-center rounded-xl bg-astra-light dark:bg-white/10 py-2.5 active:opacity-70"
                 >
-                  <Text className="text-sm font-semibold text-astra-primary">
+                  <Text className="text-sm font-semibold text-astra-primary dark:text-white">
                     {t("rewards.copyCode")}
                   </Text>
                 </Pressable>
-                <Text className="mt-3 text-center text-[11px] leading-4 text-gray-400">
+                <Text className="mt-3 text-center text-[11px] leading-4 text-gray-400 dark:text-white/60">
                   {t("rewards.codeHint")}
                 </Text>
               </>
             ) : (
-              <Text className="mt-4 text-center text-sm text-gray-600">
+              <Text className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">
                 {t("rewards.pendingBody")}
               </Text>
             )}
 
             <Pressable
               onPress={() => setVoucher(null)}
-              className="mt-5 w-full items-center rounded-xl bg-astra-primary py-3 active:opacity-90"
+              className="mt-5 w-full items-center rounded-xl bg-astra-primary dark:bg-white/15 py-3 active:opacity-90"
             >
               <Text className="font-semibold text-white">{t("common.done")}</Text>
             </Pressable>

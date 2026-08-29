@@ -13,7 +13,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
 import { clearToken } from "../lib/session";
 import { sendTestNotification } from "../lib/push";
@@ -153,14 +153,14 @@ export default function ProfileScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       {/* Reached from the Home header rather than a tab, so it carries its own
           back affordance like the other pushed screens. */}
-      <View className="flex-row items-center gap-2 border-b border-gray-100 px-4 py-3">
+      <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
         <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Ionicons name="chevron-back" size={26} color="#04107E" />
+          <Icon name="chevron-back" size={26} color="#04107E" />
         </Pressable>
-        <Text className="text-lg font-semibold text-astra-primary">{t("tabs.profile")}</Text>
+        <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("tabs.profile")}</Text>
       </View>
 
       <ScrollView
@@ -180,15 +180,15 @@ export default function ProfileScreen() {
 
       {data && (
         <View className="items-center gap-2 pt-4">
-          <View className="h-20 w-20 items-center justify-center rounded-full bg-astra-light">
-            <Ionicons name="person" size={36} color="#04107E" />
+          <View className="h-20 w-20 items-center justify-center rounded-full bg-astra-light dark:bg-white/10">
+            <Icon name="person" size={36} color="#04107E" />
           </View>
-          <Text className="text-xl font-semibold text-gray-900">
+          <Text className="text-xl font-semibold text-gray-900 dark:text-white">
             {data.name?.split(" ")[0] ?? t("profile.student")}
           </Text>
           {/* Programme · year · class shown next to the name once selected */}
           {academic ? (
-            <Text className="text-sm text-gray-500">
+            <Text className="text-sm text-gray-500 dark:text-gray-300">
               {[
                 academic.programme.code,
                 academic.track?.code,
@@ -199,13 +199,13 @@ export default function ProfileScreen() {
                 .join(" · ")}
             </Text>
           ) : (
-            <Text className="text-sm text-gray-400">{t("profile.addAcademicInfo")}</Text>
+            <Text className="text-sm text-gray-400 dark:text-white/60">{t("profile.addAcademicInfo")}</Text>
           )}
           <View className="mt-1 flex-row gap-2">
             {data.roles.map((r) => (
               <Text
                 key={r}
-                className="rounded-full bg-astra-light px-3 py-1 text-xs font-medium text-astra-primary"
+                className="rounded-full bg-astra-light dark:bg-white/10 px-3 py-1 text-xs font-medium text-astra-primary dark:text-white"
               >
                 {r}
               </Text>
@@ -215,70 +215,70 @@ export default function ProfileScreen() {
       )}
 
       {/* Academic selection drives Materials and future gradebook content. */}
-      <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
         {t("profile.academic")}
       </Text>
       <View className="gap-2">
         <Pressable
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
           onPress={() => setPicker("programme")}
         >
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-            <Ionicons name="book-outline" size={22} color="#04107E" />
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+            <Icon name="book-outline" size={22} color="#04107E" />
           </View>
           <View className="flex-1">
-            <Text className="text-xs text-gray-500">{t("profile.programme")}</Text>
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.programme")}</Text>
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">
               {academic?.programme.code ?? t("profile.selectProgramme")}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+          <Icon name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
 
         {selectedProgramme?.tracks.length ? (
           <Pressable
-            className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+            className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
             onPress={() => setPicker("track")}
           >
-            <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-              <Ionicons name="git-branch-outline" size={22} color="#04107E" />
+            <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+              <Icon name="git-branch-outline" size={22} color="#04107E" />
             </View>
             <View className="flex-1">
-              <Text className="text-xs text-gray-500">{t("profile.track")}</Text>
-              <Text className="text-base font-semibold text-gray-900">
+              <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.track")}</Text>
+              <Text className="text-base font-semibold text-gray-900 dark:text-white">
                 {academic?.track?.name ?? t("profile.selectTrack")}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            <Icon name="chevron-forward" size={18} color="#9CA3AF" />
           </Pressable>
         ) : null}
 
         <Pressable
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
           onPress={() => academic && setPicker("year")}
         >
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-            <Ionicons name="calendar-outline" size={22} color="#04107E" />
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+            <Icon name="calendar-outline" size={22} color="#04107E" />
           </View>
           <View className="flex-1">
-            <Text className="text-xs text-gray-500">{t("profile.year")}</Text>
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.year")}</Text>
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">
               {academic ? `${t("profile.year")} ${academic.studyYear}` : t("profile.selectYearProgrammeFirst")}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+          <Icon name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
 
         <Pressable
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
           onPress={() => (selectedProgramme?.classGroups.length ? setPicker("class") : undefined)}
         >
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-            <Ionicons name="people-outline" size={22} color="#04107E" />
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+            <Icon name="people-outline" size={22} color="#04107E" />
           </View>
           <View className="flex-1">
-            <Text className="text-xs text-gray-500">{t("profile.class")}</Text>
-            <Text className="text-base font-semibold text-gray-900">
+            <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.class")}</Text>
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">
               {academic?.classGroup
                 ? `${t("profile.class")} ${academic.classGroup.code}`
                 : selectedProgramme?.classGroups.length
@@ -286,51 +286,51 @@ export default function ProfileScreen() {
                   : t("profile.classAwaiting")}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+          <Icon name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
       </View>
 
       {/* Services */}
-      <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
         {t("profile.services")}
       </Text>
       <Pressable
-        className="flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+        className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
         onPress={() => router.push("/classrooms")}
       >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="school-outline" size={22} color="#04107E" />
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+          <Icon name="school-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{t("profile.findClassroom")}</Text>
-          <Text className="text-xs text-gray-500">{t("profile.findClassroomSub")}</Text>
+          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("profile.findClassroom")}</Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.findClassroomSub")}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
       {__DEV__ && (
         <Pressable
-          className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4 active:bg-gray-50"
+          className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
           onPress={async () => Alert.alert(t("profile.notificationsTitle"), await sendTestNotification())}
         >
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-            <Ionicons name="notifications-outline" size={22} color="#04107E" />
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+            <Icon name="notifications-outline" size={22} color="#04107E" />
           </View>
           <View className="flex-1">
-            <Text className="text-base font-semibold text-gray-900">{t("profile.sendTestNotification")}</Text>
-            <Text className="text-xs text-gray-500">{t("profile.sendTestNotificationSub")}</Text>
+            <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("profile.sendTestNotification")}</Text>
+            <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.sendTestNotificationSub")}</Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+          <Icon name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
       )}
 
-      <View className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 p-4">
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="language-outline" size={22} color="#04107E" />
+      <View className="mt-2 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4">
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+          <Icon name="language-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{t("profile.language")}</Text>
-          <Text className="text-xs text-gray-500">{t("profile.languageSub")}</Text>
+          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("profile.language")}</Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.languageSub")}</Text>
         </View>
         <View className="flex-row items-center gap-2">
           <Text className={language === "it" ? "text-base" : "text-base opacity-40"}>🇮🇹</Text>
@@ -351,7 +351,7 @@ export default function ProfileScreen() {
         style={{ marginBottom: insets.bottom + 16 }}
         onPress={signOut}
       >
-        <Ionicons name="log-out-outline" size={18} color="#DC2626" />
+        <Icon name="log-out-outline" size={18} color="#DC2626" />
         <Text className="text-center font-semibold text-red-600">{t("common.signOut")}</Text>
       </Pressable>
 
@@ -372,13 +372,13 @@ export default function ProfileScreen() {
             onPress={() => setPicker(null)}
           />
           <View
-            className="rounded-t-3xl bg-white pt-3"
+            className="rounded-t-3xl bg-white dark:bg-astra-primary pt-3"
             style={{ maxHeight: "70%", paddingBottom: insets.bottom + 12 }}
           >
             <View className="mb-2 items-center">
               <View className="h-1 w-10 rounded-full bg-gray-300" />
             </View>
-            <Text className="px-5 pb-2 text-lg font-semibold text-gray-900">
+            <Text className="px-5 pb-2 text-lg font-semibold text-gray-900 dark:text-white">
               {picker === "programme"
                 ? t("profile.selectProgramme")
                 : picker === "track"
@@ -397,11 +397,11 @@ export default function ProfileScreen() {
                     onPress={() => choose(opt.value)}
                   >
                     <Text
-                      className={`flex-1 pr-3 text-base ${selected ? "font-semibold text-astra-primary" : "text-gray-800"}`}
+                      className={`flex-1 pr-3 text-base ${selected ? "font-semibold text-astra-primary dark:text-white" : "text-gray-800 dark:text-gray-100"}`}
                     >
                       {opt.label}
                     </Text>
-                    {selected && <Ionicons name="checkmark" size={20} color="#04107E" />}
+                    {selected && <Icon name="checkmark" size={20} color="#04107E" />}
                   </Pressable>
                 );
               })}

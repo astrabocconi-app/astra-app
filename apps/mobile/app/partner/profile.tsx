@@ -2,7 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../../components/Icon";
 import { api } from "../../lib/api";
 import { clearToken } from "../../lib/session";
 import { useT } from "../../lib/i18n";
@@ -24,15 +24,15 @@ export default function PartnerProfileScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white p-5" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary p-5" edges={["top"]}>
       <View className="items-center gap-3 pt-6">
-        <View className="h-20 w-20 items-center justify-center rounded-full bg-astra-light">
-          <Ionicons name="storefront" size={36} color="#04107E" />
+        <View className="h-20 w-20 items-center justify-center rounded-full bg-astra-light dark:bg-white/10">
+          <Icon name="storefront" size={36} color="#04107E" />
         </View>
-        <Text className="text-xl font-semibold text-gray-900">
+        <Text className="text-xl font-semibold text-gray-900 dark:text-white">
           {stats.data?.partner.name ?? t("partnerProfile.partnerVenueFallback")}
         </Text>
-        <Text className="rounded-full bg-astra-light px-3 py-1 text-xs font-medium text-astra-primary">
+        <Text className="rounded-full bg-astra-light dark:bg-white/10 px-3 py-1 text-xs font-medium text-astra-primary dark:text-white">
           {t("partnerProfile.partnerVenueBadge")}
         </Text>
       </View>
@@ -40,11 +40,11 @@ export default function PartnerProfileScreen() {
       <View className="flex-1" />
 
       <Pressable
-        className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-3"
+        className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-white/15 px-4 py-3"
         style={{ marginBottom: insets.bottom + 80 }}
         onPress={signOut}
       >
-        <Ionicons name="log-out-outline" size={20} color="#dc2626" />
+        <Icon name="log-out-outline" size={20} color="#dc2626" />
         <Text className="font-semibold text-red-600">{t("common.signOut")}</Text>
       </Pressable>
     </SafeAreaView>

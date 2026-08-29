@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import QRCode from "react-native-qrcode-svg";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../../components/Icon";
 import { api } from "../../lib/api";
 import { saveCardToken, loadCardToken } from "../../lib/session";
 import { useT } from "../../lib/i18n";
@@ -37,15 +37,15 @@ export default function CardScreen() {
   const token = card.data?.token ?? cachedToken;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-2xl font-bold text-astra-primary">{t("card.title")}</Text>
-        <Text className="mt-2 text-center text-gray-500">
+        <Text className="text-2xl font-bold text-astra-primary dark:text-white">{t("card.title")}</Text>
+        <Text className="mt-2 text-center text-gray-500 dark:text-gray-300">
           {t("card.subtitle")}
         </Text>
 
         <View
-          className="mt-10 items-center justify-center rounded-3xl border border-gray-100 bg-white p-7"
+          className="mt-10 items-center justify-center rounded-3xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-7"
           style={{
             width: 288,
             height: 288,
@@ -74,24 +74,24 @@ export default function CardScreen() {
             <ActivityIndicator />
           ) : (
             <View className="items-center gap-2">
-              <Ionicons name="cloud-offline-outline" size={28} color="#9CA3AF" />
-              <Text className="text-center text-gray-400">{t("card.loadError")}</Text>
+              <Icon name="cloud-offline-outline" size={28} color="#9CA3AF" />
+              <Text className="text-center text-gray-400 dark:text-white/60">{t("card.loadError")}</Text>
             </View>
           )}
         </View>
 
-        <Text className="mt-8 text-lg font-semibold text-gray-900">
+        <Text className="mt-8 text-lg font-semibold text-gray-900 dark:text-white">
           {me.data?.name ?? t("card.memberFallback")}
         </Text>
 
         {/* Reassurance: the code refreshes on its own and works without signal. */}
         <View className="mt-4 flex-row items-center gap-1.5">
-          <Ionicons name="refresh" size={13} color="#9CA3AF" />
-          <Text className="text-xs text-gray-400">{t("card.autoRefresh")}</Text>
+          <Icon name="refresh" size={13} color="#9CA3AF" />
+          <Text className="text-xs text-gray-400 dark:text-white/60">{t("card.autoRefresh")}</Text>
         </View>
         <View className="mt-1 flex-row items-center gap-1.5">
-          <Ionicons name="cloud-offline-outline" size={13} color="#9CA3AF" />
-          <Text className="text-xs text-gray-400">{t("card.worksOffline")}</Text>
+          <Icon name="cloud-offline-outline" size={13} color="#9CA3AF" />
+          <Text className="text-xs text-gray-400 dark:text-white/60">{t("card.worksOffline")}</Text>
         </View>
       </View>
     </SafeAreaView>

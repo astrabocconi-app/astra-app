@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "../../components/Icon";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 
@@ -42,15 +42,15 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ paddingBottom: 32 }}>
+    <ScrollView className="flex-1 bg-white dark:bg-astra-primary" contentContainerStyle={{ paddingBottom: 32 }}>
       {/* Greeting — welcome + name on one line, with the profile button on the
           same baseline rather than up in the header. */}
       <View className="flex-row items-center gap-3 px-5 pt-4">
-        <Text className="flex-1 text-2xl font-semibold text-gray-800">
+        <Text className="flex-1 text-2xl font-semibold text-gray-800 dark:text-gray-100">
           {t("home.welcome")}
           {firstName ? (
             <>
-              , <Text className="text-astra-primary">{firstName}</Text>
+              , <Text className="text-astra-primary dark:text-white">{firstName}</Text>
             </>
           ) : null}{" "}
           👋
@@ -59,9 +59,9 @@ export default function HomeScreen() {
           onPress={() => router.push("/profile")}
           hitSlop={10}
           accessibilityLabel={t("tabs.profile")}
-          className="h-10 w-10 items-center justify-center rounded-full bg-astra-light active:opacity-70"
+          className="h-10 w-10 items-center justify-center rounded-full bg-astra-light dark:bg-white/10 active:opacity-70"
         >
-          <Ionicons name="person" size={20} color="#04107E" />
+          <Icon name="person" size={20} color="#04107E" />
         </Pressable>
       </View>
 
@@ -113,16 +113,16 @@ export default function HomeScreen() {
                   ) : (
                     <View
                       style={{ flex: 1, borderWidth: 1.5, borderColor: TINTS[i % TINTS.length] }}
-                      className="justify-center rounded-2xl bg-white p-5"
+                      className="justify-center rounded-2xl bg-white dark:bg-astra-primary p-5"
                     >
-                      <Text className="text-[11px] font-medium uppercase tracking-wide text-astra-primary">
+                      <Text className="text-[11px] font-medium uppercase tracking-wide text-astra-primary dark:text-white">
                         {t("home.news")}
                       </Text>
-                      <Text className="mt-1 text-lg font-semibold text-gray-900" numberOfLines={1}>
+                      <Text className="mt-1 text-lg font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
                         {n.title}
                       </Text>
                       {n.excerpt ? (
-                        <Text className="mt-1 text-sm text-gray-500" numberOfLines={2}>
+                        <Text className="mt-1 text-sm text-gray-500 dark:text-gray-300" numberOfLines={2}>
                           {n.excerpt}
                         </Text>
                       ) : null}
@@ -152,19 +152,19 @@ export default function HomeScreen() {
       {/* Ask ASTRA — RAG chatbot entry point */}
       <Pressable
         onPress={() => router.push("/ask")}
-        className="mx-5 mt-4 flex-row items-center gap-2.5 rounded-2xl bg-astra-light px-4 py-3.5 active:opacity-90"
+        className="mx-5 mt-4 flex-row items-center gap-2.5 rounded-2xl bg-astra-light dark:bg-white/10 px-4 py-3.5 active:opacity-90"
       >
-        <Ionicons name="sparkles" size={18} color="#04107E" />
-        <Text className="flex-1 text-sm font-medium text-astra-primary">
+        <Icon name="sparkles" size={18} color="#04107E" />
+        <Text className="flex-1 text-sm font-medium text-astra-primary dark:text-white">
           {t("home.askAstra")}
         </Text>
-        <Ionicons name="chevron-forward" size={16} color="#04107E" />
+        <Icon name="chevron-forward" size={16} color="#04107E" />
       </Pressable>
 
       {/* Free@B — quick shortcut to the classroom finder */}
       <Pressable
         onPress={() => router.push("/classrooms")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
+        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:bg-gray-50"
         style={{
           shadowColor: "#04107E",
           shadowOpacity: 0.06,
@@ -173,20 +173,20 @@ export default function HomeScreen() {
           elevation: 2,
         }}
       >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="school-outline" size={22} color="#04107E" />
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+          <Icon name="school-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{t("home.findClassroom")}</Text>
-          <Text className="text-xs text-gray-500">{t("home.findClassroomSub")}</Text>
+          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("home.findClassroom")}</Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("home.findClassroomSub")}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
       {/* Materials — handouts & dispense */}
       <Pressable
         onPress={() => router.push("/materials")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
+        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:bg-gray-50"
         style={{
           shadowColor: "#04107E",
           shadowOpacity: 0.06,
@@ -195,21 +195,21 @@ export default function HomeScreen() {
           elevation: 2,
         }}
       >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="library-outline" size={22} color="#04107E" />
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+          <Icon name="library-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{t("home.materials")}</Text>
-          <Text className="text-xs text-gray-500">{t("home.materialsSub")}</Text>
+          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("home.materials")}</Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("home.materialsSub")}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
       {/* Rewards — no longer a tab (Discounts took its place), so this is the
           way students reach the catalogue. */}
       <Pressable
         onPress={() => router.push("/rewards")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
+        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:bg-gray-50"
         style={{
           shadowColor: "#04107E",
           shadowOpacity: 0.06,
@@ -218,27 +218,27 @@ export default function HomeScreen() {
           elevation: 2,
         }}
       >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="gift-outline" size={22} color="#04107E" />
+        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+          <Icon name="gift-outline" size={22} color="#04107E" />
         </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">{t("home.rewards")}</Text>
-          <Text className="text-xs text-gray-500">{t("home.rewardsSub")}</Text>
+          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("home.rewards")}</Text>
+          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("home.rewardsSub")}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
       </Pressable>
 
       {/* Your account */}
-      <Text className="mt-6 px-5 text-lg font-semibold text-gray-900">{t("home.yourAccount")}</Text>
+      <Text className="mt-6 px-5 text-lg font-semibold text-gray-900 dark:text-white">{t("home.yourAccount")}</Text>
       <View className="px-5 pt-3">
         {/* Points balance */}
         <Pressable
-          className="rounded-2xl bg-astra-primary p-5 active:opacity-90"
+          className="rounded-2xl bg-astra-primary dark:bg-astra-dark p-5 active:opacity-90"
           onPress={() => router.push("/points-history")}
         >
           <View className="flex-row items-center justify-between">
             <Text className="text-xs uppercase tracking-wide text-white/70">{t("home.yourPoints")}</Text>
-            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
+            <Icon name="chevron-forward" size={16} color="rgba(255,255,255,0.7)" />
           </View>
           <Text className="mt-1 text-4xl font-bold text-white">
             {balance.isLoading ? "…" : (balance.data?.balance ?? 0).toLocaleString()}
@@ -247,14 +247,14 @@ export default function HomeScreen() {
         </Pressable>
 
         {/* Recent activity */}
-        <View className="mt-3 rounded-2xl border border-gray-100 p-4">
-          <Text className="mb-2 text-sm font-medium text-gray-500">{t("home.recentActivity")}</Text>
+        <View className="mt-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4">
+          <Text className="mb-2 text-sm font-medium text-gray-500 dark:text-gray-300">{t("home.recentActivity")}</Text>
           {recent.length === 0 ? (
-            <Text className="py-2 text-center text-gray-400">{t("home.noActivityYet")}</Text>
+            <Text className="py-2 text-center text-gray-400 dark:text-white/60">{t("home.noActivityYet")}</Text>
           ) : (
             recent.map((r) => (
               <View key={r.id} className="flex-row items-center justify-between py-2">
-                <Text className="flex-1 pr-3 text-gray-800" numberOfLines={1}>
+                <Text className="flex-1 pr-3 text-gray-800 dark:text-gray-100" numberOfLines={1}>
                   {r.reason}
                 </Text>
                 <Text className={`font-semibold ${r.delta >= 0 ? "text-green-600" : "text-red-600"}`}>

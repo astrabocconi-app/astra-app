@@ -44,10 +44,8 @@ export default function TabsLayout() {
   const inverted = useEggStore((s) => s.inverted);
   const toggleInverted = useEggStore((s) => s.toggleInverted);
 
-  // Two hidden gestures, both on this bar: eight taps on the wordmark invert
-  // the app, ten on the greyed-out Academics tab open it anyway.
+  // Eight taps on the wordmark invert the app.
   const tapLogo = useSecretTaps(8);
-  const tapAcademics = useSecretTaps(10);
 
   const fg = inverted ? "#FFFFFF" : BRAND;
   const barBg = inverted ? INVERTED_BAR : "#FFFFFF";
@@ -137,11 +135,16 @@ export default function TabsLayout() {
           tabBarBadgeStyle: styles.soonBadge,
         }}
         listeners={{
-          // Visible but not yet navigable — except to whoever taps it ten times.
-          // Let the tenth tap through and the navigator does the rest.
-          tabPress: (e) => {
-            if (!tapAcademics()) e.preventDefault();
-          },
+          // Visible but not yet navigable.
+          //
+          // There was a ten-tap gesture here that let the tenth press through
+          // to the placeholder screen. Removed for App Review: guideline 2.3.1
+          // forbids hidden or undocumented features, and what this revealed was
+          // a "Coming Soon" placeholder, which also invites 4.2 (minimum
+          // functionality). A greyed-out tab is precisely what a reviewer taps
+          // repeatedly to check whether it works, so it was reachable by
+          // accident. Put it back once the real Academics screen ships.
+          tabPress: (e) => e.preventDefault(),
         }}
       />
     </Tabs>

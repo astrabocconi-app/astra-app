@@ -19,7 +19,7 @@ const config: ExpoConfig = {
   slug: "astra-app",
   owner: "mfmatozza",
   scheme: "astra",
-  version: "0.1.0",
+  version: "1.0.0",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
   icon: "./assets/icon.png",

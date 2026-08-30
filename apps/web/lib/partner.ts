@@ -7,7 +7,7 @@
 // the specific login that made them, for traceability.
 
 import crypto from "node:crypto";
-import { prisma, LedgerSource } from "@astra/db";
+import { prisma, Prisma, LedgerSource } from "@astra/db";
 import { earn, getBalance } from "./points";
 
 // Fixed award per scan for now; per-offer / per-venue values come later.
@@ -76,6 +76,92 @@ export async function findRecentScan(params: {
     lastAt: previous.createdAt,
     nextAllowedAt: new Date(previous.createdAt.getTime() + SCAN_COOLDOWN_MS),
   };
+}
+
+/** Raised when the cooldown blocks a scan. Carries when it lifts. */
+export class ScanTooSoonError extends Error {
+  constructor(
+    readonly lastAt: Date,
+    readonly nextAllowedAt: Date,
+  ) {
+    super("This perk was already used inside the cooldown.");
+    this.name = "ScanTooSoonError";
+  }
+}
+
+/**
+ * Check the cooldown and award, atomically.
+ *
+ * Doing this as a read followed by a write let two concurrent requests both see
+ * "no recent scan" and both award — a double-tap, a retry on a flaky connection,
+ * or a second staff phone would hand out the points twice for one physical scan.
+ * Serializable makes the range read and the insert conflict, so one of them
+ * aborts and retries, and on the retry it sees the other's row.
+ *
+ * Same shape as reward redemption (lib/rewards.ts), for the same reason.
+ */
+export async function awardScanIfAllowed(params: {
+  studentId: string;
+  partnerUserId: string;
+  partnerId: string;
+  partnerName: string;
+  offerId?: string | null;
+  offerTitle?: string | null;
+}): Promise<number> {
+  const MAX_ATTEMPTS = 5;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      await prisma.$transaction(
+        async (tx) => {
+          const since = new Date(Date.now() - SCAN_COOLDOWN_MS);
+          const previous = await tx.pointsLedgerEntry.findFirst({
+            where: {
+              userId: params.studentId,
+              source: LedgerSource.PARTNER_SCAN,
+              createdAt: { gte: since },
+              ...(params.offerId
+                ? { offerId: params.offerId }
+                : { refType: "Partner", refId: params.partnerId, offerId: null }),
+            },
+            orderBy: { createdAt: "desc" },
+            select: { createdAt: true },
+          });
+          if (previous) {
+            throw new ScanTooSoonError(
+              previous.createdAt,
+              new Date(previous.createdAt.getTime() + SCAN_COOLDOWN_MS),
+            );
+          }
+          await tx.pointsLedgerEntry.create({
+            data: {
+              userId: params.studentId,
+              kind: "POINTS",
+              delta: POINTS_PER_SCAN,
+              source: LedgerSource.PARTNER_SCAN,
+              reason: params.offerTitle
+                ? `Scanned at ${params.partnerName} · ${params.offerTitle}`
+                : `Scanned at ${params.partnerName}`,
+              refType: "Partner",
+              refId: params.partnerId,
+              offerId: params.offerId ?? null,
+              grantedById: params.partnerUserId,
+            },
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+      );
+      return getBalance(params.studentId);
+    } catch (e) {
+      if (e instanceof ScanTooSoonError) throw e;
+      const conflict =
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        (e.code === "P2034" || e.code === "P2028");
+      if (!conflict || attempt === MAX_ATTEMPTS) throw e;
+      await new Promise((r) => setTimeout(r, attempt * 25 + Math.floor(Math.random() * 25)));
+    }
+  }
+  // Unreachable: the loop either returns or throws.
+  throw new Error("Scan could not be recorded.");
 }
 
 /** Award a scan to a student on behalf of a partner. Returns the new balance. */

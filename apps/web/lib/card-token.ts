@@ -6,7 +6,24 @@
 
 import crypto from "node:crypto";
 
-const SECRET = process.env.CARD_TOKEN_HMAC_SECRET ?? "";
+/**
+ * Signing key. Empty is only tolerable in local development.
+ *
+ * This used to fall back to "" everywhere, which meant a missing env var in
+ * production silently produced tokens signed with an empty key — forgeable by
+ * anyone who knows the (open) payload format, and with no signal that anything
+ * was wrong. Fail loudly instead, the same way OTP delivery does.
+ */
+function secret(): string {
+  const value = process.env.CARD_TOKEN_HMAC_SECRET;
+  if (value && value.length > 0) return value;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "CARD_TOKEN_HMAC_SECRET is not set. Refusing to sign or verify loyalty-card tokens with an empty key.",
+    );
+  }
+  return "dev-insecure-card-token-secret";
+}
 
 /**
  * How long a card QR stays valid.
@@ -26,7 +43,7 @@ const SECRET = process.env.CARD_TOKEN_HMAC_SECRET ?? "";
 const MAX_AGE_MS = 15 * 60 * 1000;
 
 function hmac(input: string): string {
-  return crypto.createHmac("sha256", SECRET).update(input).digest("base64url");
+  return crypto.createHmac("sha256", secret()).update(input).digest("base64url");
 }
 
 export function signCardToken(userId: string): string {

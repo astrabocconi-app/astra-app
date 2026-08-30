@@ -80,6 +80,17 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
 
+    /**
+     * DELETE /api/me — permanently delete the signed-in account.
+     * Irreversible; the caller must clear the local token afterwards.
+     */
+    deleteAccount: async () =>
+      (
+        await request<{ deleted: boolean; removed: Record<string, number> }>("/api/me", {
+          method: "DELETE",
+        })
+      ).data,
+
     academic: {
       /** Public Bocconi selection metadata reviewed for the active academic year. */
       catalogue: async () =>

@@ -118,6 +118,7 @@ model User {
   auditLogs         AuditLog[]              @relation("AuditActor")
   partnerMembership PartnerMembership?
   academicProfile   StudentAcademicProfile?
+  examRecords       ExamRecord[]
 
   // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
   sessions Session[]
@@ -227,6 +228,7 @@ model AcademicCatalogue {
   createdAt    DateTime @default(now())
 
   programmes AcademicProgramme[]
+  courses    AcademicCourse[]
 }
 
 model AcademicProgramme {
@@ -240,13 +242,85 @@ model AcademicProgramme {
   active        Boolean @default(true)
   legacy        Boolean @default(false)
 
-  catalogue   AcademicCatalogue        @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+  catalogue   AcademicCatalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
   classGroups AcademicClassGroup[]
   tracks      AcademicTrack[]
   profiles    StudentAcademicProfile[]
+  courseLinks AcademicCourseProgramme[]
 
   @@unique([catalogueId, code])
   @@index([catalogueId, active])
+}
+
+/// Scraped Bocconi course catalogue. Populated (~659 courses) but not yet read
+/// by the app — the gradebook that consumes it is a later phase. Declared here
+/// so the schema describes what the database actually contains; without it,
+/// `prisma migrate dev` would generate a migration dropping these tables.
+model AcademicCourse {
+  id          String   @id
+  catalogueId String
+  code        String
+  title       String
+  language    String?
+  sourceUrl   String
+  retrievedAt DateTime
+
+  catalogue   AcademicCatalogue         @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+  programmes  AcademicCourseProgramme[]
+  examRecords ExamRecord[]
+
+  @@unique([catalogueId, code])
+  @@index([catalogueId])
+}
+
+/// A course can sit in several programmes, carrying different credits in each.
+model AcademicCourseProgramme {
+  id          String  @id
+  courseId    String
+  programmeId String
+  credits     Int
+  semester    String?
+  courseType  String?
+
+  course    AcademicCourse    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  programme AcademicProgramme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, programmeId])
+  @@index([programmeId])
+}
+
+enum ExamStatus {
+  PLANNED
+  PASSED
+  FAILED
+  REJECTED
+}
+
+/// Student gradebook. Table exists and is empty; no app code reads it yet.
+/// Grade/credit/year invariants are enforced by CHECK constraints in SQL (see
+/// the 20260731120000 and 20260801100000 migrations) rather than in Prisma.
+model ExamRecord {
+  id          String     @id
+  userId      String
+  courseId    String?
+  customTitle String?
+  credits     Int
+  studyYear   Int
+  semester    String?
+  status      ExamStatus @default(PLANNED)
+  grade       Int?
+  lode        Boolean    @default(false)
+  passFail    Boolean    @default(false)
+  examDate    DateTime?
+  notes       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course AcademicCourse? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+
+  @@index([userId, studyYear])
+  @@index([courseId])
 }
 
 model AcademicClassGroup {
@@ -427,21 +501,21 @@ model DiscountUsage {
 // ============================================================================
 
 model Reward {
-  id          String    @id @default(cuid())
-  title       String
-  description String?
-  imageKey    String? // R2 object key
-  costPoints  Int
-  stock       Int? // null = unlimited
+  id           String    @id @default(cuid())
+  title        String
+  description  String?
+  imageKey     String? // R2 object key
+  costPoints   Int
+  stock        Int? // null = unlimited
   /// How many times ONE account may redeem this reward. null = no limit.
   /// Stops a single student farming free-ticket codes; stock caps the total
   /// across everyone, this caps it per person.
   perUserLimit Int?
-  active      Boolean   @default(true)
-  areaId      String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  active       Boolean   @default(true)
+  areaId       String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   area        Area?              @relation(fields: [areaId], references: [id])
   redemptions RewardRedemption[]

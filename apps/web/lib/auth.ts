@@ -160,6 +160,25 @@ const logoAttachment = {
   contentType: "image/png",
 };
 
+/**
+ * The single App Review demo account, and the fixed code it signs in with.
+ *
+ * Both must be set for the bypass to exist at all — an unset env var leaves the
+ * normal random-OTP path completely untouched. The address still has to pass
+ * the Bocconi domain gate like any other, so this widens nothing beyond one
+ * specific mailbox-less account that holds no real student's data.
+ */
+const DEMO_REVIEW_EMAIL = (process.env.DEMO_REVIEW_EMAIL ?? "").trim().toLowerCase();
+const DEMO_REVIEW_OTP = (process.env.DEMO_REVIEW_OTP ?? "").trim();
+
+function isDemoReviewEmail(email: string): boolean {
+  return (
+    DEMO_REVIEW_EMAIL.length > 0 &&
+    DEMO_REVIEW_OTP.length > 0 &&
+    email.trim().toLowerCase() === DEMO_REVIEW_EMAIL
+  );
+}
+
 async function deliverOtp(email: string, otp: string): Promise<void> {
   // 1) SMTP (e.g. Aruba) takes priority when configured.
   const smtp = getSmtp();
@@ -356,10 +375,19 @@ export const auth = betterAuth({
     emailOTP({
       otpLength: 6,
       expiresIn: 600, // 10 minutes
+      // App Review can't receive a code: sign-in is gated to Bocconi addresses
+      // and reviewers have no such inbox, which would make the app impossible
+      // to evaluate and get it rejected. One allowlisted address gets a fixed
+      // code instead, handed to Apple in App Store Connect. Everyone else falls
+      // through to the random generator (`undefined` -> default).
+      generateOTP: ({ email }) => (isDemoReviewEmail(email) ? DEMO_REVIEW_OTP : undefined),
       async sendVerificationOTP({ email, otp }) {
         if (!emailDomainAllowed(email)) {
           throw new APIError("BAD_REQUEST", { message: DOMAIN_ERROR });
         }
+        // No inbox exists for the review account, and deliverOtp throws in
+        // production when it can't send — so skip delivery for it only.
+        if (isDemoReviewEmail(email)) return;
         await deliverOtp(email, otp);
       },
     }),

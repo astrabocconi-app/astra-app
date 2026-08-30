@@ -80,3 +80,25 @@ test("materials accept official compound programme labels", () => {
   compound[0].subjects[0].subject = "BESS-CLES";
   assert.equal(filterMaterialsForAcademicProfile(compound, "BESS", 1)[0].count, 1);
 });
+
+// Class group deliberately plays no part in which handouts a student sees.
+// Programme + study year decide it; class exists for future gradebook content.
+// A student who never picks a class must still get their full materials — this
+// is asserted rather than left implicit so it can't quietly regress.
+test("materials ignore the student's class group entirely", () => {
+  const withClass = filterMaterialsForAcademicProfile(materials, "BIEM", 1);
+  // The signature takes no class argument at all, and the only inputs that can
+  // change the result are the programme code and the year.
+  assert.equal(filterMaterialsForAcademicProfile.length, 4);
+  assert.equal(withClass[0].count, 1);
+  // Same programme + year always yields the same result, whatever class the
+  // student is (or isn't) in.
+  assert.deepEqual(filterMaterialsForAcademicProfile(materials, "BIEM", 1), withClass);
+});
+
+test("allYears widens to the whole programme, still without class", () => {
+  const all = filterMaterialsForAcademicProfile(materials, "BIEM", 1, { allYears: true });
+  const years = all.map((entry) => entry.year);
+  assert.ok(years.length >= 1, "expected at least the student's own year");
+  assert.ok(all.every((entry) => entry.count > 0), "empty years should be dropped");
+});

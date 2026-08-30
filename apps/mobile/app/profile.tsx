@@ -13,6 +13,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
+import type { MeResponse } from "@astra/shared";
 import { Icon } from "../components/Icon";
 import { api } from "../lib/api";
 import { clearToken } from "../lib/session";
@@ -22,6 +23,9 @@ import { useLanguageStore } from "../lib/language-store";
 import { useT } from "../lib/i18n";
 
 type Picker = "programme" | "track" | "year" | "class" | null;
+
+/** Sentinel row in the track/class sheets — both are optional, so both clear. */
+const CLEAR = "__clear__";
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -39,6 +43,7 @@ export default function ProfileScreen() {
   const { language, setLanguage } = useLanguageStore();
   const t = useT();
   const [picker, setPicker] = useState<Picker>(null);
+  const [deleting, setDeleting] = useState(false);
   const migrationStarted = useRef(false);
 
   // One-time migration from the former SecureStore-only course/year selection.
@@ -78,6 +83,50 @@ export default function ProfileScreen() {
     router.replace("/");
   }
 
+  /**
+   * Deleting is irreversible, so it asks twice: the first alert explains what
+   * goes, the second is the point of no return.
+   */
+  function confirmDelete() {
+    Alert.alert(
+      t("profile.deleteAccountTitle"),
+      t("profile.deleteAccountBody"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("profile.deleteAccountContinue"),
+          style: "destructive",
+          onPress: () =>
+            Alert.alert(t("profile.deleteAccountFinalTitle"), t("profile.deleteAccountFinalBody"), [
+              { text: t("common.cancel"), style: "cancel" },
+              {
+                text: t("profile.deleteAccountConfirm"),
+                style: "destructive",
+                onPress: deleteAccount,
+              },
+            ]),
+        },
+      ],
+    );
+  }
+
+  async function deleteAccount() {
+    setDeleting(true);
+    try {
+      await api.deleteAccount();
+      // The account is gone; drop the token and every cached response with it.
+      await clearToken();
+      queryClient.clear();
+      router.replace("/");
+    } catch (e) {
+      setDeleting(false);
+      Alert.alert(
+        t("profile.deleteAccountFailedTitle"),
+        e instanceof Error ? e.message : t("profile.deleteAccountFailedBody"),
+      );
+    }
+  }
+
   const academic = data?.academicProfile ?? null;
   const selectedProgramme = catalogue.data?.programmes.find(
     (item) => item.id === academic?.programme.id
@@ -89,27 +138,33 @@ export default function ProfileScreen() {
           label: `${item.name} (${item.code})${item.legacy ? t("profile.legacySuffix") : ""}`,
         })) ?? [])
       : picker === "track"
-        ? (selectedProgramme?.tracks.map((item) => ({
-            value: item.id,
-            label: item.name,
-          })) ?? [])
+        ? [
+            { value: CLEAR, label: t("profile.noTrack") },
+            ...(selectedProgramme?.tracks.map((item) => ({
+              value: item.id,
+              label: item.name,
+            })) ?? []),
+          ]
       : picker === "year"
         ? Array.from({ length: selectedProgramme?.durationYears ?? 0 }, (_, index) => ({
             value: String(index + 1),
             label: `${t("profile.year")} ${index + 1}`,
           }))
-        : (selectedProgramme?.classGroups.map((item) => ({
-            value: item.id,
-            label: `${t("profile.class")} ${item.code}`,
-          })) ?? []);
+        : [
+            { value: CLEAR, label: t("profile.noClass") },
+            ...(selectedProgramme?.classGroups.map((item) => ({
+              value: item.id,
+              label: `${t("profile.class")} ${item.code}`,
+            })) ?? []),
+          ];
   const currentValue =
     picker === "programme"
       ? academic?.programme.id
       : picker === "track"
-        ? academic?.track?.id
+        ? (academic?.track?.id ?? CLEAR)
       : picker === "year"
         ? String(academic?.studyYear ?? "")
-        : academic?.classGroup?.id;
+        : (academic?.classGroup?.id ?? CLEAR);
 
   async function choose(value: string) {
     if (!catalogue.data) return;
@@ -120,27 +175,67 @@ export default function ProfileScreen() {
         : selectedProgramme;
     if (!programme) return;
 
+    // Changing programme invalidates the track and class, which belong to it.
+    const cleared = value === CLEAR;
+    const nextYear =
+      current === "year"
+        ? Number(value)
+        : Math.min(academic?.studyYear ?? 1, programme.durationYears);
+    const nextTrackId =
+      current === "track"
+        ? (cleared ? null : value)
+        : current === "programme"
+          ? null
+          : (academic?.track?.id ?? null);
+    const nextClassId =
+      current === "class"
+        ? (cleared ? null : value)
+        : current === "programme"
+          ? null
+          : (academic?.classGroup?.id ?? null);
+
     // Close first. Waiting for the write and the refetches before dismissing
     // made the sheet sit there for seconds and feel broken.
     setPicker(null);
 
+    // Then paint the new selection immediately. Without this the row kept
+    // showing the OLD value until the refetch came back — you tapped "Year 2"
+    // and the row still said "Year 1" for a beat, which is what made these
+    // pickers feel broken. The write is confirmed by the refetch below.
+    const previous = queryClient.getQueryData<MeResponse>(["me"]);
+    const { tracks, classGroups, ...programmeSummary } = programme;
+    queryClient.setQueryData<MeResponse>(["me"], (old) =>
+      old
+        ? {
+            ...old,
+            academicProfile: {
+              programme: programmeSummary,
+              catalogue: {
+                id: catalogue.data.id,
+                academicYear: catalogue.data.academicYear,
+                version: catalogue.data.version,
+                sourceUrl: catalogue.data.sourceUrl,
+              },
+              studyYear: nextYear,
+              track: tracks.find((item) => item.id === nextTrackId) ?? null,
+              classGroup: classGroups.find((item) => item.id === nextClassId) ?? null,
+              updatedAt: new Date().toISOString(),
+            },
+          }
+        : old,
+    );
+
     try {
       await api.academic.updateProfile({
         programmeId: programme.id,
-        studyYear:
-          current === "year"
-            ? Number(value)
-            : Math.min(academic?.studyYear ?? 1, programme.durationYears),
-        trackId:
-          current === "track" ? value : current === "programme" ? null : (academic?.track?.id ?? null),
-        classGroupId:
-          current === "class"
-            ? value
-            : current === "programme"
-              ? null
-              : (academic?.classGroup?.id ?? null),
+        studyYear: nextYear,
+        trackId: nextTrackId,
+        classGroupId: nextClassId,
       });
     } catch (e) {
+      // Put the old selection back rather than leaving a value on screen that
+      // was never actually saved.
+      if (previous) queryClient.setQueryData(["me"], previous);
       Alert.alert(
         t("profile.saveFailedTitle"),
         e instanceof Error ? e.message : t("profile.saveFailedBody"),
@@ -253,9 +348,15 @@ export default function ProfileScreen() {
           </Pressable>
         ) : null}
 
+        {/* Year needs a programme first (it bounds how many years exist), so
+            without one the row is visibly disabled rather than a tap that
+            silently does nothing. */}
         <Pressable
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
-          onPress={() => academic && setPicker("year")}
+          disabled={!academic}
+          className={`flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 ${
+            academic ? "active:bg-gray-50" : "opacity-40"
+          }`}
+          onPress={() => setPicker("year")}
         >
           <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
             <Icon name="calendar-outline" size={22} color="#04107E" />
@@ -269,9 +370,16 @@ export default function ProfileScreen() {
           <Icon name="chevron-forward" size={18} color="#9CA3AF" />
         </Pressable>
 
+        {/* Same for class: some programmes publish no class groups at all, and
+            the row said "awaiting" while still looking tappable. Note class is
+            never used to filter Materials — it exists for future gradebook
+            content — so leaving it unset costs a student nothing. */}
         <Pressable
-          className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 active:bg-gray-50"
-          onPress={() => (selectedProgramme?.classGroups.length ? setPicker("class") : undefined)}
+          disabled={!selectedProgramme?.classGroups.length}
+          className={`flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4 ${
+            selectedProgramme?.classGroups.length ? "active:bg-gray-50" : "opacity-40"
+          }`}
+          onPress={() => setPicker("class")}
         >
           <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
             <Icon name="people-outline" size={22} color="#04107E" />
@@ -348,11 +456,28 @@ export default function ProfileScreen() {
       {/* Sign out — lifted clear of the tab bar, red outline */}
       <Pressable
         className="mt-6 flex-row items-center justify-center gap-2 rounded-xl border-2 border-red-500 px-4 py-3 active:bg-red-50"
-        style={{ marginBottom: insets.bottom + 16 }}
         onPress={signOut}
       >
         <Icon name="log-out-outline" size={18} color="#DC2626" />
         <Text className="text-center font-semibold text-red-600">{t("common.signOut")}</Text>
+      </Pressable>
+
+      {/* Account deletion has to be reachable from inside the app (App Store
+          guideline 5.1.1(v)). Plain text rather than a second red button, so it
+          reads as the deliberate, rarely-wanted action it is. */}
+      <Pressable
+        disabled={deleting}
+        className="mt-4 items-center py-2 active:opacity-60"
+        style={{ marginBottom: insets.bottom + 16 }}
+        onPress={confirmDelete}
+      >
+        {deleting ? (
+          <ActivityIndicator color="#DC2626" />
+        ) : (
+          <Text className="text-sm font-medium text-red-600 underline">
+            {t("profile.deleteAccount")}
+          </Text>
+        )}
       </Pressable>
 
       {/* Academic profile picker */}

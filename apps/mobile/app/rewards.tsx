@@ -185,12 +185,38 @@ export default function RewardsScreen() {
                       <Text className="text-xs font-semibold text-white">{t("common.copy")}</Text>
                     </Pressable>
                   </View>
-                ) : (
-                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-500/15 px-3 py-2.5">
-                    <Icon name="time-outline" size={16} color="#d97706" />
-                    <Text className="flex-1 text-[13px] text-amber-800 dark:text-amber-200">
-                      {t("rewards.pendingFulfilment")}
+                ) : r.status === "CANCELLED" ? (
+                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-gray-100 dark:bg-white/10 px-3 py-2.5">
+                    <Icon name="close-circle-outline" size={16} color="#6B7280" />
+                    <Text className="flex-1 text-[13px] text-gray-600 dark:text-gray-300">
+                      {t("rewards.cancelledRefunded")}
                     </Text>
+                  </View>
+                ) : r.status === "FULFILLED" ? (
+                  <View className="mt-3 flex-row items-center gap-2 rounded-xl bg-green-50 dark:bg-green-500/15 px-3 py-2.5">
+                    <Icon name="checkmark-circle-outline" size={16} color="#16a34a" />
+                    <Text className="flex-1 text-[13px] text-green-800 dark:text-green-200">
+                      {t("rewards.collected")}
+                    </Text>
+                  </View>
+                ) : (
+                  // Still to be handed over. The reference is what staff search
+                  // for in the backoffice, so it is shown rather than hidden.
+                  <View className="mt-3 gap-2 rounded-xl bg-amber-50 dark:bg-amber-500/15 px-3 py-2.5">
+                    <View className="flex-row items-center gap-2">
+                      <Icon name="time-outline" size={16} color="#d97706" />
+                      <Text className="flex-1 text-[13px] text-amber-800 dark:text-amber-200">
+                        {t("rewards.pendingFulfilment")}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-[11px] uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                        {t("rewards.pickupRef")}
+                      </Text>
+                      <Text className="font-mono text-[15px] font-bold text-amber-900 dark:text-amber-100">
+                        {r.ref}
+                      </Text>
+                    </View>
                   </View>
                 )}
               </View>

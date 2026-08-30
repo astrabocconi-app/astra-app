@@ -23,6 +23,7 @@ const NAV: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/dashboard/news", label: "News", icon: <NewspaperIcon size={20} /> },
   { href: "/dashboard/events", label: "Events", icon: <CalendarIcon size={20} /> },
   { href: "/dashboard/rewards", label: "Rewards", icon: <GiftIcon size={20} /> },
+  { href: "/dashboard/redemptions", label: "Redemptions", icon: <GiftIcon size={20} /> },
   { href: "/dashboard/users", label: "Users", icon: <UsersIcon size={20} /> },
   { href: "/dashboard/materials", label: "Materials", icon: <BookIcon size={20} /> },
   { href: "/dashboard/points", label: "Points", icon: <CoinsIcon size={20} /> },

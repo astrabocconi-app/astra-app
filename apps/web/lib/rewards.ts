@@ -7,6 +7,7 @@
 // stock that isn't there, or be handed the same Eventbrite code twice.
 
 import { prisma, Prisma, LedgerSource, RedemptionStatus } from "@astra/db";
+import { pickupRef } from "./redemptions";
 
 export class InsufficientPointsError extends Error {
   constructor(
@@ -191,6 +192,9 @@ export async function listRedemptions(userId: string) {
   });
   return rows.map((r) => ({
     id: r.id,
+    // Short reference the student reads out at the desk; the backoffice shows
+    // the same one, derived from the id rather than stored.
+    ref: pickupRef(r.id),
     rewardId: r.rewardId,
     rewardTitle: r.reward.title,
     costPoints: r.costPoints,

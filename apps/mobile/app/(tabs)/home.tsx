@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Icon } from "../../components/Icon";
+import { Icon, MIcon } from "../../components/Icon";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 
@@ -61,7 +61,10 @@ export default function HomeScreen() {
           accessibilityLabel={t("support.a11yLabel")}
           className="h-10 w-10 items-center justify-center rounded-full bg-astra-light dark:bg-white/10 active:opacity-70"
         >
-          <Icon name="help" size={20} color="#04107E" />
+          {/* Material's filled question mark: it carries its own circle, so it
+              matches the weight of the filled person icon beside it. Ionicons'
+              "help" is a bare glyph and looked unfinished next to it. */}
+          <MIcon name="help" size={22} color="#04107E" />
         </Pressable>
         <Pressable
           onPress={() => router.push("/profile")}

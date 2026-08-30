@@ -79,6 +79,18 @@ const config: ExpoConfig = {
     // The public pk.* token used at runtime is separate — see lib/config.ts.
     "@rnmapbox/maps",
     [
+      // Listed BEFORE expo-alternate-app-icons on purpose. Expo composes
+      // dangerous mods so the last one added runs FIRST, so being earlier in
+      // this array means running last — after the icon has been generated.
+      //
+      // That plugin re-encodes the icon with jimp, which writes RGBA even when
+      // the source PNG is opaque, so the alternate icon reaches Images.xcassets
+      // with an alpha channel and Apple rejects app icons that have one. This
+      // puts the opaque original back. See plugins/with-opaque-alternate-icon.js.
+      "./plugins/with-opaque-alternate-icon",
+      { name: "Inverted", source: "./assets/icon-inverted.png" },
+    ],
+    [
       // Alternate launcher icon for the hidden inverted mode (lib/egg-store.ts).
       // The icon set is copied into the native projects at prebuild, so the
       // swap only works in a build made after this plugin was added.

@@ -120,6 +120,7 @@ model User {
   academicProfile   StudentAcademicProfile?
   examRecords       ExamRecord[]
   supportMessages   SupportMessage[]
+  pushCampaigns     PushCampaign[]          @relation("PushSender")
 
   // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
   sessions Session[]
@@ -761,6 +762,31 @@ model MaterialAccess {
 // ============================================================================
 // Push notifications & audit
 // ============================================================================
+
+/// A push notification sent from the backoffice.
+///
+/// Kept as a record rather than fire-and-forget: it is the only way to answer
+/// "what did we send, to whom, and when" after the fact, and it stops the same
+/// announcement being sent twice by someone who was not sure it went.
+model PushCampaign {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  /// Optional in-app route to open when the notification is tapped.
+  route     String?
+  /// The audience filters used, so a send can be understood later.
+  filters   Json
+  /// Devices actually targeted (a user with no device is not counted).
+  sentCount Int
+  /// Distinct users the send reached.
+  userCount Int
+  sentById  String?
+  createdAt DateTime @default(now())
+
+  sentBy User? @relation("PushSender", fields: [sentById], references: [id])
+
+  @@index([createdAt])
+}
 
 model PushToken {
   id        String   @id @default(cuid())

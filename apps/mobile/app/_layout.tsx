@@ -7,7 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { initSentry } from "../lib/sentry";
 import { loadToken, loadAccountType, loadPartnerScanOnly } from "../lib/session";
-import { registerForPush } from "../lib/push";
+import { registerForPush, attachNotificationRouting } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
 import { useLanguageStore } from "../lib/language-store";
 import { useEggStore } from "../lib/egg-store";
@@ -61,6 +61,18 @@ export default function RootLayout() {
       setReady(true);
     });
   }, []);
+
+  // Tapping a notification with a `route` opens that screen. Attached after the
+  // session restore above, so a cold-start tap lands on the right screen rather
+  // than being replaced by the initial router.replace.
+  useEffect(() => {
+    if (!ready) return;
+    let detach: (() => void) | undefined;
+    void attachNotificationRouting((route) => router.push(route as never)).then((off) => {
+      detach = off;
+    });
+    return () => detach?.();
+  }, [ready]);
 
   if (!ready) {
     return (

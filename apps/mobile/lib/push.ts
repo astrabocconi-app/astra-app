@@ -1,4 +1,5 @@
 import { Platform } from "react-native";
+import { IN_APP_ROUTES } from "@astra/shared";
 import { api } from "./api";
 
 // Push registration. Native modules (expo-notifications / expo-device) are
@@ -82,5 +83,48 @@ export async function sendTestNotification(): Promise<string> {
     return "Sent! Check the banner (background the app to see it on the lock screen too).";
   } catch {
     return "Notifications need a rebuilt dev build to work.";
+  }
+}
+
+/**
+ * Route the app when a notification is tapped.
+ *
+ * Two cases, and missing either one makes the deep link look broken half the
+ * time: a tap while the app is running, and a tap that launched it cold.
+ *
+ * Native modules stay lazily imported for the same reason as above — a dev
+ * client built before expo-notifications existed must not crash on boot.
+ */
+export async function attachNotificationRouting(
+  navigate: (route: string) => void,
+): Promise<() => void> {
+  try {
+    const Notifications = await import("expo-notifications");
+
+    const routeFrom = (response: unknown): string | null => {
+      const data = (response as { notification?: { request?: { content?: { data?: unknown } } } })
+        ?.notification?.request?.content?.data as { route?: unknown } | undefined;
+      const route = typeof data?.route === "string" ? data.route : null;
+      // Only ever navigate somewhere we know exists. The payload is ours, but a
+      // stale notification could name a screen that has since been removed, and
+      // pushing an unknown route throws.
+      return route && IN_APP_ROUTES.includes(route as (typeof IN_APP_ROUTES)[number])
+        ? route
+        : null;
+    };
+
+    // Cold start: the notification that opened the app.
+    const initial = await Notifications.getLastNotificationResponseAsync();
+    const initialRoute = initial ? routeFrom(initial) : null;
+    if (initialRoute) navigate(initialRoute);
+
+    const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const route = routeFrom(response);
+      if (route) navigate(route);
+    });
+    return () => sub.remove();
+  } catch {
+    // Notifications unavailable in this build; nothing to attach.
+    return () => {};
   }
 }

@@ -23,6 +23,7 @@ import nodemailer, { type Transporter } from "nodemailer";
 import { ASTRA_LOGO_PNG_BASE64 } from "./email-logo";
 import { OTP_LOGO_CID, OTP_SUBJECT, otpEmailHtml, otpEmailText } from "./email-template";
 import { verifyPassword } from "./partner";
+import { sendWithFailover, type Mailbox } from "./smtp-failover";
 import {
   verifyAdminCredentials,
   admin2faEnabled,
@@ -99,33 +100,75 @@ const resendKey = process.env.RESEND_API_KEY;
 const resend =
   resendKey && !resendKey.includes("PLACEHOLDER") ? new Resend(resendKey) : null;
 
-// SMTP transport (e.g. Aruba). Enabled when SMTP_HOST + SMTP_USER + SMTP_PASS
-// are set. Aruba mailboxes: host `smtps.aruba.it`, port 465 (SMTP_SECURE=true).
+// SMTP transports (Aruba). Enabled when SMTP_HOST + SMTP_USER + SMTP_PASS are
+// set. Aruba mailboxes: host `smtps.aruba.it`, port 465 (SMTP_SECURE=true).
 // Built lazily and reused across warm invocations.
+//
+// A SECOND mailbox can be configured with SMTP_USER_2 / SMTP_PASS_2. Aruba caps
+// how much one mailbox may send per hour, and sign-in email is the one thing
+// that must not fail: a student who can't get a code can't use the app at all.
+// Launch day is several hundred logins in an hour from a mailbox that normally
+// sends a handful, which is exactly when such a cap bites. The second mailbox
+// shares the host and port; only the credentials and the From address differ.
 const smtpHost = process.env.SMTP_HOST;
-const smtpUser = process.env.SMTP_USER;
-const smtpPass = process.env.SMTP_PASS;
-const smtpEnabled = Boolean(
-  smtpHost &&
-    smtpUser &&
-    smtpPass &&
-    ![smtpHost, smtpUser, smtpPass].some((v) => v!.includes("PLACEHOLDER")),
-);
-let smtpTransport: Transporter | null = null;
-function getSmtp(): Transporter | null {
-  if (!smtpEnabled) return null;
-  if (!smtpTransport) {
+
+function smtpUsable(...values: (string | undefined)[]): boolean {
+  return values.every((v) => Boolean(v) && !v!.includes("PLACEHOLDER"));
+}
+
+interface SmtpAccount extends Mailbox {
+  user: string;
+  pass: string;
+  /** Overrides the derived From address when set. */
+  fromOverride?: string;
+  transport: Transporter | null;
+}
+
+const smtpAccounts: SmtpAccount[] = [];
+if (smtpUsable(smtpHost, process.env.SMTP_USER, process.env.SMTP_PASS)) {
+  smtpAccounts.push({
+    label: "primary",
+    user: process.env.SMTP_USER!,
+    pass: process.env.SMTP_PASS!,
+    fromOverride: process.env.EMAIL_FROM,
+    blockedUntil: 0,
+    transport: null,
+  });
+}
+if (smtpUsable(smtpHost, process.env.SMTP_USER_2, process.env.SMTP_PASS_2)) {
+  smtpAccounts.push({
+    label: "fallback",
+    user: process.env.SMTP_USER_2!,
+    pass: process.env.SMTP_PASS_2!,
+    fromOverride: process.env.EMAIL_FROM_2,
+    blockedUntil: 0,
+    transport: null,
+  });
+}
+
+function transportFor(account: SmtpAccount): Transporter {
+  if (!account.transport) {
     const port = Number(process.env.SMTP_PORT ?? 465);
-    smtpTransport = nodemailer.createTransport({
+    account.transport = nodemailer.createTransport({
       host: smtpHost,
       port,
       // true for 465 (implicit TLS); false for 587 (STARTTLS). Overridable.
       secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
-      auth: { user: smtpUser, pass: smtpPass },
+      auth: { user: account.user, pass: account.pass },
     });
   }
-  return smtpTransport;
+  return account.transport;
 }
+
+/**
+ * How long to stop reaching for a mailbox that just refused us.
+ *
+ * Aruba's cap is hourly, but this is only a latency optimisation: without it
+ * every send during a spike pays a failed connect-authenticate-reject against
+ * the exhausted mailbox before reaching the fallback. Deliberately shorter than
+ * an hour so a mailbox blocked for some transient reason comes back quickly.
+ */
+const SMTP_COOLDOWN_MS = 10 * 60 * 1000;
 
 // Base URL: explicit override, else the Vercel deployment domain, else local.
 const vercelUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined;
@@ -179,19 +222,51 @@ function isDemoReviewEmail(email: string): boolean {
   );
 }
 
+/**
+ * Aruba requires the From address to match the authenticated mailbox, so the
+ * fallback cannot reuse EMAIL_FROM. Keep the display name, swap the address.
+ */
+function fromFor(account: SmtpAccount): string {
+  if (account.fromOverride && !account.fromOverride.includes("PLACEHOLDER")) {
+    return account.fromOverride;
+  }
+  const displayName = EMAIL_FROM.match(/^\s*(.*?)\s*</)?.[1];
+  return displayName ? `${displayName} <${account.user}>` : account.user;
+}
+
+/** One attempt through a specific mailbox. Throws on refusal. */
+async function sendThrough(account: SmtpAccount, email: string, otp: string): Promise<void> {
+  await transportFor(account).sendMail({
+    from: fromFor(account),
+    to: email,
+    subject: OTP_SUBJECT,
+    text: otpEmailText(otp),
+    html: otpEmailHtml(otp),
+    attachments: [logoAttachment],
+  });
+}
+
 async function deliverOtp(email: string, otp: string): Promise<void> {
-  // 1) SMTP (e.g. Aruba) takes priority when configured.
-  const smtp = getSmtp();
-  if (smtp) {
-    await smtp.sendMail({
-      from: EMAIL_FROM,
-      to: email,
-      subject: OTP_SUBJECT,
-      text: otpEmailText(otp),
-      html: otpEmailHtml(otp),
-      attachments: [logoAttachment],
-    });
-    return;
+  // 1) SMTP (Aruba) takes priority when configured. Mailboxes are tried in
+  //    turn, so an hourly cap on the primary doesn't stop anyone signing in.
+  if (smtpAccounts.length > 0) {
+    try {
+      await sendWithFailover(smtpAccounts, (account) => sendThrough(account, email, otp), {
+        cooldownMs: SMTP_COOLDOWN_MS,
+        onWarn: (m) => console.warn(`[auth] ${m}`),
+      });
+      return;
+    } catch (e) {
+      // Every mailbox refused. Resend, if configured, is the last resort;
+      // otherwise surface it rather than pretending a code was sent.
+      if (!resend) {
+        throw new APIError("INTERNAL_SERVER_ERROR", {
+          message: "Couldn't send the sign-in code. Please try again in a moment.",
+          cause: e instanceof Error ? e.message : String(e),
+        });
+      }
+      console.warn("[auth] every SMTP mailbox refused; falling back to Resend");
+    }
   }
   // 2) Resend, if configured. (Inline CID logo isn't sent here; text/HTML still
   //    render — Resend is only a fallback when SMTP isn't set.)

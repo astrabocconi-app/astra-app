@@ -37,6 +37,9 @@ export default function RewardsScreen() {
     queryKey: ["redemptions"],
     queryFn: () => api.rewards.redemptions(),
     retry: false,
+    // Catches a redemption being ticked off in the backoffice while the student
+    // is standing at the desk looking at this screen.
+    refetchInterval: 30_000,
   });
 
   const [tab, setTab] = useState<Tab>("available");

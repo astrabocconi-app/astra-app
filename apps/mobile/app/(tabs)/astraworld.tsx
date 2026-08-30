@@ -225,7 +225,11 @@ export default function AstraWorldScreen() {
     queryKey: ["content", "astraworld"],
     queryFn: () => api.content("astraworld"),
     retry: false,
-    staleTime: 5 * 60_000,
+    // Short, because the person most likely to reopen this tab is whoever just
+    // edited it in the backoffice and wants to see the change.
+    staleTime: 30_000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
   const content = remote.data ? resolveAstraWorld(remote.data) : BUNDLED_ASTRAWORLD;
 

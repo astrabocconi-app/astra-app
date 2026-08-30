@@ -54,9 +54,9 @@ export async function GET(req: Request, ctx: { params: Promise<{ key: string }> 
     {
       headers: {
         "x-request-id": requestId,
-        // Short cache: edits should appear quickly, but a burst of app opens
-        // should not become a burst of database reads.
-        "cache-control": "public, max-age=60, stale-while-revalidate=300",
+        // The floor on how fast a backoffice edit can reach a phone, so it is
+        // kept short; a burst of app opens still collapses into one read.
+        "cache-control": "public, max-age=30, stale-while-revalidate=300",
       },
     },
   );

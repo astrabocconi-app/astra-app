@@ -149,17 +149,11 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {/* Ask ASTRA — RAG chatbot entry point */}
-      <Pressable
-        onPress={() => router.push("/ask")}
-        className="mx-5 mt-4 flex-row items-center gap-2.5 rounded-2xl bg-astra-light dark:bg-white/10 px-4 py-3.5 active:opacity-90"
-      >
-        <Icon name="sparkles" size={18} color="#04107E" />
-        <Text className="flex-1 text-sm font-medium text-astra-primary dark:text-white">
-          {t("home.askAstra")}
-        </Text>
-        <Icon name="chevron-forward" size={16} color="#04107E" />
-      </Pressable>
+      {/* Ask ASTRA (the RAG assistant) is deliberately absent from v1 — the
+          answer quality still needs work, and shipping it half-good would set
+          the wrong expectation on day one. The screen, the API route and the
+          retrieval pipeline are all still in the repo; restore this entry point
+          to bring it back. */}
 
       {/* Free@B — quick shortcut to the classroom finder */}
       <Pressable

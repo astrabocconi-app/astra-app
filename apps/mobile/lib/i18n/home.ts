@@ -1,7 +1,7 @@
 export const en = {
   "home.welcome": "Welcome",
   "home.news": "News",
-  "home.askAstra": "Ask us anything — ASTRA is here for you",
+  "home.askAstra": "Ask us anything, ASTRA is here for you",
   "home.findClassroom": "Find a free classroom",
   "home.findClassroomSub": "Live room availability · Free@B",
   "home.materials": "Materials",
@@ -18,7 +18,7 @@ export const en = {
 export const it: Record<keyof typeof en, string> = {
   "home.welcome": "Benvenuto",
   "home.news": "Notizie",
-  "home.askAstra": "Chiedi qualsiasi cosa — ASTRA è qui per te",
+  "home.askAstra": "Chiedi qualsiasi cosa, ASTRA è qui per te",
   "home.findClassroom": "Trova un'aula libera",
   "home.findClassroomSub": "Disponibilità in tempo reale · Free@B",
   "home.materials": "Materiali",

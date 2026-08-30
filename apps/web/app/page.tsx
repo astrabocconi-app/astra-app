@@ -11,7 +11,7 @@ const ICON_VIEWBOX = "0 -960 960 960";
 const FEATURES = [
   {
     title: "Earn points",
-    body: "Collect points at partner venues and association events — your balance updates instantly.",
+    body: "Collect points at partner venues and association events. Your balance updates instantly.",
     // Material Symbols "loyalty" (rounded, filled) — Apache 2.0
     icon: "M856-390 570-104q-12 12-27 18t-30 6q-15 0-30-6t-27-18L103-457q-11-11-17-25.5T80-513v-287q0-33 23.5-56.5T160-880h287q16 0 31 6.5t26 17.5l352 353q12 12 17.5 27t5.5 30q0 15-5.5 29.5T856-390ZM260-640q25 0 42.5-17.5T320-700q0-25-17.5-42.5T260-760q-25 0-42.5 17.5T200-700q0 25 17.5 42.5T260-640Zm288 352 112-112q11-11 17.5-26t6.5-32q0-34-24-58t-58-24q-19 0-37.5 11T520-492q-30-28-47-38t-35-10q-34 0-58 24t-24 58q0 17 6.5 32t17.5 26l112 112q12 12 28 12t28-12Z",
   },
@@ -29,7 +29,7 @@ const FEATURES = [
   },
   {
     title: "Digital card",
-    body: "Your membership lives on your phone — a rotating QR you scan to earn on the go.",
+    body: "Your membership lives on your phone: a rotating QR you scan to earn on the go.",
     // Material Symbols "qr_code_2" (rounded, filled) — Apache 2.0
     icon: "M520-120v-80h80v80h-80Zm-80-80v-200h80v200h-80Zm320-120v-160h80v160h-80Zm-80-160v-80h80v80h-80Zm-480 80v-80h80v80h-80Zm-80-80v-80h80v80h-80Zm360-280v-80h80v80h-80ZM180-660h120v-120H180v120Zm-60 20v-160q0-17 11.5-28.5T160-840h160q17 0 28.5 11.5T360-800v160q0 17-11.5 28.5T320-600H160q-17 0-28.5-11.5T120-640Zm60 460h120v-120H180v120Zm-60 20v-160q0-17 11.5-28.5T160-360h160q17 0 28.5 11.5T360-320v160q0 17-11.5 28.5T320-120H160q-17 0-28.5-11.5T120-160Zm540-500h120v-120H660v120Zm-60 20v-160q0-17 11.5-28.5T640-840h160q17 0 28.5 11.5T840-800v160q0 17-11.5 28.5T800-600H640q-17 0-28.5-11.5T600-640Zm80 520v-120h-80v-80h160v120h80v80H680ZM520-400v-80h160v80H520Zm-160 0v-80h-80v-80h240v80h-80v80h-80Zm40-200v-160h80v80h80v80H400Zm-190-90v-60h60v60h-60Zm0 480v-60h60v60h-60Zm480-480v-60h60v60h-60Z",
   },
@@ -85,7 +85,7 @@ export default function LandingPage() {
             </h1>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-neutral-600">
               Earn points at events and partner venues, unlock rewards, grab event
-              tickets, and carry your membership card — all in the ASTRA app.
+              tickets, and carry your membership card, all in the ASTRA app.
             </p>
             <div className="mt-8">
               <p className="mb-3 text-sm font-semibold text-neutral-900">
@@ -102,12 +102,12 @@ export default function LandingPage() {
           <div className="astra-fade-up relative mx-auto flex h-[520px] w-full max-w-md items-center justify-center lg:h-[620px]">
             <PhoneFrame
               src="/screens/discounts.png"
-              alt="ASTRA app — map of partner venues offering student discounts"
+              alt="ASTRA app: map of partner venues offering student discounts"
               className="absolute right-2 top-6 w-40 rotate-6 opacity-90 sm:w-52 lg:right-0"
             />
             <PhoneFrame
               src="/screens/home.png"
-              alt="ASTRA app — home screen with points, news and shortcuts"
+              alt="ASTRA app: home screen with points, news and shortcuts"
               className="relative w-56 -rotate-3 sm:w-64 lg:w-72"
             />
           </div>

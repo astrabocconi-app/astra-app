@@ -142,7 +142,7 @@ function Hero() {
           // eslint-disable-next-line @typescript-eslint/no-require-imports
           source={require("../../assets/astraworld-poster.png")}
           resizeMode="contain"
-          accessibilityLabel="ASTRAWORLD — 04 settembre 2026"
+          accessibilityLabel="ASTRAWORLD, 04 settembre 2026"
           style={{ width: cardWidth, height: cardHeight }}
         />
       </View>
@@ -229,6 +229,16 @@ function PanelSheet({ panel, onClose }: { panel: Panel | null; onClose: () => vo
               <Text className="mt-3 text-[15px] leading-[23px] text-gray-600 dark:text-gray-300">
                 {t(panel.hookKey as never)}
               </Text>
+
+              {/* The panels run in Italian regardless of the app's language, so
+                  say it here rather than letting an English-reading exchange
+                  student find out when the session starts. */}
+              <View className="mt-4 flex-row items-center gap-2 rounded-xl bg-astra-light dark:bg-white/10 px-3 py-2.5">
+                <Icon name="language-outline" size={16} color={AW.navy} />
+                <Text className="flex-1 text-[12px] font-semibold text-astra-primary dark:text-white">
+                  {t("awp.inItalian")}
+                </Text>
+              </View>
 
               <Text className="mt-6 text-[11px] font-black uppercase tracking-[1.5px] text-gray-400 dark:text-white/50">
                 {t("awp.speakers")}

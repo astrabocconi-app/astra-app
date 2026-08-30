@@ -12,11 +12,11 @@ export const en = {
   "classrooms.inBuilding": " in {building}",
   "classrooms.atTime": " at {time}",
   "classrooms.notAvailableYet": "Not available yet",
-  "classrooms.notAvailableDesc": "Live classroom availability is read from Bocconi's timetable, which has no data for this time (weekends and outside term). Try another day or time — it fills in automatically once the semester is running.",
+  "classrooms.notAvailableDesc": "Live classroom availability is read from Bocconi's timetable, which has no data for this time (weekends and outside term). Try another day or time. It fills in automatically once the semester is running.",
   "classrooms.studyBadge": "STUDY",
   "classrooms.freeStatus": "Free",
   "classrooms.untilTime": "until {time}",
-  "classrooms.disclaimer": "Please read: rooms may close for cleaning or events, and times include a 15-min buffer before the next class. Weekend and off-term data can be incomplete — always double-check before relying on a room. Powered by Free@B.",
+  "classrooms.disclaimer": "Please read: rooms may close for cleaning or events, and times include a 15-min buffer before the next class. Weekend and off-term data can be incomplete, so always double-check before relying on a room. Powered by Free@B.",
   "classrooms.credit": "Free@B developed by Michele F. Matozza",
 };
 

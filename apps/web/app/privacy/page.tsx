@@ -7,7 +7,7 @@ import { AstraLogo } from "@/app/_ui/logo";
 // third-party processor, new data category collected, etc.).
 
 export const metadata = {
-  title: "Informativa sulla Privacy — ASTRA",
+  title: "Informativa sulla Privacy · ASTRA",
 };
 
 function Section({ n, title, children }: { n: number; title: string; children: ReactNode }) {
@@ -159,18 +159,18 @@ export default function PrivacyPolicyPage() {
           Responsabili del trattamento ai sensi dell&apos;art. 28 GDPR o autonomi Titolari:
         </p>
         <ul className="list-disc space-y-1 pl-5">
-          <li>Vercel Inc. — hosting dell&apos;applicazione e delle API;</li>
-          <li>Supabase Inc. e Neon Inc. — fornitori di database e archiviazione;</li>
+          <li>Vercel Inc.: hosting dell&apos;applicazione e delle API;</li>
+          <li>Supabase Inc. e Neon Inc.: fornitori di database e archiviazione;</li>
           <li>
-            Aruba S.p.A. e, in via sussidiaria, Resend — invio delle email di accesso
+            Aruba S.p.A. e, in via sussidiaria, Resend: invio delle email di accesso
             (codice OTP) e delle comunicazioni di servizio;
           </li>
           <li>
-            OpenAI, L.L.C. — elaborazione del testo delle domande inviate tramite
+            OpenAI, L.L.C.: elaborazione del testo delle domande inviate tramite
             l&apos;assistente virtuale &ldquo;Ask ASTRA&rdquo;, se utilizzato dall&apos;Utente;
           </li>
           <li>
-            Mapbox, Inc. — fornitura delle mappe della sezione &ldquo;Sconti&rdquo;. Il
+            Mapbox, Inc.: fornitura delle mappe della sezione &ldquo;Sconti&rdquo;. Il
             caricamento delle mappe comporta il trattamento dell&apos;indirizzo IP e di dati
             tecnici del dispositivo da parte del fornitore. La raccolta di dati di utilizzo a
             fini statistici (telemetria) è disattivata nell&apos;App;
@@ -251,7 +251,7 @@ export default function PrivacyPolicyPage() {
       </Section>
 
       <p className="mt-10 text-center text-xs text-gray-400">
-        ASTRA Bocconi — Informativa sulla Privacy
+        ASTRA Bocconi · Informativa sulla Privacy
       </p>
     </main>
   );

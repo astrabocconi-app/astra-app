@@ -14,7 +14,7 @@ export const en = {
     "Sent from your myAstra account, so we have your email to reply to. Only the myAstra team can see this.",
   "support.send": "Send to myAstra",
   "support.tooShort": "Add a little more detail",
-  "support.sentTitle": "Thanks — we've got it",
+  "support.sentTitle": "Thanks, we've got it",
   "support.sentBody": "The myAstra team will get back to you by email.",
   "support.failedTitle": "Couldn't send your message",
   "support.failedBody": "Please try again in a moment.",

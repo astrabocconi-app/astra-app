@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -5,6 +6,8 @@ import {
   Pressable,
   Linking,
   Image,
+  Modal,
+  StyleSheet,
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,13 +28,68 @@ import { AW } from "../../lib/astraworld-theme";
  * screen is a festival flyer, not another list of rows.
  */
 
+/**
+ * The four panels, condensed from their run-sheets into something that sells
+ * the session at a glance. Times come from the run-sheets themselves, which are
+ * more specific than the top-level programme.
+ */
+interface Panel {
+  id: string;
+  orgKey: string;
+  shortKey: string;
+  titleKey: string;
+  hookKey: string;
+  speakerKeys: string[];
+  window: string;
+}
+
+const PANELS: Record<string, Panel> = {
+  startlab: {
+    id: "startlab",
+    orgKey: "awp.startlab.org",
+    shortKey: "awp.startlab.short",
+    titleKey: "awp.startlab.title",
+    hookKey: "awp.startlab.hook",
+    speakerKeys: ["awp.startlab.s1", "awp.startlab.s2", "awp.startlab.s3"],
+    window: "15:00 – 15:50",
+  },
+  ef: {
+    id: "ef",
+    orgKey: "awp.ef.org",
+    shortKey: "awp.ef.short",
+    titleKey: "awp.ef.title",
+    hookKey: "awp.ef.hook",
+    speakerKeys: ["awp.ef.s1", "awp.ef.s2"],
+    window: "16:00 – 16:50",
+  },
+  chapeau: {
+    id: "chapeau",
+    orgKey: "awp.chapeau.org",
+    shortKey: "awp.chapeau.short",
+    titleKey: "awp.chapeau.title",
+    hookKey: "awp.chapeau.hook",
+    speakerKeys: ["awp.chapeau.s1", "awp.chapeau.s2", "awp.chapeau.s3"],
+    window: "17:00 – 17:30",
+  },
+  spoons: {
+    id: "spoons",
+    orgKey: "awp.spoons.org",
+    shortKey: "awp.spoons.short",
+    titleKey: "awp.spoons.title",
+    hookKey: "awp.spoons.hook",
+    speakerKeys: ["awp.spoons.s1"],
+    window: "17:30 – 18:00",
+  },
+};
+
 /** Programme, straight from the event description. 24h throughout: it's Milan. */
-const SCHEDULE: { time: string; key: string; us?: boolean }[] = [
+const SCHEDULE: { time: string; key?: string; panel?: string; us?: boolean }[] = [
   { time: "12:00", key: "aw.s1" },
   { time: "13:00", key: "aw.s2" },
-  { time: "15:00", key: "aw.s3" },
-  { time: "16:00", key: "aw.s4" },
-  { time: "17:00", key: "aw.s5" },
+  { time: "15:00", panel: "startlab" },
+  { time: "16:00", panel: "ef" },
+  { time: "17:00", panel: "chapeau" },
+  { time: "17:30", panel: "spoons" },
   { time: "17:50", key: "aw.s6", us: true },
   { time: "18:00", key: "aw.s7" },
   { time: "20:00", key: "aw.s8" },
@@ -46,19 +104,16 @@ const PARTNERS = [
 
 const MAPS_QUERY = "Parco delle Memorie Industriali, Milano";
 
-/**
- * The announcement artwork itself, rather than a re-drawn approximation.
- *
- * It is a 2:1 landscape image, so it is rendered at its own aspect ratio at full
- * width — cropping it to a taller card would cut the wordmark. The poster
- * already carries the date and "un evento dell'Astra Network", so the block
- * underneath only repeats what is too small to read at phone width.
- */
 /** Matches the ScrollView's own horizontal padding. */
 const PAGE_PADDING = 20;
 /** A touch taller than the poster's own 2:1. */
 const CARD_RATIO = 1.75;
 
+/**
+ * The announcement artwork itself, rather than a re-drawn approximation. The
+ * poster already carries the date and "un evento dell'Astra Network", so the
+ * block underneath only repeats what is too small to read at phone width.
+ */
 function Hero() {
   const t = useT();
   const { width } = useWindowDimensions();
@@ -137,9 +192,84 @@ function Body({ children }: { children: string }) {
   );
 }
 
+/** Bottom sheet with a panel's pitch: what it is, and who's on stage. */
+function PanelSheet({ panel, onClose }: { panel: Panel | null; onClose: () => void }) {
+  const t = useT();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Modal visible={panel !== null} transparent animationType="slide" onRequestClose={onClose}>
+      {/* Backdrop is a SIBLING behind the sheet, not its parent — nesting it
+          made the parent swallow taps meant for the sheet. */}
+      <View className="flex-1 justify-end">
+        <Pressable style={StyleSheet.absoluteFill} className="bg-black/50" onPress={onClose} />
+        {panel && (
+          <View
+            className="rounded-t-3xl bg-white dark:bg-astra-primary px-6 pt-3"
+            style={{ maxHeight: "85%", paddingBottom: insets.bottom + 20 }}
+          >
+            <View className="mb-3 items-center">
+              <View className="h-1 w-10 rounded-full bg-gray-300" />
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text
+                className="text-[11px] font-black uppercase tracking-[1.5px]"
+                style={{ color: AW.magentaInk }}
+              >
+                {t(panel.orgKey as never)}
+              </Text>
+              <Text className="mt-1 text-[13px] font-bold" style={{ color: AW.greenInk }}>
+                {panel.window}
+              </Text>
+
+              <Text className="mt-3 text-[21px] font-extrabold leading-7 text-gray-900 dark:text-white">
+                {t(panel.titleKey as never)}
+              </Text>
+
+              <Text className="mt-3 text-[15px] leading-[23px] text-gray-600 dark:text-gray-300">
+                {t(panel.hookKey as never)}
+              </Text>
+
+              <Text className="mt-6 text-[11px] font-black uppercase tracking-[1.5px] text-gray-400 dark:text-white/50">
+                {t("awp.speakers")}
+              </Text>
+              <View className="mt-2 gap-2">
+                {panel.speakerKeys.map((k) => (
+                  <View key={k} className="flex-row items-center gap-2.5">
+                    <View
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: AW.magenta,
+                      }}
+                    />
+                    <Text className="flex-1 text-[14px] text-gray-800 dark:text-gray-100">
+                      {t(k as never)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <Pressable
+                onPress={onClose}
+                className="mt-7 items-center rounded-xl py-3.5 active:opacity-90"
+                style={{ backgroundColor: AW.navy }}
+              >
+                <Text className="text-sm font-bold text-white">{t("awp.close")}</Text>
+              </Pressable>
+            </ScrollView>
+          </View>
+        )}
+      </View>
+    </Modal>
+  );
+}
+
 export default function AstraWorldScreen() {
   const t = useT();
   const insets = useSafeAreaInsets();
+  const [openPanel, setOpenPanel] = useState<string | null>(null);
 
   return (
     <ScrollView
@@ -177,20 +307,57 @@ export default function AstraWorldScreen() {
 
       {/* Programme */}
       <SectionTitle tint={AW.green}>{t("aw.programmeTitle")}</SectionTitle>
+      <Text className="mt-1 text-[12px] text-gray-400 dark:text-white/50">
+        {t("awp.tapHint")}
+      </Text>
       <View className="mt-3">
         {SCHEDULE.map((row, i) => {
           const last = i === SCHEDULE.length - 1;
+          const panel = row.panel ? PANELS[row.panel] : undefined;
+
+          const body = (
+            <View className="flex-1 pb-4">
+              <Text
+                className="text-[13px] font-black"
+                style={{ color: row.us ? AW.magentaInk : AW.navy }}
+              >
+                {row.time}
+              </Text>
+              <View className="mt-0.5 flex-row items-center gap-2">
+                <View className="flex-1">
+                  <Text className="text-[14px] text-gray-800 dark:text-gray-100">
+                    {panel ? t(panel.shortKey as never) : t(row.key as never)}
+                  </Text>
+                  {panel && (
+                    <Text className="mt-0.5 text-[12px] text-gray-400 dark:text-white/50">
+                      {t(panel.orgKey as never)}
+                    </Text>
+                  )}
+                </View>
+                {row.us && (
+                  <View
+                    className="rounded-full px-2 py-0.5"
+                    style={{ backgroundColor: AW.magenta }}
+                  >
+                    <Text className="text-[10px] font-black text-white">{t("aw.usBadge")}</Text>
+                  </View>
+                )}
+                {panel && <Icon name="chevron-forward" size={16} color={AW.magentaInk} />}
+              </View>
+            </View>
+          );
+
           return (
-            <View key={row.time + row.key} className="flex-row">
+            <View key={row.time + (row.panel ?? row.key ?? "")} className="flex-row">
               {/* Timeline rail */}
               <View className="items-center" style={{ width: 22 }}>
                 <View
                   style={{
-                    width: row.us ? 12 : 8,
-                    height: row.us ? 12 : 8,
+                    width: row.us || panel ? 12 : 8,
+                    height: row.us || panel ? 12 : 8,
                     borderRadius: 6,
                     marginTop: 5,
-                    backgroundColor: row.us ? AW.magenta : AW.navy,
+                    backgroundColor: row.us ? AW.magenta : panel ? AW.greenInk : AW.navy,
                   }}
                 />
                 {!last && (
@@ -205,27 +372,17 @@ export default function AstraWorldScreen() {
                 )}
               </View>
 
-              <View className={`flex-1 pb-4 ${row.us ? "" : ""}`}>
-                <Text
-                  className="text-[13px] font-black"
-                  style={{ color: row.us ? AW.magentaInk : AW.navy }}
+              {panel ? (
+                <Pressable
+                  className="flex-1 flex-row active:opacity-60"
+                  onPress={() => setOpenPanel(panel.id)}
+                  accessibilityRole="button"
                 >
-                  {row.time}
-                </Text>
-                <View className="mt-0.5 flex-row items-center gap-2">
-                  <Text className="flex-1 text-[14px] text-gray-800 dark:text-gray-100">
-                    {t(row.key as never)}
-                  </Text>
-                  {row.us && (
-                    <View
-                      className="rounded-full px-2 py-0.5"
-                      style={{ backgroundColor: AW.magenta }}
-                    >
-                      <Text className="text-[10px] font-black text-white">{t("aw.usBadge")}</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
+                  {body}
+                </Pressable>
+              ) : (
+                body
+              )}
             </View>
           );
         })}
@@ -271,6 +428,11 @@ export default function AstraWorldScreen() {
       <Text className="mt-3 text-[12px] text-gray-500 dark:text-gray-400">
         {t("aw.partnersContribution")}
       </Text>
+
+      <PanelSheet
+        panel={openPanel ? (PANELS[openPanel] ?? null) : null}
+        onClose={() => setOpenPanel(null)}
+      />
     </ScrollView>
   );
 }

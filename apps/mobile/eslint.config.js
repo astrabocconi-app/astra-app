@@ -7,7 +7,10 @@ export default [
     // Add RN-specific overrides here as the app grows.
   },
   {
-    files: ["metro.config.js", "tailwind.config.js"],
+    // Build-time tooling, loaded by Node rather than bundled into the app.
+    // Expo config plugins in particular MUST be CommonJS — prebuild requires
+    // them directly — so `require()` is correct there, not a lapse.
+    files: ["metro.config.js", "tailwind.config.js", "plugins/**/*.js"],
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 ];

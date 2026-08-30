@@ -1,6 +1,13 @@
-import { View, Text, ScrollView, Pressable, Linking } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Linking,
+  Image,
+  useWindowDimensions,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Defs, LinearGradient, Stop, Rect, Polygon, Path } from "react-native-svg";
 import { Icon } from "../../components/Icon";
 import { useT } from "../../lib/i18n";
 import { AW } from "../../lib/astraworld-theme";
@@ -39,65 +46,65 @@ const PARTNERS = [
 
 const MAPS_QUERY = "Parco delle Memorie Industriali, Milano";
 
+/**
+ * The announcement artwork itself, rather than a re-drawn approximation.
+ *
+ * It is a 2:1 landscape image, so it is rendered at its own aspect ratio at full
+ * width — cropping it to a taller card would cut the wordmark. The poster
+ * already carries the date and "un evento dell'Astra Network", so the block
+ * underneath only repeats what is too small to read at phone width.
+ */
+/** Matches the ScrollView's own horizontal padding. */
+const PAGE_PADDING = 20;
+/** A touch taller than the poster's own 2:1. */
+const CARD_RATIO = 1.75;
+
 function Hero() {
   const t = useT();
+  const { width } = useWindowDimensions();
+  const cardWidth = width - PAGE_PADDING * 2;
+  const cardHeight = Math.round(cardWidth / CARD_RATIO);
+
   return (
-    <View className="overflow-hidden rounded-3xl" style={{ backgroundColor: AW.navy }}>
-      {/* Poster-ish colour blocking. Purely decorative, so it stays behind the
-          text and is hidden from screen readers. */}
-      <View pointerEvents="none" style={{ position: "absolute", inset: 0 }}>
-        <Svg width="100%" height="100%" viewBox="0 0 340 250" preserveAspectRatio="xMidYMid slice">
-          <Defs>
-            <LinearGradient id="sweep" x1="0" y1="0" x2="1" y2="1">
-              <Stop offset="0" stopColor={AW.magenta} stopOpacity="0.95" />
-              <Stop offset="1" stopColor={AW.navy} stopOpacity="0" />
-            </LinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="340" height="250" fill={AW.navy} />
-          <Path d="M-20 0 L150 0 L40 250 L-20 250 Z" fill="url(#sweep)" />
-          <Polygon points="250,250 285,150 320,250" fill={AW.green} opacity="0.9" />
-          <Polygon points="292,250 315,196 340,250" fill={AW.yellow} opacity="0.85" />
-        </Svg>
+    <View>
+      {/* The same rounded card as the news stories on Home, just slightly
+          taller, and with no scrim or overlaid title — here the artwork is the
+          headline, so anything on top of it is in the way.
+          "contain" rather than "cover" because the card is taller than the
+          poster's own 2:1, and cover would crop the wordmark off the sides. The
+          backdrop is sampled from the poster's own edge (#fdfdfd), so the
+          letterboxing is invisible.
+          Dimensions are explicit numbers, like the news carousel's — neither
+          `aspectRatio` nor a percentage width constrained this bundled
+          require() asset, which kept its intrinsic 1774px and rendered a
+          magnified crop of one corner. */}
+      <View
+        className="overflow-hidden rounded-2xl"
+        style={{ width: cardWidth, height: cardHeight, backgroundColor: "#FDFDFD" }}
+      >
+        <Image
+          // Metro resolves bundled image assets through CommonJS.
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          source={require("../../assets/astraworld-poster.png")}
+          resizeMode="contain"
+          accessibilityLabel="ASTRAWORLD — 04 settembre 2026"
+          style={{ width: cardWidth, height: cardHeight }}
+        />
       </View>
 
-      <View className="px-6 pb-6 pt-7">
-        <Text
-          className="text-[11px] font-bold uppercase tracking-[2px]"
-          style={{ color: AW.green }}
-        >
-          {t("aw.kicker")}
-        </Text>
-
-        <Text
-          className="mt-3 text-white"
-          style={{ fontSize: 46, lineHeight: 44, fontWeight: "900", letterSpacing: -1.5 }}
-        >
-          ASTRA
-        </Text>
-        <Text
-          style={{
-            fontSize: 46,
-            lineHeight: 48,
-            fontWeight: "900",
-            letterSpacing: -1.5,
-            color: AW.magenta,
-          }}
-        >
-          WORLD
-        </Text>
-
-        <Text className="mt-3 text-base font-semibold text-white/90">{t("aw.tagline")}</Text>
-
-        <View className="mt-5 flex-row items-end gap-3">
-          <View className="rounded-2xl px-3.5 py-2" style={{ backgroundColor: AW.magenta }}>
-            <Text className="text-[22px] font-black text-white" style={{ letterSpacing: -0.5 }}>
-              {t("aw.dateShort")}
-            </Text>
-          </View>
-          <View className="flex-1">
-            <Text className="text-sm font-bold text-white">{t("aw.date")}</Text>
-            <Text className="text-xs text-white/70">{t("aw.hours")}</Text>
-          </View>
+      <View className="mt-4 flex-row items-end gap-3">
+        <View className="rounded-2xl px-3.5 py-2" style={{ backgroundColor: AW.magenta }}>
+          <Text className="text-[22px] font-black text-white" style={{ letterSpacing: -0.5 }}>
+            {t("aw.dateShort")}
+          </Text>
+        </View>
+        <View className="flex-1">
+          <Text className="text-base font-extrabold text-gray-900 dark:text-white">
+            {t("aw.tagline")}
+          </Text>
+          <Text className="text-xs text-gray-500 dark:text-white/70">
+            {t("aw.date")} · {t("aw.hours")}
+          </Text>
         </View>
       </View>
     </View>
@@ -167,28 +174,6 @@ export default function AstraWorldScreen() {
       <Body>{t("aw.dayP1")}</Body>
       <Body>{t("aw.dayP2")}</Body>
       <Body>{t("aw.dayP3")}</Body>
-
-      {/* Featured panel */}
-      <View
-        className="mt-5 rounded-2xl p-4"
-        style={{ backgroundColor: "rgba(240,21,155,0.08)", borderWidth: 1, borderColor: "rgba(240,21,155,0.25)" }}
-      >
-        <Text
-          className="text-[10px] font-black uppercase tracking-[1.5px]"
-          style={{ color: AW.magentaInk }}
-        >
-          {t("aw.panelLabel")}
-        </Text>
-        <Text className="mt-1.5 text-base font-extrabold text-gray-900 dark:text-white">
-          {t("aw.panelTitle")}
-        </Text>
-        <Text className="mt-1.5 text-[13px] leading-5 text-gray-600 dark:text-gray-300">
-          {t("aw.panelBody")}
-        </Text>
-        <Text className="mt-2.5 text-[12px] italic text-gray-400 dark:text-white/50">
-          {t("aw.panelTba")}
-        </Text>
-      </View>
 
       {/* Programme */}
       <SectionTitle tint={AW.green}>{t("aw.programmeTitle")}</SectionTitle>

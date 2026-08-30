@@ -21,11 +21,6 @@ export const en = {
   "aw.dayP3":
     "At 17:50 the Astra app presentation closes the afternoon. Then, from 18:00 to 23:00, the Funky Express takeover brings the party.",
 
-  "aw.panelLabel": "Featured panel",
-  "aw.panelTitle": "“Is going abroad really worth it?”",
-  "aw.panelBody":
-    "Built with EF, bringing together Francesca Tusa (ILSU Manager, EF Education First) and Leonardo Crenna (Representative and Co-Founder of Nova Students) to ask what an international experience really gives back: career opportunities, networking and personal growth, but also the costs and the chances you give up by leaving.",
-  "aw.panelTba": "Second and third panel titles and guests — to be announced.",
 
   "aw.programmeTitle": "Programme",
   "aw.programmeNote": "The village, bar and food area stay open all day.",
@@ -77,11 +72,6 @@ export const it: Record<keyof typeof en, string> = {
   "aw.dayP3":
     "Alle 17:50 la presentazione dell'app Astra chiude il pomeriggio. Poi, dalle 18:00 alle 23:00, si balla con il takeover di Funky Express.",
 
-  "aw.panelLabel": "Panel in evidenza",
-  "aw.panelTitle": "“Partire conviene?”",
-  "aw.panelBody":
-    "Nasce con EF e riunisce Francesca Tusa (ILSU Manager, EF Education First) e Leonardo Crenna (Rappresentante e Co-Founder di Nova Students) per capire quale sia il vero ritorno di un'esperienza all'estero: opportunità di carriera, networking e crescita personale, ma anche costi e occasioni a cui si rinuncia partendo.",
-  "aw.panelTba": "Titoli e ospiti del secondo e terzo panel — in arrivo.",
 
   "aw.programmeTitle": "Programma",
   "aw.programmeNote": "Villaggio, bar e area food restano aperti tutto il giorno.",

@@ -2,16 +2,10 @@ import { Tabs } from "expo-router";
 import { View, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, {
-  Defs,
-  LinearGradient as SvgLinearGradient,
-  Stop,
-  Rect,
-  Path,
-} from "react-native-svg";
 import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
 import { AW } from "../../lib/astraworld-theme";
+import { AstraMark } from "../../components/AstraMark";
 import { useEggStore } from "../../lib/egg-store";
 import { useSecretTaps } from "../../lib/use-secret-taps";
 
@@ -27,28 +21,15 @@ type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
 
 /**
- * The ASTRAWORLD tab mark: a filled gradient square in the poster's magenta →
- * green, with a white sparkle. Sits at the same size as the Ionicons around it
- * so the row stays on one baseline. Dims slightly when the tab isn't focused,
- * rather than going grey, so it keeps drawing the eye while the event is on.
+ * The ASTRAWORLD tab mark: the ASTRA monogram itself, tinted to the event's
+ * magenta so it still reads as "this one is different" next to the grey outline
+ * icons. Dims slightly when unfocused rather than going grey, so it keeps
+ * drawing the eye while the event is on.
  */
-function AstraWorldTabIcon({ focused }: { focused: boolean }) {
+function AstraWorldTabIcon({ focused, color }: { focused: boolean; color: string }) {
   return (
-    <View style={{ opacity: focused ? 1 : 0.75 }}>
-      <Svg width={26} height={26} viewBox="0 0 26 26">
-        <Defs>
-          <SvgLinearGradient id="awTab" x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={AW.magenta} />
-            <Stop offset="1" stopColor={AW.green} />
-          </SvgLinearGradient>
-        </Defs>
-        <Rect x="0" y="0" width="26" height="26" rx="8" fill="url(#awTab)" />
-        {/* Four-point sparkle, echoing the poster's starburst. */}
-        <Path
-          d="M13 5.5c.55 3.2 1.8 4.45 5 5s-4.45 1.8-5 5c-.55-3.2-1.8-4.45-5-5s4.45-1.8 5-5z"
-          fill="#FFFFFF"
-        />
-      </Svg>
+    <View style={{ opacity: focused ? 1 : 0.8 }}>
+      <AstraMark size={25} color={color} />
     </View>
   );
 }
@@ -152,22 +133,31 @@ export default function TabsLayout() {
         }}
       />
       {/* ASTRAWORLD — TEMPORARY, reverts to Academics after 4 September 2026.
-          Unlike the other tabs this one is a live event, so it gets the poster's
-          gradient mark instead of a plain outline icon: it should read as
-          "something is happening", not as another section. Restoring Academics
-          means renaming the route back and putting the greyed-out, inert config
-          from git history back here. */}
+          Unlike the other tabs this one is a live event, so it carries the ASTRA
+          monogram in the event's magenta rather than a grey outline glyph: it
+          should read as "something is happening", not as another section.
+          Restoring Academics means renaming the route back and putting the
+          greyed-out, inert config from git history back here. */}
       <Tabs.Screen
         name="astraworld"
         options={{
           title: t("aw.tab"),
-          tabBarIcon: ({ focused }) => <AstraWorldTabIcon focused={focused} />,
-          tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
-          // The vivid magenta is only 3.97:1 on white — fine for the gradient
-          // mark, too weak for an 11px label. The label takes the ink variant
-          // (6.3:1); in inverted mode the bar is dark, so the vivid one reads.
-          tabBarActiveTintColor: inverted ? AW.magenta : AW.magentaInk,
-          tabBarInactiveTintColor: inverted ? AW.magenta : AW.magentaInk,
+          // Colour the mark and the label directly rather than via
+          // tabBarActive/InactiveTintColor: those are read from whichever screen
+          // is focused and repaint the WHOLE bar, which turned every other tab
+          // magenta the moment this one was open.
+          //
+          // The vivid magenta is only 3.97:1 on white — fine for a glyph, too
+          // weak for an 11px label — so the label takes the ink variant (6.3:1).
+          // In inverted mode the bar is dark, so the vivid one reads there.
+          tabBarIcon: ({ focused }) => (
+            <AstraWorldTabIcon focused={focused} color={inverted ? AW.magenta : AW.magentaInk} />
+          ),
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: "700",
+            color: inverted ? AW.magenta : AW.magentaInk,
+          },
         }}
       />
     </Tabs>

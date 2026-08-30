@@ -119,6 +119,7 @@ model User {
   partnerMembership PartnerMembership?
   academicProfile   StudentAcademicProfile?
   examRecords       ExamRecord[]
+  supportMessages   SupportMessage[]
 
   // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
   sessions Session[]
@@ -528,6 +529,46 @@ model Reward {
 /// codes for our own events. Each is handed to exactly one redemption, so a
 /// single-use code can never be given to two students. Rewards without a pool
 /// simply redeem to a PENDING redemption that staff fulfil by hand.
+/// What a support message is about, so the backoffice can triage at a glance.
+enum SupportKind {
+  QUESTION
+  ISSUE
+  IDEA
+}
+
+enum SupportStatus {
+  OPEN
+  RESOLVED
+}
+
+/// A message sent from the app's support screen.
+///
+/// Always tied to the account that sent it — the whole point is being able to
+/// write back, so the reporter's email comes from the User relation rather than
+/// being retyped (and mistyped) into the form. The relation is RESTRICT rather
+/// than CASCADE: if someone deletes their account we keep the thread, since it
+/// may be mid-conversation. Account deletion anonymises the User row, so the
+/// message survives without carrying personal data.
+model SupportMessage {
+  id        String        @id @default(cuid())
+  userId    String
+  kind      SupportKind   @default(QUESTION)
+  message   String
+  status    SupportStatus @default(OPEN)
+  /// Free-text note for whoever handles it; never shown in the app.
+  adminNote String?
+  /// App version + platform, so a bug report has context without asking.
+  appVersion String?
+  platform   String?
+  createdAt  DateTime     @default(now())
+  resolvedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}
+
 model RewardCode {
   id           String    @id @default(cuid())
   rewardId     String

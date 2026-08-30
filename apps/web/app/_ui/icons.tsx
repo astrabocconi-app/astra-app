@@ -122,6 +122,17 @@ export function AuditIcon(props: IconProps) {
   );
 }
 
+/** Question mark in a circle — matches the app's support button. */
+export function SupportIcon(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M9.6 9.4a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4" />
+      <path d="M12 16.6h.01" />
+    </svg>
+  );
+}
+
 export function LogoutIcon(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">

@@ -193,6 +193,26 @@ export type EventItem = z.infer<typeof eventItem>;
 export const eventListResponse = z.object({ items: z.array(eventItem) });
 export type EventListResponse = z.infer<typeof eventListResponse>;
 
+// ── Support ───────────────────────────────────────────────────────────────
+
+/** What the student is writing in about. */
+export const supportKind = z.enum(["QUESTION", "ISSUE", "IDEA"]);
+export type SupportKind = z.infer<typeof supportKind>;
+
+/** Message sent from the app's support screen. */
+export const supportMessageInput = z.object({
+  kind: supportKind.default("QUESTION"),
+  message: z
+    .string()
+    .trim()
+    .min(10, "Please add a little more detail")
+    .max(4000, "That's too long — please shorten it"),
+  /** Filled in by the app, not the student, so bug reports carry context. */
+  appVersion: z.string().trim().max(32).nullish(),
+  platform: z.string().trim().max(32).nullish(),
+});
+export type SupportMessageInput = z.infer<typeof supportMessageInput>;
+
 // ── CMS: Rewards ──────────────────────────────────────────────────────────
 
 /** Admin create/update payload for a reward. */

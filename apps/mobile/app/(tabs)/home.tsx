@@ -56,6 +56,14 @@ export default function HomeScreen() {
           👋
         </Text>
         <Pressable
+          onPress={() => router.push("/support")}
+          hitSlop={10}
+          accessibilityLabel={t("support.a11yLabel")}
+          className="h-10 w-10 items-center justify-center rounded-full bg-astra-light dark:bg-white/10 active:opacity-70"
+        >
+          <Icon name="help" size={20} color="#04107E" />
+        </Pressable>
+        <Pressable
           onPress={() => router.push("/profile")}
           hitSlop={10}
           accessibilityLabel={t("tabs.profile")}

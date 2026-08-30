@@ -81,6 +81,23 @@ export function createApiClient(options: ApiClientOptions) {
     me: async () => (await request<MeResponse>("/api/me")).data,
 
     /**
+     * POST /api/support — send a question, issue or idea.
+     * The sender is taken from the session, so no email field to mistype.
+     */
+    support: async (body: {
+      kind: "QUESTION" | "ISSUE" | "IDEA";
+      message: string;
+      appVersion?: string | null;
+      platform?: string | null;
+    }) =>
+      (
+        await request<{ id: string; createdAt: string }>("/api/support", {
+          method: "POST",
+          body: JSON.stringify(body),
+        })
+      ).data,
+
+    /**
      * DELETE /api/me — permanently delete the signed-in account.
      * Irreversible; the caller must clear the local token afterwards.
      */

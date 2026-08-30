@@ -14,6 +14,7 @@ import * as rewards from "./rewards";
 import * as discounts from "./discounts";
 import * as academics from "./academics";
 import * as astraworld from "./astraworld";
+import * as support from "./support";
 import * as events from "./events";
 import * as pointsHistory from "./pointsHistory";
 import * as partnerProfile from "./partnerProfile";
@@ -37,6 +38,7 @@ const namespaces = [
   discounts,
   academics,
   astraworld,
+  support,
   events,
   pointsHistory,
   partnerProfile,

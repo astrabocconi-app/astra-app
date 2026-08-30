@@ -77,6 +77,24 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/health — liveness + DB connectivity check. */
     health: async () => (await request<{ status: string; db: string }>("/api/health")).data,
 
+    /**
+     * GET /api/content/:key — editable screen content.
+     *
+     * Returns null when nothing is stored or the request fails, so the caller
+     * falls back to its bundled copy. A 404 here is the normal "never edited"
+     * case, not an error worth surfacing.
+     */
+    content: async (key: string): Promise<unknown | null> => {
+      try {
+        const res = await request<{ key: string; data: unknown; updatedAt: string }>(
+          `/api/content/${encodeURIComponent(key)}`,
+        );
+        return res.data.data;
+      } catch {
+        return null;
+      }
+    },
+
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
 

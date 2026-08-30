@@ -15,6 +15,7 @@ import {
   NewspaperIcon,
   SupportIcon,
   BellIcon,
+  SparkleIcon,
 } from "@/app/_ui/icons";
 
 const NAV: { href: string; label: string; icon: ReactNode }[] = [
@@ -27,6 +28,7 @@ const NAV: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/dashboard/points", label: "Points", icon: <CoinsIcon size={20} /> },
   { href: "/dashboard/partners", label: "Partners", icon: <StoreIcon size={20} /> },
   { href: "/dashboard/partner-logins", label: "Partner logins", icon: <UsersIcon size={20} /> },
+  { href: "/dashboard/astraworld", label: "AstraWorld", icon: <SparkleIcon size={20} /> },
   { href: "/dashboard/push", label: "Notifications", icon: <BellIcon size={20} /> },
   { href: "/dashboard/support", label: "Support", icon: <SupportIcon size={20} /> },
   { href: "/dashboard/audit", label: "Audit log", icon: <AuditIcon size={20} /> },

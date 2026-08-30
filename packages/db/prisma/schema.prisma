@@ -121,6 +121,7 @@ model User {
   examRecords       ExamRecord[]
   supportMessages   SupportMessage[]
   pushCampaigns     PushCampaign[]          @relation("PushSender")
+  contentEdits      AppContent[]            @relation("ContentEditor")
 
   // Better Auth (email-OTP). Managed by Better Auth via the Prisma client.
   sessions Session[]
@@ -762,6 +763,22 @@ model MaterialAccess {
 // ============================================================================
 // Push notifications & audit
 // ============================================================================
+
+/// Editable app content that is otherwise hardcoded in the mobile bundle.
+///
+/// One row per screen, keyed by name ("astraworld"). The payload is JSON in the
+/// screen own shape rather than a generic block/field model: this exists so a
+/// specific page can be corrected without shipping an App Store update, not as
+/// a general CMS. The app keeps its bundled copy as a fallback, so a missing or
+/// malformed row degrades to what was compiled in rather than an empty screen.
+model AppContent {
+  key       String   @id
+  data      Json
+  updatedAt DateTime @updatedAt
+  updatedById String?
+
+  updatedBy User? @relation("ContentEditor", fields: [updatedById], references: [id])
+}
 
 /// A push notification sent from the backoffice.
 ///

@@ -73,6 +73,11 @@ export function translate(
 
 // Reads the current language from the language store, so components using
 // this hook automatically re-render when the user flips the switch.
+/** The reader current language, for content that carries both side by side. */
+export function useLanguage(): Language {
+  return useLanguageStore((s) => s.language);
+}
+
 export function useT() {
   const language = useLanguageStore((s) => s.language);
   return (key: TranslationKey, vars?: Record<string, string>) => translate(key, language, vars);

@@ -112,6 +112,56 @@ export const pointsHistoryResponse = z.object({
 });
 export type PointsHistoryResponse = z.infer<typeof pointsHistoryResponse>;
 
+// ── Content links (news + events) ─────────────────────────────────────────
+
+/**
+ * In-app destinations a content link may point at.
+ *
+ * An allowlist rather than free text: a typo in a route would produce a button
+ * that silently does nothing, and the editor picks from this list instead of
+ * typing a path. Keep in step with the mobile app's route table.
+ */
+export const IN_APP_ROUTES = [
+  "/rewards",
+  "/materials",
+  "/classrooms",
+  "/discounts",
+  "/support",
+  "/points-history",
+  "/astraworld",
+] as const;
+export type InAppRoute = (typeof IN_APP_ROUTES)[number];
+
+/** Human labels for the backoffice picker. */
+export const IN_APP_ROUTE_LABELS: Record<InAppRoute, string> = {
+  "/rewards": "Rewards",
+  "/materials": "Materials",
+  "/classrooms": "Free classrooms",
+  "/discounts": "Discounts",
+  "/support": "Support",
+  "/points-history": "Points history",
+  "/astraworld": "AstraWorld",
+};
+
+export const contentLink = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("external"),
+    label: z.string().trim().min(1, "Give the link a label").max(60),
+    // https only: an http link is blocked by App Transport Security anyway, so
+    // it would look like a broken button rather than an insecure one.
+    value: z.string().trim().url().startsWith("https://", "Links must start with https://"),
+  }),
+  z.object({
+    kind: z.literal("internal"),
+    label: z.string().trim().min(1, "Give the link a label").max(60),
+    value: z.enum(IN_APP_ROUTES),
+  }),
+]);
+export type ContentLink = z.infer<typeof contentLink>;
+
+/** At most six, so the bottom of an article doesn't turn into a link farm. */
+export const contentLinks = z.array(contentLink).max(6).default([]);
+
 // ── CMS: News ─────────────────────────────────────────────────────────────
 // `imageUrl` is either a pasted absolute URL or a /api/media/:id path for an
 // image uploaded to our own store. Empty string → null on the wire.
@@ -142,6 +192,7 @@ export const newsInput = z.object({
   imageUrl: optionalImageRef,
   published: z.boolean().default(false),
   pinned: z.boolean().default(false),
+  links: contentLinks,
 });
 export type NewsInput = z.infer<typeof newsInput>;
 
@@ -154,6 +205,7 @@ export const newsItem = z.object({
   published: z.boolean(),
   pinned: z.boolean(),
   publishedAt: z.string().nullable(),
+  links: z.array(contentLink),
   createdAt: z.string(),
 });
 export type NewsItem = z.infer<typeof newsItem>;
@@ -173,6 +225,7 @@ export const eventInput = z.object({
   endsAt: z.string().nullish(),
   externalTicketUrl: optionalUrl,
   published: z.boolean().default(false),
+  links: contentLinks,
 });
 export type EventInput = z.infer<typeof eventInput>;
 
@@ -186,6 +239,7 @@ export const eventItem = z.object({
   endsAt: z.string().nullable(),
   externalTicketUrl: z.string().nullable(),
   published: z.boolean(),
+  links: z.array(contentLink),
   createdAt: z.string(),
 });
 export type EventItem = z.infer<typeof eventItem>;

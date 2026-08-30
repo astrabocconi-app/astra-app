@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Icon } from "../../components/Icon";
+import { ContentLinks } from "../../components/ContentLinks";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 
@@ -111,6 +112,7 @@ export default function EventDetailScreen() {
             {event.description ? (
               <Text className="mt-4 text-base leading-6 text-gray-600 dark:text-gray-300">{event.description}</Text>
             ) : null}
+            <ContentLinks links={event.links} />
           </View>
         </ScrollView>
       )}

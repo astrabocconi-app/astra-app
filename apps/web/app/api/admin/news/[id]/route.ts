@@ -42,6 +42,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       ...(d.imageUrl !== undefined ? { coverImageKey: d.imageUrl ?? null } : {}),
       ...(d.published !== undefined ? { published: d.published } : {}),
       ...(d.pinned !== undefined ? { pinned: d.pinned } : {}),
+      ...(d.links !== undefined ? { links: d.links } : {}),
       publishedAt,
     },
   });

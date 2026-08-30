@@ -630,6 +630,8 @@ model Event {
   externalTicketUrl String? // advertise-only: link out to where tickets are sold
   capacity          Int? // null = unlimited (legacy; unused in advertise-only v1)
   pointsOnCheckin   Int       @default(0) // legacy; unused in advertise-only v1
+  /// Same shape as NewsPost.links — shown at the bottom of the event page.
+  links             Json?
   areaId            String?
   published         Boolean   @default(false)
   createdAt         DateTime  @default(now())
@@ -690,6 +692,10 @@ model NewsPost {
   published     Boolean   @default(false)
   pinned        Boolean   @default(false)
   publishedAt   DateTime?
+  /// Call-to-action links shown at the bottom of the article. Array of
+  /// { label, kind: "external" | "internal", value } — see @astra/shared
+  /// contentLinks. Internal links are in-app routes; external are https URLs.
+  links         Json?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?

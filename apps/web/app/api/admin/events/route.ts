@@ -52,6 +52,7 @@ export async function POST(req: Request) {
       endsAt: endsAt && !Number.isNaN(endsAt.getTime()) ? endsAt : null,
       externalTicketUrl: d.externalTicketUrl ?? null,
       published: d.published,
+      links: d.links,
     },
   });
   await writeAudit({

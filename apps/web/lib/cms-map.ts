@@ -6,7 +6,16 @@
 // resolved to absolute so the client can load them directly; without it (the
 // dashboard edit forms) the raw stored value is returned so re-saving is stable.
 
-import type { NewsItem, EventItem, RewardItem, PartnerItem, PartnerOffer } from "@astra/shared";
+import { z } from "zod";
+import { contentLink } from "@astra/shared";
+import type {
+  NewsItem,
+  EventItem,
+  RewardItem,
+  PartnerItem,
+  PartnerOffer,
+  ContentLink,
+} from "@astra/shared";
 import type { NewsPost, Event as EventRow, Reward, Partner, Offer } from "@astra/db";
 
 export function resolveImageUrl(value: string | null, origin?: string): string | null {
@@ -24,6 +33,16 @@ export function originFromRequest(req: Request): string {
   return host ? `${proto}://${host}` : "";
 }
 
+/**
+ * Links come out of a JSON column, so they are parsed rather than cast. A row
+ * written before the column existed, or hand-edited into a bad shape, yields an
+ * empty list instead of breaking the whole response.
+ */
+function parseLinks(value: unknown): ContentLink[] {
+  const parsed = z.array(contentLink).safeParse(value ?? []);
+  return parsed.success ? parsed.data : [];
+}
+
 export function toNewsItem(n: NewsPost, origin?: string): NewsItem {
   return {
     id: n.id,
@@ -34,6 +53,7 @@ export function toNewsItem(n: NewsPost, origin?: string): NewsItem {
     published: n.published,
     pinned: n.pinned,
     publishedAt: n.publishedAt ? n.publishedAt.toISOString() : null,
+    links: parseLinks(n.links),
     createdAt: n.createdAt.toISOString(),
   };
 }
@@ -49,6 +69,7 @@ export function toEventItem(e: EventRow, origin?: string): EventItem {
     endsAt: e.endsAt ? e.endsAt.toISOString() : null,
     externalTicketUrl: e.externalTicketUrl,
     published: e.published,
+    links: parseLinks(e.links),
     createdAt: e.createdAt.toISOString(),
   };
 }

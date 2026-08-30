@@ -16,6 +16,7 @@ import * as academics from "./academics";
 import * as astraworld from "./astraworld";
 import * as astraworldPanels from "./astraworld-panels";
 import * as support from "./support";
+import * as links from "./links";
 import * as events from "./events";
 import * as pointsHistory from "./pointsHistory";
 import * as partnerProfile from "./partnerProfile";
@@ -41,6 +42,7 @@ const namespaces = [
   astraworld,
   astraworldPanels,
   support,
+  links,
   events,
   pointsHistory,
   partnerProfile,

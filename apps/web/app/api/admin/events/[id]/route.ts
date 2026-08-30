@@ -45,6 +45,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       ...(endsAt !== undefined ? { endsAt: endsAt && !Number.isNaN(endsAt.getTime()) ? endsAt : null } : {}),
       ...(d.externalTicketUrl !== undefined ? { externalTicketUrl: d.externalTicketUrl ?? null } : {}),
       ...(d.published !== undefined ? { published: d.published } : {}),
+      ...(d.links !== undefined ? { links: d.links } : {}),
     },
   });
   await writeAudit({

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { ContentLink } from "@astra/shared";
+import { LinksEditor } from "../_components/links-editor";
 import { useRouter } from "next/navigation";
 import type { NewsItem } from "@astra/shared";
 import { Button } from "@/app/_ui/button";
@@ -28,6 +30,7 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
   const [pinned, setPinned] = useState(initial?.pinned ?? false);
+  const [links, setLinks] = useState<ContentLink[]>(initial?.links ?? []);
   const [notify, setNotify] = useState(false); // per-save action, not stored
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +39,7 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
     setLoading(true);
     setError(null);
     try {
-      const payload = { title, excerpt, body, imageUrl, published, pinned, notify };
+      const payload = { title, excerpt, body, imageUrl, published, pinned, links, notify };
       if (id) await send(`/api/admin/news/${id}`, "PATCH", payload);
       else await send("/api/admin/news", "POST", payload);
       router.push("/dashboard/news");
@@ -94,6 +97,8 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
         checked={notify}
         onChange={setNotify}
       />
+
+      <LinksEditor value={links} onChange={setLinks} />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

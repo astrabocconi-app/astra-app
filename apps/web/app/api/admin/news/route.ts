@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       coverImageKey: d.imageUrl ?? null,
       published: d.published,
       pinned: d.pinned,
+      links: d.links,
       publishedAt: d.published ? new Date() : null,
       authorId: guard.session.user.id,
     },

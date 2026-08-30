@@ -55,7 +55,9 @@ export async function listRedemptions(filter: RedemptionFilter = {}) {
 
   return rows.map((r) => ({
     id: r.id,
-    ref: pickupRef(r.id),
+    // NOT named `ref`: React reserves that, and this object is spread
+    // straight into a component.
+    pickupRef: pickupRef(r.id),
     status: r.status,
     costPoints: r.costPoints,
     // A code means it fulfilled itself; no code means someone hands it over.

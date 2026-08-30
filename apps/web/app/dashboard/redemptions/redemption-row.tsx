@@ -18,7 +18,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export function RedemptionRow({
   id,
-  ref: pickupRef,
+  pickupRef,
   status,
   costPoints,
   code,
@@ -28,7 +28,7 @@ export function RedemptionRow({
   student,
 }: {
   id: string;
-  ref: string;
+  pickupRef: string;
   status: string;
   costPoints: number;
   code: string | null;

@@ -93,8 +93,23 @@ export default async function RedemptionsPage({
         />
       ) : (
         <div className="flex flex-col gap-3">
+          {/* Props passed explicitly rather than spread. Spreading the row was
+              how a field called `ref` reached a client component, which React
+              reserves and refuses across the server boundary — the page failed
+              to load with nothing in the logs. */}
           {rows.map((r) => (
-            <RedemptionRow key={r.id} {...r} />
+            <RedemptionRow
+              key={r.id}
+              id={r.id}
+              pickupRef={r.pickupRef}
+              status={r.status}
+              costPoints={r.costPoints}
+              code={r.code}
+              createdAt={r.createdAt}
+              fulfilledAt={r.fulfilledAt}
+              rewardTitle={r.rewardTitle}
+              student={r.student}
+            />
           ))}
         </div>
       )}

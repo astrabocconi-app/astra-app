@@ -214,7 +214,7 @@ export default function RewardsScreen() {
                         {t("rewards.pickupRef")}
                       </Text>
                       <Text className="font-mono text-[15px] font-bold text-amber-900 dark:text-amber-100">
-                        {r.ref}
+                        {r.pickupRef}
                       </Text>
                     </View>
                   </View>

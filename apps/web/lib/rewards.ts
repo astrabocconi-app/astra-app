@@ -194,7 +194,7 @@ export async function listRedemptions(userId: string) {
     id: r.id,
     // Short reference the student reads out at the desk; the backoffice shows
     // the same one, derived from the id rather than stored.
-    ref: pickupRef(r.id),
+    pickupRef: pickupRef(r.id),
     rewardId: r.rewardId,
     rewardTitle: r.reward.title,
     costPoints: r.costPoints,

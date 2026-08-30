@@ -188,7 +188,7 @@ export function createApiClient(options: ApiClientOptions) {
           await request<{
             items: {
               id: string;
-              ref: string;
+              pickupRef: string;
               rewardId: string;
               rewardTitle: string;
               costPoints: number;

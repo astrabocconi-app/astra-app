@@ -1,12 +1,31 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newRequestId, errorResponse } from "@/lib/api";
+import { originFromRequest } from "@/lib/cms-map";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Only these keys are readable, so this can't be used to probe the table. */
 const PUBLIC_KEYS = new Set(["astraworld"]);
+
+/**
+ * Rewrite uploaded-image references to absolute URLs.
+ *
+ * Images picked in the backoffice are stored as `/api/media/:id`, which the
+ * dashboard can render as-is but the app cannot: React Native has no page
+ * origin to resolve a relative path against, so it would silently fail to load.
+ * The same resolution the CMS mappers do, applied to content JSON.
+ */
+function withAbsoluteMedia(data: unknown, origin: string): unknown {
+  if (!origin || data === null || typeof data !== "object") return data;
+  const clone = data as Record<string, unknown>;
+  const poster = clone.posterUrl;
+  if (typeof poster === "string" && poster.startsWith("/api/media/")) {
+    return { ...clone, posterUrl: `${origin}${poster}` };
+  }
+  return data;
+}
 
 // GET /api/content/:key — editable screen content.
 //
@@ -31,7 +50,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ key: string }> 
   }
 
   return NextResponse.json(
-    { key: row.key, data: row.data, updatedAt: row.updatedAt.toISOString() },
+    { key: row.key, data: withAbsoluteMedia(row.data, originFromRequest(req)), updatedAt: row.updatedAt.toISOString() },
     {
       headers: {
         "x-request-id": requestId,

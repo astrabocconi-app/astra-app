@@ -10,6 +10,7 @@ import {
 import { Card } from "@/app/_ui/card";
 import { Button } from "@/app/_ui/button";
 import { Field, Input, Textarea, Toggle } from "@/app/_ui/field";
+import { ImageInput } from "../_components/image-input";
 
 type Bilingual = { en: string; it: string };
 
@@ -281,6 +282,15 @@ export function AstraWorldEditor() {
             <Input value={content.venue} onChange={(e) => set("venue", e.target.value)} />
           </Field>
         </div>
+        <Field
+          label="Poster"
+          hint="Leave empty to keep the artwork built into the app. Landscape works best."
+        >
+          <ImageInput
+            value={content.posterUrl ?? ""}
+            onChange={(v) => set("posterUrl", v || null)}
+          />
+        </Field>
         <BiField label="Full date" value={content.date} onChange={(v) => set("date", v)} />
         <BiField label="Entry" value={content.entry} onChange={(v) => set("entry", v)} />
         <BiField label="Tagline" value={content.tagline} onChange={(v) => set("tagline", v)} />

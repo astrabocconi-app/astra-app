@@ -64,11 +64,17 @@ function Hero({ content, lang }: { content: AstraWorldContent; lang: Lang }) {
         style={{ width: cardWidth, height: cardHeight, backgroundColor: "#FDFDFD" }}
       >
         <Image
-          // Metro resolves bundled image assets through CommonJS.
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          source={require("../../assets/astraworld-poster.png")}
+          source={
+            // A poster chosen in the backoffice wins; otherwise the artwork
+            // compiled into the app, so the screen is never posterless.
+            content.posterUrl
+              ? { uri: content.posterUrl }
+              : // Metro resolves bundled image assets through CommonJS.
+                // eslint-disable-next-line @typescript-eslint/no-require-imports
+                require("../../assets/astraworld-poster.png")
+          }
           resizeMode="contain"
-          accessibilityLabel="ASTRAWORLD, 04 settembre 2026"
+          accessibilityLabel="ASTRAWORLD"
           style={{ width: cardWidth, height: cardHeight }}
         />
       </View>

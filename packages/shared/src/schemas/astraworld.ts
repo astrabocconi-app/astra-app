@@ -4,9 +4,9 @@ import { z } from "zod";
  * The editable content of the ASTRAWORLD screen.
  *
  * Shaped like the screen rather than like a generic CMS: the event has a fixed
- * layout and a fixed lifespan, and the point is that someone can correct a time
- * or a speaker without an App Store update. Anything the layout does not vary
- * (the poster, the colours) stays in the app bundle.
+ * layout and a fixed lifespan, and the point is that someone can correct a
+ * time, a speaker or the poster without an App Store update. What the layout
+ * never varies — the colours, the tab mark — stays in the app bundle.
  *
  * Both languages are carried side by side so the screen stays bilingual when it
  * is edited — an editor who fills in only Italian would otherwise silently
@@ -43,6 +43,21 @@ export type AstraWorldSlot = z.infer<typeof astraWorldSlot>;
 export const astraWorldContent = z.object({
   /** Shown even when the event is over, so the tab never looks broken. */
   visible: z.boolean().default(true),
+  /**
+   * The poster at the top of the screen.
+   *
+   * Either an uploaded image (/api/media/:id) or an absolute URL. Null means
+   * the app uses the artwork built into the bundle, which is what makes this
+   * safe to leave alone: replacing the poster is optional, not required.
+   */
+  posterUrl: z
+    .string()
+    .trim()
+    .nullish()
+    .transform((v) => (v ? v : null))
+    .refine((v) => v === null || v.startsWith("/api/media/") || /^https?:\/\/\S+$/.test(v), {
+      message: "Enter a valid image URL",
+    }),
   date: bilingual,
   dateShort: z.string().trim().min(1).max(12),
   hours: z.string().trim().min(1).max(40),
@@ -88,6 +103,8 @@ export type AstraWorldContent = z.infer<typeof astraWorldContent>;
  */
 export const ASTRAWORLD_DEFAULT: AstraWorldContent = {
   "visible": true,
+  // null -> the app uses its bundled poster artwork.
+  "posterUrl": null,
   "date": {
     "en": "4 September 2026",
     "it": "4 settembre 2026"

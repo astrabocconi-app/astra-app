@@ -2,23 +2,56 @@ import { Tabs } from "expo-router";
 import { View, Pressable, StyleSheet, Image, type ColorValue } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, {
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Stop,
+  Rect,
+  Path,
+} from "react-native-svg";
 import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
+import { AW } from "../../lib/astraworld-theme";
 import { useEggStore } from "../../lib/egg-store";
 import { useSecretTaps } from "../../lib/use-secret-taps";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
-const DISABLED = "#C4C8D4";
 
 // Inverted mode is the brand the other way round: white on blue.
 const INVERTED_BG = BRAND;
 const INVERTED_BAR = "#020A52";
 const INVERTED_INACTIVE = "rgba(255,255,255,0.55)";
-const INVERTED_DISABLED = "rgba(255,255,255,0.3)";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
+
+/**
+ * The ASTRAWORLD tab mark: a filled gradient square in the poster's magenta →
+ * green, with a white sparkle. Sits at the same size as the Ionicons around it
+ * so the row stays on one baseline. Dims slightly when the tab isn't focused,
+ * rather than going grey, so it keeps drawing the eye while the event is on.
+ */
+function AstraWorldTabIcon({ focused }: { focused: boolean }) {
+  return (
+    <View style={{ opacity: focused ? 1 : 0.75 }}>
+      <Svg width={26} height={26} viewBox="0 0 26 26">
+        <Defs>
+          <SvgLinearGradient id="awTab" x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={AW.magenta} />
+            <Stop offset="1" stopColor={AW.green} />
+          </SvgLinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="26" height="26" rx="8" fill="url(#awTab)" />
+        {/* Four-point sparkle, echoing the poster's starburst. */}
+        <Path
+          d="M13 5.5c.55 3.2 1.8 4.45 5 5s-4.45 1.8-5 5c-.55-3.2-1.8-4.45-5-5s4.45-1.8 5-5z"
+          fill="#FFFFFF"
+        />
+      </Svg>
+    </View>
+  );
+}
 
 // Raised circular button for the center "Card" (QR) tab — big + easy to reach.
 function CenterCardButton({ onPress }: { onPress?: PressableOnPress }) {
@@ -49,7 +82,6 @@ export default function TabsLayout() {
 
   const fg = inverted ? "#FFFFFF" : BRAND;
   const barBg = inverted ? INVERTED_BAR : "#FFFFFF";
-  const disabled = inverted ? INVERTED_DISABLED : DISABLED;
 
   return (
     <Tabs
@@ -119,32 +151,23 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
+      {/* ASTRAWORLD — TEMPORARY, reverts to Academics after 4 September 2026.
+          Unlike the other tabs this one is a live event, so it gets the poster's
+          gradient mark instead of a plain outline icon: it should read as
+          "something is happening", not as another section. Restoring Academics
+          means renaming the route back and putting the greyed-out, inert config
+          from git history back here. */}
       <Tabs.Screen
-        name="academics"
+        name="astraworld"
         options={{
-          title: t("tabs.academics"),
-          // Rendered by the navigator like every other tab so the icon and
-          // label sit on exactly the same baseline — a hand-rolled button was
-          // always a pixel or two out. Greyed out, with the "Soon!" ribbon as
-          // a badge, and inert via the tabPress listener below.
-          tabBarIcon: ({ size }) => (
-            <Ionicons name="school-outline" size={size} color={disabled} />
-          ),
-          tabBarLabelStyle: { fontSize: 11, color: disabled },
-          tabBarBadge: t("academics.soonFlag"),
-          tabBarBadgeStyle: styles.soonBadge,
-        }}
-        listeners={{
-          // Visible but not yet navigable.
-          //
-          // There was a ten-tap gesture here that let the tenth press through
-          // to the placeholder screen. Removed for App Review: guideline 2.3.1
-          // forbids hidden or undocumented features, and what this revealed was
-          // a "Coming Soon" placeholder, which also invites 4.2 (minimum
-          // functionality). A greyed-out tab is precisely what a reviewer taps
-          // repeatedly to check whether it works, so it was reachable by
-          // accident. Put it back once the real Academics screen ships.
-          tabPress: (e) => e.preventDefault(),
+          title: t("aw.tab"),
+          tabBarIcon: ({ focused }) => <AstraWorldTabIcon focused={focused} />,
+          tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
+          // The vivid magenta is only 3.97:1 on white — fine for the gradient
+          // mark, too weak for an 11px label. The label takes the ink variant
+          // (6.3:1); in inverted mode the bar is dark, so the vivid one reads.
+          tabBarActiveTintColor: inverted ? AW.magenta : AW.magentaInk,
+          tabBarInactiveTintColor: inverted ? AW.magenta : AW.magentaInk,
         }}
       />
     </Tabs>
@@ -158,20 +181,6 @@ const styles = StyleSheet.create({
   centerWrap: {
     flex: 1,
     alignItems: "center",
-  },
-  soonBadge: {
-    backgroundColor: "#FFCC00", // brand gold, against the brand blue text
-    color: BRAND,
-    fontSize: 9,
-    fontWeight: "800",
-    // The badge is built for short counts and clips a word to "So…", so it
-    // needs an explicit width and its own radius rather than the derived one.
-    lineHeight: 15,
-    height: 15,
-    minWidth: 38,
-    borderRadius: 8,
-    paddingHorizontal: 5,
-    overflow: "hidden",
   },
   centerButton: {
     top: -22,

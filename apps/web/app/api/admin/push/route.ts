@@ -3,7 +3,7 @@ import { prisma } from "@astra/db";
 import { z } from "zod";
 import { IN_APP_ROUTES } from "@astra/shared";
 import { newRequestId, errorResponse, log } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { pushAudience, previewAudience, audienceTokens, audienceOptions } from "@/lib/push-audience";
 import { sendPushToTokens } from "@/lib/push";
@@ -29,7 +29,7 @@ const input = z.object({
 // GET /api/admin/push — filter options + recent sends.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "push");
   if ("error" in guard) return guard.error;
 
   const [options, recent, totalDevices] = await Promise.all([
@@ -64,7 +64,7 @@ export async function GET(req: Request) {
 // POST /api/admin/push — preview an audience, or send to it.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "push");
   if ("error" in guard) return guard.error;
 
   const parsed = input.safeParse(await req.json().catch(() => null));

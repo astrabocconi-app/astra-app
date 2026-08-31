@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newsInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toNewsItem } from "@/lib/cms-map";
 import { sendPushToAll } from "@/lib/push";
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 // GET /api/admin/news — all posts (drafts + published), newest first.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "news");
   if ("error" in guard) return guard.error;
 
   const rows = await prisma.newsPost.findMany({
@@ -29,7 +29,7 @@ export async function GET(req: Request) {
 // POST /api/admin/news — create a post.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "news");
   if ("error" in guard) return guard.error;
 
   const raw = await req.json().catch(() => null);

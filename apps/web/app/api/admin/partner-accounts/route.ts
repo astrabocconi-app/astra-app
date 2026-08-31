@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { createPartnerAccount } from "@/lib/partner-accounts";
 
@@ -20,7 +20,7 @@ const input = z.object({
 // GET /api/admin/partner-accounts — every venue login, grouped-ready.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
 
   const rows = await prisma.partnerMembership.findMany({
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
 // POST /api/admin/partner-accounts — issue a new login for a venue.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
 
   const parsed = input.safeParse(await req.json().catch(() => null));

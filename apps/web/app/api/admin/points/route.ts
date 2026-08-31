@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, LedgerSource } from "@astra/db";
 import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { earn, spend, getBalance, InsufficientPointsError } from "@/lib/points";
 
@@ -21,7 +21,7 @@ const adjustInput = z.object({
 // stay derived and the adjustment shows up in the student's history.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "points");
   if ("error" in guard) return guard.error;
 
   const parsed = adjustInput.safeParse(await req.json().catch(() => null));

@@ -168,3 +168,21 @@ export function SparkleIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function ShieldIcon(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <path d="M12 3.5 19 6v5.5c0 4-2.9 7.5-7 9-4.1-1.5-7-5-7-9V6l7-2.5Z" />
+      <path d="m9.2 12.2 2 2 3.6-3.9" />
+    </svg>
+  );
+}
+
+export function KeyIcon(props: IconProps) {
+  return (
+    <svg {...base(props)} aria-hidden="true">
+      <circle cx="8" cy="14" r="3.5" />
+      <path d="m10.8 11.8 7.2-7.2M16 6.6l2 2M14 8.6l2 2" />
+    </svg>
+  );
+}

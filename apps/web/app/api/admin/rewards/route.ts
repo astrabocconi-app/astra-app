@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { rewardInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toRewardItem } from "@/lib/cms-map";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // GET /api/admin/rewards — full catalog (active + inactive), newest first.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
 
   const rows = await prisma.reward.findMany({
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 // POST /api/admin/rewards — create a reward.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
 
   const parsed = rewardInput.safeParse(await req.json().catch(() => null));

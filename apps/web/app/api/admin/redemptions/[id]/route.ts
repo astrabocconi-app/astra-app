@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { newRequestId, errorResponse, log } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { fulfilRedemption, cancelRedemption, RedemptionError } from "@/lib/redemptions";
 
@@ -13,7 +13,7 @@ const input = z.object({ action: z.enum(["fulfil", "cancel"]) });
 // PATCH /api/admin/redemptions/:id — mark collected, or cancel and refund.
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "redemptions");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

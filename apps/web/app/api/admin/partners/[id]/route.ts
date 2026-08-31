@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { partnerInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toPartnerItem } from "@/lib/cms-map";
 import { syncPartnerOffers } from "@/lib/partners";
@@ -18,7 +18,7 @@ const activeOffers = {
 // PATCH /api/admin/partners/:id — update fields and/or replace the discount set.
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 
@@ -75,7 +75,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 // DELETE /api/admin/partners/:id — soft delete the venue and its discounts.
 export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

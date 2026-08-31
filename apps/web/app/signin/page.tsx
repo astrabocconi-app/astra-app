@@ -5,9 +5,15 @@ import { useRouter } from "next/navigation";
 import { AstraLogo } from "@/app/_ui/logo";
 import { Button } from "@/app/_ui/button";
 
-// ASTRA admin sign-in: username + password, then a 6-digit OTP emailed to the
-// admin address (two factors). Talks to the custom Better Auth endpoints
-// /api/auth/admin-login and /api/auth/admin-verify.
+// Backoffice sign-in: username + password, for both kinds of account.
+//
+// The central admin gets a second factor — the response comes back `pending`
+// and a 6-digit code is emailed, which the second step verifies. Staff accounts
+// created from Team have no mailbox of their own, so the same call signs them
+// in directly and there is no second step. The form does not need to know which
+// it is talking to: the presence of `pending` decides.
+//
+// Talks to /api/auth/admin-login and /api/auth/admin-verify.
 async function post(path: string, body: unknown) {
   const res = await fetch(`/api/auth/${path}`, {
     method: "POST",
@@ -72,7 +78,7 @@ export default function SignInPage() {
           <h1 className="mt-4 text-2xl font-bold text-astra-primary">ASTRA Dashboard</h1>
           <p className="mt-1 text-sm text-gray-500">
             {step === "credentials"
-              ? "Sign in with your admin username and password."
+              ? "Sign in with your username and password."
               : `Enter the 6-digit code sent to ${sentTo || "your email"}.`}
           </p>
         </div>

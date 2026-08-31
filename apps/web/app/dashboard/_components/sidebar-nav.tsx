@@ -2,67 +2,55 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import {
-  HomeIcon,
-  UsersIcon,
-  BookIcon,
-  CalendarIcon,
-  CoinsIcon,
-  GiftIcon,
-  StoreIcon,
-  AuditIcon,
-  NewspaperIcon,
-  SupportIcon,
-  BellIcon,
-  SparkleIcon,
-} from "@/app/_ui/icons";
+import type { DashboardSection } from "@/lib/dashboard-pages";
+import { pageIcon } from "./page-icons";
 
-const NAV: { href: string; label: string; icon: ReactNode }[] = [
-  { href: "/dashboard", label: "Overview", icon: <HomeIcon size={20} /> },
-  { href: "/dashboard/news", label: "News", icon: <NewspaperIcon size={20} /> },
-  { href: "/dashboard/events", label: "Events", icon: <CalendarIcon size={20} /> },
-  { href: "/dashboard/rewards", label: "Rewards", icon: <GiftIcon size={20} /> },
-  { href: "/dashboard/redemptions", label: "Redemptions", icon: <GiftIcon size={20} /> },
-  { href: "/dashboard/users", label: "Users", icon: <UsersIcon size={20} /> },
-  { href: "/dashboard/materials", label: "Materials", icon: <BookIcon size={20} /> },
-  { href: "/dashboard/points", label: "Points", icon: <CoinsIcon size={20} /> },
-  { href: "/dashboard/partners", label: "Partners", icon: <StoreIcon size={20} /> },
-  { href: "/dashboard/partner-logins", label: "Partner logins", icon: <UsersIcon size={20} /> },
-  { href: "/dashboard/astraworld", label: "AstraWorld", icon: <SparkleIcon size={20} /> },
-  { href: "/dashboard/push", label: "Notifications", icon: <BellIcon size={20} /> },
-  { href: "/dashboard/support", label: "Support", icon: <SupportIcon size={20} /> },
-  { href: "/dashboard/audit", label: "Audit log", icon: <AuditIcon size={20} /> },
-];
-
-export function SidebarNav() {
+/**
+ * Grouped into sections, because a flat list of fourteen links is a wall you
+ * re-read every time instead of jumping to the group you want.
+ *
+ * Sections arrive already filtered to what this account may open, so nobody is
+ * shown a link that would bounce them.
+ */
+export function SidebarNav({ sections }: { sections: DashboardSection[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
-      {NAV.map((item) => {
-        const active =
-          item.href === "/dashboard"
-            ? pathname === "/dashboard"
-            : pathname.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-              active
-                ? "bg-astra-light text-astra-primary"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }`}
-          >
-            <span className={active ? "text-astra-primary" : "text-gray-400"}>
-              {item.icon}
-            </span>
-            {item.label}
-          </Link>
-        );
-      })}
+    <nav className="flex flex-col gap-5">
+      {sections.map((section) => (
+        <div key={section.key} className="flex flex-col gap-0.5">
+          {/* No heading above a lone Overview link. */}
+          {section.key !== "overview" && (
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+              {section.label}
+            </p>
+          )}
+
+          {section.pages.map((page) => {
+            const active =
+              page.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(page.href);
+            return (
+              <Link
+                key={page.key}
+                href={page.href}
+                aria-current={active ? "page" : undefined}
+                className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm transition-colors ${
+                  active
+                    ? "bg-astra-light font-semibold text-astra-primary"
+                    : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <span className={active ? "text-astra-primary" : "text-gray-400"}>
+                  {pageIcon(page.key)}
+                </span>
+                {page.label}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }

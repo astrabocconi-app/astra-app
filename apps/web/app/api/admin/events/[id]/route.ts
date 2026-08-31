@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { eventInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toEventItem } from "@/lib/cms-map";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // PATCH /api/admin/events/:id — update (incl. publish/unpublish).
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "events");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 
@@ -61,7 +61,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 // DELETE /api/admin/events/:id — soft delete.
 export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "events");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

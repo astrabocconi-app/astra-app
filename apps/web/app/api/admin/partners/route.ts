@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { partnerInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toPartnerItem } from "@/lib/cms-map";
 import { syncPartnerOffers } from "@/lib/partners";
@@ -18,7 +18,7 @@ const activeOffers = {
 // GET /api/admin/partners — every partner (active + hidden), A→Z.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
 
   const rows = await prisma.partner.findMany({
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
 // POST /api/admin/partners — create a partner venue and its discounts.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
 
   const parsed = partnerInput.safeParse(await req.json().catch(() => null));

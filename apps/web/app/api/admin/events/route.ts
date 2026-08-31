@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { eventInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toEventItem } from "@/lib/cms-map";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // GET /api/admin/events — all events (drafts + published), soonest first.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "events");
   if ("error" in guard) return guard.error;
 
   const rows = await prisma.event.findMany({
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 // POST /api/admin/events — create an event.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "events");
   if ("error" in guard) return guard.error;
 
   const parsed = eventInput.safeParse(await req.json().catch(() => null));

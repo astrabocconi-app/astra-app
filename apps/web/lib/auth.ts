@@ -34,6 +34,7 @@ import {
   consumeAdminOtp,
   upsertAdminUser,
 } from "./admin-auth";
+import { verifyStaffCredentials } from "./staff-accounts";
 
 // Allowed sign-in domains. Configurable via ALLOWED_EMAIL_DOMAINS (comma-list);
 // defaults to the shared constant (studbocconi.it, unibocconi.it).
@@ -348,9 +349,27 @@ function adminLoginPlugin(): BetterAuthPlugin {
         const body = ctx.body as { username?: string; password?: string } | undefined;
         const username = String(body?.username ?? "");
         const password = String(body?.password ?? "");
-        // Same generic error whether username or password is wrong (no enumeration).
+
+        // Two kinds of account use this one form. The central admin is checked
+        // first, from env; anything else is looked up as a staff account.
         if (!verifyAdminCredentials(username, password)) {
-          throw new APIError("UNAUTHORIZED", { message: "Invalid username or password." });
+          const staff = await verifyStaffCredentials(username, password);
+          // Same generic error whichever half is wrong (no enumeration).
+          if (!staff) {
+            throw new APIError("UNAUTHORIZED", { message: "Invalid username or password." });
+          }
+          // No OTP step: staff accounts are handed out by the admin and have no
+          // mailbox of their own to send a code to. Their reach is limited to
+          // the pages ticked for them, and never includes Team or the audit log.
+          const session = await ctx.context.internalAdapter.createSession(staff.id);
+          if (!session) {
+            throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
+          }
+          await setSessionCookie(ctx, { session, user: staff });
+          return ctx.json({
+            ok: true,
+            user: { id: staff.id, email: staff.email, name: staff.name, roles: staff.roles },
+          });
         }
         // Dev / 2FA-disabled: password alone signs in (no OTP step).
         if (!admin2faEnabled()) {

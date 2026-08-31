@@ -15,6 +15,7 @@
   "dependencies": {
     "@astra/db": "*",
     "@astra/shared": "*",
+    "@xyflow/react": "^12.11.5",
     "better-auth": "^1.6.23",
     "next": "^16.2.10",
     "nodemailer": "^9.0.3",

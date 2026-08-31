@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requireAnyPage } from "@/lib/admin-route";
 import { optimizeImage } from "@/lib/image";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 // field. Read routes resolve it to an absolute URL for the caller's host.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requireAnyPage(req, requestId);
   if ("error" in guard) return guard.error;
 
   let form: FormData;

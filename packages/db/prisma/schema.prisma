@@ -98,6 +98,15 @@ model User {
   name          String?
   image         String?
   roles         Role[]    @default([STUDENT])
+
+  /// Backoffice sign-in, for staff who are not students. Separate from the
+  /// email-OTP path: these people are given an account, they do not create one.
+  staffUsername     String?  @unique
+  staffPasswordHash String?
+  /// Which dashboard sections this account may open. Ignored for ADMIN, who
+  /// sees everything; empty means no access at all. Keys come from
+  /// DASHBOARD_PAGES in apps/web/lib/dashboard-pages.ts.
+  dashboardPages    String[] @default([])
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?

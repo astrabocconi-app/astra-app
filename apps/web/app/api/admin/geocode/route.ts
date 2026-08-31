@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { geocodeAddress, isGeocodingConfigured, GeocodeError } from "@/lib/geocode";
 
 export const runtime = "nodejs";
@@ -13,7 +13,7 @@ const input = z.object({ address: z.string().trim().min(1, "Enter an address") }
 // the pin before saving. Admin-only: it spends our Mapbox quota.
 export async function POST(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
 
   const parsed = input.safeParse(await req.json().catch(() => null));

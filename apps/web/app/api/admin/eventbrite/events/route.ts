@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { listEvents, isEventbriteConfigured, EventbriteError } from "@/lib/eventbrite";
 
 export const runtime = "nodejs";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // GET /api/admin/eventbrite/events — events to attach generated discounts to.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "events");
   if ("error" in guard) return guard.error;
 
   if (!isEventbriteConfigured()) {

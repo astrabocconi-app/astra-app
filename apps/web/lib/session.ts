@@ -13,6 +13,10 @@ export interface SessionUser {
     email: string;
     name: string | null;
     roles: string[];
+    /** Dashboard pages this account may open. Ignored for admins. */
+    dashboardPages: string[];
+    /** Set for backoffice staff accounts; null for students and the admin. */
+    staffUsername: string | null;
   };
 }
 
@@ -30,6 +34,8 @@ export async function getSessionUser(
       email: true,
       name: true,
       roles: true,
+      dashboardPages: true,
+      staffUsername: true,
       deletedAt: true,
       areaMemberships: { select: { areaId: true } },
     },
@@ -42,7 +48,14 @@ export async function getSessionUser(
       roles: user.roles,
       areaIds: user.areaMemberships.map((m) => m.areaId),
     },
-    user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roles: user.roles,
+      dashboardPages: user.dashboardPages,
+      staffUsername: user.staffUsername,
+    },
   };
 }
 

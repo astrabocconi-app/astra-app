@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import {
   createDiscount,
@@ -41,7 +41,7 @@ interface Made {
 // Create single-use discounts on Eventbrite and add them to the reward's pool.
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

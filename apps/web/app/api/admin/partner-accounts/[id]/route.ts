@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { updatePartnerAccount, deletePartnerAccount } from "@/lib/partner-accounts";
 
@@ -20,7 +20,7 @@ const patchInput = z.object({
 // between scan-only and full access.
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 
@@ -59,7 +59,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 // DELETE /api/admin/partner-accounts/:id — revoke a login.
 export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { z } from "zod";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { deleteDiscount } from "@/lib/eventbrite";
 
@@ -17,7 +17,7 @@ const input = z.object({
 // GET /api/admin/rewards/:id/codes — pool status and the unclaimed codes.
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 
@@ -39,7 +39,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
 // POST /api/admin/rewards/:id/codes — add vouchers to the pool.
 export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 
@@ -87,7 +87,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 // DELETE /api/admin/rewards/:id/codes — drop every UNCLAIMED code.
 export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

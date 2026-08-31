@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { rewardInput } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toRewardItem } from "@/lib/cms-map";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 // PATCH /api/admin/rewards/:id — update (incl. activate/deactivate).
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 
@@ -49,7 +49,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 // DELETE /api/admin/rewards/:id — soft delete.
 export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
   const { id } = await ctx.params;
 

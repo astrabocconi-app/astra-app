@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { astraWorldContent } from "@astra/shared";
 import { newRequestId, errorResponse } from "@/lib/api";
-import { requireAdmin } from "@/lib/admin-route";
+import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
@@ -13,7 +13,7 @@ const KEY = "astraworld";
 // GET /api/admin/content/astraworld — current stored content, if any.
 export async function GET(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "astraworld");
   if ("error" in guard) return guard.error;
 
   const row = await prisma.appContent.findUnique({
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
 // PUT /api/admin/content/astraworld — replace the stored content.
 export async function PUT(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "astraworld");
   if ("error" in guard) return guard.error;
 
   // Validated against the same schema the app parses with, so the dashboard
@@ -75,7 +75,7 @@ export async function PUT(req: Request) {
 // DELETE — drop the override so the app falls back to its bundled copy.
 export async function DELETE(req: Request) {
   const requestId = newRequestId();
-  const guard = await requireAdmin(req, requestId);
+  const guard = await requirePageApi(req, requestId, "astraworld");
   if ("error" in guard) return guard.error;
 
   await prisma.appContent.deleteMany({ where: { key: KEY } });

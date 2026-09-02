@@ -66,23 +66,23 @@ function ComingSoonArrow() {
       aria-hidden="true"
       className="pointer-events-none absolute left-6 top-full text-neutral-400"
     >
-      {/* Sweeps from beside the caption, out right, then back up under the
-          badge — a hand-drawn loop rather than a straight pointer. */}
+      {/* Sweeps up from beside the caption to just short of the badge. Dashed,
+          so where exactly the pattern lands at the end doesn't matter — the
+          solid connector below always bridges it to the arrowhead. */}
       <path
-        d="M88 50C74 53 44 52 28 42C14 33.5 12 22 18 12"
+        d="M78 50Q40 54 24 22"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeDasharray="1 6"
       />
-      {/* Arrowhead sits on the curve's end tangent, so it reads as one stroke. */}
-      <path
-        d="M11.5 18.5L18.5 9.5L26 16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      {/* Solid connector: a plain straight segment, so its direction is
+          exact (no bezier-tangent guessing) and it always touches both the
+          shaft above and the arrowhead it feeds into below. */}
+      <path d="M24 22L20 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      {/* Filled arrowhead, built from that same segment's direction, so it
+          sits flush on the connector instead of floating at its own angle. */}
+      <polygon points="20,9 26.7,16.4 18.6,18.8" fill="currentColor" />
     </svg>
   );
 }

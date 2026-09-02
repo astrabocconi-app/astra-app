@@ -187,6 +187,8 @@ const trustedOrigins = [
     .split(",")
     .map((o) => o.trim())
     .filter(Boolean),
+  // `next dev` falls back to 3001+ when 3000 is already taken locally.
+  ...(process.env.NODE_ENV !== "production" ? ["http://localhost:3001"] : []),
 ].filter((o): o is string => Boolean(o));
 
 // Sender for OTP emails. For SMTP this must be an address on the authenticated

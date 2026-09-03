@@ -67,10 +67,13 @@ function ComingSoonArrow() {
       className="pointer-events-none absolute left-6 top-full text-neutral-400"
     >
       {/* Sweeps up from beside the caption to just short of the badge. Dashed,
-          so where exactly the pattern lands at the end doesn't matter — the
-          solid connector below always bridges it to the arrowhead. */}
+          with pathLength normalizing the curve to 64 units — 9 full "1 off 6"
+          periods (63) plus one more dash (1) — so the pattern always ends on
+          a visible dot exactly at the curve's endpoint, flush with the solid
+          connector below instead of stopping mid-gap. */}
       <path
         d="M78 50Q40 54 24 22"
+        pathLength="64"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"

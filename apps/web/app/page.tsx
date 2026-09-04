@@ -92,9 +92,6 @@ export default function LandingPage() {
                 Download the app
               </p>
               <StoreBadges />
-              <p className="mt-3 text-xs text-neutral-400">
-                Coming soon to iOS &amp; Android.
-              </p>
             </div>
           </div>
 

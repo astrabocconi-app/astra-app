@@ -6,7 +6,8 @@
 // signal that Android is coming. Swap `PLAY_STORE_URL` in when the listing is up
 // and the badge lights up on its own.
 
-const APP_STORE_URL = "#";
+/** null until the App Store listing is ready. */
+const APP_STORE_URL: string | null = null;
 /** null until the Play Store listing exists. */
 const PLAY_STORE_URL: string | null = null;
 
@@ -50,13 +51,13 @@ const PLAY_ICON = (
 );
 
 /**
- * Hand-drawn curve from the "Coming soon!" note up to the Play badge.
+ * Hand-drawn curve from the "Coming soon!" note up to the badge.
  *
  * Sits in its own absolutely-positioned box so it can point at the badge
  * without taking part in the flex row's layout, and is hidden from screen
  * readers because the note beside it already says the same thing.
  */
-function ComingSoonArrow() {
+function ComingSoonArrow({ flipped = false }: { flipped?: boolean }) {
   return (
     <svg
       width="96"
@@ -64,45 +65,75 @@ function ComingSoonArrow() {
       viewBox="0 0 96 58"
       fill="none"
       aria-hidden="true"
-      className="pointer-events-none absolute left-6 top-full text-neutral-400"
+      className={`pointer-events-none absolute top-full text-neutral-400 ${
+        flipped ? "left-auto right-6" : "left-6"
+      }`}
     >
-      {/* Sweeps up from beside the caption to just short of the badge. Dashed,
-          with pathLength normalizing the curve to 64 units — 9 full "1 off 6"
-          periods (63) plus one more dash (1) — so the pattern always ends on
-          a visible dot exactly at the curve's endpoint, flush with the solid
-          connector below instead of stopping mid-gap. */}
-      <path
-        d="M78 50Q40 54 24 22"
-        pathLength="64"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeDasharray="1 6"
-      />
-      {/* Solid connector: a plain straight segment, so its direction is
-          exact (no bezier-tangent guessing) and it always touches both the
-          shaft above and the arrowhead it feeds into below. */}
-      <path d="M24 22L20 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      {/* Filled arrowhead, built from that same segment's direction, so it
-          sits flush on the connector instead of floating at its own angle. */}
-      <polygon points="20,9 26.7,16.4 18.6,18.8" fill="currentColor" />
+      {flipped ? (
+        <>
+          {/* Flipped version pointing right: sweeps up from left to reach the
+              badge on the left side. Same dash pattern as the original. */}
+          <path
+            d="M18 50Q56 54 72 22"
+            pathLength="64"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="1 6"
+          />
+          <path d="M72 22L76 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <polygon points="76,9 72,16 80,16" fill="currentColor" />
+        </>
+      ) : (
+        <>
+          {/* Original version pointing left: sweeps up from beside the caption to
+              just short of the badge. */}
+          <path
+            d="M78 50Q40 54 24 22"
+            pathLength="64"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeDasharray="1 6"
+          />
+          <path d="M24 22L20 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <polygon points="20,9 24,16 16,16" fill="currentColor" />
+        </>
+      )}
     </svg>
   );
 }
 
 export function StoreBadges({ className = "" }: { className?: string }) {
+  const appLive = APP_STORE_URL !== null;
   const playLive = PLAY_STORE_URL !== null;
 
   return (
     // pb leaves room for the arrow and note, which hang below the row.
     <div className={`flex flex-wrap items-center gap-3 pb-16 ${className}`}>
-      <a
-        href={APP_STORE_URL}
-        aria-label="Download on the App Store"
-        className="inline-flex items-center gap-3 rounded-xl bg-neutral-900 px-5 py-2.5 text-white transition-transform hover:-translate-y-0.5 hover:bg-black"
-      >
-        <BadgeInner eyebrow="Download on the" title="App Store" icon={APPLE_ICON} />
-      </a>
+      {appLive ? (
+        <a
+          href={APP_STORE_URL}
+          aria-label="Download on the App Store"
+          className="inline-flex items-center gap-3 rounded-xl bg-neutral-900 px-5 py-2.5 text-white transition-transform hover:-translate-y-0.5 hover:bg-black"
+        >
+          <BadgeInner eyebrow="Download on the" title="App Store" icon={APPLE_ICON} />
+        </a>
+      ) : (
+        <div className="relative">
+          <span
+            aria-disabled="true"
+            className="inline-flex cursor-default select-none items-center gap-3 rounded-xl bg-neutral-400 px-5 py-2.5 text-white/80"
+          >
+            <BadgeInner eyebrow="Download on the" title="App Store" icon={APPLE_ICON} muted />
+          </span>
+
+          <ComingSoonArrow flipped />
+          <span className="absolute right-[112px] top-[calc(100%+38px)] whitespace-nowrap text-sm font-semibold text-neutral-500">
+            Coming next week
+          </span>
+        </div>
+      )}
 
       {playLive ? (
         <a
@@ -114,8 +145,6 @@ export function StoreBadges({ className = "" }: { className?: string }) {
         </a>
       ) : (
         <div className="relative">
-          {/* A span, not a link: there is nothing to open yet, and a dead <a>
-              would still look and behave clickable. */}
           <span
             aria-disabled="true"
             className="inline-flex cursor-default select-none items-center gap-3 rounded-xl bg-neutral-400 px-5 py-2.5 text-white/80"

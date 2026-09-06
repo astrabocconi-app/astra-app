@@ -13,6 +13,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          defer
+          src="https://umami-analytics-five-rosy.vercel.app/script.js"
+          data-website-id="d1329fcf-7ba9-40c5-92db-a33774dd0825"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

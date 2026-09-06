@@ -186,7 +186,7 @@ export function PushComposer() {
               value={title}
               maxLength={80}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. ASTRAWORLD is tomorrow"
+              placeholder="e.g. New rewards just dropped"
             />
           </Field>
           <Field label="Message" required>

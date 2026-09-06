@@ -18,7 +18,6 @@ import {
   NewspaperIcon,
   SupportIcon,
   BellIcon,
-  SparkleIcon,
   ShieldIcon,
   KeyIcon,
 } from "@/app/_ui/icons";
@@ -31,8 +30,6 @@ export function pageIcon(key: string, size = 18): ReactNode {
       return <NewspaperIcon size={size} />;
     case "events":
       return <CalendarIcon size={size} />;
-    case "astraworld":
-      return <SparkleIcon size={size} />;
     case "materials":
       return <BookIcon size={size} />;
     case "rewards":

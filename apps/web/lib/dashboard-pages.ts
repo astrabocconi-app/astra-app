@@ -45,12 +45,6 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         blurb: "Create events students can see",
       },
       {
-        key: "astraworld",
-        label: "AstraWorld",
-        href: "/dashboard/astraworld",
-        blurb: "Edit the festival page in the app",
-      },
-      {
         key: "materials",
         label: "Materials",
         href: "/dashboard/materials",

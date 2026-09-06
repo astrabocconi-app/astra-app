@@ -13,8 +13,6 @@ import * as card from "./card";
 import * as rewards from "./rewards";
 import * as discounts from "./discounts";
 import * as academics from "./academics";
-import * as astraworld from "./astraworld";
-import * as astraworldPanels from "./astraworld-panels";
 import * as support from "./support";
 import * as links from "./links";
 import * as events from "./events";
@@ -39,8 +37,6 @@ const namespaces = [
   rewards,
   discounts,
   academics,
-  astraworld,
-  astraworldPanels,
   support,
   links,
   events,

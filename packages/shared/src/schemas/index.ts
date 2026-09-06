@@ -128,7 +128,6 @@ export const IN_APP_ROUTES = [
   "/discounts",
   "/support",
   "/points-history",
-  "/astraworld",
 ] as const;
 export type InAppRoute = (typeof IN_APP_ROUTES)[number];
 
@@ -140,7 +139,6 @@ export const IN_APP_ROUTE_LABELS: Record<InAppRoute, string> = {
   "/discounts": "Discounts",
   "/support": "Support",
   "/points-history": "Points history",
-  "/astraworld": "AstraWorld",
 };
 
 export const contentLink = z.discriminatedUnion("kind", [
@@ -421,5 +419,3 @@ export const chatResponse = z.object({
   grounded: z.boolean(),
 });
 export type ChatResponse = z.infer<typeof chatResponse>;
-
-export * from "./astraworld";

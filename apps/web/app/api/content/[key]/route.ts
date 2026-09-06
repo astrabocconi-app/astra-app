@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Only these keys are readable, so this can't be used to probe the table. */
-const PUBLIC_KEYS = new Set(["astraworld"]);
+const PUBLIC_KEYS = new Set<string>([]);
 
 /**
  * Rewrite uploaded-image references to absolute URLs.

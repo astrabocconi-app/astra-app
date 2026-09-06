@@ -4,35 +4,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
-import { AW } from "../../lib/astraworld-theme";
-import { AstraMark } from "../../components/AstraMark";
 import { useEggStore } from "../../lib/egg-store";
 import { useSecretTaps } from "../../lib/use-secret-taps";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
+const DISABLED = "#C4C8D4";
 
 // Inverted mode is the brand the other way round: white on blue.
 const INVERTED_BG = BRAND;
 const INVERTED_BAR = "#020A52";
 const INVERTED_INACTIVE = "rgba(255,255,255,0.55)";
+const INVERTED_DISABLED = "rgba(255,255,255,0.3)";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
-
-/**
- * The ASTRAWORLD tab mark: the ASTRA monogram itself, tinted to the event's
- * magenta so it still reads as "this one is different" next to the grey outline
- * icons. Dims slightly when unfocused rather than going grey, so it keeps
- * drawing the eye while the event is on.
- */
-function AstraWorldTabIcon({ focused, color }: { focused: boolean; color: string }) {
-  return (
-    <View style={{ opacity: focused ? 1 : 0.8 }}>
-      <AstraMark size={25} color={color} />
-    </View>
-  );
-}
 
 // Raised circular button for the center "Card" (QR) tab — big + easy to reach.
 function CenterCardButton({ onPress }: { onPress?: PressableOnPress }) {
@@ -63,6 +49,7 @@ export default function TabsLayout() {
 
   const fg = inverted ? "#FFFFFF" : BRAND;
   const barBg = inverted ? INVERTED_BAR : "#FFFFFF";
+  const disabled = inverted ? INVERTED_DISABLED : DISABLED;
 
   return (
     <Tabs
@@ -132,32 +119,32 @@ export default function TabsLayout() {
           headerShown: false,
         }}
       />
-      {/* ASTRAWORLD — TEMPORARY, reverts to Academics after 4 September 2026.
-          Unlike the other tabs this one is a live event, so it carries the ASTRA
-          monogram in the event's magenta rather than a grey outline glyph: it
-          should read as "something is happening", not as another section.
-          Restoring Academics means renaming the route back and putting the
-          greyed-out, inert config from git history back here. */}
       <Tabs.Screen
-        name="astraworld"
+        name="academics"
         options={{
-          title: t("aw.tab"),
-          // Colour the mark and the label directly rather than via
-          // tabBarActive/InactiveTintColor: those are read from whichever screen
-          // is focused and repaint the WHOLE bar, which turned every other tab
-          // magenta the moment this one was open.
-          //
-          // The vivid magenta is only 3.97:1 on white — fine for a glyph, too
-          // weak for an 11px label — so the label takes the ink variant (6.3:1).
-          // In inverted mode the bar is dark, so the vivid one reads there.
-          tabBarIcon: ({ focused }) => (
-            <AstraWorldTabIcon focused={focused} color={inverted ? AW.magenta : AW.magentaInk} />
+          title: t("tabs.academics"),
+          // Rendered by the navigator like every other tab so the icon and
+          // label sit on exactly the same baseline — a hand-rolled button was
+          // always a pixel or two out. Greyed out, with the "Soon!" ribbon as
+          // a badge, and inert via the tabPress listener below.
+          tabBarIcon: ({ size }) => (
+            <Ionicons name="school-outline" size={size} color={disabled} />
           ),
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontWeight: "700",
-            color: inverted ? AW.magenta : AW.magentaInk,
-          },
+          tabBarLabelStyle: { fontSize: 11, color: disabled },
+          tabBarBadge: t("academics.soonFlag"),
+          tabBarBadgeStyle: styles.soonBadge,
+        }}
+        listeners={{
+          // Visible but not yet navigable.
+          //
+          // There was a ten-tap gesture here that let the tenth press through
+          // to the placeholder screen. Removed for App Review: guideline 2.3.1
+          // forbids hidden or undocumented features, and what this revealed was
+          // a "Coming Soon" placeholder, which also invites 4.2 (minimum
+          // functionality). A greyed-out tab is precisely what a reviewer taps
+          // repeatedly to check whether it works, so it was reachable by
+          // accident. Put it back once the real Academics screen ships.
+          tabPress: (e) => e.preventDefault(),
         }}
       />
     </Tabs>
@@ -171,6 +158,20 @@ const styles = StyleSheet.create({
   centerWrap: {
     flex: 1,
     alignItems: "center",
+  },
+  soonBadge: {
+    backgroundColor: "#FFCC00", // brand gold, against the brand blue text
+    color: BRAND,
+    fontSize: 9,
+    fontWeight: "800",
+    // The badge is built for short counts and clips a word to "So…", so it
+    // needs an explicit width and its own radius rather than the derived one.
+    lineHeight: 15,
+    height: 15,
+    minWidth: 38,
+    borderRadius: 8,
+    paddingHorizontal: 5,
+    overflow: "hidden",
   },
   centerButton: {
     top: -22,

@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
-import { View, Text, Pressable, StyleSheet, Linking, Platform } from "react-native";
+import { View, Text, Pressable, Image, StyleSheet, Linking, Platform } from "react-native";
 import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
+import { router } from "expo-router";
 import { Icon } from "./Icon";
 import { BOCCONI_CAMPUS, type PartnerItem } from "@astra/shared";
 import { MAPBOX_TOKEN } from "../lib/config";
@@ -124,34 +125,57 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
         <Icon name="locate" size={20} color={BRAND} />
       </Pressable>
 
-      {/* Detail card for the tapped pin */}
+      {/* Detail card for the tapped pin. Tapping the card itself (not the close
+          or directions buttons) opens the full venue screen. */}
       {selected && (
         <View style={styles.card}>
-          <View className="flex-row items-start gap-3">
-            <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
-              <Icon name="storefront" size={20} color={BRAND} />
-            </View>
+          <Pressable
+            onPress={() => router.push(`/venue/${selected.id}`)}
+            className="flex-row items-start gap-3 active:opacity-70"
+          >
+            {selected.logoUrl ? (
+              <Image
+                source={{ uri: selected.logoUrl }}
+                resizeMode="cover"
+                style={{ width: 40, height: 40, borderRadius: 10 }}
+              />
+            ) : (
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+                <Icon name="storefront" size={20} color={BRAND} />
+              </View>
+            )}
             <View className="flex-1">
               <Text className="text-base font-semibold text-gray-900 dark:text-white">{selected.name}</Text>
               <Text className="mt-0.5 text-xs text-gray-500 dark:text-gray-300">
                 {selected.address ?? t("discounts.noAddress")}
               </Text>
             </View>
+            <Icon name="chevron-forward" size={18} color="#9CA3AF" />
             <Pressable onPress={() => setSelected(null)} hitSlop={10}>
               <Icon name="close" size={20} color="#9CA3AF" />
             </Pressable>
-          </View>
+          </Pressable>
 
           {selected.offers.length > 0 ? (
             <View className="mt-3 gap-1.5">
               {selected.offers.map((o) => (
-                <View key={o.id} className="flex-row items-center gap-2">
-                  <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
-                    {o.label}
-                  </Text>
-                  <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200" numberOfLines={1}>
-                    {o.title}
-                  </Text>
+                <View key={o.id} className="gap-1">
+                  <View className="flex-row items-center gap-2">
+                    <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
+                      {o.label}
+                    </Text>
+                    <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200" numberOfLines={1}>
+                      {o.title}
+                    </Text>
+                  </View>
+                  {o.description ? (
+                    <Text
+                      className="text-[12px] text-gray-500 dark:text-gray-400"
+                      numberOfLines={2}
+                    >
+                      {o.description}
+                    </Text>
+                  ) : null}
                 </View>
               ))}
             </View>

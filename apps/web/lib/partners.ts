@@ -35,6 +35,7 @@ export async function syncPartnerOffers(
       description: o.description ?? null,
       discountType: o.discountType,
       discountValue: o.discountValue ?? null,
+      qrEnabled: o.qrEnabled,
     };
     if (o.id) {
       // updateMany (not update) so the partnerId scope is enforced in SQL.

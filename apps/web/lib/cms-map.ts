@@ -117,6 +117,7 @@ export function toPartnerOffer(o: Offer): PartnerOffer {
     discountType: o.discountType,
     discountValue: o.discountValue,
     label: offerLabel(o),
+    qrEnabled: o.qrEnabled,
   };
 }
 
@@ -133,6 +134,7 @@ export function toPartnerItem(
     latitude: p.latitude,
     longitude: p.longitude,
     logoUrl: resolveImageUrl(p.logoKey, origin),
+    photoUrl: resolveImageUrl(p.photoKey, origin),
     active: p.active,
     offers: (p.offers ?? []).map(toPartnerOffer),
   };

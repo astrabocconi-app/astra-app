@@ -15,7 +15,21 @@ import BootOverlay from "../components/BootOverlay";
 
 initSentry();
 
-const queryClient = new QueryClient();
+// Default staleTime was 0, so every query refetched on every mount AND every
+// time the app came back to the foreground (see the focusManager wiring
+// below) — switching Home → Discounts → Home re-fetched all four Home
+// queries from scratch each time, which is what made it feel slow to open.
+// A minute-old news post or partner list is still correct; points-balance
+// keeps its own tighter refetchInterval below since scans need to show up
+// promptly.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      retry: false,
+    },
+  },
+});
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);

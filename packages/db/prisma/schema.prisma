@@ -425,7 +425,8 @@ model Partner {
   name        String
   description String?
   category    String?
-  logoKey     String? // R2 object key
+  logoKey     String? // R2 object key — small square mark shown in list/map rows
+  photoKey    String? // R2 object key — wider photo shown on the venue's detail screen
   address     String?
   latitude    Float?
   longitude   Float?
@@ -474,6 +475,10 @@ model Offer {
   discountType  DiscountType @default(OTHER)
   discountValue Int? // percent (0-100) or fixed cents, depending on discountType
   pointsAwarded Int          @default(0) // points earned when this offer is used
+  /// Shown as a small badge on the offer: true if a student redeems it by
+  /// having their card QR scanned (the /api/partner/scan flow), false if it's
+  /// an informal discount with no digital redemption (just tell the venue).
+  qrEnabled     Boolean      @default(true)
   active        Boolean      @default(true)
   startsAt      DateTime?
   endsAt        DateTime?

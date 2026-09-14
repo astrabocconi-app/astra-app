@@ -19,6 +19,7 @@ import * as events from "./events";
 import * as pointsHistory from "./pointsHistory";
 import * as partnerProfile from "./partnerProfile";
 import * as news from "./news";
+import * as venue from "./venue";
 import * as tabs from "./tabs";
 import * as partnerTabs from "./partnerTabs";
 
@@ -43,6 +44,7 @@ const namespaces = [
   pointsHistory,
   partnerProfile,
   news,
+  venue,
   tabs,
   partnerTabs,
 ];

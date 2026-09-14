@@ -48,6 +48,7 @@ type OfferDraft = {
   description: string;
   discountType: DiscountTypeValue;
   discountValue: string;
+  qrEnabled: boolean;
 };
 
 function toDraft(o: PartnerItem["offers"][number]): OfferDraft {
@@ -57,6 +58,7 @@ function toDraft(o: PartnerItem["offers"][number]): OfferDraft {
     description: o.description ?? "",
     discountType: o.discountType,
     discountValue: o.discountValue != null ? String(o.discountValue) : "",
+    qrEnabled: o.qrEnabled,
   };
 }
 
@@ -65,6 +67,7 @@ const EMPTY_OFFER: OfferDraft = {
   description: "",
   discountType: "PERCENT",
   discountValue: "",
+  qrEnabled: true,
 };
 
 export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerItem }) {
@@ -76,6 +79,7 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
   const [latitude, setLatitude] = useState(initial?.latitude != null ? String(initial.latitude) : "");
   const [longitude, setLongitude] = useState(initial?.longitude != null ? String(initial.longitude) : "");
   const [logoUrl, setLogoUrl] = useState(initial?.logoUrl ?? "");
+  const [photoUrl, setPhotoUrl] = useState(initial?.photoUrl ?? "");
   const [active, setActive] = useState(initial?.active ?? true);
   const [offers, setOffers] = useState<OfferDraft[]>(
     initial?.offers.length ? initial.offers.map(toDraft) : [{ ...EMPTY_OFFER }],
@@ -128,6 +132,7 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
         latitude: latitude.trim() === "" ? null : Number(latitude),
         longitude: longitude.trim() === "" ? null : Number(longitude),
         logoUrl,
+        photoUrl,
         active,
         offers: offers
           .filter((o) => o.title.trim() !== "")
@@ -137,6 +142,7 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
             description: o.description,
             discountType: o.discountType,
             discountValue: o.discountValue.trim() === "" ? null : Number(o.discountValue),
+            qrEnabled: o.qrEnabled,
           })),
       };
       if (id) await send(`/api/admin/partners/${id}`, "PATCH", payload);
@@ -261,6 +267,9 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
         <Field label="Logo">
           <ImageInput value={logoUrl} onChange={setLogoUrl} hint="Recommended: 400 × 400 px (square)" />
         </Field>
+        <Field label="Photo" hint="Shown when a student taps into this venue's details.">
+          <ImageInput value={photoUrl} onChange={setPhotoUrl} hint="Recommended: 1200 × 800 px" />
+        </Field>
         <Toggle label="Active" hint="Visible in the app" checked={active} onChange={setActive} />
       </Card>
 
@@ -315,6 +324,12 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
                   placeholder="e.g. Valid Mon–Fri, one per student per day"
                 />
               </Field>
+              <Toggle
+                label="Redeemed by QR scan"
+                hint="On: a student redeems this by having their card QR scanned at the venue. Off: an informal discount with no scan, shown with a different symbol."
+                checked={o.qrEnabled}
+                onChange={(v) => patchOffer(i, { qrEnabled: v })}
+              />
               {offers.length > 1 && (
                 <button
                   type="button"

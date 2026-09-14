@@ -4,6 +4,7 @@ import {
   Text,
   FlatList,
   Pressable,
+  Image,
   ScrollView,
   ActivityIndicator,
   Modal,
@@ -12,7 +13,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "../../components/Icon";
 import type { PartnerItem } from "@astra/shared";
@@ -37,14 +38,33 @@ function openDirections(p: PartnerItem) {
   if (url) void Linking.openURL(url);
 }
 
-function PartnerRow({ partner, onDirections }: { partner: PartnerItem; onDirections: () => void }) {
+function PartnerRow({
+  partner,
+  onDirections,
+  onOpen,
+}: {
+  partner: PartnerItem;
+  onDirections: () => void;
+  onOpen: () => void;
+}) {
   const t = useT();
   return (
-    <View className="rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4">
+    <Pressable
+      onPress={onOpen}
+      className="rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:opacity-80"
+    >
       <View className="flex-row items-start gap-3">
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
-          <Icon name="storefront" size={21} color="#04107E" />
-        </View>
+        {partner.logoUrl ? (
+          <Image
+            source={{ uri: partner.logoUrl }}
+            resizeMode="cover"
+            style={{ width: 44, height: 44, borderRadius: 12 }}
+          />
+        ) : (
+          <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+            <Icon name="storefront" size={21} color="#04107E" />
+          </View>
+        )}
         <View className="flex-1">
           <Text className="text-base font-semibold text-gray-900 dark:text-white">{partner.name}</Text>
           <Text className="mt-0.5 text-xs text-gray-500 dark:text-gray-300">
@@ -66,18 +86,23 @@ function PartnerRow({ partner, onDirections }: { partner: PartnerItem; onDirecti
       {partner.offers.length > 0 ? (
         <View className="mt-3 gap-1.5">
           {partner.offers.map((o) => (
-            <View key={o.id} className="flex-row items-center gap-2">
-              <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
-                {o.label}
-              </Text>
-              <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200">{o.title}</Text>
+            <View key={o.id} className="gap-1">
+              <View className="flex-row items-center gap-2">
+                <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
+                  {o.label}
+                </Text>
+                <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200">{o.title}</Text>
+              </View>
+              {o.description ? (
+                <Text className="text-[12px] text-gray-500 dark:text-gray-400">{o.description}</Text>
+              ) : null}
             </View>
           ))}
         </View>
       ) : (
         <Text className="mt-3 text-[13px] text-gray-400 dark:text-white/60">{t("discounts.noDiscount")}</Text>
       )}
-    </View>
+    </Pressable>
   );
 }
 
@@ -183,7 +208,11 @@ export default function DiscountsScreen() {
               </View>
             }
             renderItem={({ item }) => (
-              <PartnerRow partner={item} onDirections={() => openDirections(item)} />
+              <PartnerRow
+                partner={item}
+                onDirections={() => openDirections(item)}
+                onOpen={() => router.push(`/venue/${item.id}`)}
+              />
             )}
           />
         </>

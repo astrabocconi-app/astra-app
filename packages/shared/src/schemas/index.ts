@@ -314,6 +314,9 @@ export const partnerOfferInput = z.object({
   discountType: discountTypeEnum.default("OTHER"),
   // Percent (0-100) for PERCENT, cents for FIXED, unused otherwise.
   discountValue: z.coerce.number().int().min(0).nullish(),
+  // Redeemed by scanning the student's card QR (the /api/partner/scan flow)
+  // versus an informal discount with no digital redemption.
+  qrEnabled: z.boolean().default(true),
 });
 export type PartnerOfferInput = z.infer<typeof partnerOfferInput>;
 
@@ -328,6 +331,9 @@ export const partnerInput = z.object({
   latitude: z.coerce.number().min(-90).max(90).nullish(),
   longitude: z.coerce.number().min(-180).max(180).nullish(),
   logoUrl: optionalImageRef,
+  // Wider photo shown on the venue's detail screen; logoUrl stays the small
+  // square mark used in list/map rows.
+  photoUrl: optionalImageRef,
   active: z.boolean().default(true),
   offers: z.array(partnerOfferInput).default([]),
 });
@@ -341,6 +347,7 @@ export const partnerOffer = z.object({
   discountValue: z.number().int().nullable(),
   /** Ready-to-render summary, e.g. "20% off" — built server-side so every client agrees. */
   label: z.string(),
+  qrEnabled: z.boolean(),
 });
 export type PartnerOffer = z.infer<typeof partnerOffer>;
 
@@ -353,6 +360,7 @@ export const partnerItem = z.object({
   latitude: z.number().nullable(),
   longitude: z.number().nullable(),
   logoUrl: z.string().nullable(),
+  photoUrl: z.string().nullable(),
   active: z.boolean(),
   offers: z.array(partnerOffer),
 });

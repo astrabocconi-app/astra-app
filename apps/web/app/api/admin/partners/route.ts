@@ -60,6 +60,7 @@ export async function POST(req: Request) {
         latitude: coords.latitude,
         longitude: coords.longitude,
         logoKey: d.logoUrl ?? null,
+        photoKey: d.photoUrl ?? null,
         active: d.active,
       },
     });

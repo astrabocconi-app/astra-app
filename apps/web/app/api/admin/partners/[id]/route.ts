@@ -53,6 +53,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
         ...(d.address !== undefined ? { address: d.address ?? null } : {}),
         ...(location ?? {}),
         ...(d.logoUrl !== undefined ? { logoKey: d.logoUrl ?? null } : {}),
+        ...(d.photoUrl !== undefined ? { photoKey: d.photoUrl ?? null } : {}),
         ...(d.active !== undefined ? { active: d.active } : {}),
       },
     });

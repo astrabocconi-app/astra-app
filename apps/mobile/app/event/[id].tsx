@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
+import * as WebBrowser from "expo-web-browser";
 import { Icon } from "../../components/Icon";
 import { ContentLinks } from "../../components/ContentLinks";
 import { api } from "../../lib/api";
@@ -44,6 +45,19 @@ function openInMaps(address: string, t: ReturnType<typeof useT>) {
       { text: t("common.cancel"), style: "cancel" },
     ]);
   }
+}
+
+// Eventbrite's API can't sell tickets on our behalf, so checkout is their page,
+// shown in an in-app sheet rather than a WebView: Apple Pay and saved cards
+// only work in the system browser engine.
+function openTickets(url: string) {
+  void WebBrowser.openBrowserAsync(url, {
+    presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+    controlsColor: "#04107E",
+    toolbarColor: "#FFFFFF",
+    dismissButtonStyle: "close",
+    enableBarCollapsing: true,
+  }).catch(() => Linking.openURL(url));
 }
 
 function formatWhen(iso: string) {
@@ -122,7 +136,7 @@ export default function EventDetailScreen() {
         <View className="border-t border-gray-100 dark:border-white/10 px-5 pb-2 pt-3">
           <Pressable
             className="flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-astra-dark py-3.5 active:opacity-90"
-            onPress={() => Linking.openURL(event.externalTicketUrl!)}
+            onPress={() => openTickets(event.externalTicketUrl!)}
           >
             <Icon name="ticket-outline" size={18} color="#fff" />
             <Text className="text-base font-semibold text-white">{t("event.getTickets")}</Text>

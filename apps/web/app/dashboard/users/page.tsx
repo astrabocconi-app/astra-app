@@ -40,7 +40,7 @@ export default async function UsersPage({
     },
     orderBy: { createdAt: "desc" },
     take: PAGE_SIZE,
-    include: { academicProfile: { include: { programme: true } } },
+    include: { academicProfile: { include: { programme: true, track: true, classGroup: true } } },
   });
 
   // Balances come from the append-only ledger, so read them in one grouped
@@ -115,7 +115,14 @@ export default async function UsersPage({
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {academic
-                        ? `${academic.programme.code} · Year ${academic.studyYear}`
+                        ? [
+                            academic.programme.code,
+                            academic.track?.code,
+                            `Year ${academic.studyYear}`,
+                            academic.classGroup ? `Class ${academic.classGroup.code}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")
                         : "—"}
                     </td>
                     <td className="px-4 py-3 font-medium text-gray-800">

@@ -16,6 +16,7 @@ const ROLES = [
 interface Options {
   programmes: { code: string; name: string; count: number }[];
   studyYears: { year: number; count: number }[];
+  classGroups: { id: string; code: string; programmeCode: string; count: number }[];
 }
 interface Recent {
   id: string;
@@ -66,6 +67,7 @@ export function PushComposer() {
   const [roles, setRoles] = useState<string[]>(["STUDENT"]);
   const [programmeCodes, setProgrammeCodes] = useState<string[]>([]);
   const [studyYears, setStudyYears] = useState<number[]>([]);
+  const [classGroupIds, setClassGroupIds] = useState<string[]>([]);
 
   const [options, setOptions] = useState<Options | null>(null);
   const [totalDevices, setTotalDevices] = useState(0);
@@ -80,8 +82,9 @@ export function PushComposer() {
       roles: roles.length ? roles : undefined,
       programmeCodes: programmeCodes.length ? programmeCodes : undefined,
       studyYears: studyYears.length ? studyYears : undefined,
+      classGroupIds: classGroupIds.length ? classGroupIds : undefined,
     }),
-    [roles, programmeCodes, studyYears],
+    [roles, programmeCodes, studyYears, classGroupIds],
   );
 
   async function load() {
@@ -126,7 +129,27 @@ export function PushComposer() {
   }
 
   const filtered =
-    programmeCodes.length > 0 || studyYears.length > 0 || roles.length !== 1 || roles[0] !== "STUDENT";
+    programmeCodes.length > 0 ||
+    studyYears.length > 0 ||
+    classGroupIds.length > 0 ||
+    roles.length !== 1 ||
+    roles[0] !== "STUDENT";
+
+  // Classes only make sense inside a programme, so they appear once one is picked.
+  const classOptions = (options?.classGroups ?? []).filter((c) => programmeCodes.includes(c.programmeCode));
+
+  function toggleProgramme(code: string) {
+    const next = programmeCodes.includes(code)
+      ? programmeCodes.filter((x) => x !== code)
+      : [...programmeCodes, code];
+    setProgrammeCodes(next);
+    // A class left selected from a programme that was just removed would
+    // silently narrow the audience to nobody.
+    const allowed = new Set(
+      (options?.classGroups ?? []).filter((c) => next.includes(c.programmeCode)).map((c) => c.id),
+    );
+    setClassGroupIds((ids) => ids.filter((id) => allowed.has(id)));
+  }
 
   async function send() {
     const reach = preview?.reachable ?? 0;
@@ -244,7 +267,7 @@ export function PushComposer() {
                   <Chip
                     key={p.code}
                     active={programmeCodes.includes(p.code)}
-                    onClick={() => toggle(programmeCodes, setProgrammeCodes, p.code)}
+                    onClick={() => toggleProgramme(p.code)}
                   >
                     {p.code} <span className="opacity-60">({p.count})</span>
                   </Chip>
@@ -266,6 +289,25 @@ export function PushComposer() {
                     onClick={() => toggle(studyYears, setStudyYears, y.year)}
                   >
                     Year {y.year} <span className="opacity-60">({y.count})</span>
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {classOptions.length > 0 && (
+            <div>
+              <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                Class
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {classOptions.map((c) => (
+                  <Chip
+                    key={c.id}
+                    active={classGroupIds.includes(c.id)}
+                    onClick={() => toggle(classGroupIds, setClassGroupIds, c.id)}
+                  >
+                    {c.programmeCode} · {c.code} <span className="opacity-60">({c.count})</span>
                   </Chip>
                 ))}
               </div>

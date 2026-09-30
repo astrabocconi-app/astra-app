@@ -6,16 +6,15 @@ import type { ComponentProps } from "react";
 import { useT } from "../../lib/i18n";
 import { useEggStore } from "../../lib/egg-store";
 import { useSecretTaps } from "../../lib/use-secret-taps";
+import { AcademicOnboarding } from "../../components/AcademicOnboarding";
 
 const BRAND = "#04107E";
 const INACTIVE = "#9CA3AF";
-const DISABLED = "#C4C8D4";
 
 // Inverted mode is the brand the other way round: white on blue.
 const INVERTED_BG = BRAND;
 const INVERTED_BAR = "#020A52";
 const INVERTED_INACTIVE = "rgba(255,255,255,0.55)";
-const INVERTED_DISABLED = "rgba(255,255,255,0.3)";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
@@ -49,9 +48,9 @@ export default function TabsLayout() {
 
   const fg = inverted ? "#FFFFFF" : BRAND;
   const barBg = inverted ? INVERTED_BAR : "#FFFFFF";
-  const disabled = inverted ? INVERTED_DISABLED : DISABLED;
 
   return (
+    <>
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: fg,
@@ -121,33 +120,11 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="academics"
-        options={{
-          title: t("tabs.academics"),
-          // Rendered by the navigator like every other tab so the icon and
-          // label sit on exactly the same baseline — a hand-rolled button was
-          // always a pixel or two out. Greyed out, with the "Soon!" ribbon as
-          // a badge, and inert via the tabPress listener below.
-          tabBarIcon: ({ size }) => (
-            <Ionicons name="school-outline" size={size} color={disabled} />
-          ),
-          tabBarLabelStyle: { fontSize: 11, color: disabled },
-          tabBarBadge: t("academics.soonFlag"),
-          tabBarBadgeStyle: styles.soonBadge,
-        }}
-        listeners={{
-          // Visible but not yet navigable.
-          //
-          // There was a ten-tap gesture here that let the tenth press through
-          // to the placeholder screen. Removed for App Review: guideline 2.3.1
-          // forbids hidden or undocumented features, and what this revealed was
-          // a "Coming Soon" placeholder, which also invites 4.2 (minimum
-          // functionality). A greyed-out tab is precisely what a reviewer taps
-          // repeatedly to check whether it works, so it was reachable by
-          // accident. Put it back once the real Academics screen ships.
-          tabPress: (e) => e.preventDefault(),
-        }}
+        options={{ title: t("tabs.academics"), tabBarIcon: tabIcon("school-outline") }}
       />
     </Tabs>
+    <AcademicOnboarding />
+    </>
   );
 }
 
@@ -158,20 +135,6 @@ const styles = StyleSheet.create({
   centerWrap: {
     flex: 1,
     alignItems: "center",
-  },
-  soonBadge: {
-    backgroundColor: "#FFCC00", // brand gold, against the brand blue text
-    color: BRAND,
-    fontSize: 9,
-    fontWeight: "800",
-    // The badge is built for short counts and clips a word to "So…", so it
-    // needs an explicit width and its own radius rather than the derived one.
-    lineHeight: 15,
-    height: 15,
-    minWidth: 38,
-    borderRadius: 8,
-    paddingHorizontal: 5,
-    overflow: "hidden",
   },
   centerButton: {
     top: -22,

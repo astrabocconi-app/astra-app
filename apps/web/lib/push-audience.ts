@@ -19,6 +19,8 @@ export const pushAudience = z.object({
   programmeCodes: z.array(z.string().trim().min(1)).optional(),
   /** Study years, 1-5. */
   studyYears: z.array(z.number().int().min(1).max(5)).optional(),
+  /** Class groups, by id — class codes repeat across programmes. */
+  classGroupIds: z.array(z.string().min(1)).optional(),
   /** Only people who have set an academic profile at all. */
   hasAcademicProfile: z.boolean().optional(),
   /** Specific users, by id. When set, this alone decides the audience. */
@@ -48,6 +50,7 @@ export function audienceWhere(a: PushAudience): Prisma.UserWhereInput {
     profile.programme = { code: { in: a.programmeCodes } };
   }
   if (a.studyYears && a.studyYears.length > 0) profile.studyYear = { in: a.studyYears };
+  if (a.classGroupIds && a.classGroupIds.length > 0) profile.classGroupId = { in: a.classGroupIds };
 
   const wantsProfile =
     a.hasAcademicProfile === true || Object.keys(profile).length > 0;
@@ -103,18 +106,33 @@ export async function audienceTokens(a: PushAudience): Promise<{ tokens: string[
 export async function audienceOptions() {
   const rows = await prisma.studentAcademicProfile.findMany({
     where: { user: { deletedAt: null } },
-    select: { studyYear: true, programme: { select: { code: true, name: true } } },
+    select: {
+      studyYear: true,
+      programme: { select: { code: true, name: true } },
+      classGroup: { select: { id: true, code: true } },
+    },
   });
   const programmes = new Map<string, { code: string; name: string; count: number }>();
   const years = new Map<number, number>();
+  const classes = new Map<string, { id: string; code: string; programmeCode: string; count: number }>();
   for (const r of rows) {
     const p = programmes.get(r.programme.code) ?? { ...r.programme, count: 0 };
     p.count += 1;
     programmes.set(r.programme.code, p);
     years.set(r.studyYear, (years.get(r.studyYear) ?? 0) + 1);
+    if (r.classGroup) {
+      const c = classes.get(r.classGroup.id) ?? { ...r.classGroup, programmeCode: r.programme.code, count: 0 };
+      c.count += 1;
+      classes.set(r.classGroup.id, c);
+    }
   }
   return {
     programmes: [...programmes.values()].sort((a, b) => a.code.localeCompare(b.code)),
+    classGroups: [...classes.values()].sort(
+      (a, b) =>
+        a.programmeCode.localeCompare(b.programmeCode) ||
+        a.code.localeCompare(b.code, undefined, { numeric: true }),
+    ),
     studyYears: [...years.entries()]
       .map(([year, count]) => ({ year, count }))
       .sort((a, b) => a.year - b.year),

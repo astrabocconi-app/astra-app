@@ -19,7 +19,7 @@ const config: ExpoConfig = {
   slug: "astra-app",
   owner: "mfmatozza",
   scheme: "astra",
-  version: "1.0.2",
+  version: "1.0.3",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
   icon: "./assets/icon.png",
@@ -53,6 +53,7 @@ const config: ExpoConfig = {
     "expo-router",
     "expo-secure-store",
     "expo-notifications",
+    "expo-web-browser",
     [
       "expo-splash-screen",
       {

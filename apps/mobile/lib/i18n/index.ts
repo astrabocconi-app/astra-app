@@ -22,6 +22,8 @@ import * as news from "./news";
 import * as venue from "./venue";
 import * as tabs from "./tabs";
 import * as partnerTabs from "./partnerTabs";
+import * as onboarding from "./onboarding";
+import * as polare from "./polare";
 
 const namespaces = [
   common,
@@ -47,6 +49,8 @@ const namespaces = [
   venue,
   tabs,
   partnerTabs,
+  onboarding,
+  polare,
 ];
 
 const en: Record<string, string> = Object.assign({}, ...namespaces.map((n) => n.en));

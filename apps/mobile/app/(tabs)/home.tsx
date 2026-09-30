@@ -6,10 +6,12 @@ import {
   Pressable,
   Image,
   StyleSheet,
+  Platform,
   useWindowDimensions,
   type NativeSyntheticEvent,
   type NativeScrollEvent,
 } from "react-native";
+import Svg, { Path } from "react-native-svg";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Icon, MIcon } from "../../components/Icon";
@@ -18,6 +20,38 @@ import { useT } from "../../lib/i18n";
 
 // Fallback tints for cards without a cover image (cycled by index).
 const TINTS = ["#04107E", "#3B4AD0", "#1E2A8A"];
+const GOLD = "#FFCC00";
+// Polare is the press: set it like a masthead.
+const SERIF = Platform.select({ ios: "Georgia", default: "serif" });
+
+// A floor of rooms, some free — decorative, not live data.
+const ROOMS = [1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1];
+function RoomGrid() {
+  return (
+    <View style={{ width: 4 * 7 + 3 * 3, flexDirection: "row", flexWrap: "wrap", gap: 3 }}>
+      {ROOMS.map((free, i) => (
+        <View
+          key={i}
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: 1.5,
+            backgroundColor: free ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.22)",
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
+/** Four-point star — the pole star the press is named after. */
+function PoleStar() {
+  return (
+    <Svg width={16} height={16} viewBox="0 0 24 24">
+      <Path d="M12 0 L14.2 9.8 L24 12 L14.2 14.2 L12 24 L9.8 14.2 L0 12 L9.8 9.8 Z" fill="#04107E" />
+    </Svg>
+  );
+}
 
 export default function HomeScreen() {
   const t = useT();
@@ -52,8 +86,7 @@ export default function HomeScreen() {
             <>
               , <Text className="text-astra-primary dark:text-white">{firstName}</Text>
             </>
-          ) : null}{" "}
-          👋
+          ) : null}
         </Text>
         <Pressable
           onPress={() => router.push("/support")}
@@ -166,93 +199,76 @@ export default function HomeScreen() {
           retrieval pipeline are all still in the repo; restore this entry point
           to bring it back. */}
 
-      {/* Free@B — quick shortcut to the classroom finder */}
-      <Pressable
-        onPress={() => router.push("/classrooms")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:bg-gray-50"
-        style={{
-          shadowColor: "#04107E",
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 3 },
-          elevation: 2,
-        }}
-      >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
-          <Icon name="school-outline" size={22} color="#04107E" />
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("home.findClassroom")}</Text>
-          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("home.findClassroomSub")}</Text>
-        </View>
-        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
-      </Pressable>
+      {/* Two squares, then one bar. Handouts and the gradebook moved to the
+          Academics tab. */}
+      <View className="mx-5 mt-5 flex-row gap-3">
+        <Pressable
+          onPress={() => router.push("/classrooms")}
+          accessibilityLabel={`${t("home.freeAtB")}, ${t("home.freeAtBSub")}`}
+          className="flex-1 justify-between rounded-[18px] bg-astra-primary dark:bg-white/10 p-4 active:opacity-90"
+          style={{ aspectRatio: 1 }}
+        >
+          <View className="flex-row items-start justify-between">
+            <View className="flex-row items-center gap-1.5">
+              <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "#4ADE80" }} />
+              <Text className="text-[11px] font-bold uppercase text-white/70" style={{ letterSpacing: 1.2 }}>
+                {t("home.freeAtBEyebrow")}
+              </Text>
+            </View>
+            <RoomGrid />
+          </View>
+          <View>
+            <Text className="text-[27px] font-extrabold text-white" style={{ letterSpacing: -0.6 }}>
+              {t("home.freeAtB")}
+            </Text>
+            <Text className="mt-0.5 text-[13px] leading-[17px] text-white/75">{t("home.freeAtBSub")}</Text>
+          </View>
+        </Pressable>
 
-      {/* Gradebook — private exam records */}
-      <Pressable
-        onPress={() => router.push("/gradebook")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 bg-white p-4 active:bg-gray-50"
-        style={{
-          shadowColor: "#04107E",
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 3 },
-          elevation: 2,
-        }}
-      >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light">
-          <Ionicons name="book-outline" size={22} color="#04107E" />
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900">Gradebook</Text>
-          <Text className="text-xs text-gray-500">Your exams and grades · private to you</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-      </Pressable>
+        <Pressable
+          onPress={() => router.push("/polare")}
+          accessibilityLabel={`ASTRA ${t("home.polare")}, ${t("home.polareSub")}`}
+          className="flex-1 justify-between rounded-[18px] p-4 active:opacity-90"
+          style={{ aspectRatio: 1, backgroundColor: GOLD }}
+        >
+          <View>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-[11px] font-bold uppercase text-astra-primary" style={{ letterSpacing: 1.2 }}>
+                {t("home.polareEyebrow")}
+              </Text>
+              <PoleStar />
+            </View>
+            <View className="mt-2" style={{ height: StyleSheet.hairlineWidth * 2, backgroundColor: "#04107E" }} />
+          </View>
+          <View>
+            <Text className="text-astra-primary" style={{ fontFamily: SERIF, fontSize: 30, fontWeight: "700", letterSpacing: -0.4 }}>
+              {t("home.polare")}
+            </Text>
+            <Text className="mt-0.5 text-[13px] leading-[17px] text-astra-primary/75">{t("home.polareSub")}</Text>
+          </View>
+        </Pressable>
+      </View>
 
-      {/* Materials — handouts & dispense */}
-      <Pressable
-        onPress={() => router.push("/materials")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:bg-gray-50"
-        style={{
-          shadowColor: "#04107E",
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 3 },
-          elevation: 2,
-        }}
-      >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
-          <Icon name="library-outline" size={22} color="#04107E" />
-        </View>
-        <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("home.materials")}</Text>
-          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("home.materialsSub")}</Text>
-        </View>
-        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
-      </Pressable>
-
-      {/* Rewards — no longer a tab (Discounts took its place), so this is the
-          way students reach the catalogue. */}
+      {/* Rewards — not a tab (Discounts took its place), so this bar is the
+          way in. Carries the balance so there's a reason to look at it. */}
       <Pressable
         onPress={() => router.push("/rewards")}
-        className="mx-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4 active:bg-gray-50"
-        style={{
-          shadowColor: "#04107E",
-          shadowOpacity: 0.06,
-          shadowRadius: 8,
-          shadowOffset: { width: 0, height: 3 },
-          elevation: 2,
-        }}
+        className="mx-5 mt-3 flex-row items-center rounded-[18px] border-[1.5px] border-astra-primary dark:border-white/30 px-4 py-4 active:bg-astra-light dark:active:bg-white/10"
       >
-        <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
-          <Icon name="gift-outline" size={22} color="#04107E" />
-        </View>
         <View className="flex-1">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("home.rewards")}</Text>
-          <Text className="text-xs text-gray-500 dark:text-gray-300">{t("home.rewardsSub")}</Text>
+          <Text className="text-lg font-bold text-astra-primary dark:text-white" style={{ letterSpacing: -0.3 }}>
+            {t("home.rewards")}
+          </Text>
+          <Text className="text-[13px] text-gray-500 dark:text-gray-300">{t("home.rewardsSub")}</Text>
         </View>
-        <Icon name="chevron-forward" size={18} color="#9CA3AF" />
+        {balance.data ? (
+          <View className="mr-2 rounded-full bg-astra-light dark:bg-white/15 px-3 py-1">
+            <Text className="text-[13px] font-bold text-astra-primary dark:text-white" style={{ fontVariant: ["tabular-nums"] }}>
+              {t("home.pointsShort", { n: balance.data.balance.toLocaleString() })}
+            </Text>
+          </View>
+        ) : null}
+        <Icon name="arrow-forward" size={18} color="#04107E" />
       </Pressable>
 
       {/* Your account */}

@@ -312,7 +312,7 @@ enum ExamStatus {
 /// Grade/credit/year invariants are enforced by CHECK constraints in SQL (see
 /// the 20260731120000 and 20260801100000 migrations) rather than in Prisma.
 model ExamRecord {
-  id          String     @id
+  id          String     @id @default(cuid())
   userId      String
   courseId    String?
   customTitle String?

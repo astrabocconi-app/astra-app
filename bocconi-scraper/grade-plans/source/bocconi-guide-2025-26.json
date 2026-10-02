@@ -1,0 +1,3912 @@
+{
+ "source": {
+  "file": "full guide for courses bocconi.pdf",
+  "title": "Guide all'università A.A. 2025-2026 - Corsi di laurea triennali - 2. Piani di studio dei corsi di laurea",
+  "pages": 415,
+  "pageNote": "Pages ~146-389 are a second rendering of the same chapters (credits identical; spot-checked CLEAM, BIEF, BAI, BGL); sourcePages refer to the first copy.",
+  "supplementary": "Graduation-grade rules are NOT in the guide. Taken from Bocconi 'Bachelor Programs Rules and Regulations 2025-2026' (Regolamento trienni, DR 75 del 28.07.2025): https://www.unibocconi.it/sites/default/files/media/attachments/All%20DR%2075%20del%2028.07.2025%20Trienni_Regolamento_25-26_ITA_ENG.pdf - same text in the 2024-25 edition."
+ },
+ "schemaNotes": {
+  "graded": "true = mark in /30 that enters the GPA",
+  "moduleOf": "modules of one exam; combine before GPA (see gpa.modules)",
+  "internshipCanReplace": "slot can be filled by a pass/fail stage (then excluded from GPA)",
+  "pickGroup/pickCount": "N slots filled from the same choice list",
+  "trackSpecific": "placeholder row; actual course in tracks[].years"
+ },
+ "programmesNotInGuide": {
+  "WBB": "World Bachelor in Business (triple degree with USC Marshall and HKUST) appears only in the Regolamento 2025-26 (p.3: 'The Italian study plan totals 180 credits'); no study plan in the guide.",
+  "BEMACC": "Not found in the guide or the Regolamento 2025-26.",
+  "CLEF": "Discontinued from cohort 2024-25; included for current 3rd-year students only."
+ },
+ "programmes": [
+  {
+   "code": "CLEAM",
+   "name": "Economia aziendale e management",
+   "language": "it",
+   "degreeClass": "L-18 R",
+   "cohort": "immatricolati dall'a.a. 2025-2026",
+   "sourcePages": [
+    9,
+    10,
+    11,
+    12
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 59,
+     "courses": [
+      {
+       "title": "Economia aziendale e gestione delle imprese",
+       "credits": 10,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30060"
+      },
+      {
+       "title": "Economia - Modulo 1 (Microeconomia)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30065",
+       "moduleOf": "30064 Economia"
+      },
+      {
+       "title": "Matematica - Modulo 1 (Generale)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30062",
+       "moduleOf": "30061 Matematica"
+      },
+      {
+       "title": "Seminario di Critical thinking",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30527",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Economia - Modulo 2 (Macroeconomia)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30066",
+       "moduleOf": "30064 Economia"
+      },
+      {
+       "title": "Matematica - Modulo 2 (Applicata)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30063",
+       "moduleOf": "30061 Matematica"
+      },
+      {
+       "title": "Diritto - Modulo 1 (Privato)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30423",
+       "moduleOf": "Diritto"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Inglese (I lingua) (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "code": "30301",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 60,
+     "courses": [
+      {
+       "title": "Bilancio - Modulo 1",
+       "credits": 5,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Bilancio"
+      },
+      {
+       "title": "Storia economica",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Sistema finanziario",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Statistica",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Diritto - Modulo 2 (Pubblico Comparato)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Diritto"
+      },
+      {
+       "title": "Bilancio - Modulo 2",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Bilancio"
+      },
+      {
+       "title": "Economia e management delle amministrazioni pubbliche",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Marketing",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Programmazione e controllo",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Seminari di Business Ethics e responsabilità sociale",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 61,
+     "courses": [
+      {
+       "title": "Finanza aziendale",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Fondamenti di organizzazione",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Strategia e innovazione - Modulo 1 (Strategia competitiva)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Strategia e innovazione"
+      },
+      {
+       "title": "Strategia e innovazione - Modulo 2 (Gestione della tecnologia, dell'innovazione e delle operations)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Strategia e innovazione"
+      },
+      {
+       "title": "Seminari per lo sviluppo delle competenze manageriali e di leadership",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Opzionale n. 1",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Diritto commerciale",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Scienza delle finanze",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Opzionale n. 2",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Opzionale n. 3 (oppure stage)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [],
+   "internshipRules": [
+    {
+     "slot": "Opzionale n. 3",
+     "credits": 6,
+     "quote": "Opzionale n° 2-3 (oppure stage in alternativa ad opzionale n.3) ITA/ING 12",
+     "page": 11
+    }
+   ],
+   "notes": [
+    "Plan table prints 'Opzionale n° 2-3 (oppure stage in alternativa ad opzionale n.3)' as one 12-CFU row; split here into two 6-CFU slots.",
+    "Year-2 total is labelled 'Totale crediti previsti per il primo anno di corso 60' (typo in guide; it is year 2).",
+    "No majors in the 2025-26 CLEAM plan. Year 2-3 course codes not printed in the guide.",
+    "Placement of optionals/stage in I or II semester is indicative only (p.12). At least one course (mandatory or optional) must be in English.",
+    "Older cohorts (immatricolati fino al 2024-25) follow a different plan at pp.12-16 (not extracted)."
+   ]
+  },
+  {
+   "code": "CLEF",
+   "name": "Economia e finanza",
+   "language": "it",
+   "degreeClass": "L-18",
+   "cohort": "immatricolati fino all'a.a. 2023-2024 (discontinued from cohort 2024-25; only year 3 active in 2025-26)",
+   "sourcePages": [
+    2,
+    18,
+    19,
+    20,
+    21
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 59,
+     "courses": [
+      {
+       "title": "Economia aziendale e gestione delle imprese",
+       "credits": 10,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30060"
+      },
+      {
+       "title": "Economia - Modulo 1 (Microeconomia)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30065",
+       "moduleOf": "30064 Economia"
+      },
+      {
+       "title": "Matematica - Modulo 1 (Generale)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30062",
+       "moduleOf": "30061 Matematica"
+      },
+      {
+       "title": "Seminario di Critical thinking",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30527",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Economia - Modulo 2 (Macroeconomia)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30066",
+       "moduleOf": "30064 Economia"
+      },
+      {
+       "title": "Matematica - Modulo 2 (Applicata)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30063",
+       "moduleOf": "30061 Matematica"
+      },
+      {
+       "title": "Diritto - Modulo 1 (Privato)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30423",
+       "moduleOf": "30002 Diritto"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Inglese (I lingua) (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "code": "30301",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 63,
+     "courses": [
+      {
+       "title": "Bilancio - Modulo 1",
+       "credits": 5,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30426",
+       "moduleOf": "30425 Bilancio"
+      },
+      {
+       "title": "Storia economica",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30067"
+      },
+      {
+       "title": "Sistema finanziario",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30006"
+      },
+      {
+       "title": "Statistica",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30001"
+      },
+      {
+       "title": "Diritto - Modulo 2 (Pubblico)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30004",
+       "moduleOf": "30002 Diritto"
+      },
+      {
+       "title": "Scienza delle finanze",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30352"
+      },
+      {
+       "title": "Bilancio - Modulo 2",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30427",
+       "moduleOf": "30425 Bilancio"
+      },
+      {
+       "title": "Investimenti finanziari",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30589"
+      },
+      {
+       "title": "Metodi quantitativi per la finanza",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30025"
+      },
+      {
+       "title": "Seminari per lo sviluppo delle competenze manageriali e di leadership",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30288",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 58,
+     "courses": [
+      {
+       "title": "Monetary economics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30026"
+      },
+      {
+       "title": "Corporate finance",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30017"
+      },
+      {
+       "title": "Financial statement analysis",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30024"
+      },
+      {
+       "title": "Opzionale n. 1",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Diritto commerciale",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30013"
+      },
+      {
+       "title": "Economia e gestione delle istituzioni finanziarie",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30027"
+      },
+      {
+       "title": "Opzionale n. 2",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Opzionale n. 3 (oppure stage)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [],
+   "internshipRules": [
+    {
+     "slot": "Opzionale n. 3",
+     "credits": 6,
+     "quote": "Opzionale n° 2-3 (oppure stage in alternativa ad opzionale n.3) ITA/ING 12",
+     "page": 20
+    }
+   ],
+   "notes": [
+    "Year-3 total labelled 'primo anno' in guide (typo). Monetary economics, Corporate finance, Financial statement analysis are taught in English.",
+    "Not open to new students; relevant only to final-year students in 2025-26."
+   ]
+  },
+  {
+   "code": "BESS",
+   "name": "Economic and Social Sciences",
+   "language": "en",
+   "degreeClass": "L-33 R",
+   "cohort": "immatricolati dall'a.a. 2025/2026",
+   "sourcePages": [
+    25,
+    26,
+    27,
+    28
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 62,
+     "courses": [
+      {
+       "title": "Mathematics - Module 1 (Theory and methods)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30448",
+       "moduleOf": "30447 Mathematics"
+      },
+      {
+       "title": "Fundamentals of management",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30450"
+      },
+      {
+       "title": "Foundations of economics - Module 1 (Microeconomics)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30452",
+       "moduleOf": "30451 Foundations of economics"
+      },
+      {
+       "title": "Logic and methodology of social sciences",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30454"
+      },
+      {
+       "title": "Mathematics - Module 2 (Applied mathematics)",
+       "credits": 9,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30449",
+       "moduleOf": "30447 Mathematics"
+      },
+      {
+       "title": "Foundations of economics - Module 2 (Macroeconomics)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30453",
+       "moduleOf": "30451 Foundations of economics"
+      },
+      {
+       "title": "Statistics - Module 1 (Theory and methods)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30456",
+       "moduleOf": "30455 Statistics"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Prima lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 61,
+     "courses": [
+      {
+       "title": "Statistics - Module 2 (Applied statistics)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30457",
+       "moduleOf": "30455 Statistics"
+      },
+      {
+       "title": "Strategic decision making and markets",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Macroeconomics and economic policy",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Economic history",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Incentives design and policy",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Private and business law",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Econometrics",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Social Sciences 1 (Cognitive sciences)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 57,
+     "courses": [
+      {
+       "title": "Empirical research methods and data analysis",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Social Sciences 2 - Module 1 (Organizational behavior and social psychology)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Social Sciences 2"
+      },
+      {
+       "title": "Law and public policy",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "1 opzionale",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Culture, institutions and development",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "note": "o altro insegnamento sostenuto all'estero purché appartenente alla classe disciplinare SECS-P/01"
+      },
+      {
+       "title": "Social Sciences 2 - Module 2 (Sociology)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Social Sciences 2"
+      },
+      {
+       "title": "International economics and finance",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "1 opzionale o stage",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [],
+   "internshipRules": [
+    {
+     "slot": "second optional (year 3, II sem)",
+     "credits": 6,
+     "quote": "1 opzionale o stage ITA/ING 6",
+     "page": 27
+    }
+   ],
+   "notes": [
+    "Year-2 total labelled 'primo anno' in guide (typo).",
+    "No seminars in BESS 2025-26 plan.",
+    "Older cohort plan (fino al 2024/25) at pp.28-32 not extracted."
+   ]
+  },
+  {
+   "code": "BEMACS",
+   "name": "Economics, Management and Computer Science",
+   "language": "en",
+   "degreeClass": "L-33 R",
+   "cohort": "immatricolati a partire dall'a.a. 2018-2019 (single plan; applies to 2025-26 cohort)",
+   "sourcePages": [
+    35,
+    36,
+    37,
+    38,
+    39
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 60,
+     "courses": [
+      {
+       "title": "Mathematics and statistics - Module 1 (Mathematics)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30400",
+       "moduleOf": "30399 Mathematics and statistics"
+      },
+      {
+       "title": "Fundamentals of computer science",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30398"
+      },
+      {
+       "title": "Microeconomics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30403"
+      },
+      {
+       "title": "Principles of Management",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30402"
+      },
+      {
+       "title": "Mathematics and statistics - Module 2 (Statistics)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30401",
+       "moduleOf": "30399 Mathematics and statistics"
+      },
+      {
+       "title": "Accounting",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30404"
+      },
+      {
+       "title": "Fundamentals of information technology law",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30405"
+      },
+      {
+       "title": "Prima lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 63,
+     "courses": [
+      {
+       "title": "Advanced mathematics and statistics - Module 1 (Applied mathematics)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30407",
+       "moduleOf": "30406 Advanced mathematics and statistics"
+      },
+      {
+       "title": "Advanced mathematics and statistics - Module 2 (Advanced statistical methods)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30408",
+       "moduleOf": "30406 Advanced mathematics and statistics"
+      },
+      {
+       "title": "Macroeconomics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30409"
+      },
+      {
+       "title": "Computer programming",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30509"
+      },
+      {
+       "title": "Technological innovation seminars I",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30415",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "European IP and data law",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30650"
+      },
+      {
+       "title": "Machine learning",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30412"
+      },
+      {
+       "title": "Econometrics",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30413"
+      },
+      {
+       "title": "Principles of finance",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30414"
+      },
+      {
+       "title": "Technological innovation seminars II",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30422",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 57,
+     "courses": [
+      {
+       "title": "Big data and databases",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30416"
+      },
+      {
+       "title": "Computational microeconomics - Module 1 (Game theory)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30418",
+       "moduleOf": "30417 Computational microeconomics"
+      },
+      {
+       "title": "Marketing analytics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30420"
+      },
+      {
+       "title": "Opzionale n. 1",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Computational microeconomics - Module 2 (Mechanism design)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30419",
+       "moduleOf": "30417 Computational microeconomics"
+      },
+      {
+       "title": "Information systems management",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30421"
+      },
+      {
+       "title": "Opzionale n. 2",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Opzionale n. 3",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [],
+   "internshipRules": [
+    {
+     "slot": "Opzionali n. 2/3 (one of them)",
+     "credits": 6,
+     "quote": "Opzionali n. 2/3 o stage ITA/ING 12",
+     "page": "37-38",
+     "ambiguity": "Table row is 'Opzionali n. 2/3 o stage' 12 CFU; general rule (pp.6, 123) says a stage replaces ONE optional (6 CFU). Both slots flagged internshipCanReplace, but only one stage is allowed."
+    }
+   ],
+   "notes": [
+    "No Computer science 30424 course in BEMACS.",
+    "For students enrolled before 2023/24, Fundamentals of computer science was in sem II and Principles of Management in sem I."
+   ]
+  },
+  {
+   "code": "BIEM",
+   "name": "International Economics and Management",
+   "language": "en",
+   "degreeClass": "L-18 R",
+   "cohort": "immatricolati dall'a.a. 2025-2026",
+   "sourcePages": [
+    43,
+    44,
+    45,
+    46
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 59,
+     "courses": [
+      {
+       "title": "Economics - Module 1 (Microeconomics)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30065",
+       "moduleOf": "30064 Economics"
+      },
+      {
+       "title": "Management",
+       "credits": 10,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30060"
+      },
+      {
+       "title": "Mathematics - Module 1 (General)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30062",
+       "moduleOf": "30061 Mathematics"
+      },
+      {
+       "title": "Critical thinking seminar",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30527",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Introduction to the legal system - Module 1",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30428",
+       "moduleOf": "30046 Introduction to the legal system"
+      },
+      {
+       "title": "Economics - Module 2 (Macroeconomics)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30066",
+       "moduleOf": "30064 Economics"
+      },
+      {
+       "title": "Mathematics - Module 2 (Applied)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30063",
+       "moduleOf": "30061 Mathematics"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Prima lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 59,
+     "courses": [
+      {
+       "title": "Financial accounting - Module 1",
+       "credits": 5,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Financial accounting"
+      },
+      {
+       "title": "Finance - Module 1 (Financial markets and institutions)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Finance"
+      },
+      {
+       "title": "Statistics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Economic history",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Introduction to the legal system - Module 2",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "30046 Introduction to the legal system"
+      },
+      {
+       "title": "Financial accounting - Module 2",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Financial accounting"
+      },
+      {
+       "title": "Finance - Module 2 (Corporate finance)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Finance"
+      },
+      {
+       "title": "Marketing",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "1 corso a scelta tra European economic policy / Public finance",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "European economic policy",
+        "Public finance"
+       ]
+      },
+      {
+       "title": "Leadership and managerial skills seminar",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 62,
+     "courses": [
+      {
+       "title": "Applications for management",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "International macroeconomics",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Insegnamento obbligatorio di percorso 1 of 3",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "Organization theory",
+        "Public management",
+        "Technology and innovation management",
+        "Business planning and control"
+       ],
+       "pickGroup": "BIEM-percorso",
+       "pickCount": 3
+      },
+      {
+       "title": "Insegnamento obbligatorio di percorso 2 of 3",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "Organization theory",
+        "Public management",
+        "Technology and innovation management",
+        "Business planning and control"
+       ],
+       "pickGroup": "BIEM-percorso",
+       "pickCount": 3
+      },
+      {
+       "title": "Insegnamento obbligatorio di percorso 3 of 3",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "Organization theory",
+        "Public management",
+        "Technology and innovation management",
+        "Business planning and control"
+       ],
+       "pickGroup": "BIEM-percorso",
+       "pickCount": 3
+      },
+      {
+       "title": "CSR & Ethics in Business (seminar)",
+       "credits": 2,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Business strategy",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Comparative business and European law",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Opzionale n. 1",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Opzionale n. 2 oppure stage",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Globalization, societies and institutions (seminar)",
+       "credits": 2,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [],
+   "internshipRules": [
+    {
+     "slot": "Opzionale n. 2",
+     "credits": 6,
+     "quote": "Opzionale n° 2 oppure stage ITA/ING 6",
+     "page": 45
+    }
+   ],
+   "notes": [
+    "Year 3: '3 insegnamenti obbligatori di percorso tra' 4 listed courses, 18 CFU total (6 each assumed - per-course credits not printed); footnote calls them 'insegnamenti di major', semester placement indicative.",
+    "No formal track split in the 2025-26 BIEM plan beyond this 3-of-4 choice. Older cohorts (2024-25 pp.46-50; 2023-24 pp.50-53) have different plans (not extracted).",
+    "Year 2-3 course codes not printed in the guide."
+   ]
+  },
+  {
+   "code": "BIEF",
+   "name": "International Economics and Finance",
+   "language": "en",
+   "degreeClass": "L-33 R",
+   "cohort": "immatricolati dall'a.a. 2025-2026",
+   "sourcePages": [
+    58,
+    59,
+    60,
+    65,
+    66
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 59,
+     "courses": [
+      {
+       "title": "Economics - Module 1 (Microeconomics)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30065",
+       "moduleOf": "30064 Economics"
+      },
+      {
+       "title": "Management",
+       "credits": 10,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30060"
+      },
+      {
+       "title": "Mathematics - Module 1 (General)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30062",
+       "moduleOf": "30061 Mathematics"
+      },
+      {
+       "title": "Critical thinking seminar",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30527",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Introduction to the legal system - Module 1",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30428",
+       "moduleOf": "30046 Introduction to the legal system"
+      },
+      {
+       "title": "Economics - Module 2 (Macroeconomics)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30066",
+       "moduleOf": "30064 Economics"
+      },
+      {
+       "title": "Mathematics - Module 2 (Applied)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30063",
+       "moduleOf": "30061 Mathematics"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Prima lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 59,
+     "courses": [
+      {
+       "title": "Financial accounting - Module 1",
+       "credits": 5,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Financial accounting"
+      },
+      {
+       "title": "Finance - Module 1 (Financial markets and institutions)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Finance"
+      },
+      {
+       "title": "Economic history",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Statistics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30001"
+      },
+      {
+       "title": "Introduction to the legal system - Module 2",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30048",
+       "moduleOf": "30046 Introduction to the legal system"
+      },
+      {
+       "title": "[track] Markets, Organization and Incentives (Economics) / International and monetary economics (Finance)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "trackSpecific": true
+      },
+      {
+       "title": "[track] International economics (Economics) / Financial economics (Finance)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "trackSpecific": true
+      },
+      {
+       "title": "Leadership and managerial skills seminar",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Finance - Module 2 (Corporate finance)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Finance"
+      },
+      {
+       "title": "Financial accounting - Module 2",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Financial accounting"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 62,
+     "courses": [
+      {
+       "title": "[track] Empirical methods for economics (Economics) / Empirical methods for finance (Finance)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "trackSpecific": true
+      },
+      {
+       "title": "CSR & Ethics in Business (seminar)",
+       "credits": 2,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Major course 1 of 4 (from track list)",
+       "credits": 6,
+       "semester": null,
+       "graded": true,
+       "kind": "elective",
+       "choices": null,
+       "pickGroup": "BIEF-major",
+       "pickCount": 4,
+       "trackSpecific": true
+      },
+      {
+       "title": "Major course 2 of 4 (from track list)",
+       "credits": 6,
+       "semester": null,
+       "graded": true,
+       "kind": "elective",
+       "choices": null,
+       "pickGroup": "BIEF-major",
+       "pickCount": 4,
+       "trackSpecific": true
+      },
+      {
+       "title": "Major course 3 of 4 (from track list)",
+       "credits": 6,
+       "semester": null,
+       "graded": true,
+       "kind": "elective",
+       "choices": null,
+       "pickGroup": "BIEF-major",
+       "pickCount": 4,
+       "trackSpecific": true
+      },
+      {
+       "title": "Major course 4 of 4 (from track list)",
+       "credits": 6,
+       "semester": null,
+       "graded": true,
+       "kind": "elective",
+       "choices": null,
+       "pickGroup": "BIEF-major",
+       "pickCount": 4,
+       "trackSpecific": true
+      },
+      {
+       "title": "[track] Macroeconomics and the world economy (Economics) / Business strategy (Finance)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "trackSpecific": true
+      },
+      {
+       "title": "Comparative business and European law",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Opzionale n. 1",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Opzionale n. 2 oppure stage",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Globalization, societies and institutions (seminar)",
+       "credits": 2,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [
+    {
+     "code": "ECON",
+     "name": "Percorso in Economics",
+     "fromYear": 2,
+     "replaces": "rows with trackSpecific=true",
+     "years": {
+      "2": [
+       {
+        "title": "Markets, Organization and Incentives",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "International economics",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       }
+      ],
+      "3": [
+       {
+        "title": "Empirical methods for economics (Introduction to econometrics)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30284"
+       },
+       {
+        "title": "Macroeconomics and the world economy",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "n. 4 insegnamenti di Major (choose 4 x 6 CFU)",
+        "credits": 24,
+        "semester": null,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30145 Development economics (6, II)",
+         "30313 Economics of institutions and culture (6, II)",
+         "30056 European economic policy (6, II)",
+         "30159 Monetary theory and policy (6, I)",
+         "30264 Public finance (6, I)",
+         "30147 The economics of imperfect labour markets (6, I)"
+        ],
+        "pickCount": 4,
+        "creditsEach": 6
+       }
+      ]
+     }
+    },
+    {
+     "code": "FIN",
+     "name": "Percorso in Finance",
+     "fromYear": 2,
+     "replaces": "rows with trackSpecific=true",
+     "years": {
+      "2": [
+       {
+        "title": "International and monetary economics",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Financial economics",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       }
+      ],
+      "3": [
+       {
+        "title": "Empirical methods for finance (Introduction to econometrics for finance)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30285"
+       },
+       {
+        "title": "Business strategy",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "n. 4 insegnamenti di Major (choose 4 x 6 CFU)",
+        "credits": 24,
+        "semester": null,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30257 Corporate Valuation (6, I)",
+         "30178 International banking (6, I)",
+         "30150 Introduction to Options and Futures (6, I)",
+         "30148 Management of Financial Institutions (6, I)",
+         "30151 Principles of International Finance (6, II)"
+        ],
+        "pickCount": 4,
+        "creditsEach": 6
+       }
+      ]
+     }
+    }
+   ],
+   "internshipRules": [
+    {
+     "slot": "Opzionale n. 2",
+     "credits": 6,
+     "quote": "Opzionale n° 2 oppure stage ITA/ING 6",
+     "page": 60
+    }
+   ],
+   "notes": [
+    "Track-specific rows in 'years' are placeholders (trackSpecific=true); 'tracks' gives the actual course per track (same credits/semester).",
+    "Finance major list in the guide has 5 courses (pp.65-66); Economics has 6. Choose 4.",
+    "Propaedeutic: 30001 Statistics before 30284/30285 Empirical methods (p.408).",
+    "Older cohort plan (fino al 2024-25) pp.61-65 not extracted."
+   ]
+  },
+  {
+   "code": "CLEACC",
+   "name": "Economia e management per arte, cultura e comunicazione - Economics and Management for Arts, Culture and Communication",
+   "language": "it / en (two classes)",
+   "degreeClass": "L-18 R",
+   "cohort": "immatricolati dall'a.a. 2025-2026",
+   "sourcePages": [
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    83,
+    84,
+    85,
+    86,
+    87
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 61,
+     "courses": [
+      {
+       "title": "Economia aziendale e delle istituzioni culturali",
+       "credits": 10,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30267"
+      },
+      {
+       "title": "Estetica",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30077"
+      },
+      {
+       "title": "Matematica generale e finanziaria",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30268"
+      },
+      {
+       "title": "Diritto - Modulo 1 (Privato)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30423",
+       "moduleOf": "Diritto"
+      },
+      {
+       "title": "Economia - Modulo 1 (Microeconomia)",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30065",
+       "moduleOf": "30064 Economia"
+      },
+      {
+       "title": "Storia economica e del pensiero economico",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30035"
+      },
+      {
+       "title": "Metodo, critica e ricerca nelle discipline artistiche",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30245"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Inglese (I lingua) (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "code": "30301",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 61,
+     "courses": [
+      {
+       "title": "Economia - Modulo 2 (Macroeconomia)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30066",
+       "moduleOf": "30064 Economia"
+      },
+      {
+       "title": "Statistica",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Metodo, critica e ricerca nelle discipline artistiche II - Modulo 1 (un insegnamento di percorso a scelta)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "elective",
+       "moduleOf": "Metodo, critica e ricerca nelle discipline artistiche II",
+       "choices": [
+        "30470 Critical approaches to the arts II - Module I (Contemporary art) ING",
+        "30474 Metodo, critica e ricerca nelle discipline artistiche II - Modulo I (Etica arte scienza) ITA",
+        "30471 Critical approaches to the arts II - Module 1 (Music and society) ING",
+        "30473 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 1 (Storia dell'architettura) ITA",
+        "30472 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 1 (Teatro) ITA",
+        "30469 Critical approaches to the arts II - Module 1 (Television and culture) ING"
+       ]
+      },
+      {
+       "title": "Bilancio - Modulo 1",
+       "credits": 5,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Bilancio"
+      },
+      {
+       "title": "Antropologia culturale e dello sviluppo",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Bilancio - Modulo 2",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Bilancio"
+      },
+      {
+       "title": "Fondamenti di organizzazione",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (un insegnamento di percorso a scelta)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "elective",
+       "moduleOf": "Metodo, critica e ricerca nelle discipline artistiche II",
+       "choices": [
+        "30396 Critical approaches to the arts II - Module 2 (Art and politics) ING",
+        "30478 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (Arte rinascimentale) ITA",
+        "30475 Critical approaches to the arts II - Module 2 (Cinema) ING",
+        "30476 Critical approaches to the arts II - Module 2 (Modern art) ING",
+        "30479 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (Musica e letteratura) ITA",
+        "30477 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (Storia del giornalismo) ITA"
+       ]
+      },
+      {
+       "title": "Diritto - Modulo 2 (Pubblico Comparato)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Diritto"
+      },
+      {
+       "title": "Seminari per lo sviluppo delle competenze manageriali e di leadership",
+       "credits": 2,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 58,
+     "courses": [
+      {
+       "title": "Programmazione e controllo",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Advanced Management - Modulo 1 (Competitive strategies in creative industries)",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Advanced Management"
+      },
+      {
+       "title": "Advanced Management - Modulo 2 (Marketing nei settori creativi)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Advanced Management"
+      },
+      {
+       "title": "Management of public and not for profit organizations",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Diritto commerciale",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Un laboratorio o uno stage o un insegnamento opzionale sostenuto all'estero in alternativa",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "30756 Communication in the arts and cultural consumption decisions",
+        "30571 Fashion collections and sustainability",
+        "30383 Digital disruption and entrepreneurship",
+        "30380 The global industry of imaginaries",
+        "30378 The transformation of cultural sector and art market: critical issues and cases",
+        "30384 Tourism, local identity and destination management"
+       ],
+       "internshipCanReplace": true,
+       "note": "Laboratorio assumed graded in /30 (not stated); if replaced by stage -> pass/fail, excluded from GPA"
+      },
+      {
+       "title": "Scienza delle finanze",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory"
+      },
+      {
+       "title": "Finanza - Modulo 1 (Finanza aziendale)",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Finanza"
+      },
+      {
+       "title": "Finanza - Modulo 2 (Sistema finanziario)",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "moduleOf": "Finanza"
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [
+    {
+     "code": "ENG",
+     "name": "Classe inglese (English-taught class)",
+     "fromYear": 1,
+     "replacesAllYears": true,
+     "years": {
+      "1": [
+       {
+        "title": "Management of cultural companies and institutions",
+        "credits": 10,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30267"
+       },
+       {
+        "title": "Philosophy of art",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30077"
+       },
+       {
+        "title": "Mathematics",
+        "credits": 9,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30268"
+       },
+       {
+        "title": "Law - Module 1 (Private law)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30423",
+        "moduleOf": "Law"
+       },
+       {
+        "title": "Economics - Module 1 (Microeconomics)",
+        "credits": 7,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30065",
+        "moduleOf": "30064 Economics"
+       },
+       {
+        "title": "Economic history and history of economic thought",
+        "credits": 7,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30035"
+       },
+       {
+        "title": "Critical approaches to the arts",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30245"
+       },
+       {
+        "title": "Computer science",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30424"
+       },
+       {
+        "title": "Prima lingua (didattica ed esame)",
+        "credits": 4,
+        "semester": 2,
+        "graded": false,
+        "kind": "language",
+        "note": "Language exam; treated as not graded (see notes.languages)"
+       }
+      ],
+      "2": [
+       {
+        "title": "Economics - Module 2 (Macroeconomics)",
+        "credits": 7,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30066",
+        "moduleOf": "30064 Economics"
+       },
+       {
+        "title": "Statistics",
+        "credits": 8,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Critical approaches to the arts II - Module 1 (un insegnamento di percorso a scelta)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "elective",
+        "moduleOf": "Metodo, critica e ricerca nelle discipline artistiche II",
+        "choices": [
+         "30470 Critical approaches to the arts II - Module I (Contemporary art) ING",
+         "30474 Metodo, critica e ricerca nelle discipline artistiche II - Modulo I (Etica arte scienza) ITA",
+         "30471 Critical approaches to the arts II - Module 1 (Music and society) ING",
+         "30473 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 1 (Storia dell'architettura) ITA",
+         "30472 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 1 (Teatro) ITA",
+         "30469 Critical approaches to the arts II - Module 1 (Television and culture) ING"
+        ]
+       },
+       {
+        "title": "Financial accounting - Module 1",
+        "credits": 5,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Financial accounting"
+       },
+       {
+        "title": "Cultural anthropology",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Financial accounting - Module 2",
+        "credits": 5,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Financial accounting"
+       },
+       {
+        "title": "Foundamentals of organization",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Critical approaches to the arts II - Module 2 (un insegnamento di percorso a scelta)",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "elective",
+        "moduleOf": "Metodo, critica e ricerca nelle discipline artistiche II",
+        "choices": [
+         "30396 Critical approaches to the arts II - Module 2 (Art and politics) ING",
+         "30478 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (Arte rinascimentale) ITA",
+         "30475 Critical approaches to the arts II - Module 2 (Cinema) ING",
+         "30476 Critical approaches to the arts II - Module 2 (Modern art) ING",
+         "30479 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (Musica e letteratura) ITA",
+         "30477 Metodo, critica e ricerca nelle discipline artistiche II - Modulo 2 (Storia del giornalismo) ITA"
+        ]
+       },
+       {
+        "title": "Law - Module 2 (Comparative Public law)",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Law"
+       },
+       {
+        "title": "Leadership and managerial skills seminar",
+        "credits": 2,
+        "semester": 2,
+        "graded": false,
+        "kind": "other",
+        "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+       },
+       {
+        "title": "Seconda lingua (didattica ed esame)",
+        "credits": 4,
+        "semester": 2,
+        "graded": false,
+        "kind": "language",
+        "note": "Language exam; treated as not graded (see notes.languages)"
+       }
+      ],
+      "3": [
+       {
+        "title": "Business planning and control",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Advanced Management - Modulo 1 (Competitive strategies in creative industries)",
+        "credits": 7,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Advanced Management"
+       },
+       {
+        "title": "Advanced Management - Modulo 2 (Marketing in creative industries)",
+        "credits": 8,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Advanced Management"
+       },
+       {
+        "title": "Management of public and not for profit organizations",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Company and business law",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Un laboratorio o uno stage o un insegnamento opzionale sostenuto all'estero in alternativa",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30756 Communication in the arts and cultural consumption decisions",
+         "30571 Fashion collections and sustainability",
+         "30383 Digital disruption and entrepreneurship",
+         "30380 The global industry of imaginaries",
+         "30378 The transformation of cultural sector and art market: critical issues and cases",
+         "30384 Tourism, local identity and destination management"
+        ],
+        "internshipCanReplace": true,
+        "note": "Laboratorio assumed graded in /30 (not stated); if replaced by stage -> pass/fail, excluded from GPA"
+       },
+       {
+        "title": "Public finance",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory"
+       },
+       {
+        "title": "Finance - Module 1 (Corporate finance)",
+        "credits": 5,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Finance"
+       },
+       {
+        "title": "Finance - Module 2 (Financial markets and institutions)",
+        "credits": 5,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "moduleOf": "Finance"
+       },
+       {
+        "title": "Lavoro finale",
+        "credits": 3,
+        "semester": 2,
+        "graded": false,
+        "kind": "thesis",
+        "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+       }
+      ]
+     }
+    }
+   ],
+   "internshipRules": [
+    {
+     "slot": "Year 3 laboratorio slot",
+     "credits": 6,
+     "quote": "Un laboratorio o uno stage o un insegnamento opzionale sostenuto all'estero in alternativa ITA/ING 6",
+     "page": 71
+    }
+   ],
+   "notes": [
+    "Default 'years' = Italian class; tracks[ENG] = English class (identical credits/structure, English titles).",
+    "CLEACC has NO free optional course within 180 CFU: the only choice slot in year 3 is a laboratorio (6 listed, all ING, sem II) OR stage OR an optional taken abroad.",
+    "Year-2 'percorso' modules: choose one module per semester (max 60 students each); they are the two modules of one exam 'Metodo, critica e ricerca nelle discipline artistiche II'.",
+    "English-class guide prints 'Foundamentals of organization' (sic) and module names 'Method and research in arts II' in the notes."
+   ]
+  },
+  {
+   "code": "BIG",
+   "name": "International Politics and Government",
+   "language": "en",
+   "degreeClass": "L-36 R",
+   "cohort": "immatricolati dall'a.a. 2024-2025 (latest plan; applies to 2025-26 cohort)",
+   "sourcePages": [
+    94,
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
+    102
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 60,
+     "courses": [
+      {
+       "title": "Political science and comparative politics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30317"
+      },
+      {
+       "title": "Quantitative methods for social sciences - Module 1 (Mathematics)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30319",
+       "moduleOf": "30318 Quantitative methods for social sciences"
+      },
+      {
+       "title": "Law - Module 1 (Comparative public law)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30322",
+       "moduleOf": "30321 Law"
+      },
+      {
+       "title": "Introduction to economics - Module 1 (Microeconomics)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30325",
+       "moduleOf": "30324 Introduction to economics"
+      },
+      {
+       "title": "Introduction to economics - Module 2 (Macroeconomics)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30326",
+       "moduleOf": "30324 Introduction to economics"
+      },
+      {
+       "title": "Political philosophy",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30331"
+      },
+      {
+       "title": "Quantitative methods for social sciences - Module 2 (Statistics)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30320",
+       "moduleOf": "30318 Quantitative methods for social sciences"
+      },
+      {
+       "title": "Marketing research skills for public policy",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30332",
+       "note": "3-CFU skills activity; assumed pass/fail seminar - VERIFY"
+      },
+      {
+       "title": "Computer science",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30424"
+      },
+      {
+       "title": "Prima lingua (didattica ed esame)",
+       "credits": 5,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 66,
+     "courses": [
+      {
+       "title": "Management of government organizations",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30341"
+      },
+      {
+       "title": "International relations",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30334"
+      },
+      {
+       "title": "Public economics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30508"
+      },
+      {
+       "title": "History - Module 1 (Global history)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30328",
+       "moduleOf": "30327 History"
+      },
+      {
+       "title": "Negotiation skills",
+       "credits": 3,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30338",
+       "note": "Skills seminar per programme description (p.90); assumed pass/fail - VERIFY"
+      },
+      {
+       "title": "Policy evaluation",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30337"
+      },
+      {
+       "title": "Economics and politics of the European Union",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30564"
+      },
+      {
+       "title": "Law - Module 2 (International and European law)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30323",
+       "moduleOf": "30321 Law"
+      },
+      {
+       "title": "Political economics",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30335"
+      },
+      {
+       "title": "Seconda lingua (didattica ed esame)",
+       "credits": 5,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 54,
+     "courses": [
+      {
+       "title": "Sociology",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30528"
+      },
+      {
+       "title": "Public governance",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30342"
+      },
+      {
+       "title": "Opzionale 1",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Opzionale 2",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "History - Module 2 (History of political institutions)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30329",
+       "moduleOf": "30327 History"
+      },
+      {
+       "title": "Media, political elites and the public",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30572"
+      },
+      {
+       "title": "Opzionale 3",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": false
+      },
+      {
+       "title": "Opzionale 4 oppure stage",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [
+    {
+     "code": "PPM",
+     "name": "Curriculum in Politics and Policy Making",
+     "fromYear": 1,
+     "years": "same as default 'years'"
+    },
+    {
+     "code": "DSO",
+     "name": "Curriculum in Data, Society and Organisation (Double Program with HEC Paris)",
+     "fromYear": 1,
+     "replacesAllYears": true,
+     "years": {
+      "1": [
+       {
+        "title": "Economics (Module I - Consumer behavior & firms)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30667",
+        "moduleOf": "30666 Economics"
+       },
+       {
+        "title": "Comparative public law and regulation",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30669"
+       },
+       {
+        "title": "Politics & public sector",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30670"
+       },
+       {
+        "title": "Quantitative methods for social sciences (Module I - Mathematics for social sciences)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30672",
+        "moduleOf": "30671 Quantitative methods for social sciences"
+       },
+       {
+        "title": "Coding and data visualization in Python",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30674"
+       },
+       {
+        "title": "Economics (Module II - Macro-economic governance)",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30668",
+        "moduleOf": "30666 Economics"
+       },
+       {
+        "title": "Global history and affairs",
+        "credits": 8,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30675"
+       },
+       {
+        "title": "Machine learning (Module I - Introduction)",
+        "credits": 5,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30677",
+        "moduleOf": "30676 Machine learning"
+       },
+       {
+        "title": "Quantitative methods for social sciences (Module II - Data analytics)",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30673",
+        "moduleOf": "30671 Quantitative methods for social sciences"
+       },
+       {
+        "title": "Prima lingua",
+        "credits": 5,
+        "semester": 2,
+        "graded": false,
+        "kind": "language",
+        "note": "Language exam; treated as not graded (see notes.languages)"
+       }
+      ],
+      "2": [
+       {
+        "title": "Governance of digital technologies in public & private sector",
+        "credits": 7,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30679"
+       },
+       {
+        "title": "Social transformations",
+        "credits": 8,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30680"
+       },
+       {
+        "title": "Social media & democracy",
+        "credits": 8,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30681"
+       },
+       {
+        "title": "Machine learning (Module II - Deep learning)",
+        "credits": 8,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30678",
+        "moduleOf": "30676 Machine learning"
+       },
+       {
+        "title": "Climate change and sustainability (HEC)",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30682"
+       },
+       {
+        "title": "Business analytics & Data modelling (HEC)",
+        "credits": 8,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30683"
+       },
+       {
+        "title": "European governance (HEC)",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30684"
+       },
+       {
+        "title": "Behavioral and cognitive science (HEC)",
+        "credits": 8,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30685"
+       },
+       {
+        "title": "Introduction to ethics and philosophy of AI and technology (seminar) (HEC)",
+        "credits": 2,
+        "semester": 2,
+        "graded": false,
+        "kind": "other",
+        "code": "30686",
+        "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+       },
+       {
+        "title": "Seconda lingua",
+        "credits": 5,
+        "semester": 2,
+        "graded": false,
+        "kind": "language",
+        "note": "Language exam; treated as not graded (see notes.languages)"
+       }
+      ],
+      "3": [
+       {
+        "title": "1 opzionale o stage (HEC)",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": true
+       },
+       {
+        "title": "Introduction to research methods (seminario)",
+        "credits": 3,
+        "semester": 1,
+        "graded": false,
+        "kind": "other",
+        "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+       },
+       {
+        "title": "Entrepreneurial management methods for addressing challenges (seminario)",
+        "credits": 3,
+        "semester": 1,
+        "graded": false,
+        "kind": "other",
+        "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+       },
+       {
+        "title": "Opzionale da 3 cfu n.1 (nei percorsi proposti, HEC)",
+        "credits": 3,
+        "semester": 1,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": false
+       },
+       {
+        "title": "Opzionale da 3 cfu n.2 (nei percorsi proposti, HEC)",
+        "credits": 3,
+        "semester": 1,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": false
+       },
+       {
+        "title": "Opzionale da 3 cfu n.3 (nei percorsi proposti, HEC)",
+        "credits": 3,
+        "semester": 1,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": false
+       },
+       {
+        "title": "Opzionale da 3 cfu n.4 (nei percorsi proposti, HEC)",
+        "credits": 3,
+        "semester": 1,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": false
+       },
+       {
+        "title": "Opzionale da 3 cfu n.5 (nei percorsi proposti, HEC)",
+        "credits": 3,
+        "semester": 2,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": false
+       },
+       {
+        "title": "Opzionale da 3 cfu n.6 (nei percorsi proposti, HEC)",
+        "credits": 3,
+        "semester": 2,
+        "graded": true,
+        "kind": "optional_free",
+        "internshipCanReplace": false
+       },
+       {
+        "title": "Capstone project",
+        "credits": 15,
+        "semester": 2,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "Capstone project (Political Science)",
+         "Capstone project (Sociology)",
+         "Capstone project (Contemporary History)"
+        ]
+       },
+       {
+        "title": "Progetto sul campo/Laboratori",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "other",
+        "note": "Grading type not stated - verify"
+       },
+       {
+        "title": "Lavoro finale",
+        "credits": 3,
+        "semester": 2,
+        "graded": false,
+        "kind": "thesis",
+        "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+       }
+      ]
+     }
+    }
+   ],
+   "internshipRules": [
+    {
+     "track": "PPM",
+     "slot": "Opzionale 4",
+     "credits": 6,
+     "quote": "Opzionale 4 oppure stage ITA/ING 6",
+     "page": 98
+    },
+    {
+     "track": "PPM",
+     "quote": "1 opzionale può essere sostituito con uno stage curriculare.",
+     "page": 95,
+     "note": "In 2.1.11.5 (optional-choice rules, placed after the fino-2023-24 plan)"
+    },
+    {
+     "track": "DSO",
+     "slot": "1 opzionale o stage (yr 3 sem I, HEC)",
+     "credits": 6,
+     "quote": "lo studente può scegliere 4 insegnamenti opzionali oppure 3 insegnamenti opzionali e lo stage (posizionato nel 1° semestre di terzo anno)",
+     "page": 102,
+     "ambiguity": "Text says 24 CFU of 'attività a scelta' = 4 optionals, but the DSO table shows 1x6 + 6x3 CFU optionals (=24 CFU). The stage replaces the 6-CFU slot."
+    }
+   ],
+   "notes": [
+    "Optional rules (pp.94-95, 2.1.11.5): year-3 choice of 4 optionals (24 CFU): 2-4 from BIG-specific list [30610 Current Political Phenomena, 30482 Human Rights, 30534 Islam, politics and the Middle East (sem I); 30609 Topics in Politics, 30483 Politics of Advanced Democracies, 30487 Political Regimes (sem II)], the rest (max 2) from [30296 Global sustainability strategy, 30172 Financial macroeconomics, 30298 Diversity management and policy, 30760 International Demography and sustainability], the general optional list or characterizing courses of other programmes. AMBIGUOUS whether 2.1.11.5 also applies to cohorts from 2024-25 (it sits after the older plan).",
+    "DSO: semesters 4-6 at HEC Paris; grades recognised per cap. 7.14.3. No switch PPM -> DSO.",
+    "Languages are 5 CFU each in BIG (not 4).",
+    "Propaedeutic: 30320 before 30337 Policy evaluation (p.408)."
+   ]
+  },
+  {
+   "code": "BAI",
+   "name": "Mathematical and Computing Sciences for Artificial Intelligence",
+   "language": "en",
+   "degreeClass": "L-35 R",
+   "cohort": "immatricolati dall'a.a. 2025-2026",
+   "sourcePages": [
+    107,
+    108,
+    109,
+    113,
+    114
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 62,
+     "courses": [
+      {
+       "title": "Foundations of Economic Sciences",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30545"
+      },
+      {
+       "title": "Computer Science - Module 1 (Introduction to Computer Science and Programming)",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30539",
+       "moduleOf": "30538 Computer Science"
+      },
+      {
+       "title": "Mathematical Analysis I - Module 1",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30738",
+       "moduleOf": "30737 Mathematical Analysis I"
+      },
+      {
+       "title": "Algebra and Geometry",
+       "credits": 7,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30544"
+      },
+      {
+       "title": "Foundations of Physics I",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30537"
+      },
+      {
+       "title": "Computer Science - Module 2 (Computing Theory and Algorithms)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30540",
+       "moduleOf": "30538 Computer Science"
+      },
+      {
+       "title": "Probability",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30546"
+      },
+      {
+       "title": "Mathematical Analysis I - Module 2",
+       "credits": 7,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30739",
+       "moduleOf": "30737 Mathematical Analysis I"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 57,
+     "courses": [
+      {
+       "title": "Foundations of Physics II",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30547"
+      },
+      {
+       "title": "Decision Theory and Human Behaviour",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30548"
+      },
+      {
+       "title": "Mathematical Statistics",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30549"
+      },
+      {
+       "title": "Mathematical Analysis II - Module 1",
+       "credits": 5,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30741",
+       "moduleOf": "Mathematical Analysis II"
+      },
+      {
+       "title": "Advanced Programming and Optimization Algorithms",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30553"
+      },
+      {
+       "title": "Mathematical Modelling in Machine Learning",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30554"
+      },
+      {
+       "title": "Mathematical Analysis II - Module 2",
+       "credits": 5,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30742",
+       "moduleOf": "Mathematical Analysis II"
+      },
+      {
+       "title": "Digital Ethics seminar",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30555",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Behavioural skills seminar",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30556",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "AI Lab",
+       "credits": 1,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30557",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Lingua (didattica ed esame)",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 61,
+     "courses": [
+      {
+       "title": "Game Theory and Mechanism Design",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30559"
+      },
+      {
+       "title": "Mathematical Modelling for Finance",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30560"
+      },
+      {
+       "title": "Stochastic Processes and Simulation in Natural Sciences",
+       "credits": 8,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30561"
+      },
+      {
+       "title": "1 opzionale o stage (second slot: any Bocconi optional / characterizing course, incl. BAI basket)",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "optional_free",
+       "internshipCanReplace": true
+      },
+      {
+       "title": "Statistical and Quantum Physics",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30558"
+      },
+      {
+       "title": "Machine Learning and Artificial Intelligence",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30562"
+      },
+      {
+       "title": "Mathematical Modelling for Neuroscience",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30563"
+      },
+      {
+       "title": "1 opzionale (first slot: paniere attività specifiche per BAI)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "30761 AI methods for economic research (6, I)",
+        "30758 Algebric and topological methods (6, I)",
+        "30462 Econometrics (7, II)",
+        "30665 Elements of real and fourier analysis (6, II)",
+        "30757 Statistical and computational methods in accounting (6, I)",
+        "30516 Theoretical computer science (6, II)",
+        "30592 Topics in computational modelling: From information theory to evolutionary models (6, II)"
+       ],
+       "note": "If Econometrics (7 CFU) is chosen the plan totals 181 CFU (p.113)"
+      },
+      {
+       "title": "Lavoro finale",
+       "credits": 3,
+       "semester": 2,
+       "graded": false,
+       "kind": "thesis",
+       "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+      }
+     ]
+    }
+   ],
+   "tracks": [],
+   "internshipRules": [
+    {
+     "slot": "second optional slot",
+     "credits": 6,
+     "quote": "Secondo slot pari a 6 cfu da scegliere all'interno del \"paniere attività complessive dei corsi di laurea Bocconi\" ... oppure uno Stage.",
+     "page": 114,
+     "note": "Only the second slot can be a stage; the first must come from the BAI basket. The plan table has '1 opzionale o stage' in sem I and '1 opzionale' in sem II; mapping rows to slots is our interpretation."
+    }
+   ],
+   "notes": [
+    "Only one EU language (4 CFU, year 2); no Computer science 30424.",
+    "Mathematical Analysis I/II and Computer Science are each one exam split into 2 modules."
+   ]
+  },
+  {
+   "code": "BGL",
+   "name": "Global Law",
+   "language": "en",
+   "degreeClass": "L-14 R",
+   "school": "Scuola di Giurisprudenza",
+   "cohort": "immatricolati a partire dall'a.a. 2023-2024 (latest plan; applies to 2025-26 cohort)",
+   "sourcePages": [
+    118,
+    119,
+    120,
+    121,
+    122,
+    123
+   ],
+   "years": [
+    {
+     "year": 1,
+     "statedTotalCredits": 58,
+     "courses": [
+      {
+       "title": "General Jurisprudence",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30611"
+      },
+      {
+       "title": "Critical thinking seminar",
+       "credits": 1,
+       "semester": 1,
+       "graded": false,
+       "kind": "other",
+       "code": "30527",
+       "note": "Seminar: pass/fail (idoneo), excluded from GPA"
+      },
+      {
+       "title": "Introduction to Private Law - Module 1 (Civil Law)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30613",
+       "moduleOf": "30612 Introduction to Private Law"
+      },
+      {
+       "title": "Introduction to Private Law - Module 2 (Common Law)",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30614",
+       "moduleOf": "30612 Introduction to Private Law"
+      },
+      {
+       "title": "Transnational Constitutional Law - Module 1 (European Legal Systems)",
+       "credits": 10,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30616",
+       "moduleOf": "30615 Transnational Constitutional Law"
+      },
+      {
+       "title": "Transnational Constitutional Law - Module 2 (Anglo-American Legal Systems)",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30617",
+       "moduleOf": "30615 Transnational Constitutional Law"
+      },
+      {
+       "title": "Historical Foundations of Law - Module 1 (Civil law)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30619",
+       "moduleOf": "30618 Historical Foundations of Law"
+      },
+      {
+       "title": "Historical Foundations of Law - Module 2 (Common law)",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30620",
+       "moduleOf": "30618 Historical Foundations of Law"
+      }
+     ]
+    },
+    {
+     "year": 2,
+     "statedTotalCredits": 61,
+     "courses": [
+      {
+       "title": "European Union law",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30621"
+      },
+      {
+       "title": "Management of International Organizations",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30622"
+      },
+      {
+       "title": "Labour and Social Law",
+       "credits": 6,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30623"
+      },
+      {
+       "title": "International law",
+       "credits": 9,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30624"
+      },
+      {
+       "title": "Legal Tech",
+       "credits": 3,
+       "semester": 1,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30625",
+       "note": "3 CFU; grading type not stated - VERIFY"
+      },
+      {
+       "title": "Quantitative methods - preparatory",
+       "credits": 0,
+       "semester": 2,
+       "graded": false,
+       "kind": "other",
+       "code": "30626",
+       "note": "0 CFU, nothing recorded"
+      },
+      {
+       "title": "Global administrative law",
+       "credits": 8,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30627"
+      },
+      {
+       "title": "Microeconomics oppure Public Finance",
+       "credits": 6,
+       "semester": 2,
+       "graded": true,
+       "kind": "elective",
+       "choices": [
+        "30636 Microeconomics",
+        "30637 Public Finance"
+       ]
+      },
+      {
+       "title": "Criminal Law",
+       "credits": 10,
+       "semester": 2,
+       "graded": true,
+       "kind": "mandatory",
+       "code": "30629"
+      },
+      {
+       "title": "EU language",
+       "credits": 4,
+       "semester": 2,
+       "graded": false,
+       "kind": "language",
+       "note": "Language exam; treated as not graded (see notes.languages)"
+      }
+     ]
+    },
+    {
+     "year": 3,
+     "statedTotalCredits": 61,
+     "courses": "depends on track - see tracks GL / DL"
+    }
+   ],
+   "tracks": [
+    {
+     "code": "GL",
+     "name": "Percorso in GLOBAL LAW",
+     "fromYear": 3,
+     "years": {
+      "3": [
+       {
+        "title": "Quantitative analysis for global jurists",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30630"
+       },
+       {
+        "title": "Business and Corporate Law",
+        "credits": 10,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30631"
+       },
+       {
+        "title": "Global Civil Justice oppure Criminal Procedure",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30638 Global Civil Justice",
+         "30639 Criminal Procedure"
+        ]
+       },
+       {
+        "title": "Economic Analysis of law oppure International Political Affairs",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30640 Economic Analysis of law",
+         "30641 International Political Affairs"
+        ]
+       },
+       {
+        "title": "Administrative environmental law and climate change oppure Gender Law and women's rights",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30642 Administrative environmental law and climate change",
+         "30635 Gender Law and women's rights"
+        ]
+       },
+       {
+        "title": "Regulatory law oppure Global Finance",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30643 Regulatory law",
+         "30644 Global Finance"
+        ]
+       },
+       {
+        "title": "Fundamentals of IT and IP Law oppure Sports law",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30645 Fundamentals of IT and IP Law",
+         "30646 Sports law"
+        ]
+       },
+       {
+        "title": "Legal clinic oppure Internship",
+        "credits": 6,
+        "semester": 2,
+        "graded": false,
+        "kind": "internship",
+        "note": "Pass/fail"
+       },
+       {
+        "title": "Due seminari tra: Cultural aspects of international negotiations / Democracy lab / Global diplomacy",
+        "credits": 6,
+        "semester": 2,
+        "graded": false,
+        "kind": "other",
+        "choices": [
+         "30744 Cultural aspects of international negotiations",
+         "30745 Democracy lab",
+         "30746 Global diplomacy: mastering skills, strategies, and careers in international institutions"
+        ],
+        "pickCount": 2,
+        "note": "Seminars: assumed pass/fail"
+       },
+       {
+        "title": "Lavoro finale",
+        "credits": 3,
+        "semester": 2,
+        "graded": false,
+        "kind": "thesis",
+        "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+       }
+      ]
+     }
+    },
+    {
+     "code": "DL",
+     "name": "Percorso in DOMESTIC LAWYER",
+     "fromYear": 3,
+     "years": {
+      "3": [
+       {
+        "title": "Quantitative analysis for global jurists",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30630"
+       },
+       {
+        "title": "Business and Corporate Law",
+        "credits": 10,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30631"
+       },
+       {
+        "title": "Criminal Procedure",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30639"
+       },
+       {
+        "title": "Disciplina giuridica di bilancio",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30697"
+       },
+       {
+        "title": "1 insegnamento a scelta tra Casi e questioni di diritto societario / Operazioni straordinarie",
+        "credits": 6,
+        "semester": 1,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30698 Casi e questioni di diritto societario",
+         "30699 Operazioni straordinarie"
+        ]
+       },
+       {
+        "title": "Regulatory law oppure Global Finance",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "elective",
+        "choices": [
+         "30643 Regulatory law",
+         "30644 Global Finance"
+        ]
+       },
+       {
+        "title": "Accounting and financial statement analysis",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30701"
+       },
+       {
+        "title": "Diritto Privato",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30702"
+       },
+       {
+        "title": "Diritto tributario",
+        "credits": 6,
+        "semester": 2,
+        "graded": true,
+        "kind": "mandatory",
+        "code": "30703"
+       },
+       {
+        "title": "Lavoro finale",
+        "credits": 3,
+        "semester": 2,
+        "graded": false,
+        "kind": "thesis",
+        "note": "Not graded in /30; scored 0-4 points on the /110 graduation grade"
+       }
+      ]
+     }
+    }
+   ],
+   "internshipRules": [
+    {
+     "track": "GL",
+     "slot": "Legal clinic oppure Internship",
+     "credits": 6,
+     "quote": "Legal clinic oppure Internship 6",
+     "page": 121,
+     "note": "In BGL an internship replaces the legal clinic, NOT an optional course (Regolamento 2025-26 art.16). BGL has no free-choice optional within 180 CFU. The Domestic Lawyer track has neither clinic nor internship slot."
+    }
+   ],
+   "notes": [
+    "Both tracks: 34 CFU sem I + 27 CFU sem II = 61.",
+    "Only one EU language (4 CFU). No Computer science course.",
+    "Domestic Lawyer: several courses taught in Italian."
+   ]
+  }
+ ],
+ "gpa": {
+  "method": "Credit-weighted arithmetic mean of all marks in /30 recorded in the career; weights = course credits.",
+  "lodeValue": 31,
+  "passMark": 18,
+  "maxMark": 30,
+  "excluded": "Activities not graded in /30 (seminars, stage/internship, legal clinic, idoneità) are excluded from numerator and denominator.",
+  "dropWorst": false,
+  "supernumerary": "Up to 3 supernumerary activities (beyond 180 CFU), allowed only after passing all first-3-semester exams. They count in the GPA, but if more than 2 the 2 best grades (ties: more credits) are used. No worst grades are dropped from the 180-CFU plan.",
+  "modules": "Courses split into modules are ONE exam: grade = credit-weighted mean of the module grades, rounded half-up to an integer; the combined exam grade with total credits enters the GPA. How a 30L on a module propagates is not stated.",
+  "transfers": "Exams from other universities keep the origin grade, converted to /30 via correspondence tables.",
+  "quotes": [
+   {
+    "page": 407,
+    "text": "La media è calcolata secondo il metodo della media aritmetica ponderata, prendendo a riferimento tutti i risultati espressi in trentesimi presenti nella carriera dello studente. La ponderazione è effettuata considerando il peso in crediti degli insegnamenti."
+   },
+   {
+    "page": 407,
+    "text": "Sono esclusi dal calcolo della media i crediti maturati nelle attività formative la cui valutazione non è espressa in trentesimi (ad es. seminari, stage etc.)."
+   },
+   {
+    "page": 407,
+    "text": "Ai fini del calcolo della media al 30 e lode è assegnato valore 31."
+   },
+   {
+    "page": 407,
+    "text": "Gli eventuali esami in sovrannumero entrano nel calcolo della media fino a un massimo di 2 esami. Se lo studente ha superato più di 2 esami in sovrannumero, sono utilizzati i 2 migliori risultati (quelli nei quali sono stati conseguiti i voti più alti, a parità di voti quelli con un maggior numero di crediti)."
+   },
+   {
+    "page": 406,
+    "text": "L'esito finale dell'esame è verbalizzato con votazione espressa in trentesimi oppure idoneo (per le attività formative come ad es. seminari, stage etc.)"
+   },
+   {
+    "page": "11-12",
+    "text": "Il voto è dato dalla media ponderata (rispetto ai crediti di ciascun modulo) dei voti parziali. La media è arrotondata per eccesso quando i decimali sono uguali o superiori a 5 e per difetto quando i decimali sono inferiori a 5."
+   },
+   {
+    "page": 405,
+    "text": "Le votazioni da 18 a 30 trentesimi sono considerate sufficienze. La Commissione d'esame può attribuire la lode al candidato cui ha assegnato 30 trentesimi."
+   }
+  ]
+ },
+ "graduation": {
+  "source": "Regolamento trienni 2025-26, Art. 25 'Prova finale: presentazione e valutazione' (PDF pp.24-25); same in 2024-25 (pp.23-24). NOT in the guide PDF.",
+  "formula": "final = GPA/30*110 + thesisPoints (0..4) + bonusPoint (0 or 1)",
+  "thesisPoints": {
+   "min": 0,
+   "max": 4,
+   "note": "Committee of >=3 evaluates the written report; no oral defence. Granularity (integers vs fractions) not stated."
+  },
+  "bonus": {
+   "points": 1,
+   "max": 1,
+   "conditions": "positive participation in curricular internship (stage curriculare) and/or study abroad (Exchange or Double Degree with at least 1 exam recognised; Joint Programs) and/or legal clinic (BGL only). Max 1 point total."
+  },
+  "noOtherBonuses": "No time-to-degree, number-of-lodes or other bonus is mentioned in the guide or the Regolamento.",
+  "passThreshold": 66,
+  "lode": "Unanimous committee decision; possible only if (1) sum of elements >= 111, (2) thesis points >= 3, (3) no disciplinary sanction >= 6 months.",
+  "rounding": "NOT stated in the guide or the Regolamento (how GPA*110/30 is rounded, or capping at 110). Treat as unknown.",
+  "admission": "All plan credits except the 3 CFU of the lavoro finale must be earned before the final exam.",
+  "thesis": "Lavoro finale = 3 CFU in every programme: written report under a tutor; may originate from a stage/study experience or (BGL) legal clinic; in English for English-taught programmes (Regolamento art. 21).",
+  "quotes": [
+   {
+    "page": "Regolamento 25-26 p.24",
+    "text": "La valutazione conclusiva è espressa in centodecimi. Lo studente supera la prova finale quando consegue una votazione complessiva non inferiore a sessantasei centodecimi, con giudizio positivo assegnato alla prova finale."
+   },
+   {
+    "page": "Regolamento 25-26 p.24",
+    "text": "La valutazione della prova conclusiva e l'assegnazione del voto finale tengono conto delle valutazioni conseguite nelle attività formative precedenti, in particolare della media ponderata delle votazioni espresse in trentesimi, rapportata in centodecimi, cui è possibile aggiungere: - da zero a quattro centodecimi per il lavoro finale, avuto riguardo alla complessità delle tematiche trattate, alla profondità dell'analisi svolta, alla congruità delle conclusioni tratte - un centodecimo per la positiva partecipazione a una o più delle seguenti attività: stage curriculare, e/o programmi di studio all'estero (Exchange o Double Degree se sia stato riconosciuto almeno 1 esame superato all'estero; Joint Programs) e/o (per il corso di laurea della Scuola di Giurisprudenza) legal clinic."
+   },
+   {
+    "page": "Regolamento 25-26 p.25",
+    "text": "Può essere assegnato al massimo un centodecimo, indipendentemente dal numero di attività svolte."
+   },
+   {
+    "page": "Regolamento 25-26 p.25",
+    "text": "La commissione all'unanimità può assegnare la votazione di 110 cum laude quando si verifichino tutte le seguenti condizioni: la somma degli elementi che concorrono alla determinazione del voto di laurea sia pari almeno a 111; il punteggio assegnato al Lavoro Finale sia di almeno 3 punti; lo studente non abbia ricevuto alcun provvedimento disciplinare con sanzione pari o superiore a 6 mesi."
+   },
+   {
+    "page": 405,
+    "text": "Tutte le sanzioni disciplinari sono registrate nella carriera accademica dello studente e trascritte nei fogli di congedo e nei documenti di ricognizione della carriera in sede di determinazione del voto finale di laurea."
+   }
+  ]
+ },
+ "internshipGeneral": {
+  "rule": "Undergraduate School programmes: a curricular stage (or similar: qualified work experience, field projects) can replace ONE optional course (6 CFU). School of Law (BGL): a stage replaces the legal clinic. Stage credits are pass/fail -> excluded from GPA, but earn the +1/110 graduation point. A stage can also be taken as a supernumerary activity.",
+  "quotes": [
+   {
+    "page": 6,
+    "text": "L'insegnamento opzionale ha valore pari a 6 crediti. ... In alternativa ad un insegnamento opzionale è possibile effettuare uno stage curriculare."
+   },
+   {
+    "page": 123,
+    "text": "In alternativa ad un insegnamento opzionale è possibile effettuare uno stage curriculare."
+   },
+   {
+    "page": "Regolamento 25-26 p.16",
+    "text": "Per i corsi di laurea della Scuola Universitaria lo stage e le attività assimilabili allo stage (attività qualificate di lavoro e progetti sul campo) possono essere scelti in alternativa ad un insegnamento opzionale. Per il corso di laurea della Scuola di Giurisprudenza lo stage può essere scelto in alternativa allo svolgimento di una legal clinic. ... l'acquisizione dei crediti è subordinata alla verifica delle competenze acquisite (pass/fail)."
+   }
+  ]
+ },
+ "notes": {
+  "languages": "The guide does not say whether language exams (4-5 CFU) get a /30 mark or idoneità; set graded:false per your assumption - VERIFY (make it user-overridable). Recognised certifications can replace the internal exam (p.407).",
+  "computerScience": "Computer science (30424, 6 CFU) treated as a graded course; ECDL is a prerequisite to sit it (p.408).",
+  "seminars": "Seminars are pass/fail (Regolamento 25-26 art.23: 'Pass/fail grades are not included in the GPA'). BIG 'Marketing research skills' / 'Negotiation skills' (3 CFU) and BGL 'Legal Tech' (3 CFU) are not explicitly labelled - flagged.",
+  "optionals": "Standard optional = 6 CFU; catalogue in guide 2.2 (pp.123-128); characterizing courses of other programmes in 2.3 (max 2 of those, p.369).",
+  "olderCohorts": "Students enrolled before 2025-26 follow different plans (sections 'fino all'a.a. 2024-2025' etc.), not extracted."
+ }
+}

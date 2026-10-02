@@ -1,22 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   Image,
-  ActivityIndicator,
   Pressable,
   Alert,
   Modal,
+  RefreshControl,
   StyleSheet,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
 import * as Clipboard from "expo-clipboard";
 import { api } from "../lib/api";
-import { useT } from "../lib/i18n";
-import { Icon } from "../components/Icon";
+import { useLocale, useT } from "../lib/i18n";
+import { useRefresh } from "../lib/use-refresh";
+import { Icon, Spinner } from "../components/Icon";
+import { ScreenHeader } from "../components/ScreenHeader";
+import { EmptyState } from "../components/EmptyState";
 import { SegmentedToggle } from "../components/SegmentedToggle";
 
 type Voucher = { code: string | null; title: string };
@@ -24,6 +26,7 @@ type Tab = "available" | "redeemed";
 
 export default function RewardsScreen() {
   const t = useT();
+  const locale = useLocale();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const rewards = useQuery({ queryKey: ["rewards"], queryFn: () => api.rewards.list(), retry: false });
@@ -45,9 +48,24 @@ export default function RewardsScreen() {
   const [tab, setTab] = useState<Tab>("available");
   const [busyId, setBusyId] = useState<string | null>(null);
   const [voucher, setVoucher] = useState<Voucher | null>(null);
+  // The code just copied: its button reads "Copied" for a moment instead of
+  // interrupting with an alert.
+  const [copied, setCopied] = useState<string | null>(null);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(null), 1500);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  const refresh = useRefresh(rewards.refetch, balance.refetch, mine.refetch);
+
+  async function copy(code: string) {
+    await Clipboard.setStringAsync(code);
+    setCopied(code);
+  }
 
   const items = rewards.data?.items ?? [];
-  const points = balance.data?.balance ?? 0;
+  // Undefined while loading, so nothing flashes as unaffordable.
+  const points = balance.data?.balance;
   const redemptions = mine.data?.items ?? [];
 
   function confirm(reward: { id: string; title: string; costPoints: number }) {
@@ -55,7 +73,7 @@ export default function RewardsScreen() {
       t("rewards.confirmTitle"),
       t("rewards.confirmBody", {
         title: reward.title,
-        points: reward.costPoints.toLocaleString(),
+        points: reward.costPoints.toLocaleString(locale),
       }),
       [
         { text: t("common.cancel"), style: "cancel" },
@@ -76,37 +94,35 @@ export default function RewardsScreen() {
         qc.invalidateQueries({ queryKey: ["points-history"] }),
       ]);
       setVoucher({ code: res.code, title: reward.title });
-    } catch (e) {
-      Alert.alert(
-        t("rewards.failedTitle"),
-        e instanceof Error ? e.message : t("rewards.failedBody"),
-      );
+    } catch {
+      Alert.alert(t("rewards.failedTitle"), t("rewards.failedBody"));
     } finally {
       setBusyId(null);
     }
   }
 
-  const header = (
-    <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
-      <Pressable onPress={() => router.back()} hitSlop={10}>
-        <Icon name="chevron-back" size={26} color="#04107E" />
-      </Pressable>
-      <View>
-        <Text className="text-lg font-semibold text-astra-primary dark:text-white">
-          {t("rewards.title")}
-        </Text>
-        <Text className="text-xs text-gray-400 dark:text-white/60">{t("rewards.subtitle")}</Text>
-      </View>
-    </View>
-  );
+  const header = <ScreenHeader title={t("rewards.title")} subtitle={t("rewards.subtitle")} />;
 
   if (rewards.isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
         {header}
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#04107E" />
+          <Spinner />
         </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (rewards.isError) {
+    return (
+      <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
+        {header}
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("common.error")}
+          action={{ label: t("common.retry"), onPress: () => rewards.refetch() }}
+        />
       </SafeAreaView>
     );
   }
@@ -117,14 +133,15 @@ export default function RewardsScreen() {
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 14 }}
+        refreshControl={<RefreshControl {...refresh} />}
       >
         {/* Balance banner */}
         <View className="flex-row items-center justify-between rounded-2xl bg-astra-primary dark:bg-astra-dark px-5 py-4">
           <View>
-            <Text className="text-xs uppercase tracking-wide text-white/70">
-              {t("rewards.yourPoints")}
+            <Text className="text-xs text-white/70">{t("rewards.yourPoints")}</Text>
+            <Text className="mt-0.5 text-2xl font-semibold text-white">
+              {points == null ? "…" : points.toLocaleString(locale)}
             </Text>
-            <Text className="mt-0.5 text-2xl font-bold text-white">{points.toLocaleString()}</Text>
           </View>
           <Icon name="gift" size={26} color="rgba(255,255,255,0.85)" />
         </View>
@@ -140,17 +157,11 @@ export default function RewardsScreen() {
 
         {tab === "redeemed" ? (
           redemptions.length === 0 ? (
-            <View className="mt-10 items-center gap-3 px-4">
-              <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
-                <Icon name="ticket-outline" size={30} color="#04107E" />
-              </View>
-              <Text className="text-xl font-semibold text-astra-primary dark:text-white">
-                {t("rewards.noneRedeemedTitle")}
-              </Text>
-              <Text className="text-center text-gray-500 dark:text-gray-300">
-                {t("rewards.noneRedeemedBody")}
-              </Text>
-            </View>
+            <EmptyState
+              icon="ticket-outline"
+              title={t("rewards.noneRedeemedTitle")}
+              body={t("rewards.noneRedeemedBody")}
+            />
           ) : (
             redemptions.map((r) => (
               <View
@@ -166,8 +177,8 @@ export default function RewardsScreen() {
                       {r.rewardTitle}
                     </Text>
                     <Text className="mt-0.5 text-xs text-gray-400 dark:text-white/60">
-                      {new Date(r.createdAt).toLocaleDateString()} ·{" "}
-                      {t("rewards.spentPoints", { points: r.costPoints.toLocaleString() })}
+                      {new Date(r.createdAt).toLocaleDateString(locale)} ·{" "}
+                      {t("rewards.spentPoints", { points: r.costPoints.toLocaleString(locale) })}
                     </Text>
                   </View>
                 </View>
@@ -178,14 +189,13 @@ export default function RewardsScreen() {
                       {r.code}
                     </Text>
                     <Pressable
-                      onPress={async () => {
-                        await Clipboard.setStringAsync(r.code!);
-                        Alert.alert(t("rewards.copiedTitle"));
-                      }}
+                      onPress={() => copy(r.code!)}
                       hitSlop={8}
                       className="rounded-lg bg-astra-primary dark:bg-astra-dark px-3 py-1.5 active:opacity-80"
                     >
-                      <Text className="text-xs font-semibold text-white">{t("common.copy")}</Text>
+                      <Text className="text-xs font-semibold text-white">
+                        {copied === r.code ? t("rewards.copiedTitle") : t("common.copy")}
+                      </Text>
                     </Pressable>
                   </View>
                 ) : r.status === "CANCELLED" ? (
@@ -226,26 +236,17 @@ export default function RewardsScreen() {
             ))
           )
         ) : items.length === 0 ? (
-          <View className="mt-10 items-center gap-3 px-4">
-            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
-              <Icon name="gift-outline" size={30} color="#04107E" />
-            </View>
-            <Text className="text-xl font-semibold text-astra-primary dark:text-white">
-              {t("rewards.emptyTitle")}
-            </Text>
-            <Text className="text-center text-gray-500 dark:text-gray-300">
-              {t("rewards.emptyBody")}
-            </Text>
-          </View>
+          <EmptyState icon="gift-outline" title={t("rewards.emptyTitle")} body={t("rewards.emptyBody")} />
         ) : (
           items.map((r) => {
-            const affordable = points >= r.costPoints;
+            const affordable = points != null && points >= r.costPoints;
             const soldOut = r.stock !== null && r.stock <= 0;
             // Show the per-account cap up front rather than letting them tap
             // through and fail — they'd have no idea why.
             const minesCount = redemptions.filter((x) => x.rewardId === r.id).length;
             const capped = r.perUserLimit !== null && minesCount >= r.perUserLimit;
             const busy = busyId === r.id;
+            const blocked = !affordable || soldOut || capped;
             return (
               <View
                 key={r.id}
@@ -289,8 +290,8 @@ export default function RewardsScreen() {
                     )}
                   </View>
                   <View className="items-end">
-                    <Text className="text-lg font-bold text-astra-primary dark:text-white">
-                      {r.costPoints.toLocaleString()}
+                    <Text className="text-lg font-semibold text-astra-primary dark:text-white">
+                      {r.costPoints.toLocaleString(locale)}
                     </Text>
                     <Text className="text-[11px] text-gray-400 dark:text-white/60">
                       {t("rewards.pointsLabel")}
@@ -298,31 +299,29 @@ export default function RewardsScreen() {
                   </View>
                 </View>
 
+                {/* Unavailable is the same button, dimmed: it reads in both modes. */}
                 <Pressable
-                  disabled={!affordable || soldOut || capped || busy}
+                  disabled={blocked || busy}
                   onPress={() => confirm(r)}
-                  className="items-center rounded-xl py-3 active:opacity-80"
-                  style={{
-                    backgroundColor: !affordable || soldOut || capped ? "#E5E7EB" : "#04107E",
-                  }}
+                  className={`items-center rounded-xl bg-astra-primary dark:bg-white/15 py-3 active:opacity-80 ${
+                    blocked ? "opacity-40" : ""
+                  }`}
                 >
                   {busy ? (
-                    <ActivityIndicator color="#fff" />
+                    <Spinner color="#fff" />
                   ) : (
-                    <Text
-                      className={`text-sm font-semibold ${
-                        !affordable || soldOut || capped ? "text-gray-500" : "text-white"
-                      }`}
-                    >
+                    <Text className="text-sm font-semibold text-white">
                       {capped
                         ? t("rewards.alreadyRedeemed")
                         : soldOut
                           ? t("rewards.soldOut")
                           : affordable
                             ? t("rewards.redeem")
-                            : t("rewards.morePoints", {
-                                points: (r.costPoints - points).toLocaleString(),
-                              })}
+                            : points == null
+                              ? "…"
+                              : t("rewards.morePoints", {
+                                  points: (r.costPoints - points).toLocaleString(locale),
+                                })}
                     </Text>
                   )}
                 </Pressable>
@@ -333,7 +332,12 @@ export default function RewardsScreen() {
       </ScrollView>
 
       {/* Voucher handed out */}
-      <Modal visible={voucher !== null} transparent animationType="fade">
+      <Modal
+        visible={voucher !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setVoucher(null)}
+      >
         <View style={[StyleSheet.absoluteFill, styles.center, { backgroundColor: "rgba(0,0,0,0.6)", padding: 28 }]}>
           <View
             className="w-full items-center rounded-3xl bg-white dark:bg-astra-dark p-7"
@@ -342,7 +346,7 @@ export default function RewardsScreen() {
             <View className="h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
               <Icon name="checkmark" size={34} color="#16a34a" />
             </View>
-            <Text className="mt-4 text-center text-xl font-bold text-gray-900 dark:text-white">
+            <Text className="mt-4 text-center text-xl font-semibold text-gray-900 dark:text-white">
               {t("rewards.redeemedTitle")}
             </Text>
             <Text className="mt-1 text-center text-sm text-gray-500 dark:text-gray-300">
@@ -358,14 +362,11 @@ export default function RewardsScreen() {
                   {voucher.code}
                 </Text>
                 <Pressable
-                  onPress={async () => {
-                    await Clipboard.setStringAsync(voucher.code!);
-                    Alert.alert(t("rewards.copiedTitle"));
-                  }}
+                  onPress={() => copy(voucher.code!)}
                   className="mt-3 w-full items-center rounded-xl bg-astra-light dark:bg-white/10 py-2.5 active:opacity-70"
                 >
                   <Text className="text-sm font-semibold text-astra-primary dark:text-white">
-                    {t("rewards.copyCode")}
+                    {copied === voucher.code ? t("rewards.copiedTitle") : t("rewards.copyCode")}
                   </Text>
                 </Pressable>
                 <Text className="mt-3 text-center text-[11px] leading-4 text-gray-400 dark:text-white/60">

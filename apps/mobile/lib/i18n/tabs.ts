@@ -9,7 +9,7 @@ export const en = {
 
 export const it: Record<keyof typeof en, string> = {
   "tabs.events": "Eventi",
-  "tabs.card": "Carta",
+  "tabs.card": "Tessera",
   "tabs.rewards": "Premi",
   "tabs.discounts": "Sconti",
   "tabs.academics": "Didattica",

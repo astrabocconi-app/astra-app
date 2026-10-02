@@ -26,11 +26,27 @@ export interface ClassroomsResult {
   timestamp: string | null;
 }
 
+// Free@B live-scrapes Bocconi on every call, which takes seconds. Every student
+// asking "what's free now" gets the same answer, so share it for a minute and
+// let concurrent requests ride the same upstream call. Failures are evicted so
+// the next request retries.
+// ponytail: per-instance memory, so each warm serverless instance scrapes once
+// a minute; move to a shared KV if upstream load ever matters.
+const CACHE_MS = 60_000;
+const cache = new Map<string, { at: number; result: Promise<ClassroomsResult> }>();
+
 // time = "HH:MM" (defaults to now), day = "today" | "tomorrow" | "day-after".
-export async function fetchClassrooms(params: {
-  time?: string;
-  day?: string;
-}): Promise<ClassroomsResult> {
+export function fetchClassrooms(params: { time?: string; day?: string }): Promise<ClassroomsResult> {
+  const key = `${params.day ?? "today"}|${params.time ?? "now"}`;
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_MS) return hit.result;
+  const result = fetchUpstream(params);
+  cache.set(key, { at: Date.now(), result });
+  result.catch(() => cache.delete(key));
+  return result;
+}
+
+async function fetchUpstream(params: { time?: string; day?: string }): Promise<ClassroomsResult> {
   const qs = new URLSearchParams();
   if (params.time) qs.set("time", params.time);
   if (params.day) qs.set("day", params.day);

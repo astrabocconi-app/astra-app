@@ -38,7 +38,7 @@ export function ContentLinks({ links }: { links: ContentLink[] }) {
           key={`${link.kind}-${link.value}-${i}`}
           onPress={() => open(link)}
           accessibilityRole="link"
-          className="flex-row items-center gap-2.5 rounded-2xl border border-astra-primary/20 bg-astra-light dark:bg-white/10 px-4 py-3.5 active:opacity-80"
+          className="flex-row items-center gap-2.5 rounded-2xl border border-astra-primary/20 dark:border-white/15 bg-astra-light dark:bg-white/10 px-4 py-3.5 active:opacity-80"
         >
           <Text
             className="flex-1 text-[15px] font-semibold text-astra-primary dark:text-white"

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/academic/courses?q=&programmeId=&all=1
  *
- * Defaults to the student's own programme, since that is what the gradebook
+ * Defaults to the student's own programme, since that is what a course
  * picker wants. `all=1` searches the whole catalogue for electives, exchange
  * and courses borrowed from another programme.
  */

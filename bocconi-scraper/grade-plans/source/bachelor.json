@@ -1,0 +1,3001 @@
+{
+ "BAI": [
+  {
+   "id": "EX-1-04",
+   "name": "Algebra and Geometry",
+   "cfu": "7",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Computer Science - Module 1 (Introduction to Computer Science and Programming)",
+   "cfu": "8",
+   "module": "COMPUTER SCIENCE",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Computer Science - Module 2 (Computing Theory and Algorithms)",
+   "cfu": "8",
+   "module": "COMPUTER SCIENCE",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Foundations of Economic Sciences",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-05",
+   "name": "Foundations of Physics I",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Mathematical Analysis I - Module 1",
+   "cfu": "8",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "Mathematical Analysis I - Module 2",
+   "cfu": "7",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Probability",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Advanced Programming and Optimization Algorithms",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Decision Theory and Human Behaviour",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Foreign Language",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Foundations of Physics II",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Mathematical Analysis II - Module 1",
+   "cfu": "6",
+   "module": "MATH 2",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Mathematical Analysis II - Module 2",
+   "cfu": "5",
+   "module": "MATH 2",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Mathematical Modelling in Machine Learning",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Mathematical Statistics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-03",
+   "name": "AI Lab",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-02",
+   "name": "Behavioural Skills Seminar",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-01",
+   "name": "Digital Ethics Seminar",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Elective II",
+   "cfu": "3",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-18",
+   "name": "Game Theory and Mechanism Design",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Machine Learning and Artificial Intelligence",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Mathematical Modelling for Finance",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Mathematical Modelling for Neuroscience",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-17",
+   "name": "Statistical and Quantum Physics",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Stochastic Processes and Simulation in Natural Sciences",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "BEMACC": [
+  {
+   "id": "EX-1-08",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Critical Approaches to the Arts - I",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Economic History and History of Economic Thought",
+   "cfu": "7",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-05",
+   "name": "Economics - Module 1 (Microeconomics)",
+   "cfu": "7",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-09",
+   "name": "First foreign language",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Law - Module 1 (Private Law)",
+   "cfu": "6",
+   "module": "LAW",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Management of Cultural Companies and Institutions",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Mathematics",
+   "cfu": "9",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Philosophy of Art",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Critical Approaches to the Arts - II - Module 1",
+   "cfu": "6",
+   "module": "ARTS",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Critical Approaches to the Arts - II - Module 2",
+   "cfu": "6",
+   "module": "ARTS",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Cultural Anthropology",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Economics - Module 2 (Macroeconomics)",
+   "cfu": "7",
+   "module": "ECONOMICS",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Financial Accounting - Module 1",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Financial Accounting - Module 2",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Fundamentals of Organization",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Law - Module 2 (Comparative Public Law)",
+   "cfu": "6",
+   "module": "LAW",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-19",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Statistics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-01",
+   "name": "Leadership and Managerial Skills Seminar",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Advanced Management - Module 1 (Competitive strategies in creative industries)",
+   "cfu": "7",
+   "module": "ADVANCED MANAGEMENT",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Advanced Management - Module 2 (Marketing in creative industries)",
+   "cfu": "8",
+   "module": "ADVANCED MANAGEMENT",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Business Planning and Control",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Company and Business Law",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Finance - Module 1 (Corporate Finance)",
+   "cfu": "5",
+   "module": "FINANCE",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Finance - Module 2 (Financial Markets and Institutions)",
+   "cfu": "5",
+   "module": "FINANCE",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Management of public and not for profit organizations",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Public Finance",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-28",
+   "name": "Workshop / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "BEMACS": [
+  {
+   "id": "EX-1-06",
+   "name": "Accounting",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "First foreign language",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Fundamentals of Computer Science",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Fundamentals of Information Technology Law",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Mathematics and Statistics (Module 1 - Mathematics)",
+   "cfu": "8",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Mathematics and Statistics (Module 2 - Statistics)",
+   "cfu": "8",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Microeconomics",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-05",
+   "name": "Principles of Management",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Advanced Mathematics and Statistics (Module 1 - Applied Mathematics)",
+   "cfu": "7",
+   "module": "ADVANCED MATH",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Advanced Mathematics and Statistics (Module 2 - Advanced Statistical Methods)",
+   "cfu": "7",
+   "module": "ADVANCED MATH",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Computer Programming",
+   "cfu": "7",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Econometrics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "European IP and data law",
+   "cfu": "7",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Machine Learning",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Macroeconomics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Principles of Finance",
+   "cfu": "7",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-01",
+   "name": "Technological Innovation Seminars 1",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-02",
+   "name": "Technological Innovation Seminars 2",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-18",
+   "name": "Big Data and Databases",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Computational Microeconomics (Module 1 - Game Theory)",
+   "cfu": "8",
+   "module": "COMPUTATIONAL",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Computational Microeconomics (Module 2 - Mechanism Design)",
+   "cfu": "8",
+   "module": "COMPUTATIONAL",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Elective II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Elective III",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Information Systems Management",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Marketing Analytics",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "BESS": [
+  {
+   "id": "EX-1-08",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Foundations of Economics, Module 1 (Microeconomics)",
+   "cfu": "7",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Foundations of Economics, Module 2 (Macroeconomics)",
+   "cfu": "7",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Fundamentals of Management",
+   "cfu": "7",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-09",
+   "name": "Language I",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Logic and Methodology of Social Sciences",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Mathematics, Module 1 (Theory and Methods)",
+   "cfu": "9",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-05",
+   "name": "Mathematics, Module 2 (Applied mathematics)",
+   "cfu": "9",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Statistics, Module 1 (Theory and Methods)",
+   "cfu": "7",
+   "module": "STATISTICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Econometrics",
+   "cfu": "7",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Economic History",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Incentives Design and Policy",
+   "cfu": "7",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Language II",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Macroeconomics and Economic Policy",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Private and Business Law",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Social Sciences 1 (Cognitive Sciences)",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Statistics, Module 2 (Applied Statistics)",
+   "cfu": "7",
+   "module": "STATISTICS",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Strategic Decision Making and Markets",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Culture, Institutions and Development",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Elective II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Empirical Research methods and Data Analysis",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "International Economics and Finance",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Law and Public Policy",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Social Sciences 2 - Module 1 (Organizational behavior and Social psychology)",
+   "cfu": "8",
+   "module": "SOCIAL SCIENCES",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Social Sciences 2 - Module 2 (Sociology)",
+   "cfu": "7",
+   "module": "SOCIAL SCIENCES",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "BIEF-ECON": [
+  {
+   "id": "EX-1-05",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Economics, Module 1 (Microeconomics)",
+   "cfu": "9",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Economics, Module 2 (Macroeconomics)",
+   "cfu": "8",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "First foreign language",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Introduction to the Legal System - Module 1",
+   "cfu": "6",
+   "module": "LEGAL",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Management",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Mathematics, Module 1 (General)",
+   "cfu": "8",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Mathematics, Module 2 (Applied)",
+   "cfu": "7",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-1-01",
+   "name": "Critical Thinking Seminar",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Economic History",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Finance - Module 1 (Financial Markets and Institutions)",
+   "cfu": "6",
+   "module": "FINANCE",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Finance - Module 2 (Corporate Finance)",
+   "cfu": "6",
+   "module": "FINANCE",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Financial Accounting - Module 1",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Financial Accounting - Module 2",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "International Economics",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Introduction to the Legal System - Module 2",
+   "cfu": "6",
+   "module": "LEGAL",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Markets, Organizations and Incentives",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Statistics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-02",
+   "name": "Leadership and Managerial Skills Seminars",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Comparative Business and European Law",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Elective II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Empirical Methods for Economics (Introduction to Econometrics)",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Macroeconomics and the World Economy",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Major Compulsory 1",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Major Compulsory 2",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Major Compulsory 3",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Major Compulsory 4",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-03",
+   "name": "CSR & Ethics in Business",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-04",
+   "name": "Globalization, Societies and Institutions",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  }
+ ],
+ "BIEF-FIN": [
+  {
+   "id": "EX-1-05",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Economics, Module 1 (Microeconomics)",
+   "cfu": "9",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Economics, Module 2 (Macroeconomics)",
+   "cfu": "8",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "First foreign language",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Introduction to the Legal System - Module 1",
+   "cfu": "6",
+   "module": "LEGAL",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Management",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Mathematics, Module 1 (General)",
+   "cfu": "8",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Mathematics, Module 2 (Applied)",
+   "cfu": "7",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-1-01",
+   "name": "Critical Thinking Seminar",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Economic History",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Finance - Module 1 (Financial Markets and Institutions)",
+   "cfu": "6",
+   "module": "FINANCE",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Finance - Module 2 (Corporate Finance)",
+   "cfu": "6",
+   "module": "FINANCE",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Financial Accounting - Module 1",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Financial Accounting - Module 2",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Financial Economics",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "International and Monetary Economics",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Introduction to the Legal System - Module 2",
+   "cfu": "6",
+   "module": "LEGAL",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Statistics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-02",
+   "name": "Leadership and Managerial Skills Seminars",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Business Strategy",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Comparative Business and European Law",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Elective II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Empirical methods for Finance (Introduction to Econometrics for Finance)",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Major Compulsory 1",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Major Compulsory 2",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Major Compulsory 3",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Major Compulsory 4",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-03",
+   "name": "CSR & Ethics in Business",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-04",
+   "name": "Globalization, Societies and Institutions",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  }
+ ],
+ "BIEM": [
+  {
+   "id": "EX-1-05",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Economics, Module 1 (Microeconomics)",
+   "cfu": "9",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Economics, Module 2 (Macroeconomics)",
+   "cfu": "8",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "First foreign language",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Introduction to the Legal System - Module 1",
+   "cfu": "6",
+   "module": "LEGAL",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Management",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Mathematics, Module 1 (General)",
+   "cfu": "8",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Mathematics, Module 2 (Applied)",
+   "cfu": "7",
+   "module": "MATH",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-1-01",
+   "name": "Critical Thinking Seminar",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Economic History",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "European Economic Policy/Public Finance",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Finance - Module 1 (Financial Markets and Institutions)",
+   "cfu": "6",
+   "module": "FINANCE",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Finance - Module 2 (Corporate Finance)",
+   "cfu": "6",
+   "module": "FINANCE",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Financial Accounting - Module 1",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Financial Accounting - Module 2",
+   "cfu": "5",
+   "module": "ACCOUNTING",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Introduction to the Legal System - Module 2",
+   "cfu": "6",
+   "module": "LEGAL",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Marketing",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Statistics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-02",
+   "name": "Leadership and Managerial Skills Seminars",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Applications for Management",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Business Strategy",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Comparative Business and European Law",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Compulsory Course I",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Compulsory Course II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Compulsory Course III",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Elective II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "International Macroeconomics",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-03",
+   "name": "CSR & Ethics in Business",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-04",
+   "name": "Globalization, Societies and Institutions",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  }
+ ],
+ "BIG": [
+  {
+   "id": "EX-1-09",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-10",
+   "name": "First foreign language",
+   "cfu": "5",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Introduction to Economics (Module I - Microeconomics)",
+   "cfu": "8",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-05",
+   "name": "Introduction to Economics (Module II - Macroeconomics)",
+   "cfu": "6",
+   "module": "ECONOMICS",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Law (Module 1 - Comparative Public Law)",
+   "cfu": "6",
+   "module": "LAW",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "Marketing Research Skills for Public Policy",
+   "cfu": "3",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Political Philosophy",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Political Science and Comparative Politics",
+   "cfu": "8",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Quantitative Methods for Social Sciences (Module I - Mathematics)",
+   "cfu": "6",
+   "module": "SOCIAL SCIENCES",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Quantitative Methods for Social Sciences (Module II - Statistics)",
+   "cfu": "6",
+   "module": "SOCIAL SCIENCES",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Economics and Politics of the European Union",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "History (Module I - Global History)",
+   "cfu": "6",
+   "module": "HISTORY",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "International Relations",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Law (Module II - International and European Law)",
+   "cfu": "6",
+   "module": "LAW",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Management of government organizations",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Negotiation Skills",
+   "cfu": "3",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Policy Evaluation",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-19",
+   "name": "Political Economics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Public Economics",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-20",
+   "name": "Second foreign language",
+   "cfu": "5",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Elective I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Elective II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Elective III",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-28",
+   "name": "Elective IV",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "History (Module II - History of Political Institutions)",
+   "cfu": "8",
+   "module": "HISTORY",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Media, Political Elites and the Public",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Public Governance",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Sociology",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "CLEACC": [
+  {
+   "id": "EX-1-08",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Diritto - modulo 1 (privato)",
+   "cfu": "6",
+   "module": "DIRITTO",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-05",
+   "name": "Economia - modulo 1 (microeconomia)",
+   "cfu": "7",
+   "module": "ECONOMIA",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Economia Aziendale e delle Istituzioni Culturali",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Estetica",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-09",
+   "name": "Inglese",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Matematica Generale e Finanziaria",
+   "cfu": "9",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Metodo, critica e ricerca nelle discipline artistiche I",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Storia economica e del pensiero economico",
+   "cfu": "7",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Antropologia culturale e dello sviluppo",
+   "cfu": "5",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Bilancio - modulo 1",
+   "cfu": "5",
+   "module": "BILANCIO",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Bilancio - modulo 2",
+   "cfu": "5",
+   "module": "BILANCIO",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Diritto - modulo 2 (pubblico)",
+   "cfu": "6",
+   "module": "DIRITTO",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Economia - modulo 2 (macroeconomia)",
+   "cfu": "7",
+   "module": "ECONOMIA",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Fondamenti di organizzazione",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Metodo, critica e ricerca nelle discipline artistiche II - modulo 1",
+   "cfu": "6",
+   "module": "METODO",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Metodo, critica e ricerca nelle discipline artistiche II - modulo 2",
+   "cfu": "6",
+   "module": "METODO",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-19",
+   "name": "Seconda Lingua Straniera",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Statistica",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-01",
+   "name": "Seminari per lo sviluppo di competenze manageriali e di leadership",
+   "cfu": "2",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Advanced Management - Modulo 1 (Strategie Competitive nei settori creativi)",
+   "cfu": "7",
+   "module": "ADVANCED MANAGEMENT",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Advanced Management - Modulo 2 (Marketing nei settori creativi)",
+   "cfu": "8",
+   "module": "ADVANCED MANAGEMENT",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Diritto Commerciale",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Finanza - modulo 1 (Finanza aziendale)",
+   "cfu": "5",
+   "module": "FINANZA",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Finanza - modulo 2 (Sistema Finanziario)",
+   "cfu": "5",
+   "module": "FINANZA",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Management of public and not for profit organizations (in inglese)",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Programmazione e controllo",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Scienza delle finanze",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-28",
+   "name": "Stage/laboratorio/opzionale all'estero",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "CLEAM": [
+  {
+   "id": "EX-1-05",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Diritto - modulo 1 (privato)",
+   "cfu": "6",
+   "module": "DIRITTO",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Economia - modulo 1 (microeconomia)",
+   "cfu": "9",
+   "module": "ECONOMIA",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Economia - modulo 2 (macroeconomia)",
+   "cfu": "8",
+   "module": "ECONOMIA",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Economia aziendale e gestione delle imprese",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "Inglese",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Matematica - modulo 1 (generale)",
+   "cfu": "8",
+   "module": "MATEMATICA",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Matematica - modulo 2 (applicata)",
+   "cfu": "7",
+   "module": "MATEMATICA",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-1-01",
+   "name": "Seminario di Critical Thinking",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Bilancio - modulo 1",
+   "cfu": "5",
+   "module": "BILANCIO",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Bilancio - modulo 2",
+   "cfu": "5",
+   "module": "BILANCIO",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Diritto - modulo 2 (pubblico)",
+   "cfu": "6",
+   "module": "DIRITTO",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Economia e management delle amministrazioni pubbliche",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Marketing",
+   "cfu": "7",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Programmazione e controllo",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Seconda Lingua Straniera",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Sistema Finanziario",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Statistica",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Storia economica",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-2-03",
+   "name": "Seminari di Business Ethics e responsabilità sociale",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Diritto Commerciale",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Finanza Aziendale",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Fondamenti di organizzazione",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Opzionale I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Opzionale II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-27",
+   "name": "Opzionale III",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Scienza delle finanze",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Strategia e Innovazione - Modulo 1 (Strategia Competitiva)",
+   "cfu": "7",
+   "module": "STRATEGIA",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Strategia e Innovazione - Modulo 2 (GTIO)",
+   "cfu": "7",
+   "module": "STRATEGIA",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-02",
+   "name": "Seminari per lo sviluppo di competenze manageriali e di leadership",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  }
+ ],
+ "CLEF": [
+  {
+   "id": "EX-1-05",
+   "name": "Computer Science",
+   "cfu": "6",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-07",
+   "name": "Diritto - modulo 1 (privato)",
+   "cfu": "6",
+   "module": "DIRITTO",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-03",
+   "name": "Economia - modulo 1 (microeconomia)",
+   "cfu": "9",
+   "module": "ECONOMIA",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-04",
+   "name": "Economia - modulo 2 (macroeconomia)",
+   "cfu": "8",
+   "module": "ECONOMIA",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-01",
+   "name": "Economia aziendale e gestione delle imprese",
+   "cfu": "10",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-08",
+   "name": "Inglese",
+   "cfu": "4",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-02",
+   "name": "Matematica - modulo 1 (generale)",
+   "cfu": "8",
+   "module": "MATEMATICA",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-1-06",
+   "name": "Matematica - modulo 2 (applicata)",
+   "cfu": "7",
+   "module": "MATEMATICA",
+   "anno": "1",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-1-01",
+   "name": "Seminario di Critical Thinking",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "1",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-10",
+   "name": "Bilancio - modulo 1",
+   "cfu": "5",
+   "module": "BILANCIO",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-15",
+   "name": "Bilancio - modulo 2",
+   "cfu": "5",
+   "module": "BILANCIO",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-13",
+   "name": "Diritto - modulo 2 (pubblico)",
+   "cfu": "6",
+   "module": "DIRITTO",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-16",
+   "name": "Investimenti Finanziari",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-17",
+   "name": "Metodi Quantitativi per la finanza",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-14",
+   "name": "Scienza delle finanze",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-18",
+   "name": "Seconda Lingua Straniera",
+   "cfu": "4",
+   "anno": "2",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-11",
+   "name": "Sistema Finanziario",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-12",
+   "name": "Statistica",
+   "cfu": "8",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-2-09",
+   "name": "Storia economica",
+   "cfu": "6",
+   "anno": "2",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-20",
+   "name": "Corporate Finance",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-23",
+   "name": "Diritto Commerciale",
+   "cfu": "7",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-24",
+   "name": "Economia e gestione delle Istituzioni Finanziarie",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-21",
+   "name": "Financial Statement Analysis",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-19",
+   "name": "Monetary Economics",
+   "cfu": "8",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-22",
+   "name": "Opzionale I / STAGE",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "course",
+   "isStage": true
+  },
+  {
+   "id": "EX-3-25",
+   "name": "Opzionale II",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "EX-3-26",
+   "name": "Opzionale III",
+   "cfu": "6",
+   "anno": "3",
+   "semestre": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "SEM-3-02",
+   "name": "Seminari per lo sviluppo di competenze manageriali e di leadership",
+   "cfu": "1",
+   "module": "Seminario",
+   "anno": "3",
+   "semestre": "1",
+   "kind": "seminar",
+   "isStage": false
+  }
+ ]
+}

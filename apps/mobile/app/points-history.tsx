@@ -1,14 +1,16 @@
-import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, FlatList, RefreshControl } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
-import { Icon } from "../components/Icon";
+import { Spinner } from "../components/Icon";
+import { ScreenHeader } from "../components/ScreenHeader";
+import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
-import { useT } from "../lib/i18n";
+import { useLocale, useT } from "../lib/i18n";
+import { useRefresh } from "../lib/use-refresh";
 
-function formatDate(iso: string): string {
+function formatDate(iso: string, locale: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
+  return d.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export default function PointsHistoryScreen() {
@@ -18,53 +20,48 @@ export default function PointsHistoryScreen() {
     retry: false,
   });
   const t = useT();
+  const locale = useLocale();
+  const insets = useSafeAreaInsets();
+  const refresh = useRefresh(refetch);
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-3 border-b border-gray-100 dark:border-white/10 px-4 py-3">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Icon name="chevron-back" size={26} color="#04107E" />
-        </Pressable>
-        <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("pointsHistory.title")}</Text>
-      </View>
+      <ScreenHeader title={t("pointsHistory.title")} />
 
       {isLoading && (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
+          <Spinner />
         </View>
       )}
 
       {error && (
-        <View className="flex-1 items-center justify-center gap-3 px-8">
-          <Text className="text-center text-red-600">{String((error as Error).message)}</Text>
-          <Pressable className="rounded-lg border border-gray-300 px-4 py-3" onPress={() => refetch()}>
-            <Text>{t("common.retry")}</Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("common.error")}
+          action={{ label: t("common.retry"), onPress: () => refetch() }}
+        />
       )}
 
       {data && (
         <FlatList
           data={data.entries}
           keyExtractor={(e) => e.id}
-          contentContainerStyle={{ padding: 16, gap: 8 }}
-          ListEmptyComponent={
-            <View className="items-center gap-2 pt-16">
-              <Icon name="sparkles-outline" size={28} color="#9CA3AF" />
-              <Text className="text-gray-400 dark:text-white/60">{t("pointsHistory.empty")}</Text>
-            </View>
-          }
+          contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 16, gap: 8, flexGrow: 1 }}
+          refreshControl={<RefreshControl {...refresh} />}
+          ListEmptyComponent={<EmptyState icon="sparkles-outline" title={t("pointsHistory.empty")} />}
           renderItem={({ item }) => (
-            <View className="flex-row items-center justify-between rounded-xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4">
+            <View className="flex-row items-center justify-between rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4">
               <View className="flex-1 pr-3">
                 <Text className="font-medium text-gray-900 dark:text-white">{item.reason}</Text>
-                <Text className="mt-0.5 text-xs uppercase tracking-wide text-gray-400 dark:text-white/60">
-                  {item.source} · {formatDate(item.createdAt)}
+                {/* The source is a raw server enum, so only the date is shown. */}
+                <Text className="mt-0.5 text-xs text-gray-400 dark:text-white/60">
+                  {formatDate(item.createdAt, locale)}
                 </Text>
               </View>
               <Text
-                className={`text-base font-semibold ${item.delta >= 0 ? "text-green-600" : "text-red-600"}`}
+                className={`text-base font-semibold ${
+                  item.delta >= 0 ? "text-green-600 dark:text-green-300" : "text-red-600 dark:text-red-300"
+                }`}
               >
                 {item.delta >= 0 ? "+" : ""}
                 {item.delta}

@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react";
+import { ActivityIndicator } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useEggStore } from "../lib/egg-store";
 
@@ -30,4 +31,10 @@ export function Icon({ color, ...rest }: ComponentProps<typeof Ionicons>) {
 export function MIcon({ color, ...rest }: ComponentProps<typeof MaterialIcons>) {
   const mapped = useMappedColor(color);
   return <MaterialIcons color={mapped as string | undefined} {...rest} />;
+}
+
+/** ActivityIndicator in brand blue, white in inverted mode (same remapping). */
+export function Spinner({ color = "#04107E", ...rest }: ComponentProps<typeof ActivityIndicator>) {
+  const mapped = useMappedColor(color);
+  return <ActivityIndicator color={mapped as string} {...rest} />;
 }

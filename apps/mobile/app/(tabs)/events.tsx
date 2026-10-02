@@ -1,46 +1,57 @@
-import { View, Text, ScrollView, Pressable, Image, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Pressable, Image, RefreshControl } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Icon } from "../../components/Icon";
-import { api } from "../../lib/api";
-import { useT } from "../../lib/i18n";
+import { Icon, Spinner } from "../../components/Icon";
+import { EmptyState } from "../../components/EmptyState";
+import { queries } from "../../lib/prefetch";
+import { useLocale, useT } from "../../lib/i18n";
+import { useRefresh } from "../../lib/use-refresh";
 
-function formatWhen(iso: string) {
+function formatWhen(iso: string, locale: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" }) +
+  return d.toLocaleDateString(locale, { day: "numeric", month: "short" }) +
     " · " +
-    d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+    d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function EventsScreen() {
   const t = useT();
-  const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list(), retry: false });
+  const locale = useLocale();
+  const events = useQuery(queries.events());
+  const refresh = useRefresh(events.refetch);
   const items = events.data?.items ?? [];
 
   if (events.isLoading) {
     return (
       <View className="flex-1 items-center justify-center bg-white dark:bg-astra-primary">
-        <ActivityIndicator />
+        <Spinner />
       </View>
     );
   }
 
-  if (items.length === 0) {
+  // Error before empty: offline must not read as "no events".
+  if (events.isError || items.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center gap-3 bg-white dark:bg-astra-primary px-8">
-        <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
-          <Icon name="calendar-outline" size={30} color="#04107E" />
-        </View>
-        <Text className="text-xl font-semibold text-astra-primary dark:text-white">{t("events.emptyTitle")}</Text>
-        <Text className="text-center text-gray-500 dark:text-gray-300">
-          {t("events.emptyBody")}
-        </Text>
+      <View className="flex-1 bg-white dark:bg-astra-primary">
+        {events.isError ? (
+          <EmptyState
+            icon="cloud-offline-outline"
+            title={t("common.error")}
+            action={{ label: t("common.retry"), onPress: () => events.refetch() }}
+          />
+        ) : (
+          <EmptyState icon="calendar-outline" title={t("events.emptyTitle")} body={t("events.emptyBody")} />
+        )}
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-astra-primary" contentContainerStyle={{ padding: 20, gap: 14 }}>
+    <ScrollView
+      className="flex-1 bg-white dark:bg-astra-primary"
+      contentContainerStyle={{ padding: 20, gap: 14 }}
+      refreshControl={<RefreshControl {...refresh} />}
+    >
       {items.map((e) => (
         <Pressable
           key={e.id}
@@ -56,23 +67,31 @@ export default function EventsScreen() {
         >
           {e.imageUrl ? (
             <Image source={{ uri: e.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
-          ) : (
-            <View style={{ height: 96, backgroundColor: "#04107E" }} className="items-center justify-center">
-              <Icon name="sparkles" size={28} color="rgba(255,255,255,0.9)" />
-            </View>
-          )}
-          <View className="p-4">
-            <Text className="text-base font-semibold text-gray-900 dark:text-white">{e.title}</Text>
-            <View className="mt-1 flex-row items-center gap-1.5">
-              <Icon name="time-outline" size={13} color="#6B7280" />
-              <Text className="text-xs text-gray-500 dark:text-gray-300">{formatWhen(e.startsAt)}</Text>
-            </View>
-            {e.location ? (
-              <View className="mt-1 flex-row items-center gap-1.5">
-                <Icon name="location-outline" size={13} color="#6B7280" />
-                <Text className="text-xs text-gray-500 dark:text-gray-300">{e.location}</Text>
+          ) : null}
+          {/* No cover: a small icon tile beside the text rather than a filler hero. */}
+          <View className="flex-row items-start gap-3 p-4">
+            {e.imageUrl ? null : (
+              <View className="h-11 w-11 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+                <Icon name="calendar-outline" size={21} color="#04107E" />
               </View>
-            ) : null}
+            )}
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
+                {e.title}
+              </Text>
+              <View className="mt-1 flex-row items-center gap-1.5">
+                <Icon name="time-outline" size={13} color="#6B7280" />
+                <Text className="text-xs text-gray-500 dark:text-gray-300">{formatWhen(e.startsAt, locale)}</Text>
+              </View>
+              {e.location ? (
+                <View className="mt-1 flex-row items-center gap-1.5">
+                  <Icon name="location-outline" size={13} color="#6B7280" />
+                  <Text className="flex-1 text-xs text-gray-500 dark:text-gray-300" numberOfLines={1}>
+                    {e.location}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
         </Pressable>
       ))}

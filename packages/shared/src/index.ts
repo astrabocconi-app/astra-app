@@ -11,4 +11,5 @@
 export * from "./schemas";
 export * from "./client";
 export * from "./domain";
-export * from "./gradebook-stats";
+export * from "./grade-plans";
+export * from "./grade-calc";

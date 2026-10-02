@@ -1,5 +1,5 @@
 export const en = {
-  "onboarding.step": "Step {current} of {total}",
+  "onboarding.step": "{current} of {total}",
   "onboarding.programmeTitle": "What do you study?",
   "onboarding.programmeSub": "We use it to show you the right handouts, exams and news.",
   "onboarding.yearTitle": "Which year are you in?",
@@ -9,7 +9,6 @@ export const en = {
   "onboarding.search": "Search by name or code",
   "onboarding.levelBachelor": "Bachelor",
   "onboarding.levelMaster": "Master",
-  "onboarding.levelIntegrated": "Law · 5 years",
   "onboarding.noResults": "Nothing matches “{q}”.",
   "onboarding.yearWord": "Year",
   "onboarding.notSure": "Not sure yet",
@@ -23,7 +22,7 @@ export const en = {
 };
 
 export const it: Record<keyof typeof en, string> = {
-  "onboarding.step": "Passo {current} di {total}",
+  "onboarding.step": "{current} di {total}",
   "onboarding.programmeTitle": "Cosa studi?",
   "onboarding.programmeSub": "Ci serve per mostrarti le dispense, gli esami e le notizie giuste.",
   "onboarding.yearTitle": "A che anno sei?",
@@ -33,7 +32,6 @@ export const it: Record<keyof typeof en, string> = {
   "onboarding.search": "Cerca per nome o sigla",
   "onboarding.levelBachelor": "Triennale",
   "onboarding.levelMaster": "Magistrale",
-  "onboarding.levelIntegrated": "Giurisprudenza · 5 anni",
   "onboarding.noResults": "Nessun risultato per “{q}”.",
   "onboarding.yearWord": "Anno",
   "onboarding.notSure": "Non lo so ancora",
@@ -43,5 +41,5 @@ export const it: Record<keyof typeof en, string> = {
   "onboarding.retry": "Riprova",
   "onboarding.later": "Più tardi",
   "onboarding.loadFailed": "Non siamo riusciti a caricare l'elenco dei corsi.",
-  "onboarding.saveFailed": "Non è stato salvato. Controlla la connessione e riprova.",
+  "onboarding.saveFailed": "Salvataggio non riuscito. Controlla la connessione e riprova.",
 };

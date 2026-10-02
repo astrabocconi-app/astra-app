@@ -1,5 +1,4 @@
 export const en = {
-  "venue.back": "Discounts",
   "venue.notAvailable": "This venue is no longer available.",
   "venue.offersTitle": "Offers",
   "venue.qrEnabled": "Scan your card",
@@ -11,11 +10,10 @@ export const en = {
 };
 
 export const it: Record<keyof typeof en, string> = {
-  "venue.back": "Sconti",
   "venue.notAvailable": "Questo locale non è più disponibile.",
   "venue.offersTitle": "Offerte",
   "venue.qrEnabled": "Scansiona la tessera",
-  "venue.qrDisabled": "Nessuna scansione",
+  "venue.qrDisabled": "Non serve scansionare",
   "venue.openLocationTitle": "Apri posizione",
   "venue.appleMaps": "Apple Maps",
   "venue.googleMaps": "Google Maps",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, Pressable, StyleSheet, type LayoutChangeEvent } from "react-native";
 import Animated, { useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
+import { useEggStore } from "../lib/egg-store";
 
 const BRAND = "#04107E";
 const TRACK = "#EDEFF9"; // astra-light
@@ -24,6 +25,7 @@ export function SegmentedToggle<T extends string>({
   value: T;
   onChange: (value: T) => void;
 }) {
+  const inverted = useEggStore((s) => s.inverted);
   const [trackWidth, setTrackWidth] = useState(0);
   const index = Math.max(0, options.findIndex((o) => o.value === value));
   const segmentWidth = trackWidth > 0 ? (trackWidth - PADDING * 2) / options.length : 0;
@@ -49,8 +51,12 @@ export function SegmentedToggle<T extends string>({
   );
 
   return (
-    <View style={styles.track} onLayout={onLayout}>
-      <Animated.View style={[styles.thumb, thumbStyle]} />
+    // Inverted mode flips it: a faint white track and a white thumb on blue.
+    <View
+      style={[styles.track, { backgroundColor: inverted ? "rgba(255,255,255,0.1)" : TRACK }]}
+      onLayout={onLayout}
+    >
+      <Animated.View style={[styles.thumb, { backgroundColor: inverted ? "#fff" : BRAND }, thumbStyle]} />
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -61,7 +67,12 @@ export function SegmentedToggle<T extends string>({
             accessibilityRole="tab"
             accessibilityState={{ selected: active }}
           >
-            <Text style={[styles.label, active ? styles.labelActive : styles.labelIdle]}>
+            <Text
+              style={[
+                styles.label,
+                { color: active ? (inverted ? BRAND : "#fff") : inverted ? "rgba(255,255,255,0.7)" : "#6B7280" },
+              ]}
+            >
               {o.label}
             </Text>
           </Pressable>
@@ -74,7 +85,6 @@ export function SegmentedToggle<T extends string>({
 const styles = StyleSheet.create({
   track: {
     flexDirection: "row",
-    backgroundColor: TRACK,
     borderRadius: 14,
     padding: PADDING,
   },
@@ -84,7 +94,6 @@ const styles = StyleSheet.create({
     left: PADDING,
     bottom: PADDING,
     borderRadius: 10,
-    backgroundColor: BRAND,
   },
   segment: {
     flex: 1,
@@ -96,6 +105,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
-  labelActive: { color: "#fff" },
-  labelIdle: { color: "#6B7280" },
 });

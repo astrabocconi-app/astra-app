@@ -64,3 +64,6 @@ Icon
 *.swp
 .vercel
 .env*
+
+# Python bytecode
+__pycache__/

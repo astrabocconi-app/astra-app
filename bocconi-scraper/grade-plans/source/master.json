@@ -1,0 +1,2753 @@
+{
+ "CRSG": [
+  {
+   "id": "79333cc0-3442-4143-b99e-633b1955931e",
+   "name": "Emerging topics in cybersecurity (at Bocconi)",
+   "cfu": "2",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "70f3da99-36d7-411e-beea-2e3454af5729",
+   "name": "Software Methodologies and Architectures for Security Module I: Enterprise Ict Architectures",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Software Methodologies and Architectures for Security"
+  },
+  {
+   "id": "25b8ab14-e501-4996-b622-a2d5089bc3a4",
+   "name": "Software methodologies and architectures for security Module II: Software Engineering Methodologies for Security",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Software Methodologies and Architectures for Security"
+  },
+  {
+   "id": "b73e6cc2-3076-4ba0-878c-c033dd925241",
+   "name": "Cyber Security Technologies Procedures and Policies",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "73433544-0c0a-43ce-936c-cdcaf3a6c801",
+   "name": "Artificial Intelligence for Security",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "80785a26-fe2c-4f47-bfb5-ffd65c5612ed",
+   "name": "Technology Risk Governance",
+   "cfu": "5",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "00c093ed-c0bf-44a0-a5f0-3269f0af6122",
+   "name": "Emerging topics in cybersecurity (Politecnico)",
+   "cfu": "2",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e2f08827-27d9-46e5-9544-98399f888247",
+   "name": "Strategy and Governance for Cyber Risk",
+   "cfu": "8",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7871a847-9089-4cc0-9d7c-958aedc663ca",
+   "name": "Cyber Risk and Data Protection Law",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "ab9bef2f-96bd-433d-b2e5-913f9c50897f",
+   "name": "Methods and Data Analytics for Risk Assessment",
+   "cfu": "7",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "dec03498-d275-4e98-b698-6d6357cb1cd2",
+   "name": "Institutional Scenarios of Cyber Risk",
+   "cfu": "8",
+   "code": "M",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f753229d-c57f-4bd7-aca4-e23fec30e2e1",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "aff5e296-660f-4312-b7e2-a765c84f135e",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "61e6b690-d692-447e-87ff-c06e82d815ec",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9d805678-a009-4414-bfbf-6206a0eea4f8",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a27d3e9c-a5fd-474e-a10f-2e757fbf9179",
+   "name": "EU Language",
+   "cfu": "4",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "eb69721a-743c-4327-b476-8aa2b9529ded",
+   "name": "Ethics Seminar (first semester Politecnico)",
+   "cfu": "2",
+   "code": "F",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "6473d12e-3227-46f1-92a7-29800742877b",
+   "name": "Behavioural Skills Seminar (second semester Bocconi)",
+   "cfu": "2",
+   "code": "G",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "b0528c31-9780-4345-9896-caa37a1b101c",
+   "name": "Internship",
+   "cfu": "8",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "AI": [
+  {
+   "id": "0fc516eb-6ff4-408c-8669-7cd30e1a2910",
+   "name": "AI ethics seminar",
+   "cfu": "2",
+   "code": "A",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "e1660239-0293-4790-b5e7-8cd89c0ac786",
+   "name": "Mathematical Methods in Computer Science or Analysis of algorithms and data structures",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "38a9ff24-64f2-4772-ad56-24f612338bd5",
+   "name": "Algorithms for optimization and inference",
+   "cfu": "8",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "bcebc8d4-dced-42f4-9322-7a1b51dc0983",
+   "name": "Software engineering",
+   "cfu": "8",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "bbe8a3aa-d405-4393-bd9f-2b53c66e7744",
+   "name": "Deep Learning and Reinforcement Learning",
+   "cfu": "8",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "248cff76-14e7-41be-9366-69973ef830e7",
+   "name": "Information theory",
+   "cfu": "8",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "71d70a12-d08d-4801-8413-308b87658cc4",
+   "name": "Computer vision and image processing",
+   "cfu": "8",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "c7b7a9d0-aaa7-463a-8b4f-c7f64802d942",
+   "name": "Language technology",
+   "cfu": "8",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "4695477c-b28f-456a-851f-93509c2c94be",
+   "name": "Machine learning Lab",
+   "cfu": "2",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7b9cb724-2b57-41b0-a741-54a3e1b111a8",
+   "name": "Foreign language",
+   "cfu": "4",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "df28782a-635d-4c62-ae5b-0e0f6222898f",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "fe4bed86-a08f-45b0-9690-546e7d7b7d78",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "036aa4b1-2f7f-4657-acbd-cd08ab68e4e1",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "649d779c-dc96-4d48-9d98-86a9e48b0633",
+   "name": "1 out of a short list* from Bocconi list:",
+   "cfu": "6",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "4eedeec6-4ba7-4a22-96a5-5341b30c14ab",
+   "name": "Open choice course from Bocconi list",
+   "cfu": "6",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "025027a1-c145-4dd0-99e0-f0a4e68af440",
+   "name": "internship",
+   "cfu": "8",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "GIO": [
+  {
+   "id": "5d393af6-7d84-4768-8d23-8eb07a79aa9e",
+   "name": "Politics and policy making",
+   "cfu": "6",
+   "code": "",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "82886274-d1d9-491f-bbdd-4c3f13244ca3",
+   "name": "Government and international organizations: trends and careers",
+   "cfu": "3",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5c9f5d0c-3670-4136-a856-13bba36c72b1",
+   "name": "Strategic and HR management in public organizations",
+   "cfu": "9",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2475ee44-dd18-490b-82fe-e0162757f04f",
+   "name": "Quantitative methods for social sciences",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5c859fa2-2dff-4934-a559-1a88cd3cf260",
+   "name": "National and international institutions law6Politics and policy making",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "10ea055f-769b-4c98-bb5a-5213c50c8527",
+   "name": "Economics and policy of global markets",
+   "cfu": "9",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "3ca1622f-7125-4df2-917f-0805b4ee674e",
+   "name": "Policy analysis and evaluation",
+   "cfu": "8",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f37da16b-fd39-4445-8d9a-4990121539dc",
+   "name": "Public accounting and performance management",
+   "cfu": "9",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b379ccb2-2c60-4ae0-84e3-071a59df8547",
+   "name": "Major compulsory course",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "75ce3421-ef1d-46d2-89cf-fbce1759b1fe",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "702b5e59-1a51-4a9b-945b-6106c92e51bf",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9fedd69b-0ce5-4dcb-9759-e5cb035c6a85",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "ca2041d8-ae67-4f46-b048-1fae7e42ee73",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "6d2a2755-1fd1-40d2-ac16-e9834e70485c",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "98f90973-0d33-41ba-9eb5-9a25776dbac4",
+   "name": "Second language (lessons + exam 1st semester)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "02ac86f2-a4cd-4c8b-a9f5-af31d31ef2ae",
+   "name": "Enhancing Experience Curricular Supplementary Activities",
+   "cfu": "2",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "83cc6fb8-1ccf-435d-9c3a-6aedefded811",
+   "name": "Internship or similar activities",
+   "cfu": "8",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "IM-GLOBAL": [
+  {
+   "id": "87005277-e140-46f9-a7bb-f7eac03f9458",
+   "name": "International finance",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "1953fa9d-c6ae-4b53-9f89-f7d229fe9574",
+   "name": "Principles of business analytics",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "561189ea-a420-4072-ac38-4a7b2795e3fc",
+   "name": "Business Game",
+   "cfu": "2",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "02cf0157-5511-4ccb-b862-2e2641966ed7",
+   "name": "Performance evaluation and measurement",
+   "cfu": "8",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "95401e3a-3b81-4f15-863c-858a52c697d1",
+   "name": "Marketing Analytics",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "c26e24d8-9235-4797-97b7-076079c1bd62",
+   "name": "Comparative Corporate Law",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "73068aa6-1f05-4746-89d1-82169a456588",
+   "name": "Managing Organizations",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "4a366365-ed3d-4196-afa7-6a0be2392d8d",
+   "name": "Global scenarios, Module 1 (Geopolitics and business)",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Global scenarios"
+  },
+  {
+   "id": "0fd45609-98be-4425-b15e-293cecf925f2",
+   "name": "Global scenarios, Module 2 (Macroeconomics)",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Global scenarios"
+  },
+  {
+   "id": "c7eed768-6957-4765-852d-d76ab66e99f5",
+   "name": "Global Strategy",
+   "cfu": "8",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "23b41a16-7824-4844-a1a3-12931cd1df36",
+   "name": "Seminar on collaborative competences",
+   "cfu": "2",
+   "code": "M",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "4f723f69-8e24-44dd-87c8-0b60a025baee",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0a76c821-e3cb-4cf1-87ad-156f4177833f",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "12999c19-8174-46e0-ba6a-9b42e4569113",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "28871b34-f2cb-47ef-943c-c45c6172b79b",
+   "name": "Global operations and supply chain management",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "6a00eadd-4518-4e39-9c27-4216eb4fa1c2",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "9bebfdd8-5b5e-4314-ad3b-30fcc611f162",
+   "name": "Second foreign language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "FINANCE": [
+  {
+   "id": "11bf7006-5e97-4a80-b0c3-48a68ef6a762",
+   "name": "Empirical Finance",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "71e0071e-2221-4dd6-9f25-95892897be3c",
+   "name": "Financial reporting and Analysis Lab",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7dc85b4c-f8ba-4073-b001-fb4187a69b37",
+   "name": "Corporate finance (Business valuation)",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "eac4f36b-ea1f-4da5-8f19-aef59b90635d",
+   "name": "Quantitative finance and derivatives - Module 1",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Quantitative finance and derivatives"
+  },
+  {
+   "id": "2e1b1e0a-fc05-4309-a7cb-72f7357e8ff5",
+   "name": "Theory of finance",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "552a00cf-80b9-413d-97cf-3b1903c57232",
+   "name": "Financial institutions and market law",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "53ff5aaa-22fe-430d-af7e-eb1c663a2e3d",
+   "name": "Financial Data Science",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b777ece1-632b-4c7e-a3fc-f15e0ff1918f",
+   "name": "Behavioural skill seminar - Public Speaking",
+   "cfu": "2",
+   "code": "H",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "7760889d-0514-4fe9-a103-eaf0a3c61133",
+   "name": "Risk management and value in banking and insurance",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9e9eafc1-c4a3-46ca-85f5-2a7aa8b63394",
+   "name": "Investment banking",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "acbdc881-9f87-4b18-9540-e48a69deede9",
+   "name": "Quantitative finance and derivatives - Module 2",
+   "cfu": "6",
+   "code": "M",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Quantitative finance and derivatives"
+  },
+  {
+   "id": "bbe763be-f09c-4319-85d8-e97f4fe094e0",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "757c3df7-5e3c-4392-89c4-0adef3894094",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8c0c7bcd-0ee4-4681-b0b3-c7861a2dcfd4",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "68daddcb-bb47-4c61-abe5-79530dc9b99b",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0f7622aa-dd17-4235-a77e-e28cadd0d7c4",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "8823683c-acb9-4acb-b87d-5030e0e097e1",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "111f3b21-1c46-413c-9128-72e5fa0a026c",
+   "name": "Additional course 1",
+   "cfu": "",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "08ed5d26-ac20-49bc-bc79-c20bce4e994b",
+   "name": "Additional course 2",
+   "cfu": "",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "IM": [
+  {
+   "id": "79ca2282-0280-4bcf-8b46-3295cbd03b56",
+   "name": "Global scenarios Module 1 (Geopolitics and business)",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "72f75a50-90f7-4993-ac5c-e99f14fcff39",
+   "name": "International finance",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "54cfe676-90dc-4ba0-b8d7-70d30e8ef4b2",
+   "name": "Marketing analytics",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "54082f80-e102-4e84-8fe5-71bf6b8b26e4",
+   "name": "Performance measurement",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f135ac45-b631-4131-82eb-85c4e5a56016",
+   "name": "Principles of business analytics",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "31f38434-cf68-44f4-85ca-92a3702f8ae0",
+   "name": "Global operations and supply chain management",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0a53426b-8f4c-4d7e-9272-48005e57decc",
+   "name": "Global scenarios Module 2 (Macroeconomics)",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "093edf6e-7808-48b9-93f9-8aaae4fa7ebe",
+   "name": "Global strategy",
+   "cfu": "8",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7d812db0-1ac7-4ed4-83f5-0b31d2230436",
+   "name": "International comparative I business law",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "ddae22f6-6b50-475f-8358-403608045d81",
+   "name": "Managing organizations",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5955bf89-6727-4068-ae5d-15391861fab8",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "fe22cc69-d90a-4d04-bf62-eb063a06b07c",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8fc07c58-6ad5-4ba7-a68f-8753d2b52f27",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "3d09a1e7-e201-45a0-9f78-1e3eea7025c4",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d2cc9dea-6ef4-45a4-ab69-392f8afcc242",
+   "name": "Additional course 1",
+   "cfu": "",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "280c5624-a7ff-4774-8f34-e3ce61835c4d",
+   "name": "Additional course 2",
+   "cfu": "",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "DAAIHS": [
+  {
+   "id": "f7558df7-87ab-4cbe-99f1-17916990617c",
+   "name": "Advanced statistics for health sciences (@ Bocconi)",
+   "cfu": "8",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5eb31ff0-8dc3-45f9-9f2b-0fbf7909a28c",
+   "name": "Advanced computer programming (@ Bocconi)",
+   "cfu": "9",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e26361ac-7cdb-4200-a6d6-77a32d4eb678",
+   "name": "Artificial Intelligence module 1 (@ Bocconi)",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Artificial Intelligence"
+  },
+  {
+   "id": "20ab799d-eadf-4646-b33a-e64ac3a0e47c",
+   "name": "Privacy ethics and regulations in the application of AI seminar (@ Bocconi)",
+   "cfu": "2",
+   "code": "D",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "44445eae-7204-4f2c-99cf-bbf8e90e9b81",
+   "name": "Machine Learning (@ Bocconi)",
+   "cfu": "8",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a8611d53-1f02-42ea-8297-db1741b14808",
+   "name": "Artificial Intelligence module 2 (@ Bocconi)",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Artificial Intelligence"
+  },
+  {
+   "id": "09411887-d64c-427e-a66d-1a49f0f52905",
+   "name": "Data Systems in healthcare (@ Bocconi)",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f8cccd43-cf6b-49e3-ae00-67ef6645807d",
+   "name": "1 elective (@ Bocconi)",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a91fb6f2-05c8-4e03-9820-45e02afb50d9",
+   "name": "Biology and genetics (@ Humanitas)",
+   "cfu": "4",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "af905329-e2fa-4813-a3de-159db0f80f46",
+   "name": "Data Science for Clinics (@ Humanitas)",
+   "cfu": "8",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b6f59db9-a769-4dad-8f21-f814740f7ad0",
+   "name": "Clinical Epidemiology (@ Humanitas)",
+   "cfu": "10",
+   "code": "M",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e6946e0f-7776-4f74-b879-73ed515de81f",
+   "name": "Next generation sequencing and bioinformatics (@ Humanitas)",
+   "cfu": "7",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "6c6d5d47-8565-4039-9d75-e5a967490863",
+   "name": "Applications of artificial intelligence in health sciences (@ Humanitas)",
+   "cfu": "10",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "18670583-8f30-4ace-9781-9781f31d5828",
+   "name": "1 elective (@ Humanitas)",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "92d320c8-492c-466f-a896-f6df4f1278c0",
+   "name": "Guidelines for quality assessment and reporting in AI publication seminar (@ Humanitas)",
+   "cfu": "2",
+   "code": "D",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "c380bf88-5ae7-49fb-bedb-beac56190cd3",
+   "name": "Foreign language (1st sem) (@ Humanitas)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "400a3c1c-fcc6-49c8-88a3-07b706013eaa",
+   "name": "Internship",
+   "cfu": "6",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "DSBA": [
+  {
+   "id": "489500b5-39f3-48a8-86f6-c0336237f566",
+   "name": "Computer Programming and Database Systems",
+   "cfu": "8",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5e287c3f-de14-421a-89b3-8886d79e15c6",
+   "name": "Statistics and Probability",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e9b50591-6858-4483-8985-18a604135bdd",
+   "name": "Econometrics for Big Data",
+   "cfu": "8",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "11b913b2-7523-407c-8e2a-25f13090e6ca",
+   "name": "Business Analytics",
+   "cfu": "8",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "09f1a2a6-6855-4c2b-86b9-af4ff775af51",
+   "name": "Behavioral skills seminar",
+   "cfu": "2",
+   "code": "E",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "49627fda-65dd-469f-bdb1-7a857202119f",
+   "name": "Natural Language Processing",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "cc5347b0-03e4-4f58-88ff-bc4f7e83ca45",
+   "name": "Machine Learning",
+   "cfu": "8",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "36e92c5c-f2e0-4b70-8c21-02e58b009771",
+   "name": "Track in Business Analytics: elective",
+   "cfu": "",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e21c7aa9-1a20-4448-afee-8342a81f8b88",
+   "name": "Track in Data Science: elective",
+   "cfu": "",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a63f061a-ec3e-40c1-8525-a5c269975689",
+   "name": "rack in Business Analytics: elective",
+   "cfu": "",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9ef23278-a943-431e-bcd3-8dbf0f685daa",
+   "name": "Track in Data Science: elective",
+   "cfu": "",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "64d7f3f0-65d8-45af-a654-59d57f69a3d8",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "aaec3ea8-9724-470b-8b5f-41bbcf0cb2ce",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8c16b046-e67a-4066-8e7d-649f332c6e31",
+   "name": "Digital Privacy Seminar",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "c7620177-f166-4ddd-886b-6b0f8ed12d5b",
+   "name": "Foreign language",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9d7b5ba5-7b6e-4793-9e1b-9333d4b90d88",
+   "name": "Internship",
+   "cfu": "8",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "MM": [
+  {
+   "id": "77b9e3ae-fbcf-4779-9da7-293beddd1144",
+   "name": "Legal issues in marketing",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "928a4b27-4688-44ab-b095-627c2a734870",
+   "name": "Strategic marketing and analytics (Data & analytics for strategic marketing decisions) Module 1",
+   "cfu": "8",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "35a2c12b-db6d-4cbf-9bf0-96362199a874",
+   "name": "Channel marketing (Trade evolution analysis and planning)",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "133fccd4-57fc-4c9e-91ad-733773d7484f",
+   "name": "Industry analysis (Industrial economics and economics of innovation)",
+   "cfu": "8",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0c8f5be9-9f29-4508-a5bd-65275e8f8667",
+   "name": "Understanding consumer (Consumer behavior and CCT) Module 1",
+   "cfu": "5",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2bbee4ea-a9e2-4911-a3d3-b3398501188d",
+   "name": "Understanding consumer (Consumer behavior and CCT) Module 2",
+   "cfu": "5",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "dd142082-6fd1-4a0c-bcd9-76cc9e47501f",
+   "name": "Behavioural skills seminars",
+   "cfu": "2",
+   "code": "F",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "0a3da03c-3ba0-47a9-92ce-e3c67c60d791",
+   "name": "Market research and business forecasting",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "fda1efa2-9508-42de-8baa-1458b0586d23",
+   "name": "Strategic marketing and analytics (Web analytics) Module 2",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e1576dff-7acd-4f82-8c01-15347c9f9b78",
+   "name": "Innovation in the data economy",
+   "cfu": "5",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2547a851-80ed-46c3-9fa9-9e3c5775c4d3",
+   "name": "Brand management",
+   "cfu": "5",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "1216daae-db8d-4097-8cca-fae5ae78b06a",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0b9b4286-72b5-4fc7-892f-288ef9fcb2c0",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f6dd3a45-f03e-47ad-a594-0d5a22fc398a",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8df4dbf5-3fa0-4724-9974-3f32931413f9",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "82907ce5-6e42-4bc3-9481-6d5030749c2a",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "F",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "d1ed1348-8e4b-4792-8c18-fead51e91303",
+   "name": "Second foreign language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "82197a66-6adf-4d5c-8ba3-848563eccfde",
+   "name": "Enhancing Experience Curricular Supplementary Activities",
+   "cfu": "2",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "ab23fcca-6cb2-40bf-929b-3988a3c65e48",
+   "name": "Internship or similar activities",
+   "cfu": "8",
+   "code": "I",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "IM-CONCENTRATION": [
+  {
+   "id": "7f83c838-def4-42aa-82eb-1df7f5ae9f68",
+   "name": "Advanced corporate finance for management",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e812ceef-7dcb-43c7-8fad-df676f07e57a",
+   "name": "Principles of business analytics",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8b667da3-453c-4858-8457-f7f69808dc9e",
+   "name": "Behaviourial skills seminars",
+   "cfu": "2",
+   "code": "C",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "81d8a6da-e8af-4336-8743-4e8d74593c28",
+   "name": "Performance measurement",
+   "cfu": "8",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "471abbd2-234d-4a2d-aaca-50a9a6394c61",
+   "name": "Marketing management – advanced",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "3c188960-4087-4d83-ae0a-64a0107b5d6f",
+   "name": "Corporate strategy",
+   "cfu": "8",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "fd15ed34-0dee-4ba9-a900-430a4c57ebf7",
+   "name": "Human resources management",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9dd7ecc7-018e-44a3-801e-75a2369c5f0e",
+   "name": "Economy and Society – module 1",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Economy and Society"
+  },
+  {
+   "id": "574e12b2-50c1-4ede-b4f1-6a4bcf169e00",
+   "name": "Business Game",
+   "cfu": "2",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "bcf8e600-6fe1-475a-8235-f65f2f5e0808",
+   "name": "Economy and Society – module 2",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Economy and Society"
+  },
+  {
+   "id": "0b7bf373-8c4c-4132-8ffe-09a49131cca7",
+   "name": "1 course to be chosen",
+   "cfu": "6",
+   "code": "M",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "925f79a6-0465-4534-888d-185dcccd0cdf",
+   "name": "1 compulsory concentration course",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d989eaa0-61f6-4bb6-a0d3-82bd063838f1",
+   "name": "1 concentration elective on data analysis",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8910fcbb-5cfe-47a9-bd2f-fe989eaf903c",
+   "name": "1 concentration elective",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "213acbdb-18e3-4b18-9b5c-be9e78825ab1",
+   "name": "1 free elective",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "cb36e76f-8a06-46ee-aa98-3081e786122a",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "2ff2afb3-8b05-4e5c-979d-a0e0afe39ee8",
+   "name": "Second foreign language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "AFM": [
+  {
+   "id": "7e05a625-02a0-4cc2-a185-6506e410869c",
+   "name": "Data analysis for business decisions",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "1759eda0-3960-42f0-b819-0d4a7e9caab5",
+   "name": "Corporate Reporting – Module 1 Corporate financial reporting",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Corporate Reporting"
+  },
+  {
+   "id": "d36b5fb5-fc1c-4805-b151-f6a5f9caec33",
+   "name": "Financial management and financial markets",
+   "cfu": "8",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "fa639790-e6eb-46f8-ad4d-127a687beda7",
+   "name": "Corporate governance",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "3233d170-2013-42c8-b42a-8f7f5c0a8512",
+   "name": "Behavioural skills seminars",
+   "cfu": "2",
+   "code": "E",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "18de15ad-0625-425b-b6a1-9a57c3c28312",
+   "name": "Fair value accounting reporting and valuation",
+   "cfu": "8",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "299b6adb-14b8-4c5e-845f-cfab35dd7c21",
+   "name": "Macroeconomic trends for Business decisions",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "6916d383-2d7c-48f3-93ff-306133728a46",
+   "name": "Performance measurement and control systems",
+   "cfu": "8",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a5e92f3b-2d11-4646-aa83-e21d9d895794",
+   "name": "Business law (selected corporate and tax issues in management and internal auditing) or Corporate Global Tax Strategies",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "60426ac4-a20e-4799-9a05-1edad429f511",
+   "name": "Corporate Reporting – Module 2 Non financial and sustainability reporting",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Corporate Reporting"
+  },
+  {
+   "id": "60270bc6-3203-43f9-9464-26378cf949ca",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f45f3b11-4d8e-4b67-b9f8-71ca6a65f9ce",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7aabe2c5-7940-4fd9-88e6-7c3e129acc92",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0d0abcf0-51f5-4745-b623-6a1ce8a0d7e3",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "1398b0f1-9b9e-446b-9ec0-99b102dc4ae6",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "ecd030a0-6c44-4b3b-b172-0fe7d6d87abd",
+   "name": "Second language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "acfc8a9f-5e04-40ee-9379-6c5d71938b91",
+   "name": "Enhancing Experience Curricular Supplementary Activities",
+   "cfu": "2",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "c20b0306-a4b4-443d-a6df-8136e35445ad",
+   "name": "Internship or similar activities",
+   "cfu": "6",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "CLELI": [
+  {
+   "id": "56e28d9c-ebc0-4016-9533-64fe0e813063",
+   "name": "Analisi Strategiche e valutazioni finanziarie",
+   "cfu": "8",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d6aecf12-49ee-4aaa-b976-3b8dbb54e3b3",
+   "name": "Bilancio e operazioni di gestione straordinaria",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "dd66118d-44e2-47b5-9dd9-fa63ad0b67db",
+   "name": "Diritto commerciale (corso progredito)",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "cb3d13b7-1582-4a61-ac1b-1ea6416a4c92",
+   "name": "Seiminari per lo sviluppo di abilità comportamentali",
+   "cfu": "2",
+   "code": "D",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "ad87bbd6-db19-4e9c-81d2-8efe36254ec5",
+   "name": "Sistemni di corporate governance",
+   "cfu": "8",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "4390e457-7bd0-4ef9-b125-4e9024c316c3",
+   "name": "Finanza strategica",
+   "cfu": "8",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "194541a7-4258-4510-bda6-6cd38a3bb692",
+   "name": "Modelli finanziari per la valutazione",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b05ff713-3bf1-47ac-8f25-6d8cc0315836",
+   "name": "Principi contabili internazionali",
+   "cfu": "8",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0dbcc947-6285-49cd-aebf-860d3bb640cb",
+   "name": "Tassazione delle società e dei gruppi",
+   "cfu": "8",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "989429d7-1e4e-4737-b788-0c73c608f19f",
+   "name": "Diritto dei mercati e degli strumenti finanziari",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0f100b9a-bc3e-46f5-a3c0-0af4c7884852",
+   "name": "Opzionale 1",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "41172e05-7081-4efd-a132-14790a2b3706",
+   "name": "Opzionale 2",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5bdc3a05-91cc-4d33-bffd-7aad372e459d",
+   "name": "Opzionale 3",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "79442ec5-1a44-42f8-96c4-8cf65b132cbd",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false
+  },
+  {
+   "id": "4fc7d58e-b3cc-4592-bda8-4618d7a7b0b3",
+   "name": "lingua 2 (didattica + esame I sem 2° anno)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "ESS": [
+  {
+   "id": "ebd63040-05f4-4ec1-9e6e-22d6d5215f37",
+   "name": "Advanced mathematics for economics and social sciences",
+   "cfu": "8",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "0e1fe025-521d-40fb-9630-32e092151aa8",
+   "name": "Advanced statistics for economics and social sciences",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "49481b43-f828-4af7-a723-2d32ca0e2073",
+   "name": "Foundations of social sciences module I (Empirical research methods and data analysis)",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9942839f-127b-4aae-a552-f3662a4aaf3f",
+   "name": "Competition Law and Practice",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b46b4dd9-33cb-4d6e-8047-22a975b1ce75",
+   "name": "Behavioural skills seminars",
+   "cfu": "2",
+   "code": "E",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "391d09a4-ae69-4484-8a67-b01be4c0aaa2",
+   "name": "Econometrics",
+   "cfu": "8",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "fb5bea82-f671-4882-8c61-c2a38bfdda65",
+   "name": "1 compulsory course to be chosen from",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "891e16b7-1df1-4331-a9d5-9fcf9dedb5f6",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b3999ec0-a0b9-4d85-9856-fa0c1853bf5e",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "ecc32eba-ca34-4ec2-a266-45998e0f840e",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "ab477d54-8d05-4c1b-8535-bfc461c61730",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "75b08ef6-e2dd-44a4-8cc3-88ace6758eb1",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "42a574d4-c774-4d07-b30b-71ca3db604b7",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9a73ade8-e8d7-43e5-b1e5-5cd34fdaffbb",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "be66d902-5bc1-4688-bc18-9dd4eacafffd",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "d7725938-cc43-4ed5-a4bf-b4b67afff480",
+   "name": "Second foreign language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7c1fa8a6-fb77-4cda-a627-79d769385390",
+   "name": "Enhancing Experience Curricular Supplementary Activities",
+   "cfu": "2",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "596ac76f-38de-4f15-84dd-5fafbab5d3f4",
+   "name": "Internship or similar activities",
+   "cfu": "8",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "PPA": [
+  {
+   "id": "5ec7a541-3c77-419b-aae1-096649701144",
+   "name": "Behavioral Skills Seminar",
+   "cfu": "2",
+   "code": "",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "d01840cb-455f-44a8-a717-370c612fc756",
+   "name": "Decisions and organizations",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "509aed9d-ace3-4810-8f90-30768e7079be",
+   "name": "Methods and tools for policy analysis",
+   "cfu": "8",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2467d8c8-804f-4434-84b6-c776ffb6ca17",
+   "name": "Political science Module 1 (Topics in comparative politics)",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a45b641a-05c4-46dc-b8d2-189cdb725f07",
+   "name": "Public administration",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "bf38cfce-76de-446b-b15b-9543ba81be43",
+   "name": "Public economics",
+   "cfu": "8",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "bfa60978-3022-4e38-8683-280fda131f4e",
+   "name": "Economics and politics",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d9b534a4-6054-4cc9-8686-c6dcf970e1f3",
+   "name": "Law and policy making",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "1668e470-5562-4235-bce1-93fcc5dbc9f9",
+   "name": "Political science Module 2 (International relations and politics)",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "1328ea44-07f1-4c3e-a61e-5c6473e531c2",
+   "name": "Population dynamics and policies",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "3ce4ab34-7557-4478-a583-ba308f3b2b26",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7b674ee4-4c4d-4e26-ac81-5c198e1de1e4",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8cc28c8e-ce12-4673-b1a8-88510d1a1904",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2914c8a8-0507-445b-bab0-990a97c5fea6",
+   "name": "Elective 4",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "4eefc643-346d-4c51-af63-b42f5f70c94c",
+   "name": "Second foreign language",
+   "cfu": "4",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5c7d7b79-303c-47c2-8f88-d7c6ea26502a",
+   "name": "Additional course 1",
+   "cfu": "",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a90d601c-00a0-48ff-84ae-9e46fc637bd0",
+   "name": "Additional course 2",
+   "cfu": "",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "TS": [
+  {
+   "id": "a8a338cf-ed40-45c5-b93a-088bdc4bd42d",
+   "name": "Sustainable Leadership seminar",
+   "cfu": "2",
+   "code": "A",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "add1f0cf-76ee-4d9b-b314-80f1cb84a76b",
+   "name": "Management and Economics for Sustainability module 1(Corporate Sustainability Strategies and Governance)",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "19b1fbfc-7df5-4899-98ef-65c160d5b45d",
+   "name": "Sustainable Finance and ESG Investing",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "50d40ed3-03cc-47d9-a2f5-f76bf75bd4f5",
+   "name": "Impact and Sustainability Measurement",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "f855fd5f-cd17-449d-a754-143db9196738",
+   "name": "Management and Economics for Sustainability module 2 (Environmental Economics and Climate Change)",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e16468f9-a619-4ad1-b7fb-d4fcb8855f7f",
+   "name": "ESG Law",
+   "cfu": "6",
+   "code": "F",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "231328bf-0ecd-4959-b8d6-662f1e720881",
+   "name": "Critical Thinking and Complex Decision Making seminar",
+   "cfu": "2",
+   "code": "G",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "332f9606-4634-4023-99d5-3a386affa3fa",
+   "name": "Materials Towards Circular Economy",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "c9d7f19a-0181-472b-a00d-7adfcafe7b34",
+   "name": "Technologies for Energy and Sustainable Transition module 1 (Ecological Processes Environmental Impacts and Transition Towards Sustainability)",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "622273c1-65e1-4454-a5a0-026c038709df",
+   "name": "Technologies for Energy and Sustainable Transition module 2 (Technologies for the Energy Transition Towards Sustainability)",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "413c2d2a-f5ed-401a-b499-3372bf9ba19e",
+   "name": "Designing Sustainable Cities",
+   "cfu": "6",
+   "code": "M",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5451be4e-80ce-4fcc-a48f-3d9d6abab4d8",
+   "name": "Innovation for Sustainability",
+   "cfu": "6",
+   "code": "N",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "175b3a8d-4a58-4ea9-864b-a71296965d04",
+   "name": "Business and Marketing Plan Workshop 1st sem.",
+   "cfu": "3",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d8830a0c-9edc-46f6-9d92-c6ab65a48c7e",
+   "name": "Sustainable Entrepreneurship Workshop 2nd sem.",
+   "cfu": "3",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "8276f874-3cca-43c3-b823-babb9d214669",
+   "name": "Data Analytics for Sustainability 1st sem.",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b5b5cb5c-6b42-4d57-a673-d112e45a26e0",
+   "name": "Sustainable Operations & Supply Chain Management 2nd sem",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d6c03712-73f8-40d6-a6b3-001a4c84a7e3",
+   "name": "Foreign language (lessons and exam) 1st sem",
+   "cfu": "4",
+   "code": "E",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "efa9278a-b65d-4b63-be9e-ad5f41dbb055",
+   "name": "Diversity and Global Policy 1st sem. | Technologies and Systems for Sustainable Mobility 2nd sem",
+   "cfu": "6",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "948e2936-787c-47a6-96f4-0c4e79c7db51",
+   "name": "Electives (to be chosen among a set of Bocconi courses & PoliMi courses)",
+   "cfu": "6",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  }
+ ],
+ "ACME": [
+  {
+   "id": "9fa0ca4f-a2cb-42be-99c9-4d8d9408ad1e",
+   "name": "Management of cultural industries and institutions module I (strategy and governance)",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Management of cultural industries and institutions"
+  },
+  {
+   "id": "66562bba-c050-46db-9ba4-a0df926016ab",
+   "name": "Cultural mediation",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2d855dbf-ffbf-41bf-a4dc-3ae071a9624a",
+   "name": "Quantitative methods for management",
+   "cfu": "6",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9eabee24-a052-4f16-a64a-2304c98b0a33",
+   "name": "Performance measurement",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "cd886098-b502-40da-832c-98be9d7f6611",
+   "name": "European and international advanced IP law",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "6544f746-8e6f-4527-b926-679a953749c0",
+   "name": "Behavioural skills seminars",
+   "cfu": "2",
+   "code": "F",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "4abe0cd5-2fba-4e17-956c-e1aa7662e7ed",
+   "name": "Applied research in cultural industries and institutions — module II (marketing and crm in the arts)",
+   "cfu": "6",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "960d2149-53df-4f46-a163-b6987da4d25d",
+   "name": "Project and team management",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "c397f300-6e18-48f1-bb94-d6b052895716",
+   "name": "Management of cultural industries and institutions module II (comparative cultural public policies and fundraising)",
+   "cfu": "6",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Management of cultural industries and institutions"
+  },
+  {
+   "id": "73ad6912-bd7e-4ccb-b1c7-dbb8a5f95342",
+   "name": "Major’s workshop 1",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e39ba294-7dd9-4b96-8784-01a7dad88985",
+   "name": "Major’s workshop 2",
+   "cfu": "6",
+   "code": "M",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "813f23b8-646a-4b26-a635-738ece5d3ce8",
+   "name": "Major’s workshop 3",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "b169e2b6-3059-46d4-ba92-abbed577162a",
+   "name": "Major’s workshop 4",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "942fc2bb-d842-43ca-bfb9-d8ebea6aaaf7",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "d60492b1-f9c1-4a90-921c-04196f87d633",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "78dc003a-94b2-4e99-a247-e1181514a7d3",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "f17c1885-93b8-4bc8-9f5f-b4b40dd18503",
+   "name": "Second foreign language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e0a88b79-255c-43d9-9562-84f1dfca4a56",
+   "name": "Enhancing Experience Curricular Supplementary Activities",
+   "cfu": "2",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "a8b4b7d4-c201-41a2-a6b4-64d6990a2d37",
+   "name": "Internship or similar activities",
+   "cfu": "8",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ],
+ "EMIT": [
+  {
+   "id": "fe5ab6e9-4d85-477f-89ed-c3cc0ddbe82d",
+   "name": "Fundamentals of innovation and industrial change",
+   "cfu": "6",
+   "code": "A",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "e977c3c1-e24d-4579-8444-23a58ac14afa",
+   "name": "Intellectual property and competition law",
+   "cfu": "6",
+   "code": "B",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "6068525a-1ebb-4493-b6e6-b0f261bf3017",
+   "name": "Business Economics I (Empirical Methods)",
+   "cfu": "8",
+   "code": "C",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Business Economics"
+  },
+  {
+   "id": "94b52944-6230-4b76-90b1-59f01e70a096",
+   "name": "Venture capital and valuation",
+   "cfu": "6",
+   "code": "D",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "449c9847-389f-40ac-a3e1-5c3cad84be15",
+   "name": "Technology and innovation strategy",
+   "cfu": "6",
+   "code": "E",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "90c19c80-0fb4-455e-914e-839ae12d5b3c",
+   "name": "Behavioural skills seminars",
+   "cfu": "2",
+   "code": "F",
+   "anno": "1",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "58812130-4e43-42ef-85c7-c0e40f47ce8f",
+   "name": "Business Economics II (Analytic Methods)",
+   "cfu": "8",
+   "code": "G",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false,
+   "module": "Business Economics"
+  },
+  {
+   "id": "7b6a3503-313b-41c2-a543-3d5eb932e15d",
+   "name": "Strategic decision making",
+   "cfu": "6",
+   "code": "H",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "36b8a3f2-87b6-4d79-a496-622061d1ae63",
+   "name": "Data analytics and visualization",
+   "cfu": "8",
+   "code": "I",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "9c74e4ec-3822-448c-876f-e5c01bf6419d",
+   "name": "1 major compulsory course",
+   "cfu": "6",
+   "code": "L",
+   "anno": "1",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5d5bef13-bac8-4c7a-9b97-aba7b2e2f723",
+   "name": "Elective 1",
+   "cfu": "6",
+   "code": "A",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "2ee675a6-832e-4ac8-b9c0-f99d38bd018c",
+   "name": "Elective 2",
+   "cfu": "6",
+   "code": "B",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "5369ee1d-17d3-4ade-9bb1-6a9862b9b230",
+   "name": "Elective 3",
+   "cfu": "6",
+   "code": "C",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "cb23a097-82b1-460c-bd73-a216a3ecc733",
+   "name": "1 Innovation Specific Elective**",
+   "cfu": "6",
+   "code": "D",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "7f039d20-12ea-4d96-99c1-a274cf3d7a2f",
+   "name": "Professional English seminars (lessons + exam)",
+   "cfu": "2",
+   "code": "E",
+   "anno": "2",
+   "kind": "seminar",
+   "isStage": false,
+   "module": "Seminario"
+  },
+  {
+   "id": "ae1a7365-778e-42dc-87c1-197a2572987e",
+   "name": "Second language (lessons + exam 1st semester 2nd year)",
+   "cfu": "4",
+   "code": "F",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "3058500a-ebe9-409e-b448-f9ffbd233171",
+   "name": "Enhancing Experience Curricular Supplementary Activities",
+   "cfu": "2",
+   "code": "G",
+   "anno": "2",
+   "kind": "course",
+   "isStage": false
+  },
+  {
+   "id": "484bfc74-533b-4020-b767-cb811e11f89b",
+   "name": "Internship or similar activities",
+   "cfu": "8",
+   "code": "H",
+   "anno": "2",
+   "kind": "course",
+   "isStage": true
+  }
+ ]
+}

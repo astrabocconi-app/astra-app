@@ -8,13 +8,11 @@ import type {
   PartnerListResponse,
   ChatResponse,
   MaterialsResponse,
+  GuidesResponse,
   AcademicCatalogueResponse,
   AcademicCourseSearchResponse,
   AcademicProfile,
   AcademicProfileInput,
-  ExamRecord,
-  ExamRecordInput,
-  GradebookResponse,
 } from "../schemas";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
@@ -39,6 +37,9 @@ export interface ApiError extends Error {
   code?: string;
 }
 
+/** Long enough for a cold server start; short enough that a dead connection surfaces. */
+const REQUEST_TIMEOUT_MS = 20_000;
+
 function makeError(status: number, code: string | undefined, message: string): ApiError {
   const err = new Error(message) as ApiError;
   err.name = "ApiError";
@@ -52,20 +53,34 @@ export function createApiClient(options: ApiClientOptions) {
 
   async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; res: Response }> {
     const token = getToken?.();
-    const res = await fetch(new URL(path, baseUrl), {
-      ...init,
-      // Bearer-only client: never send cookies. A stray session cookie (e.g. one
-      // the platform auto-stored from a prior response) would trigger Better
-      // Auth's origin check, which fails because RN fetch sends no Origin header.
-      credentials: "omit",
-      headers: {
-        "content-type": "application/json",
-        ...(token ? { authorization: `Bearer ${token}` } : {}),
-        ...init?.headers,
-      },
-    });
-
-    const text = await res.text();
+    // fetch never gives up on a stalled connection (campus Wi-Fi handing over to
+    // mobile data), which left spinners — and the first-login sheet — stuck for
+    // good. Abort after REQUEST_TIMEOUT_MS so callers get an error to retry on.
+    const abort = new AbortController();
+    const timer = setTimeout(() => abort.abort(), REQUEST_TIMEOUT_MS);
+    let res: Response;
+    let text: string;
+    try {
+      res = await fetch(new URL(path, baseUrl), {
+        signal: abort.signal,
+        ...init,
+        // Bearer-only client: never send cookies. A stray session cookie (e.g. one
+        // the platform auto-stored from a prior response) would trigger Better
+        // Auth's origin check, which fails because RN fetch sends no Origin header.
+        credentials: "omit",
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+          ...init?.headers,
+        },
+      });
+      text = await res.text();
+    } catch (e) {
+      if (abort.signal.aborted) throw makeError(0, "TIMEOUT", `ASTRA API timed out on ${path}`);
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
     const body = text ? (JSON.parse(text) as unknown) : undefined;
 
     if (!res.ok) {
@@ -145,7 +160,7 @@ export function createApiClient(options: ApiClientOptions) {
           })
         ).data,
       /**
-       * Official courses for the gradebook picker; `q` matches code or title.
+       * Official courses; `q` matches code or title.
        * Defaults to the student's own programme — pass `all` for electives and
        * exchange courses from anywhere in the catalogue.
        */
@@ -161,27 +176,6 @@ export function createApiClient(options: ApiClientOptions) {
           )
         ).data;
       },
-    },
-
-    /** Private gradebook. Self-only: there is no admin-facing counterpart. */
-    gradebook: {
-      list: async () => (await request<GradebookResponse>("/api/me/gradebook")).data,
-      create: async (input: ExamRecordInput) =>
-        (
-          await request<{ record: ExamRecord }>("/api/me/gradebook", {
-            method: "POST",
-            body: JSON.stringify(input),
-          })
-        ).data,
-      update: async (id: string, input: ExamRecordInput) =>
-        (
-          await request<{ record: ExamRecord }>(`/api/me/gradebook/${id}`, {
-            method: "PUT",
-            body: JSON.stringify(input),
-          })
-        ).data,
-      remove: async (id: string) =>
-        (await request<{ ok: true }>(`/api/me/gradebook/${id}`, { method: "DELETE" })).data,
     },
 
     points: {
@@ -256,6 +250,11 @@ export function createApiClient(options: ApiClientOptions) {
             `/api/materials${opts?.allYears ? "?allYears=1" : ""}`,
           )
         ).data,
+    },
+
+    /** GET /api/guides — ASTRA guides grouped by category. */
+    guides: {
+      list: async () => (await request<GuidesResponse>("/api/guides")).data,
     },
 
     /** Ask ASTRA — RAG chatbot over scraped Bocconi/ASTRA content. */

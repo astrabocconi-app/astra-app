@@ -1,13 +1,10 @@
 export const en = {
-  "home.welcome": "Welcome",
+  "home.welcome": "Hi",
   "home.news": "News",
-  "home.askAstra": "Ask us anything, ASTRA is here for you",
   "home.freeAtB": "Free@B",
   "home.freeAtBSub": "Empty classrooms, right now",
   "home.freeAtBEyebrow": "Live",
-  "home.polare": "Polare",
-  "home.polareEyebrow": "ASTRA",
-  "home.polareSub": "The ASTRA press",
+  "home.polareSub": "Articles written by the ASTRA press team",
   "home.rewards": "Rewards",
   "home.rewardsSub": "Spend your points on ASTRA perks",
   "home.pointsShort": "{n} pts",
@@ -19,15 +16,12 @@ export const en = {
 };
 
 export const it: Record<keyof typeof en, string> = {
-  "home.welcome": "Benvenuto",
+  "home.welcome": "Ciao",
   "home.news": "Notizie",
-  "home.askAstra": "Chiedi qualsiasi cosa, ASTRA è qui per te",
   "home.freeAtB": "Free@B",
   "home.freeAtBSub": "Aule libere, adesso",
   "home.freeAtBEyebrow": "Live",
-  "home.polare": "Polare",
-  "home.polareEyebrow": "ASTRA",
-  "home.polareSub": "La stampa di ASTRA",
+  "home.polareSub": "Gli articoli della redazione di ASTRA",
   "home.rewards": "Premi",
   "home.rewardsSub": "Usa i tuoi punti per i vantaggi ASTRA",
   "home.pointsShort": "{n} pt",
@@ -35,5 +29,5 @@ export const it: Record<keyof typeof en, string> = {
   "home.yourPoints": "I tuoi punti",
   "home.tapToSeeHistory": "Tocca per vedere lo storico",
   "home.recentActivity": "Attività recente",
-  "home.noActivityYet": "Nessuna attività ancora.",
+  "home.noActivityYet": "Ancora nessuna attività.",
 };

@@ -82,7 +82,7 @@ test("materials accept official compound programme labels", () => {
 });
 
 // Class group deliberately plays no part in which handouts a student sees.
-// Programme + study year decide it; class exists for future gradebook content.
+// Programme + study year decide it; class is not used for filtering.
 // A student who never picks a class must still get their full materials — this
 // is asserted rather than left implicit so it can't quietly regress.
 test("materials ignore the student's class group entirely", () => {

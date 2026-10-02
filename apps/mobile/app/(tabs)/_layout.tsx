@@ -20,10 +20,25 @@ type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
 
 // Raised circular button for the center "Card" (QR) tab — big + easy to reach.
-function CenterCardButton({ onPress }: { onPress?: PressableOnPress }) {
+// The ring takes the bar's colour so it reads as a cut-out in both modes.
+function CenterCardButton({
+  onPress,
+  ringColor,
+  label,
+}: {
+  onPress?: PressableOnPress;
+  ringColor: string;
+  label: string;
+}) {
   return (
     <View style={styles.centerWrap} pointerEvents="box-none">
-      <Pressable onPress={onPress} style={styles.centerButton} hitSlop={12}>
+      <Pressable
+        onPress={onPress}
+        style={[styles.centerButton, { borderColor: ringColor }]}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+      >
         <Ionicons name="qr-code" size={30} color="#fff" />
       </Pressable>
     </View>
@@ -55,7 +70,7 @@ export default function TabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: fg,
         tabBarInactiveTintColor: inverted ? INVERTED_INACTIVE : INACTIVE,
-        headerTitleStyle: { color: fg, fontWeight: "700" },
+        headerTitleStyle: { color: fg, fontWeight: "600" },
         headerStyle: { backgroundColor: inverted ? INVERTED_BG : "#FFFFFF" },
         headerTintColor: fg,
         headerShadowVisible: false,
@@ -105,8 +120,12 @@ export default function TabsLayout() {
         name="card"
         options={{
           title: t("tabs.card"),
+          // The screen renders its own title inside a SafeAreaView.
+          headerShown: false,
           tabBarLabel: () => null,
-          tabBarButton: (props) => <CenterCardButton onPress={props.onPress ?? undefined} />,
+          tabBarButton: (props) => (
+            <CenterCardButton onPress={props.onPress ?? undefined} ringColor={barBg} label={t("tabs.card")} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -137,18 +156,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   centerButton: {
-    top: -22,
+    top: -16,
     width: 64,
     height: 64,
     borderRadius: 32,
     backgroundColor: BRAND,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 4,
-    borderColor: "#fff",
+    borderWidth: 3,
     // elevation / shadow
     shadowColor: BRAND,
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.18,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,

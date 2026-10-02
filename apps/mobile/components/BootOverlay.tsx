@@ -2,22 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, StyleSheet } from "react-native";
 import LogoLoader from "./LogoLoader";
 import { useBootStore } from "../lib/boot-store";
+import { useEggStore } from "../lib/egg-store";
 
 // Full-screen intro overlay shown once when the app boots into the home screen.
 //
 // The trick that makes it feel layered: instead of hard-cutting from the loader
-// to home, the two overlap. First the loader holds on a solid white backdrop.
+// to home, the two overlap. First the loader holds on a solid backdrop (white,
+// or brand blue in inverted mode).
 // Then the *backdrop* dissolves on its own — so the live home fades in
 // underneath in opacity — while the morphing logo stays fully visible on top.
 // The logo lingers over the real home for a beat, then fades out last. The
 // animation literally finishes on top of the home page.
-const HOLD_MS = 2200; // keep the loader up at least this long (min on-screen time)
+const HOLD_MS = 1200; // keep the loader up at least this long (min on-screen time)
 const BG_FADE_MS = 650; // white backdrop dissolves → home appears gradually in opacity
 const LOGO_HOLD_MS = 300; // logo floats over the now-visible home for a beat
 const LOGO_FADE_MS = 450; // then the logo itself fades away over home
 
 export default function BootOverlay() {
   const done = useBootStore((s) => s.done);
+  const inverted = useEggStore((s) => s.inverted);
   const backdrop = useRef(new Animated.Value(1)).current; // white sheet opacity
   const logo = useRef(new Animated.Value(1)).current; // logo layer opacity
   const [frozen, setFrozen] = useState(false); // stops the morph looping on reveal
@@ -47,15 +50,16 @@ export default function BootOverlay() {
 
   return (
     // Outer opacity fades the whole overlay (logo included) out in step 2.
-    // pointerEvents="none" keeps the app underneath responsive throughout.
+    // It swallows taps while the backdrop hides home (a tap there would land on
+    // a screen nobody can see), then lets them through once home is revealed.
     <Animated.View
-      pointerEvents="none"
+      pointerEvents={frozen ? "none" : "auto"}
       style={[StyleSheet.absoluteFill, styles.center, { opacity: logo }]}
     >
       <Animated.View
-        style={[StyleSheet.absoluteFill, { backgroundColor: "#fff", opacity: backdrop }]}
+        style={[StyleSheet.absoluteFill, { backgroundColor: inverted ? "#04107E" : "#fff", opacity: backdrop }]}
       />
-      <LogoLoader size={168} paused={frozen} />
+      <LogoLoader size={168} paused={frozen} color={inverted ? "#fff" : "#04107e"} />
     </Animated.View>
   );
 }

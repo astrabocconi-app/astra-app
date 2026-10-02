@@ -4,8 +4,10 @@ export const en = {
   "academics.noProfileSub": "So we can show your handouts and courses",
   "academics.materials": "Handouts",
   "academics.materialsSub": "Dispense for your course, by year",
-  "academics.gradebook": "Gradebook",
-  "academics.gradebookSub": "Your exams and grades · private to you",
+  "academics.guides": "Guides",
+  "academics.guidesSub": "Exchange, internships, thesis and more",
+  "academics.calculator": "Grade calculator",
+  "academics.calculatorSub": "Your average, graduation grade and what you need",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -14,6 +16,8 @@ export const it: Record<keyof typeof en, string> = {
   "academics.noProfileSub": "Così ti mostriamo dispense e corsi giusti",
   "academics.materials": "Dispense",
   "academics.materialsSub": "Le dispense del tuo corso, per anno",
-  "academics.gradebook": "Libretto",
-  "academics.gradebookSub": "I tuoi esami e voti · visibili solo a te",
+  "academics.guides": "Guide",
+  "academics.guidesSub": "Exchange, stage, tesi e molto altro",
+  "academics.calculator": "Calcolatore voti",
+  "academics.calculatorSub": "Media, voto di laurea e cosa ti serve",
 };

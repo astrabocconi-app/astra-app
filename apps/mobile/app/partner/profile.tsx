@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Icon } from "../../components/Icon";
@@ -9,7 +9,6 @@ import { useT } from "../../lib/i18n";
 
 export default function PartnerProfileScreen() {
   const t = useT();
-  const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const stats = useQuery({
     queryKey: ["partner-stats"],
@@ -41,7 +40,8 @@ export default function PartnerProfileScreen() {
 
       <Pressable
         className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 dark:border-white/15 px-4 py-3"
-        style={{ marginBottom: insets.bottom + 80 }}
+        // The tab scene already ends above the bar.
+        style={{ marginBottom: 24 }}
         onPress={signOut}
       >
         <Icon name="log-out-outline" size={20} color="#dc2626" />

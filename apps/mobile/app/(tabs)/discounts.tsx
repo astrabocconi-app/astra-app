@@ -6,7 +6,7 @@ import {
   Pressable,
   Image,
   ScrollView,
-  ActivityIndicator,
+  RefreshControl,
   Modal,
   Linking,
   Platform,
@@ -15,12 +15,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { Icon } from "../../components/Icon";
+import { Icon, Spinner } from "../../components/Icon";
+import { EmptyState } from "../../components/EmptyState";
 import type { PartnerItem } from "@astra/shared";
-import { api } from "../../lib/api";
+import { queries } from "../../lib/prefetch";
 import { useT } from "../../lib/i18n";
 import { SegmentedToggle } from "../../components/SegmentedToggle";
 import { DiscountsMap } from "../../components/DiscountsMap";
+import { useRefresh } from "../../lib/use-refresh";
 
 type ViewMode = "map" | "list";
 const ALL = "__all__";
@@ -71,13 +73,19 @@ function PartnerRow({
             {partner.address ?? t("discounts.noAddress")}
           </Text>
           {partner.category ? (
-            <Text className="mt-1 self-start rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-300">
+            <Text className="mt-1 self-start rounded-full bg-gray-100 dark:bg-white/10 px-2 py-0.5 text-[10px] font-medium text-gray-500 dark:text-gray-300">
               {partner.category}
             </Text>
           ) : null}
         </View>
         {partner.latitude != null && partner.longitude != null ? (
-          <Pressable onPress={onDirections} hitSlop={8} className="p-1">
+          <Pressable
+            onPress={onDirections}
+            hitSlop={8}
+            className="p-2"
+            accessibilityRole="button"
+            accessibilityLabel={t("discounts.openInMaps")}
+          >
             <Icon name="navigate-outline" size={19} color="#04107E" />
           </Pressable>
         ) : null}
@@ -88,7 +96,10 @@ function PartnerRow({
           {partner.offers.map((o) => (
             <View key={o.id} className="gap-1">
               <View className="flex-row items-center gap-2">
-                <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
+                <Text
+                  className="rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-astra-primary dark:text-white"
+                  numberOfLines={1}
+                >
                   {o.label}
                 </Text>
                 <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200">{o.title}</Text>
@@ -116,11 +127,8 @@ export default function DiscountsScreen() {
   const [category, setCategory] = useState<string>(ALL);
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  const q = useQuery({
-    queryKey: ["partners"],
-    queryFn: () => api.partners.list(),
-    retry: false,
-  });
+  const q = useQuery(queries.partners());
+  const refresh = useRefresh(q.refetch);
 
   const partners = useMemo(() => q.data?.items ?? [], [q.data]);
   const categories = q.data?.categories ?? [];
@@ -151,78 +159,62 @@ export default function DiscountsScreen() {
         />
       </View>
 
-      {q.isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#04107E" />
-        </View>
-      ) : q.isError ? (
-        <View className="flex-1 items-center justify-center gap-3 px-10">
-          <Icon name="cloud-offline-outline" size={30} color="#9CA3AF" />
-          <Text className="text-center text-gray-500 dark:text-gray-300">{t("discounts.loadError")}</Text>
+      {/* Category filter. Above both modes, so the map never drops pins
+          without saying why. */}
+      {partners.length > 0 && categories.length > 0 && (
+        <View className="px-5 pb-2">
           <Pressable
-            onPress={() => q.refetch()}
-            className="rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2 active:opacity-80"
+            onPress={() => setPickerOpen(true)}
+            className="flex-row items-center justify-between rounded-xl border border-gray-200 dark:border-white/15 px-4 py-2.5 active:bg-gray-50 dark:active:bg-white/5"
           >
-            <Text className="font-medium text-white">{t("common.retry")}</Text>
+            <Text className="text-sm font-medium text-gray-800 dark:text-gray-100">{categoryLabel}</Text>
+            <Icon name="chevron-down" size={16} color="#9CA3AF" />
           </Pressable>
         </View>
-      ) : partners.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-3 px-10">
-          <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
-            <Icon name="pricetags-outline" size={28} color="#04107E" />
-          </View>
-          <Text className="text-xl font-semibold text-astra-primary dark:text-white">
-            {t("discounts.emptyTitle")}
-          </Text>
-          <Text className="text-center text-gray-500 dark:text-gray-300">{t("discounts.emptyBody")}</Text>
+      )}
+
+      {q.isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <Spinner />
         </View>
+      ) : q.isError ? (
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("discounts.loadError")}
+          action={{ label: t("common.retry"), onPress: () => q.refetch() }}
+        />
+      ) : partners.length === 0 ? (
+        <EmptyState icon="pricetags-outline" title={t("discounts.emptyTitle")} body={t("discounts.emptyBody")} />
       ) : mode === "map" ? (
         <DiscountsMap partners={visible} />
       ) : (
-        <>
-          {/* Category filter */}
-          {categories.length > 0 && (
-            <View className="px-5 pb-2">
-              <Pressable
-                onPress={() => setPickerOpen(true)}
-                className="flex-row items-center justify-between rounded-xl border border-gray-200 dark:border-white/15 px-4 py-2.5 active:bg-gray-50"
-              >
-                <Text className="text-sm font-medium text-gray-800 dark:text-gray-100">{categoryLabel}</Text>
-                <Icon name="chevron-down" size={16} color="#9CA3AF" />
-              </Pressable>
-            </View>
+        <FlatList
+          data={visible}
+          keyExtractor={(p) => p.id}
+          refreshControl={<RefreshControl {...refresh} />}
+          contentContainerStyle={{
+            paddingHorizontal: 20,
+            // The tab scene already ends above the bar.
+            paddingBottom: 24,
+            gap: 10,
+            flexGrow: 1,
+          }}
+          ListEmptyComponent={<EmptyState icon="pricetags-outline" title={t("discounts.emptyFiltered")} />}
+          renderItem={({ item }) => (
+            <PartnerRow
+              partner={item}
+              onDirections={() => openDirections(item)}
+              onOpen={() => router.push(`/venue/${item.id}`)}
+            />
           )}
-
-          <FlatList
-            data={visible}
-            keyExtractor={(p) => p.id}
-            contentContainerStyle={{
-              paddingHorizontal: 20,
-              paddingBottom: insets.bottom + 90,
-              gap: 10,
-              flexGrow: 1,
-            }}
-            ListEmptyComponent={
-              <View className="flex-1 items-center justify-center px-10 pt-20">
-                <Text className="text-center text-gray-400 dark:text-white/60">{t("discounts.emptyFiltered")}</Text>
-              </View>
-            }
-            renderItem={({ item }) => (
-              <PartnerRow
-                partner={item}
-                onDirections={() => openDirections(item)}
-                onOpen={() => router.push(`/venue/${item.id}`)}
-              />
-            )}
-          />
-        </>
+        />
       )}
 
       {/* Category picker sheet */}
       <Modal
         visible={pickerOpen}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setPickerOpen(false)}
       >
         {/* Backdrop sits behind the sheet as a sibling — nesting the sheet in a
@@ -237,11 +229,8 @@ export default function DiscountsScreen() {
             className="rounded-t-3xl bg-white dark:bg-astra-primary pt-3"
             style={{ maxHeight: "70%", paddingBottom: insets.bottom + 12 }}
           >
-            <View className="mb-2 items-center">
-              <View className="h-1 w-10 rounded-full bg-gray-300" />
-            </View>
             <Text className="px-5 pb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {t("discounts.allCategories")}
+              {t("discounts.category")}
             </Text>
             <ScrollView>
               {[ALL, ...categories].map((c) => {
@@ -253,7 +242,7 @@ export default function DiscountsScreen() {
                       setCategory(c);
                       setPickerOpen(false);
                     }}
-                    className="flex-row items-center justify-between px-5 py-4 active:bg-gray-50"
+                    className="flex-row items-center justify-between px-5 py-4 active:bg-gray-50 dark:active:bg-white/5"
                   >
                     <Text
                       className={`flex-1 pr-3 text-base ${selected ? "font-semibold text-astra-primary dark:text-white" : "text-gray-800 dark:text-gray-100"}`}

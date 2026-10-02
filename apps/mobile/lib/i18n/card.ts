@@ -8,10 +8,10 @@ export const en = {
 };
 
 export const it: Record<keyof typeof en, string> = {
-  "card.title": "La tua carta ASTRA",
+  "card.title": "La tua tessera ASTRA",
   "card.subtitle": "Mostrala nei locali partner per guadagnare punti sui tuoi acquisti.",
-  "card.loadError": "Impossibile caricare la tua carta.",
-  "card.memberFallback": "Membro",
+  "card.loadError": "Impossibile caricare la tua tessera.",
+  "card.memberFallback": "Socio",
   "card.autoRefresh": "Si aggiorna automaticamente, non serve fare uno screenshot",
   "card.worksOffline": "Funziona anche offline",
 };

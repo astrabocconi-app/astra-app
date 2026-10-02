@@ -4,20 +4,21 @@ import {
   ScrollView,
   Pressable,
   Image,
-  ActivityIndicator,
   Linking,
   ActionSheetIOS,
   Alert,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { Icon } from "../../components/Icon";
+import { Icon, Spinner } from "../../components/Icon";
 import { ContentLinks } from "../../components/ContentLinks";
+import { ScreenHeader } from "../../components/ScreenHeader";
+import { EmptyState } from "../../components/EmptyState";
 import { api } from "../../lib/api";
-import { useT } from "../../lib/i18n";
+import { useLocale, useT } from "../../lib/i18n";
 
 // Tap an address → bottom chooser to open it in Apple Maps or Google Maps.
 function openInMaps(address: string, t: ReturnType<typeof useT>) {
@@ -60,12 +61,12 @@ function openTickets(url: string) {
   }).catch(() => Linking.openURL(url));
 }
 
-function formatWhen(iso: string) {
+function formatWhen(iso: string, locale: string) {
   const d = new Date(iso);
   return (
-    d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" }) +
+    d.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" }) +
     " · " +
-    d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+    d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })
   );
 }
 
@@ -74,48 +75,48 @@ export default function EventDetailScreen() {
   const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list(), retry: false });
   const event = events.data?.items.find((e) => e.id === id);
   const t = useT();
+  const locale = useLocale();
+  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
-      {/* Back */}
-      <Pressable onPress={() => router.back()} className="flex-row items-center gap-1 px-4 py-2" hitSlop={8}>
-        <Icon name="chevron-back" size={22} color="#04107E" />
-        <Text className="text-base font-medium text-astra-primary dark:text-white">{t("event.back")}</Text>
-      </Pressable>
+      <ScreenHeader title="" />
 
       {events.isLoading ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
+          <Spinner />
         </View>
+      ) : events.isError ? (
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("common.error")}
+          action={{ label: t("common.retry"), onPress: () => events.refetch() }}
+        />
       ) : !event ? (
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-gray-500 dark:text-gray-300">{t("event.notAvailable")}</Text>
-        </View>
+        <EmptyState icon="calendar-outline" title={t("event.notAvailable")} />
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {event.imageUrl ? (
             <Image source={{ uri: event.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
-          ) : (
-            <View style={{ height: 120, backgroundColor: "#04107E" }} className="items-center justify-center">
-              <Icon name="sparkles" size={34} color="rgba(255,255,255,0.9)" />
-            </View>
-          )}
+          ) : null}
 
           <View className="px-5 pt-5">
-            <Text className="text-2xl font-bold text-gray-900 dark:text-white">{event.title}</Text>
+            <Text className="text-2xl font-semibold text-gray-900 dark:text-white">{event.title}</Text>
 
             <View className="mt-3 gap-2">
               <View className="flex-row items-center gap-2">
                 <Icon name="time-outline" size={16} color="#04107E" />
-                <Text className="text-sm text-gray-700 dark:text-gray-200">{formatWhen(event.startsAt)}</Text>
+                <Text className="text-sm text-gray-700 dark:text-gray-200">{formatWhen(event.startsAt, locale)}</Text>
               </View>
               {event.location ? (
                 <Pressable
-                  className="flex-row items-center gap-2 active:opacity-60"
+                  className="flex-row items-center gap-2 py-1.5 active:opacity-60"
                   onPress={() => openInMaps(event.location!, t)}
+                  hitSlop={8}
+                  accessibilityRole="link"
                 >
                   <Icon name="location-outline" size={16} color="#04107E" />
-                  <Text className="text-sm font-medium text-astra-primary dark:text-white underline">
+                  <Text className="text-sm font-medium text-astra-primary dark:text-white">
                     {event.location}
                   </Text>
                   <Icon name="open-outline" size={13} color="#04107E" />
@@ -124,7 +125,9 @@ export default function EventDetailScreen() {
             </View>
 
             {event.description ? (
-              <Text className="mt-4 text-base leading-6 text-gray-600 dark:text-gray-300">{event.description}</Text>
+              <Text selectable className="mt-4 text-base leading-6 text-gray-600 dark:text-gray-300">
+                {event.description}
+              </Text>
             ) : null}
             <ContentLinks links={event.links} />
           </View>
@@ -133,7 +136,10 @@ export default function EventDetailScreen() {
 
       {/* Get tickets */}
       {event?.externalTicketUrl ? (
-        <View className="border-t border-gray-100 dark:border-white/10 px-5 pb-2 pt-3">
+        <View
+          className="border-t border-gray-100 dark:border-white/10 px-5 pt-3"
+          style={{ paddingBottom: insets.bottom + 8 }}
+        >
           <Pressable
             className="flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-astra-dark py-3.5 active:opacity-90"
             onPress={() => openTickets(event.externalTicketUrl!)}

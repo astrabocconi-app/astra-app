@@ -109,7 +109,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
               anchor={{ x: 0.5, y: 1 }}
               allowOverlap={active}
             >
-              <Pressable onPress={() => setSelected(p)} hitSlop={8}>
+              <Pressable onPress={() => setSelected(p)} hitSlop={8} accessibilityRole="button" accessibilityLabel={p.name}>
                 <View style={[styles.pin, active && styles.pinActive]}>
                   <Icon name="pricetag" size={13} color="#fff" />
                 </View>
@@ -120,15 +120,35 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
         })}
       </MapView>
 
+      {/* Partners without coordinates can't be pinned; say so rather than
+          letting them silently vanish. */}
+      {pinned.length < partners.length && (
+        <View
+          pointerEvents="none"
+          className="absolute left-3.5 top-3.5 rounded-full border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-dark px-3 py-1.5"
+        >
+          <Text className="text-xs font-medium text-gray-700 dark:text-gray-200">
+            {t("discounts.pinsCount", { count: String(pinned.length) })}
+          </Text>
+        </View>
+      )}
+
       {/* Re-centre control */}
-      <Pressable onPress={recenter} style={styles.recenter} hitSlop={8}>
+      <Pressable
+        onPress={recenter}
+        style={styles.recenter}
+        className="bg-white dark:bg-astra-dark"
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={t("discounts.recenter")}
+      >
         <Icon name="locate" size={20} color={BRAND} />
       </Pressable>
 
       {/* Detail card for the tapped pin. Tapping the card itself (not the close
           or directions buttons) opens the full venue screen. */}
       {selected && (
-        <View style={styles.card}>
+        <View style={styles.card} className="border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-dark">
           <Pressable
             onPress={() => router.push(`/venue/${selected.id}`)}
             className="flex-row items-start gap-3 active:opacity-70"
@@ -151,7 +171,12 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
               </Text>
             </View>
             <Icon name="chevron-forward" size={18} color="#9CA3AF" />
-            <Pressable onPress={() => setSelected(null)} hitSlop={10}>
+            <Pressable
+              onPress={() => setSelected(null)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={t("common.close")}
+            >
               <Icon name="close" size={20} color="#9CA3AF" />
             </Pressable>
           </Pressable>
@@ -161,7 +186,10 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
               {selected.offers.map((o) => (
                 <View key={o.id} className="gap-1">
                   <View className="flex-row items-center gap-2">
-                    <Text className="rounded-full bg-astra-primary dark:bg-astra-dark px-2 py-0.5 text-[11px] font-bold text-white">
+                    <Text
+                      className="rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-astra-primary dark:text-white"
+                      numberOfLines={1}
+                    >
                       {o.label}
                     </Text>
                     <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200" numberOfLines={1}>
@@ -246,7 +274,6 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     borderRadius: 20,
-    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -260,7 +287,6 @@ const styles = StyleSheet.create({
     left: 14,
     right: 14,
     bottom: 14,
-    backgroundColor: "#fff",
     borderRadius: 18,
     padding: 14,
     shadowColor: "#000",

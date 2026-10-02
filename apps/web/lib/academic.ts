@@ -21,7 +21,7 @@ export async function getActiveAcademicCatalogue() {
 }
 
 /**
- * Official courses for the gradebook picker, scoped to the active catalogue.
+ * Official courses, scoped to the active catalogue.
  * `programmeId` narrows to one programme's offerings (credits/semester/type are
  * per-programme); without it the search spans the whole catalogue, which is what
  * electives and exchange courses need.
@@ -97,7 +97,7 @@ export function toAcademicProfile(
     },
     studyYear: row.studyYear,
     track: row.track
-      ? { id: row.track.id, code: row.track.code, name: row.track.name, sourceUrl: row.track.sourceUrl }
+      ? { id: row.track.id, code: row.track.code, name: row.track.name, sourceUrl: row.track.sourceUrl, fromYear: row.track.fromYear }
       : null,
     classGroup: row.classGroup
       ? { id: row.classGroup.id, code: row.classGroup.code, sourceUrl: row.classGroup.sourceUrl }
@@ -123,7 +123,7 @@ export async function saveAcademicProfile(userId: string, input: AcademicProfile
   const [track, classGroup] = await Promise.all([
     input.trackId
       ? prisma.academicTrack.findFirst({
-          where: { id: input.trackId, programmeId: programme.id, active: true },
+          where: { id: input.trackId, programmeId: programme.id, active: true, fromYear: { lte: input.studyYear } },
           select: { id: true },
         })
       : null,
@@ -135,7 +135,7 @@ export async function saveAcademicProfile(userId: string, input: AcademicProfile
       : null,
   ]);
   if (input.trackId && !track) {
-    throw new AcademicSelectionError("Track does not belong to programme.");
+    throw new AcademicSelectionError("Track does not belong to programme or year.");
   }
   if (input.classGroupId && !classGroup) {
     throw new AcademicSelectionError("Class group does not belong to programme.");

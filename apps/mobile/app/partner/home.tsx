@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,6 +7,8 @@ import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
 import { ScanChart, seriesColor } from "../../components/ScanChart";
 import { SegmentedToggle } from "../../components/SegmentedToggle";
+import { Spinner } from "../../components/Icon";
+import { EmptyState } from "../../components/EmptyState";
 
 type RangeDays = 7 | 14 | 30 | 90;
 
@@ -73,7 +75,7 @@ export default function PartnerHomeScreen() {
         {s ? (
           <ScanChart buckets={s.buckets} series={s.series} bucket={s.range.bucket} />
         ) : (
-          <ActivityIndicator className="my-8" />
+          <Spinner className="my-8" />
         )}
 
         {/* Legend doubles as the table view: the lighter hues fall below 3:1 on
@@ -111,18 +113,14 @@ export default function PartnerHomeScreen() {
       </View>
 
       {stats.isError && (
-        <View className="mt-6 items-center gap-2">
-          <Text className="text-red-600">{t("partnerHome.loadStatsError")}</Text>
-          <Pressable
-            className="rounded-lg border border-gray-300 px-4 py-2"
-            onPress={() => stats.refetch()}
-          >
-            <Text>{t("common.retry")}</Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("partnerHome.loadStatsError")}
+          action={{ label: t("common.retry"), onPress: () => stats.refetch() }}
+        />
       )}
 
-      {stats.isLoading && !s && <ActivityIndicator className="mt-6" />}
+      {stats.isLoading && !s && <Spinner className="mt-6" />}
     </ScrollView>
   );
 }

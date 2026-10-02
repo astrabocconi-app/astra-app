@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
   TextInput,
   Pressable,
-  ActivityIndicator,
   Image,
   ImageBackground,
   Keyboard,
@@ -19,7 +18,10 @@ import { api } from "../lib/api";
 import { setToken, setAccountType, setPartnerScanOnly } from "../lib/session";
 import { registerForPush } from "../lib/push";
 import { useBootStore } from "../lib/boot-store";
+import { useEggStore } from "../lib/egg-store";
 import { useT } from "../lib/i18n";
+import { Spinner } from "../components/Icon";
+import { TextField } from "../components/TextField";
 
 // Student: play the logo-morph intro overlay over home, then navigate there.
 async function enterStudentApp() {
@@ -34,12 +36,16 @@ async function enterStudentApp() {
 //   • Partner — login code + password (issued by ASTRA) → venue home
 // iOS-only accessory bar so the numeric OTP keypad can be dismissed.
 const OTP_ACCESSORY_ID = "astra-otp-accessory";
+/** How long "Resend code" stays disabled after a code goes out. */
+const RESEND_AFTER_MS = 30_000;
 
 type Step = "email" | "code";
 type Mode = "student" | "partner";
 
 export default function LoginScreen() {
   const t = useT();
+  // Inverted mode survives sign-out, so the login screen honours it too.
+  const inverted = useEggStore((s) => s.inverted);
   const [mode, setMode] = useState<Mode>("student");
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
@@ -48,6 +54,14 @@ export default function LoginScreen() {
   const [partnerPassword, setPartnerPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sentAt, setSentAt] = useState(0);
+  const [resendReady, setResendReady] = useState(false);
+
+  useEffect(() => {
+    if (!sentAt) return;
+    const timer = setTimeout(() => setResendReady(true), RESEND_AFTER_MS);
+    return () => clearTimeout(timer);
+  }, [sentAt]);
 
   // DEV-ONLY: typing a dev username (in a dev build) bypasses OTP entirely.
   const isDevBypass = __DEV__ && isDevLoginUsername(email);
@@ -71,9 +85,11 @@ export default function LoginScreen() {
         return;
       }
       await api.auth.sendOtp(email.trim());
+      setResendReady(false);
+      setSentAt(Date.now());
       setStep("code");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t("login.errorSendCode"));
+    } catch {
+      setError(t("login.errorSendCode"));
     } finally {
       setLoading(false);
     }
@@ -87,8 +103,8 @@ export default function LoginScreen() {
       if (!token) throw new Error(t("login.errorNoToken"));
       await setToken(token);
       await enterStudentApp();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t("login.errorInvalidCode"));
+    } catch {
+      setError(t("login.errorInvalidCode"));
     } finally {
       setLoading(false);
     }
@@ -108,8 +124,8 @@ export default function LoginScreen() {
       await setPartnerScanOnly(scanOnly);
       // Scan-only staff have no home screen to land on.
       router.replace(scanOnly ? "/partner/scan" : "/partner/home");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : t("login.errorInvalidCodeOrPassword"));
+    } catch {
+      setError(t("login.errorInvalidCodeOrPassword"));
     } finally {
       setLoading(false);
     }
@@ -127,7 +143,7 @@ export default function LoginScreen() {
       source={require("../assets/campus.jpg")}
       resizeMode="cover"
       imageStyle={{ opacity: 0.18 }}
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      style={{ flex: 1, backgroundColor: inverted ? "#04107E" : "#FFFFFF" }}
     >
       <SafeAreaView className="flex-1">
         {/* The keyboard covers the sign-in button and had no way out: no
@@ -137,6 +153,9 @@ export default function LoginScreen() {
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
+          // iOS: keeps the Send/Verify button above the keyboard. Android's
+          // adjustResize already does.
+          automaticallyAdjustKeyboardInsets
           showsVerticalScrollIndicator={false}
         >
         <Pressable
@@ -146,8 +165,13 @@ export default function LoginScreen() {
         >
           <Image
             // Metro's static asset loading uses CommonJS require.
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
-            source={require("../assets/logo-horizontal.png")}
+            source={
+              inverted
+                ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+                  require("../assets/logo-horizontal-white.png")
+                : // eslint-disable-next-line @typescript-eslint/no-require-imports
+                  require("../assets/logo-horizontal.png")
+            }
             resizeMode="contain"
             style={{ width: 260, height: 70, marginBottom: 40 }}
           />
@@ -158,7 +182,7 @@ export default function LoginScreen() {
                 <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
                   {step === "email"
                     ? t("login.signInWithEmail", {
-                        domains: ALLOWED_EMAIL_DOMAINS.map((d) => "@" + d).join(" or "),
+                        domains: ALLOWED_EMAIL_DOMAINS.map((d) => "@" + d).join(` ${t("common.or")} `),
                       })
                     : t("login.enterCode", { email })}
                 </Text>
@@ -169,12 +193,15 @@ export default function LoginScreen() {
                 )}
 
                 {step === "email" ? (
-                  <TextInput
-                    className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center"
+                  <TextField center
+                    className="w-full rounded-xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-3 text-center text-gray-900 dark:text-white"
+                    placeholderTextColor="#9CA3AF"
                     placeholder="name@studbocconi.it"
                     autoCapitalize="none"
                     autoCorrect={false}
                     keyboardType="email-address"
+                    textContentType="emailAddress"
+                    autoComplete="email"
                     returnKeyType="go"
                     onSubmitEditing={() => !studentDisabled && sendCode()}
                     value={email}
@@ -183,7 +210,8 @@ export default function LoginScreen() {
                   />
                 ) : (
                   <TextInput
-                    className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center text-xl tracking-[8px]"
+                    className="w-full rounded-xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-3 text-center text-xl tracking-[8px] text-gray-900 dark:text-white"
+                    placeholderTextColor="#9CA3AF"
                     placeholder="000000"
                     keyboardType="number-pad"
                     textContentType="oneTimeCode"
@@ -202,13 +230,14 @@ export default function LoginScreen() {
                 {error && <Text className="text-center text-sm text-red-600">{error}</Text>}
 
                 <Pressable
-                  className="w-full items-center rounded-xl px-4 py-3"
+                  className={`w-full items-center rounded-xl bg-astra-primary dark:bg-white/15 px-4 py-3 ${
+                    studentDisabled && !loading ? "opacity-40" : ""
+                  }`}
                   disabled={studentDisabled}
                   onPress={step === "email" ? sendCode : verify}
-                  style={{ backgroundColor: studentDisabled ? "#A9B0D8" : "#04107E" }}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <Spinner color="#fff" />
                   ) : (
                     <Text className="text-center font-semibold text-white">
                       {step === "email"
@@ -221,15 +250,31 @@ export default function LoginScreen() {
                 </Pressable>
 
                 {step === "code" && !loading && (
-                  <Pressable
-                    onPress={() => {
-                      setStep("email");
-                      setCode("");
-                      setError(null);
-                    }}
-                  >
-                    <Text className="text-center text-sm text-gray-500 dark:text-gray-300">{t("login.useDifferentEmail")}</Text>
-                  </Pressable>
+                  <View className="items-center">
+                    {/* Re-sends to the same address; held back briefly so a
+                        slow inbox doesn't trigger a pile of codes. */}
+                    <Pressable
+                      onPress={sendCode}
+                      disabled={!resendReady}
+                      className={`py-2 ${resendReady ? "" : "opacity-40"}`}
+                      hitSlop={8}
+                    >
+                      <Text className="text-center text-sm font-medium text-astra-primary dark:text-white">
+                        {t("login.resendCode")}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        setStep("email");
+                        setCode("");
+                        setError(null);
+                      }}
+                      className="py-2"
+                      hitSlop={8}
+                    >
+                      <Text className="text-center text-sm text-gray-500 dark:text-gray-300">{t("login.useDifferentEmail")}</Text>
+                    </Pressable>
+                  </View>
                 )}
               </>
             ) : (
@@ -238,8 +283,9 @@ export default function LoginScreen() {
                   {t("login.partnerSignInDesc")}
                 </Text>
 
-                <TextInput
-                  className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center"
+                <TextField center
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-3 text-center text-gray-900 dark:text-white"
+                  placeholderTextColor="#9CA3AF"
                   placeholder={t("login.venueCodePlaceholder")}
                   autoCapitalize="none"
                   autoCorrect={false}
@@ -247,10 +293,13 @@ export default function LoginScreen() {
                   onChangeText={setPartnerCode}
                   editable={!loading}
                 />
-                <TextInput
-                  className="w-full rounded-xl border border-gray-300 bg-white dark:bg-astra-primary px-4 py-3 text-center"
+                <TextField center
+                  className="w-full rounded-xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-3 text-center text-gray-900 dark:text-white"
+                  placeholderTextColor="#9CA3AF"
                   placeholder={t("login.passwordPlaceholder")}
                   secureTextEntry
+                  textContentType="password"
+                  autoComplete="password"
                   autoCapitalize="none"
                   autoCorrect={false}
                   returnKeyType="go"
@@ -263,13 +312,14 @@ export default function LoginScreen() {
                 {error && <Text className="text-center text-sm text-red-600">{error}</Text>}
 
                 <Pressable
-                  className="w-full items-center rounded-xl px-4 py-3"
+                  className={`w-full items-center rounded-xl bg-astra-primary dark:bg-white/15 px-4 py-3 ${
+                    partnerDisabled && !loading ? "opacity-40" : ""
+                  }`}
                   disabled={partnerDisabled}
                   onPress={partnerSignIn}
-                  style={{ backgroundColor: partnerDisabled ? "#A9B0D8" : "#04107E" }}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <Spinner color="#fff" />
                   ) : (
                     <Text className="text-center font-semibold text-white">{t("login.partnerSignIn")}</Text>
                   )}
@@ -280,7 +330,8 @@ export default function LoginScreen() {
             {/* Mode toggle */}
             {!loading && (
               <Pressable
-                className="mt-2"
+                className="mt-2 py-2"
+                hitSlop={8}
                 onPress={() => switchMode(mode === "student" ? "partner" : "student")}
               >
                 <Text className="text-center text-sm font-medium text-astra-primary dark:text-white">

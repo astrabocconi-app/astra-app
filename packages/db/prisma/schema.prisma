@@ -304,8 +304,6 @@ model AcademicCourseProgramme {
 enum ExamStatus {
   PLANNED
   PASSED
-  FAILED
-  REJECTED
 }
 
 /// Student gradebook. Table exists and is empty; no app code reads it yet.
@@ -355,6 +353,8 @@ model AcademicTrack {
   name        String
   sourceUrl   String
   active      Boolean @default(true)
+  /// First study year the track can be chosen (BIEF splits from year 2).
+  fromYear    Int     @default(1)
 
   programme AcademicProgramme        @relation(fields: [programmeId], references: [id], onDelete: Cascade)
   profiles  StudentAcademicProfile[]

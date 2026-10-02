@@ -2,10 +2,8 @@ import { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   ScrollView,
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -14,9 +12,11 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Constants from "expo-constants";
-import { Icon } from "../components/Icon";
+import { Icon, Spinner } from "../components/Icon";
+import { ScreenHeader } from "../components/ScreenHeader";
 import { api } from "../lib/api";
 import { useT } from "../lib/i18n";
+import { TextField } from "../components/TextField";
 
 type Kind = "QUESTION" | "ISSUE" | "IDEA";
 
@@ -60,29 +60,14 @@ export default function SupportScreen() {
         platform: Platform.OS,
       });
       setSent(true);
-    } catch (e) {
-      Alert.alert(
-        t("support.failedTitle"),
-        e instanceof Error ? e.message : t("support.failedBody"),
-      );
+    } catch {
+      Alert.alert(t("support.failedTitle"), t("support.failedBody"));
     } finally {
       setSending(false);
     }
   }
 
-  const header = (
-    <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
-      <Pressable onPress={() => router.back()} hitSlop={10}>
-        <Icon name="chevron-back" size={26} color="#04107E" />
-      </Pressable>
-      <View>
-        <Text className="text-lg font-semibold text-astra-primary dark:text-white">
-          {t("support.title")}
-        </Text>
-        <Text className="text-xs text-gray-400 dark:text-white/60">{t("support.subtitle")}</Text>
-      </View>
-    </View>
-  );
+  const header = <ScreenHeader title={t("support.title")} subtitle={t("support.subtitle")} />;
 
   if (sent) {
     return (
@@ -92,7 +77,7 @@ export default function SupportScreen() {
           <View className="h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
             <Icon name="checkmark" size={34} color="#16a34a" />
           </View>
-          <Text className="text-center text-xl font-bold text-gray-900 dark:text-white">
+          <Text className="text-center text-xl font-semibold text-gray-900 dark:text-white">
             {t("support.sentTitle")}
           </Text>
           <Text className="text-center text-gray-500 dark:text-gray-300">
@@ -100,7 +85,7 @@ export default function SupportScreen() {
           </Text>
           <Pressable
             onPress={() => router.back()}
-            className="mt-3 rounded-xl bg-astra-primary px-6 py-3 active:opacity-90"
+            className="mt-3 rounded-xl bg-astra-primary dark:bg-white/15 px-6 py-3 active:opacity-90"
           >
             <Text className="font-semibold text-white">{t("common.done")}</Text>
           </Pressable>
@@ -139,7 +124,7 @@ export default function SupportScreen() {
                     onPress={() => setKind(k.value)}
                     className={`flex-1 items-center gap-1.5 rounded-2xl border py-3 active:opacity-80 ${
                       active
-                        ? "border-astra-primary bg-astra-light dark:bg-white/10"
+                        ? "border-astra-primary dark:border-white bg-astra-light dark:bg-white/10"
                         : "border-gray-200 dark:border-white/15"
                     }`}
                   >
@@ -167,7 +152,7 @@ export default function SupportScreen() {
             <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
               {t("support.messageLabel")}
             </Text>
-            <TextInput
+            <TextField
               value={message}
               onChangeText={setMessage}
               placeholder={t("support.placeholder")}
@@ -178,7 +163,7 @@ export default function SupportScreen() {
               className="rounded-2xl border border-gray-200 dark:border-white/15 px-4 py-3 text-[15px] text-gray-900 dark:text-white"
               style={{ minHeight: 160 }}
             />
-            <Text className="text-right text-[11px] text-gray-400">
+            <Text className="text-right text-[11px] text-gray-400 dark:text-white/60">
               {trimmed.length}/{MAX_LENGTH}
             </Text>
           </View>
@@ -195,15 +180,14 @@ export default function SupportScreen() {
           <Pressable
             disabled={!canSend}
             onPress={submit}
-            className="items-center rounded-xl py-3.5 active:opacity-90"
-            style={{ backgroundColor: canSend ? "#04107E" : "#E5E7EB" }}
+            className={`items-center rounded-xl bg-astra-primary dark:bg-white/15 py-3.5 active:opacity-90 ${
+              canSend || sending ? "" : "opacity-40"
+            }`}
           >
             {sending ? (
-              <ActivityIndicator color="#fff" />
+              <Spinner color="#fff" />
             ) : (
-              <Text
-                className={`text-sm font-semibold ${canSend ? "text-white" : "text-gray-500"}`}
-              >
+              <Text className="text-sm font-semibold text-white">
                 {trimmed.length < MIN_LENGTH && trimmed.length > 0
                   ? t("support.tooShort")
                   : t("support.send")}

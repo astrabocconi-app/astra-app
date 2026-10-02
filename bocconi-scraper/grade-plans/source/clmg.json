@@ -1,0 +1,402 @@
+[
+ {
+  "id": "00e82fcd-e31e-4439-803e-65bfaa369dfe",
+  "name": "Istituzioni di diritto privato- modulo 1",
+  "cfu": "8",
+  "anno": "1",
+  "code": "A",
+  "module": "Istituzioni di diritto privato",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "0cfb60a7-bc78-4b04-aaf2-77e74fa6ef21",
+  "name": "Diritto amministrativo (corso progredito) a scelta fra: Diritto processuale amministrativo, Environmental law. Global Administrative Law",
+  "cfu": "8",
+  "anno": "5",
+  "code": "B",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "dbe3a0d4-2c20-4f6c-97d5-0d5d9dc1d2b0",
+  "name": "Diritto costituzionale (corso progredito) a scelta fra: Giustizia costituzionale, Diritto pubblico dell'economia, Transnational constitutional law and government policies",
+  "cfu": "8",
+  "anno": "4",
+  "code": "B",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "db8b4da4-8ae0-4bca-874b-56ee58d7dd40",
+  "name": "Computing AI and the Law",
+  "cfu": "4",
+  "anno": "5",
+  "code": "C",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "bd5b52cb-9872-4ceb-9efc-866a4b08cb40",
+  "name": "Diritto commerciale (corso progredito) a scelta fra: Casi e questioni di diritto societario, Operazioni straordinarie, Antitrust law",
+  "cfu": "6",
+  "anno": "4",
+  "code": "C",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "7e02dddc-30e9-41eb-8bd7-4f0d92dfca46",
+  "name": "EU law",
+  "cfu": "9",
+  "anno": "3",
+  "code": "C",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "21924f8f-b178-440c-964a-59e2fb565f3c",
+  "name": "Filosofia del diritto",
+  "cfu": "8",
+  "anno": "1",
+  "code": "C",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "77fd9c01-441a-43df-a769-d8f1ad574898",
+  "name": "Legal argumentation and economic analysis of law",
+  "cfu": "8",
+  "anno": "2",
+  "code": "C",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "07f262f2-7848-4690-90d6-9fd73fd4cc0b",
+  "name": "Diritto contabile e fiscale - modulo 1",
+  "cfu": "5",
+  "anno": "3",
+  "code": "D",
+  "module": "Diritto contabile e fiscale",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "c3f7b2d1-4c50-49cb-85a4-b9e6ea4a5df0",
+  "name": "Diritto processuale penale (corso progredito) a scelta fra: Diritto dell'esecuzione penale, Processo penale agli enti, Procedura penale europea",
+  "cfu": "6",
+  "anno": "4",
+  "code": "D",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "e2873e80-c9b7-4382-a50d-79e12358cd70",
+  "name": "History of law - Module 1 (Introduction to European Legal History)",
+  "cfu": "6",
+  "anno": "2",
+  "code": "D",
+  "module": "History of law",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "54d5775e-4836-42b0-bf8f-58cf79ddfd2b",
+  "name": "opzionale n1",
+  "cfu": "6",
+  "anno": "5",
+  "code": "D",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "53caa54b-9d48-432c-8f61-23db1e696658",
+  "name": "Critical thinking",
+  "cfu": "1",
+  "anno": "1",
+  "code": "D",
+  "module": "Seminario",
+  "kind": "seminar",
+  "isStage": false
+ },
+ {
+  "id": "7a8863ea-4a53-405a-a9ab-dd82b78812ba",
+  "name": "International law",
+  "cfu": "9",
+  "anno": "4",
+  "code": "E",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "22ca0e93-40e9-4f90-a9f9-60fd72192cfd",
+  "name": "Diritto processuale civile - modulo 2",
+  "cfu": "6",
+  "anno": "3",
+  "code": "E",
+  "module": "Diritto processuale civile",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "b0e6a48c-a330-4bc6-8ae2-6909655fd356",
+  "name": "Legal English",
+  "cfu": "3",
+  "anno": "2",
+  "code": "E",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "5844a37c-16e6-43ed-884f-74cab1db7239",
+  "name": "opzionale n 2",
+  "cfu": "6",
+  "anno": "5",
+  "code": "E",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "369fc662-7049-47bc-96b0-5ad6fdc0c4c4",
+  "name": "Diritto civile a scelta fra: Contratti e obbligazioni, European and International contracts",
+  "cfu": "8",
+  "anno": "4",
+  "code": "F",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "4287eef5-432b-46eb-9f89-29f41061beff",
+  "name": "Diritto costituzionale italiano ed europeo",
+  "cfu": "10",
+  "anno": "1",
+  "code": "F",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "5c1ea6f6-9328-42c7-ab5a-2c19b85bbf4e",
+  "name": "Management and Accounting - Module 2 (Accounting and Financial Statement Analysis)",
+  "cfu": "6",
+  "anno": "2",
+  "code": "F",
+  "module": "Aziendale",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "4f83d7e1-52b4-4725-82d9-a2b2942c3944",
+  "name": "Diritto contabile e fiscale - modulo 2",
+  "cfu": "7",
+  "anno": "3",
+  "code": "F",
+  "module": "Diritto contabile e fiscale",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "eaf9d49f-7dd9-43c2-a654-0a5ce1c8ce61",
+  "name": "stage / opzionale n 3",
+  "cfu": "6",
+  "anno": "5",
+  "code": "F",
+  "kind": "course",
+  "isStage": true
+ },
+ {
+  "id": "4d21d2b7-bc15-4f13-9a16-c03d7d7e40b8",
+  "name": "Principi di economia a scelta: Economia/Scienze delle finanze",
+  "cfu": "6",
+  "anno": "1",
+  "code": "G",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "4e99a65f-c706-46a5-a0eb-05f0b35770bd",
+  "name": "Diritto processuale penale",
+  "cfu": "8",
+  "anno": "3",
+  "code": "G",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "ef110770-6b59-4f74-8749-f63799860f6f",
+  "name": "Storia del diritto - Modulo 2",
+  "cfu": "8",
+  "anno": "2",
+  "code": "G",
+  "module": "History of law",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "e8635366-0ad3-449c-b2f4-6776fc2b5c85",
+  "name": "Diritto penale (corso progredito) a scelta fra: Parte speciale del codice penale, Focus su criminalità economica, Paths of internationalization",
+  "cfu": "6",
+  "anno": "4",
+  "code": "G",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "3150503d-a4fb-4a5a-8587-6b640926b2c0",
+  "name": "Seminari / Moot / Cliniche legali / opzionale n4",
+  "cfu": "6",
+  "anno": "5",
+  "code": "G",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "6d9a1ed1-63f5-4e8e-a3ab-f85c48b429b1",
+  "name": "Istituzioni di diritto privato- modulo 2",
+  "cfu": "6",
+  "anno": "1",
+  "code": "H",
+  "module": "Istituzioni di diritto privato",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "e0d6516d-e4e7-4ff9-992d-9d1b6635db83",
+  "name": "Diritto del lavoro",
+  "cfu": "6",
+  "anno": "3",
+  "code": "H",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "0ea4fae7-33ca-49b2-9d87-1b6e4c4a3398",
+  "name": "Diritto del lavoro (corso progredito) a scelta fra: Casi di diritto del lavoro, Istituzioni del mercato del lavoro, European social law",
+  "cfu": "6",
+  "anno": "4",
+  "code": "H",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "28a7ef4a-a917-4483-8407-a9ca94937312",
+  "name": "Inglese (I lingua) (didattica ed esame)",
+  "cfu": "4",
+  "anno": "1",
+  "code": "I",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "5f0b9120-c6df-4938-85fc-8ef9515949c7",
+  "name": "Diritto commerciale",
+  "cfu": "10",
+  "anno": "2",
+  "code": "I",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "3be34ff8-eb4b-4e47-a0a7-bd7e5f115c8c",
+  "name": "Seconda lingua straniera (didattica ed esame)",
+  "cfu": "4",
+  "anno": "3",
+  "code": "I",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "bb56a92d-0520-493f-8cb7-11d57f0bd9cf",
+  "name": "Roman law - Module 2 (Roman Foundations of European Law)",
+  "cfu": "6",
+  "anno": "2",
+  "code": "L",
+  "module": "Diritto romano",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "9e40ad3a-8c59-4402-b7b8-91b3d8ae0107",
+  "name": "Informatica per giurisprudenza",
+  "cfu": "3",
+  "anno": "2",
+  "code": "M",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "1116d94c-e80e-4500-9042-45d91188ccb4",
+  "name": "Diritto penale",
+  "cfu": "10",
+  "anno": "3",
+  "code": "A",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "16034022-b4ed-4d88-964d-85a293620842",
+  "name": "Economia aziendale e bilancio - modulo 1",
+  "cfu": "6",
+  "anno": "2",
+  "code": "A",
+  "module": "Aziendale",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "22c62326-1d09-4b0f-a38c-3aaab1e7c2f2",
+  "name": "Diritto amministrativo a scelta fra:  Diritto amministrativo, Diritto amministrativo italiano ed europeo",
+  "cfu": "10",
+  "anno": "4",
+  "code": "A",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "3f907437-5b48-49a6-b8df-4469dbe38d1e",
+  "name": "Diritto civile (corso progredito) a scelta fra: Diritto Bancario, Diritto Finanziario, Diritto Assicurativo",
+  "cfu": "8",
+  "anno": "5",
+  "code": "A",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "70ed50fa-9236-4467-a2d4-c02bc9531b18",
+  "name": "Diritto romano - modulo 1",
+  "cfu": "8",
+  "anno": "1",
+  "code": "B",
+  "module": "Diritto romano",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "b289372b-19ca-4ec9-b028-364ed18ef50b",
+  "name": "Diritto comparato a scelta: Private law/ Diritto pubblico",
+  "cfu": "9",
+  "anno": "2",
+  "code": "B",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "c0d7f1b0-b228-4b15-b365-f667786f1a71",
+  "name": "Quantitative methods",
+  "cfu": "6",
+  "anno": "1",
+  "code": "E",
+  "kind": "course",
+  "isStage": false
+ },
+ {
+  "id": "f4d36210-6747-4f56-9321-37a0aee2653d",
+  "name": "Diritto processuale civile - modulo 1",
+  "cfu": "8",
+  "anno": "3",
+  "code": "B",
+  "module": "Diritto processuale civile",
+  "kind": "course",
+  "isStage": false
+ }
+]

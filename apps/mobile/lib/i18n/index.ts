@@ -24,6 +24,8 @@ import * as tabs from "./tabs";
 import * as partnerTabs from "./partnerTabs";
 import * as onboarding from "./onboarding";
 import * as polare from "./polare";
+import * as guides from "./guides";
+import * as calc from "./calc";
 
 const namespaces = [
   common,
@@ -51,6 +53,8 @@ const namespaces = [
   partnerTabs,
   onboarding,
   polare,
+  guides,
+  calc,
 ];
 
 const en: Record<string, string> = Object.assign({}, ...namespaces.map((n) => n.en));
@@ -79,6 +83,9 @@ export function translate(
 export function useLanguage(): Language {
   return useLanguageStore((s) => s.language);
 }
+
+/** BCP 47 locale for dates and numbers, so they follow the app language, not the phone's. */
+export const useLocale = () => (useLanguage() === "it" ? "it-IT" : "en-GB");
 
 export function useT() {
   const language = useLanguageStore((s) => s.language);

@@ -11,6 +11,13 @@ UPDATE "ExamRecord"
   SET "status" = 'PLANNED', "grade" = NULL, "lode" = false
   WHERE "status" IN ('FAILED', 'REJECTED');
 
+-- The grade-shape check and the passed-only unique indexes mention the old
+-- enum's values, so they have to go before the type can change (they are
+-- recreated for the new type below).
+ALTER TABLE "ExamRecord" DROP CONSTRAINT "ExamRecord_grade_shape";
+DROP INDEX "ExamRecord_passed_course_key";
+DROP INDEX "ExamRecord_passed_custom_key";
+
 -- Postgres cannot remove a value from an enum in place; the type is rebuilt.
 ALTER TYPE "ExamStatus" RENAME TO "ExamStatus_old";
 CREATE TYPE "ExamStatus" AS ENUM ('PLANNED', 'PASSED');
@@ -22,8 +29,6 @@ ALTER TABLE "ExamRecord" ALTER COLUMN "status" SET DEFAULT 'PLANNED';
 
 DROP TYPE "ExamStatus_old";
 
--- The grade shape no longer has a second graded status to admit.
-ALTER TABLE "ExamRecord" DROP CONSTRAINT "ExamRecord_grade_shape";
 
 ALTER TABLE "ExamRecord"
   ADD CONSTRAINT "ExamRecord_grade_shape"
@@ -38,8 +43,6 @@ ALTER TABLE "ExamRecord"
 
 -- With no attempt history there is one row per exam, so uniqueness no longer
 -- needs to single out the passed one: a course appears once, planned or passed.
-DROP INDEX "ExamRecord_passed_course_key";
-DROP INDEX "ExamRecord_passed_custom_key";
 
 CREATE UNIQUE INDEX "ExamRecord_course_key"
   ON "ExamRecord"("userId", "courseId")

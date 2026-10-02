@@ -7,6 +7,9 @@ export const en = {
   "common.loading": "Loading…",
   "common.error": "Something went wrong",
   "common.retry": "Retry",
+  "common.back": "Back",
+  "common.close": "Close",
+  "common.or": "or",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -18,4 +21,7 @@ export const it: Record<keyof typeof en, string> = {
   "common.loading": "Caricamento…",
   "common.error": "Qualcosa è andato storto",
   "common.retry": "Riprova",
+  "common.back": "Indietro",
+  "common.close": "Chiudi",
+  "common.or": "o",
 };

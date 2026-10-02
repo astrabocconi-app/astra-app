@@ -1,6 +1,6 @@
 import "../global.css";
 import { useEffect, useState } from "react";
-import { AppState, type AppStateStatus, View, ActivityIndicator } from "react-native";
+import { AppState, type AppStateStatus, View } from "react-native";
 import { Stack, router } from "expo-router";
 import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -12,6 +12,7 @@ import { useBootStore } from "../lib/boot-store";
 import { useLanguageStore } from "../lib/language-store";
 import { useEggStore } from "../lib/egg-store";
 import BootOverlay from "../components/BootOverlay";
+import { Spinner } from "../components/Icon";
 
 initSentry();
 
@@ -91,7 +92,7 @@ export default function RootLayout() {
   if (!ready) {
     return (
       <View className="flex-1 items-center justify-center bg-white dark:bg-astra-primary">
-        <ActivityIndicator />
+        <Spinner />
       </View>
     );
   }

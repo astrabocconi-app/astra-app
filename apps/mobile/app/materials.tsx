@@ -1,11 +1,14 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Linking } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, Pressable, ScrollView, Linking, Alert, RefreshControl } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Icon } from "../components/Icon";
+import { Icon, Spinner } from "../components/Icon";
+import { ScreenHeader } from "../components/ScreenHeader";
+import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useT, type TranslationKey } from "../lib/i18n";
+import { useRefresh } from "../lib/use-refresh";
 
 const ALL_MATERIALS_URL = "https://www.astrabocconi.com/dispense";
 const YEAR_ORDER = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year"];
@@ -42,6 +45,7 @@ type FlatItem = {
 // nothing is bundled. Everything else lives on the ASTRA website (see-all link).
 export default function MaterialsScreen() {
   const t = useT();
+  const insets = useSafeAreaInsets();
   const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
   const myCourse = me.data?.academicProfile?.programme.code ?? null;
   // Students revisit earlier years when resitting or revising, and look ahead
@@ -53,6 +57,7 @@ export default function MaterialsScreen() {
     retry: 1,
     enabled: Boolean(myCourse),
   });
+  const refresh = useRefresh(q.refetch);
 
   // Flatten this student's course into a single list carrying year + semester.
   const mine = useMemo<FlatItem[]>(() => {
@@ -100,6 +105,15 @@ export default function MaterialsScreen() {
     );
   }, [filtered]);
 
+  // Handout links are third-party URLs; a dead one gets a message, not silence.
+  async function open(url: string) {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody"));
+    }
+  }
+
   const Chip = ({
     label,
     active,
@@ -111,9 +125,12 @@ export default function MaterialsScreen() {
   }) => (
     <Pressable
       onPress={onPress}
-      className={`rounded-full px-3 py-1.5 ${active ? "bg-astra-primary dark:bg-astra-dark" : "bg-astra-light dark:bg-white/10"}`}
+      hitSlop={{ top: 6, bottom: 6 }}
+      className={`rounded-full px-3.5 py-2 ${active ? "bg-astra-primary dark:bg-white" : "bg-gray-100 dark:bg-white/10"}`}
     >
-      <Text className={`text-xs font-semibold ${active ? "text-white" : "text-astra-primary dark:text-white"}`}>
+      <Text
+        className={`text-[13px] font-medium ${active ? "text-white dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
+      >
         {label}
       </Text>
     </Pressable>
@@ -121,87 +138,68 @@ export default function MaterialsScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
-      {/* Header */}
-      <View className="flex-row items-center gap-2 border-b border-gray-100 dark:border-white/10 px-4 py-3">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
-          <Icon name="chevron-back" size={26} color="#04107E" />
-        </Pressable>
-        <View className="flex-1">
-          <Text className="text-lg font-semibold text-astra-primary dark:text-white">{t("materials.title")}</Text>
-          <Text className="text-xs text-gray-400 dark:text-white/60">
-            {myCourse ? t("materials.courseHandouts", { course: myCourse }) : t("materials.yourCourseHandouts")}
-          </Text>
-        </View>
-        <Pressable
-          onPress={() => Linking.openURL(ALL_MATERIALS_URL)}
-          className="flex-row items-center gap-1 rounded-full border border-astra-primary/20 px-3 py-1.5 active:opacity-70"
-        >
-          <Text className="text-xs font-semibold text-astra-primary dark:text-white">{t("materials.seeAll")}</Text>
-          <Icon name="open-outline" size={13} color="#04107E" />
-        </Pressable>
-      </View>
-
-      {!myCourse ? (
-        <View className="flex-1 items-center justify-center gap-3 px-8">
-          <Icon name="school-outline" size={30} color="#9CA3AF" />
-          <Text className="text-center text-gray-600 dark:text-gray-300">
-            {t("materials.setCourseYear")}
-          </Text>
+      <ScreenHeader
+        title={t("materials.title")}
+        subtitle={myCourse ? t("materials.courseHandouts", { course: myCourse }) : t("materials.yourCourseHandouts")}
+        right={
           <Pressable
-            onPress={() => router.push("/profile")}
-            className="mt-1 rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2"
+            onPress={() => open(ALL_MATERIALS_URL)}
+            hitSlop={8}
+            className="mr-2 flex-row items-center gap-1 rounded-full border border-astra-primary/20 dark:border-white/15 px-3 py-1.5 active:opacity-70"
           >
-            <Text className="font-medium text-white">{t("materials.goToProfile")}</Text>
+            <Text className="text-xs font-semibold text-astra-primary dark:text-white">{t("materials.seeAll")}</Text>
+            <Icon name="open-outline" size={13} color="#04107E" />
           </Pressable>
-          <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="mt-1">
-            <Text className="text-sm font-medium text-astra-primary dark:text-white underline">
-              {t("materials.browseAllMaterials")}
-            </Text>
-          </Pressable>
+        }
+      />
+
+      {/* Scope: just my year, or the whole programme. Outside the result
+          branches, so an empty year can still switch to the whole course. */}
+      {myCourse ? (
+        <View className="flex-row gap-2 px-4 pt-3">
+          <Chip
+            label={t("materials.myYear")}
+            active={!allYears}
+            onPress={() => {
+              setAllYears(false);
+              setYearFilter(null);
+            }}
+          />
+          <Chip
+            label={t("materials.allYearsOfCourse")}
+            active={allYears}
+            onPress={() => {
+              setAllYears(true);
+              setYearFilter(null);
+            }}
+          />
         </View>
-      ) : q.isLoading ? (
+      ) : null}
+
+      {me.isLoading || (myCourse && q.isLoading) ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color="#04107E" />
+          <Spinner />
         </View>
+      ) : !myCourse ? (
+        <EmptyState
+          icon="school-outline"
+          title={t("materials.setCourseYear")}
+          action={{ label: t("materials.goToProfile"), onPress: () => router.push("/profile") }}
+        />
       ) : q.isError ? (
-        <View className="flex-1 items-center justify-center gap-2 px-8">
-          <Icon name="cloud-offline-outline" size={28} color="#9CA3AF" />
-          <Text className="text-center text-gray-500 dark:text-gray-300">{t("materials.loadError")}</Text>
-          <Pressable onPress={() => q.refetch()} className="mt-2 rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2">
-            <Text className="font-medium text-white">{t("common.retry")}</Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("materials.loadError")}
+          action={{ label: t("common.retry"), onPress: () => q.refetch() }}
+        />
       ) : mine.length === 0 ? (
-        <View className="flex-1 items-center justify-center gap-3 px-8">
-          <Text className="text-center text-gray-500 dark:text-gray-300">
-            {t("materials.noHandoutsForCourse", { course: myCourse })}
-          </Text>
-          <Pressable onPress={() => Linking.openURL(ALL_MATERIALS_URL)} className="rounded-full bg-astra-primary dark:bg-astra-dark px-5 py-2">
-            <Text className="font-medium text-white">{t("materials.seeAllMaterials")}</Text>
-          </Pressable>
-        </View>
+        <EmptyState
+          icon="document-text-outline"
+          title={t("materials.noHandoutsForCourse", { course: myCourse })}
+          action={{ label: t("materials.seeAllMaterials"), onPress: () => open(ALL_MATERIALS_URL) }}
+        />
       ) : (
         <>
-          {/* Scope: just my year, or the whole programme */}
-          <View className="flex-row gap-2 px-4 pt-3">
-            <Chip
-              label={t("materials.myYear")}
-              active={!allYears}
-              onPress={() => {
-                setAllYears(false);
-                setYearFilter(null);
-              }}
-            />
-            <Chip
-              label={t("materials.allYearsOfCourse")}
-              active={allYears}
-              onPress={() => {
-                setAllYears(true);
-                setYearFilter(null);
-              }}
-            />
-          </View>
-
           {/* Filters */}
           {(availYears.length > 1 || availSemesters.length > 1) && (
             <View className="gap-2 px-4 py-3">
@@ -236,19 +234,20 @@ export default function MaterialsScreen() {
 
           <ScrollView
             className="flex-1"
-            contentContainerStyle={{ padding: 16, paddingTop: 4, gap: 16 }}
+            contentContainerStyle={{ padding: 16, paddingTop: 4, paddingBottom: insets.bottom + 16, gap: 16 }}
+            refreshControl={<RefreshControl {...refresh} />}
           >
             {grouped.map(([year, items]) => (
               <View key={year}>
-                <Text className="mb-1.5 text-sm font-bold uppercase tracking-wide text-astra-primary dark:text-white">
+                <Text className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
                   {t(YEAR_FULL_KEYS[year]!)}
                 </Text>
                 <View className="gap-1.5">
                   {items.map((it) => (
                     <Pressable
                       key={String(it.id)}
-                      onPress={() => Linking.openURL(it.url)}
-                      className="flex-row items-center gap-3 rounded-xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-3 active:opacity-70"
+                      onPress={() => open(it.url)}
+                      className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-3 active:opacity-70"
                     >
                       <View className="h-9 w-9 items-center justify-center rounded-lg bg-astra-light dark:bg-white/10">
                         <Icon name="document-text-outline" size={18} color="#04107E" />
@@ -265,20 +264,20 @@ export default function MaterialsScreen() {
                           </Text>
                         )}
                       </View>
-                      <Icon name="download-outline" size={18} color="#04107E" />
+                      {/* Opens in the browser, so the outbound arrow, not a download. */}
+                      <Icon name="open-outline" size={18} color="#04107E" />
                     </Pressable>
                   ))}
                 </View>
               </View>
             ))}
             <Pressable
-              onPress={() => Linking.openURL(ALL_MATERIALS_URL)}
-              className="mt-2 flex-row items-center justify-center gap-2 rounded-xl border border-astra-primary/20 py-3 active:opacity-70"
+              onPress={() => open(ALL_MATERIALS_URL)}
+              className="mt-2 flex-row items-center justify-center gap-2 rounded-xl border border-astra-primary/20 dark:border-white/15 py-3 active:opacity-70"
             >
               <Text className="text-sm font-semibold text-astra-primary dark:text-white">{t("materials.seeAllMaterials")}</Text>
               <Icon name="open-outline" size={15} color="#04107E" />
             </Pressable>
-            <View className="h-6" />
           </ScrollView>
         </>
       )}

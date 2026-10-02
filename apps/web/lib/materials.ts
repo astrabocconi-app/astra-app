@@ -44,7 +44,7 @@ interface ClmgRow {
   exam_type: string | number | null;
 }
 
-async function fetchTable<T>(table: string, query: string): Promise<T[]> {
+export async function fetchTable<T>(table: string, query: string): Promise<T[]> {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
     headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
     next: { revalidate: 60 },

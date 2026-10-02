@@ -444,48 +444,9 @@ function GraduationPanel({
   const t = useT();
   const max = thesisMax(state);
   const result = average == null ? null : graduation(state, average);
-  const toggle = (key: "bonus" | "onTime" | "athlete", title: string, sub: string) => (
-    <SettingRow title={title} sub={sub}>
-      <Switch value={state[key]} onValueChange={(v) => setting(key, v)} trackColor={{ true: "#04107E" }} accessibilityLabel={title} />
-    </SettingRow>
-  );
-
   return (
     <View className="mt-3 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
-      {state.type === "master" && (
-        <View className="px-4 pb-3 pt-4">
-          <Text className="mb-2 text-[15px] font-medium text-gray-900 dark:text-white">{t("calc.thesisType")}</Text>
-          <SegmentedToggle
-            value={state.thesisType}
-            onChange={(v) => {
-              setting("thesisType", v);
-              if (v === "applied" && state.thesis > 5) setting("thesis", 5);
-            }}
-            options={[
-              { value: "research", label: t("calc.research") },
-              { value: "applied", label: t("calc.applied") },
-            ]}
-          />
-        </View>
-      )}
-      <View className={state.type === "master" ? "" : "-mt-px"}>
-        <SettingRow
-          title={t("calc.thesis")}
-          sub={
-            state.type === "bachelor"
-              ? t("calc.thesisSubBachelor")
-              : state.type === "clmg"
-                ? t("calc.thesisSubClmg")
-                : t("calc.thesisSubMaster", { n: String(max) })
-          }
-        >
-          <Stepper value={Math.min(state.thesis, max)} min={0} max={max} onChange={(n) => setting("thesis", n)} label={t("calc.thesis")} />
-        </SettingRow>
-      </View>
-      {state.type === "bachelor" && toggle("bonus", t("calc.bonusBachelor"), t("calc.bonusBachelorSub"))}
-      {state.type === "clmg" && toggle("bonus", t("calc.bonusClmg"), t("calc.bonusClmgSub"))}
-      {state.type === "master" && toggle("onTime", t("calc.onTime"), t("calc.onTimeSub"))}
-      {state.type === "master" && toggle("athlete", t("calc.athlete"), t("calc.athleteSub"))}
+      <ExtrasInputs state={state} setting={setting} thesisTitle={t("calc.thesis")} />
 
       <View className="border-t border-gray-100 dark:border-white/10 bg-astra-light dark:bg-white/5 px-4 py-5">
         {result == null ? (
@@ -516,6 +477,57 @@ function GraduationPanel({
         )}
       </View>
     </View>
+  );
+}
+
+/** Final paper points and bonuses: they feed both the grade and the simulation. */
+function ExtrasInputs({ state, setting, thesisTitle }: { state: CalcState; setting: Setting; thesisTitle: string }) {
+  const t = useT();
+  const max = thesisMax(state);
+  const toggle = (key: "bonus" | "onTime" | "athlete", title: string, sub: string) => (
+    <SettingRow title={title} sub={sub}>
+      <Switch value={state[key]} onValueChange={(v) => setting(key, v)} trackColor={{ true: "#04107E" }} accessibilityLabel={title} />
+    </SettingRow>
+  );
+
+  return (
+    <>
+      {state.type === "master" && (
+        <View className="px-4 pb-3 pt-4">
+          <Text className="mb-2 text-[15px] font-medium text-gray-900 dark:text-white">{t("calc.thesisType")}</Text>
+          <SegmentedToggle
+            value={state.thesisType}
+            onChange={(v) => {
+              setting("thesisType", v);
+              if (v === "applied" && state.thesis > 5) setting("thesis", 5);
+            }}
+            options={[
+              { value: "research", label: t("calc.research") },
+              { value: "applied", label: t("calc.applied") },
+            ]}
+          />
+        </View>
+      )}
+      <View className={state.type === "master" ? "" : "-mt-px"}>
+        <SettingRow
+          title={thesisTitle}
+          sub={
+            state.type === "bachelor"
+              ? t("calc.thesisSubBachelor")
+              : state.type === "clmg"
+                ? t("calc.thesisSubClmg")
+                : t("calc.thesisSubMaster", { n: String(max) })
+          }
+        >
+          <Stepper value={Math.min(state.thesis, max)} min={0} max={max} onChange={(n) => setting("thesis", n)} label={t("calc.thesis")} />
+        </SettingRow>
+      </View>
+      {state.type === "bachelor" && toggle("bonus", t("calc.bonusBachelor"), t("calc.bonusBachelorSub"))}
+      {state.type === "clmg" && toggle("bonus", t("calc.bonusClmg"), t("calc.bonusClmgSub"))}
+      {state.type === "master" && toggle("onTime", t("calc.onTime"), t("calc.onTimeSub"))}
+      {state.type === "master" && toggle("athlete", t("calc.athlete"), t("calc.athleteSub"))}
+
+    </>
   );
 }
 
@@ -588,6 +600,8 @@ function SimulationPanel({
 
   return (
     <View className="mt-3 overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
+      {/* The thesis points the student aims for change what the exams need. */}
+      <ExtrasInputs state={state} setting={setting} thesisTitle={t("calc.thesisAim")} />
       <SettingRow title={t("calc.target")}>
         <View className="flex-row items-center gap-3">
           <Pressable
@@ -722,10 +736,13 @@ function GradeSheet({
               })}
             </View>
           )}
-          <View className="flex-row items-center justify-between border-t border-gray-100 dark:border-white/10 px-5 py-3">
-            <Text className="text-[15px] font-medium text-gray-900 dark:text-white">{t("calc.creditsLabel")}</Text>
-            <Stepper value={row.credits} min={1} max={30} onChange={(n) => onCredits(row.id, n)} label={t("calc.creditsLabel")} />
-          </View>
+          {/* Plan exams have fixed credits; only an exam the student added needs them. */}
+          {custom && (
+            <View className="flex-row items-center justify-between border-t border-gray-100 dark:border-white/10 px-5 py-3">
+              <Text className="text-[15px] font-medium text-gray-900 dark:text-white">{t("calc.creditsLabel")}</Text>
+              <Stepper value={row.credits} min={1} max={30} onChange={(n) => onCredits(row.id, n)} label={t("calc.creditsLabel")} />
+            </View>
+          )}
           {row.grade != null && action(t("calc.clearGrade"), () => onGrade(row.id, null))}
           {action(row.noGrade ? t("calc.markGraded") : t("calc.markPassFail"), () => onNoGrade(row.id, !row.noGrade))}
           {removable && action(t("calc.removeExam"), () => onRemove(row.id), true)}

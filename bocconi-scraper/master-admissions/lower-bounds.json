@@ -1,0 +1,14 @@
+{
+  "_source": "B.lab Bocconi 'Master Admission – Survey results, first and second round' (A.Y. 2026/27), lower-bound tables, 'score out of 30' column.",
+  "round1": {
+    "AFM": 27.42, "AI": 28.35, "CYBER": 25.66, "DSBA": 27.15, "ESS": 27.39, "EMIT": 25.56,
+    "ACME": 26.86, "GIO": 26.84, "FIN": 28.81, "FIN-GLOB": 29.72, "CHINA-MIM": 26.96,
+    "ESSEC": 29.41, "IM-CEMS": 29.27, "IM-CONC": 26.68, "IM-GLOB": 28.2, "MM": 26.14,
+    "PPA": 27.19, "TS": 26.0
+  },
+  "round2": {
+    "AFM": 27.57, "CYBER": 24.23, "ESS": 31.03, "EMIT": 26.11, "ACME": 30.6, "GIO": 27.16,
+    "FIN": 29.52, "CHINA-MIM": 27.69, "ESSEC": 28.19, "IM-CEMS": 28.56, "IM-CONC": 26.89,
+    "IM-GLOB": 27.43, "MM": 25.61, "PPA": 25.75, "TS": 25.19
+  }
+}

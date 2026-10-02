@@ -8,6 +8,8 @@ export const en = {
   "academics.guidesSub": "Exchange, internships, thesis and more",
   "academics.calculator": "Grade calculator",
   "academics.calculatorSub": "Your average, graduation grade and what you need",
+  "academics.masters": "Master admissions",
+  "academics.mastersSub": "Your admission score against last year's admits",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -20,4 +22,6 @@ export const it: Record<keyof typeof en, string> = {
   "academics.guidesSub": "Exchange, stage, tesi e molto altro",
   "academics.calculator": "Calcolatore voti",
   "academics.calculatorSub": "Media, voto di laurea e cosa ti serve",
+  "academics.masters": "Ammissioni magistrali",
+  "academics.mastersSub": "Il tuo punteggio a confronto con gli ammessi dell'anno scorso",
 };

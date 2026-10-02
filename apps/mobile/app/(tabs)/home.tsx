@@ -24,6 +24,8 @@ export default function HomeScreen() {
   const t = useT();
   const locale = useLocale();
   const { width } = useWindowDimensions();
+  // Two cards side by side in a 20pt-margin row with a 12pt gap, 1.2 : 1.
+  const cardHeight = Math.round((width - 40 - 12) / 2 / 1.2);
   usePrefetchScreens();
   const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
   const balance = useQuery({
@@ -173,12 +175,13 @@ export default function HomeScreen() {
 
       {/* Two picture cards, then the rewards row. Handouts moved to the
           Academics tab. */}
-      <View className="mx-5 mt-5 flex-row gap-3">
+      {/* Both cards get the same explicit height. An aspect ratio alone let the
+          logo image's natural height stretch the Polare card taller. */}
+      <View className="mx-5 mt-5 flex-row gap-3" style={{ height: cardHeight }}>
         <Pressable
           onPress={() => router.push("/classrooms")}
           accessibilityLabel={`${t("home.freeAtB")}, ${t("home.freeAtBSub")}`}
           className="flex-1 overflow-hidden rounded-2xl active:opacity-90"
-          style={{ aspectRatio: 1.2 }}
         >
           <Image source={require("../../assets/freeatb-classroom.jpg")} resizeMode="cover" style={StyleSheet.absoluteFill} />
           {/* Brand-blue wash: the photo reads as texture, the text stays legible. */}
@@ -204,12 +207,12 @@ export default function HomeScreen() {
           accessibilityLabel={`${t("polare.title")}, ${t("home.polareSub")}`}
           className="flex-1 justify-between overflow-hidden rounded-2xl p-3.5 active:opacity-90"
           // Same blue as the logo's own background, so the artwork has no edge.
-          style={{ aspectRatio: 1.2, backgroundColor: "#04107E" }}
+          style={{ backgroundColor: "#04107E" }}
         >
           <Image
             source={require("../../assets/stella-polare.jpg")}
             resizeMode="contain"
-            style={{ width: "100%", flex: 1 }}
+            style={{ width: "100%", flex: 1, minHeight: 0 }}
             accessibilityIgnoresInvertColors
           />
           <Text className="mt-2 text-xs text-white/80" numberOfLines={2}>

@@ -3,6 +3,9 @@ import { PageHeader } from "@/app/_ui/page-header";
 import { Badge } from "@/app/_ui/badge";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { UsersIcon } from "@/app/_ui/icons";
+import { requirePage } from "@/lib/dashboard-access";
+import { isAdmin } from "@/lib/authz";
+import { DeleteUserButton } from "./delete-user-button";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +27,9 @@ export default async function UsersPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
+  // Deleting accounts is the admin's call, not a staff account granted Users.
+  const session = await requirePage("users");
+  const canDelete = isAdmin(session.actor);
   const query = q?.trim() ?? "";
 
   const rows = await prisma.user.findMany({
@@ -102,6 +108,7 @@ export default async function UsersPage({
                 <th className="px-4 py-3 font-medium">Points</th>
                 <th className="px-4 py-3 font-medium">Joined</th>
                 <th className="px-4 py-3 font-medium">Roles</th>
+                {canDelete && <th className="px-4 py-3" />}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -140,6 +147,13 @@ export default async function UsersPage({
                         ))}
                       </div>
                     </td>
+                    {canDelete && (
+                      <td className="px-4 py-3 text-right">
+                        {u.id !== session.user.id && !u.roles.includes("ADMIN") && (
+                          <DeleteUserButton id={u.id} email={u.email} />
+                        )}
+                      </td>
+                    )}
                   </tr>
                 );
               })}

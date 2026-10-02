@@ -12,6 +12,7 @@ const SECTIONS: { href: Href; icon: ComponentProps<typeof NavRow>["icon"]; title
   { href: "/materials", icon: "menu-book", title: "academics.materials", sub: "academics.materialsSub" },
   { href: "/guides", icon: "auto-stories", title: "academics.guides", sub: "academics.guidesSub" },
   { href: "/calculator", icon: "calculate", title: "academics.calculator", sub: "academics.calculatorSub" },
+  { href: "/master-admissions", icon: "school", title: "academics.masters", sub: "academics.mastersSub" },
 ];
 
 export default function AcademicsScreen() {

@@ -13,3 +13,5 @@ export * from "./client";
 export * from "./domain";
 export * from "./grade-plans";
 export * from "./grade-calc";
+export * from "./master-admissions";
+export * from "./master-admissions-data";

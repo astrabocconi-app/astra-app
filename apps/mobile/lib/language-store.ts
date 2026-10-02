@@ -8,7 +8,10 @@ import * as SecureStore from "expo-secure-store";
 
 export type Language = "en" | "it";
 
-const LANGUAGE_KEY = "astra_language";
+// v2 since 1.1.1: the iOS keychain outlives reinstalls, so phones that once
+// picked Italian stayed Italian even for a fresh install or a new account. The
+// new key starts everyone on English again; Profile switches it back.
+const LANGUAGE_KEY = "astra_language_v2";
 const DEFAULT_LANGUAGE: Language = "en";
 
 type LanguageState = {

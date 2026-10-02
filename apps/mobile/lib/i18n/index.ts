@@ -26,6 +26,7 @@ import * as onboarding from "./onboarding";
 import * as polare from "./polare";
 import * as guides from "./guides";
 import * as calc from "./calc";
+import * as masters from "./masters";
 
 const namespaces = [
   common,
@@ -55,6 +56,7 @@ const namespaces = [
   polare,
   guides,
   calc,
+  masters,
 ];
 
 const en: Record<string, string> = Object.assign({}, ...namespaces.map((n) => n.en));

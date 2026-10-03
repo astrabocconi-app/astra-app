@@ -845,7 +845,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "1 corso a scelta tra European economic policy / Public finance",
+    "n": "European economic policy / Public finance",
     "c": 6,
     "y": 2,
     "k": "g"
@@ -2363,7 +2363,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "1 insegnamento a scelta tra Casi e questioni di diritto societario / Operazioni straordinarie",
+    "n": "Casi e questioni di diritto societario / Operazioni straordinarie",
     "c": 6,
     "y": 3,
     "k": "g"
@@ -2861,7 +2861,7 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "#4",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
@@ -2873,7 +2873,7 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "#5",
+    "n": "#4",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -2935,10 +2935,16 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "#1",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
+   },
+   {
+    "n": "#1",
+    "c": 6,
+    "y": 2,
+    "k": "o"
    },
    {
     "n": "#2",
@@ -2947,16 +2953,10 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "Open choice course from Bocconi list",
+    "n": "#3",
     "c": 6,
     "y": 2,
-    "k": "g"
-   },
-   {
-    "n": "1 out of a short list* from Bocconi list:",
-    "c": 6,
-    "y": 2,
-    "k": "g"
+    "k": "o"
    },
    {
     "n": "Foreign language",
@@ -2965,13 +2965,13 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "#3",
+    "n": "#4",
     "c": 6,
     "y": 2,
     "k": "o"
    },
    {
-    "n": "#4",
+    "n": "#5",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -2997,7 +2997,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "National and international institutions law6Politics and policy making",
+    "n": "National and international institutions law / Politics and policy making",
     "c": 6,
     "y": 1,
     "k": "g"
@@ -3057,25 +3057,25 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "#3",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "Second language (lessons + exam 1st semester)",
+    "n": "Second language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "#4",
+    "n": "#3",
     "c": 6,
     "y": 2,
     "k": "o"
    },
    {
-    "n": "#5",
+    "n": "#4",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -3181,7 +3181,7 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "Second foreign language (lessons + exam 1st semester 2nd year)",
+    "n": "Second foreign language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
@@ -3381,63 +3381,63 @@ export const GRADE_PLANS: {
   ],
   "DAAIHS": [
    {
-    "n": "Data Systems in healthcare (@ Bocconi)",
+    "n": "Data Systems in healthcare",
     "c": 6,
     "y": 1,
     "k": "g"
    },
    {
-    "n": "Privacy ethics and regulations in the application of AI seminar (@ Bocconi)",
+    "n": "Privacy ethics and regulations in the application of AI seminar",
     "c": 2,
     "y": 1,
     "k": "p"
    },
    {
-    "n": "Machine Learning (@ Bocconi)",
+    "n": "Machine Learning",
     "c": 8,
     "y": 1,
     "k": "g"
    },
    {
-    "n": "Advanced computer programming (@ Bocconi)",
+    "n": "Advanced computer programming",
     "c": 9,
     "y": 1,
     "k": "g"
    },
    {
-    "n": "Artificial Intelligence module 2 (@ Bocconi)",
+    "n": "Artificial Intelligence module 2",
     "c": 6,
     "y": 1,
     "k": "g",
     "m": "Artificial Intelligence"
    },
    {
-    "n": "Biology and genetics (@ Humanitas)",
+    "n": "Biology and genetics · Humanitas",
     "c": 4,
     "y": 1,
     "k": "g"
    },
    {
-    "n": "Data Science for Clinics (@ Humanitas)",
+    "n": "Data Science for Clinics · Humanitas",
     "c": 8,
     "y": 1,
     "k": "g"
    },
    {
-    "n": "Clinical Epidemiology (@ Humanitas)",
+    "n": "Clinical Epidemiology · Humanitas",
     "c": 10,
     "y": 1,
     "k": "g"
    },
    {
-    "n": "Artificial Intelligence module 1 (@ Bocconi)",
+    "n": "Artificial Intelligence module 1",
     "c": 6,
     "y": 1,
     "k": "g",
     "m": "Artificial Intelligence"
    },
    {
-    "n": "Advanced statistics for health sciences (@ Bocconi)",
+    "n": "Advanced statistics for health sciences",
     "c": 8,
     "y": 1,
     "k": "g"
@@ -3455,31 +3455,31 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "#3",
+    "n": "Internship",
     "c": 6,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "Applications of artificial intelligence in health sciences (@ Humanitas)",
+    "n": "Applications of artificial intelligence in health sciences · Humanitas",
     "c": 10,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "Guidelines for quality assessment and reporting in AI publication seminar (@ Humanitas)",
+    "n": "Guidelines for quality assessment and reporting in AI publication seminar · Humanitas",
     "c": 2,
     "y": 2,
     "k": "p"
    },
    {
-    "n": "Foreign language (1st sem) (@ Humanitas)",
+    "n": "Foreign language · Humanitas",
     "c": 2,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "Next generation sequencing and bioinformatics (@ Humanitas)",
+    "n": "Next generation sequencing and bioinformatics · Humanitas",
     "c": 7,
     "y": 2,
     "k": "g"
@@ -3541,13 +3541,13 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "#2",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "#3",
+    "n": "#2",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -3657,19 +3657,19 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "#4",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "Second foreign language (lessons + exam 1st semester 2nd year)",
+    "n": "Second foreign language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "#5",
+    "n": "#4",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -3677,7 +3677,7 @@ export const GRADE_PLANS: {
   ],
   "IM-CONCENTRATION": [
    {
-    "n": "1 course to be chosen",
+    "n": "Course of your choice",
     "c": 6,
     "y": 1,
     "k": "g"
@@ -3713,7 +3713,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "Behaviourial skills seminars",
+    "n": "Behavioural skills seminars",
     "c": 2,
     "y": 1,
     "k": "p"
@@ -3751,7 +3751,7 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "Second foreign language (lessons + exam 1st semester 2nd year)",
+    "n": "Second foreign language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
@@ -3763,7 +3763,7 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "1 compulsory concentration course",
+    "n": "Concentration course",
     "c": 6,
     "y": 2,
     "k": "g"
@@ -3775,7 +3775,7 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "1 concentration elective on data analysis",
+    "n": "Concentration elective (data analysis)",
     "c": 6,
     "y": 2,
     "k": "g"
@@ -3875,19 +3875,19 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "#4",
+    "n": "Internship",
     "c": 6,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "Second language (lessons + exam 1st semester 2nd year)",
+    "n": "Second language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "#5",
+    "n": "#4",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -3931,7 +3931,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "Seiminari per lo sviluppo di abilità comportamentali",
+    "n": "Seminari per lo sviluppo di abilità comportamentali",
     "c": 2,
     "y": 1,
     "k": "p"
@@ -4041,7 +4041,7 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "1 compulsory course to be chosen from",
+    "n": "Compulsory course of your choice",
     "c": 6,
     "y": 1,
     "k": "g"
@@ -4053,13 +4053,13 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "#5",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "#6",
+    "n": "#5",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -4071,13 +4071,13 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "#7",
+    "n": "#6",
     "c": 6,
     "y": 2,
     "k": "o"
    },
    {
-    "n": "#8",
+    "n": "#7",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -4089,7 +4089,7 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "Second foreign language (lessons + exam 1st semester 2nd year)",
+    "n": "Second foreign language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
@@ -4237,7 +4237,7 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "Management and Economics for Sustainability module 1(Corporate Sustainability Strategies and Governance)",
+    "n": "Management and Economics for Sustainability module 1 (Corporate Sustainability Strategies and Governance)",
     "c": 6,
     "y": 1,
     "k": "g"
@@ -4261,13 +4261,13 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "Business and Marketing Plan Workshop 1st sem.",
+    "n": "Business and Marketing Plan Workshop",
     "c": 3,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "Data Analytics for Sustainability 1st sem.",
+    "n": "Data Analytics for Sustainability",
     "c": 6,
     "y": 2,
     "k": "g"
@@ -4279,25 +4279,25 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "Sustainable Operations & Supply Chain Management 2nd sem",
+    "n": "Sustainable Operations & Supply Chain Management",
     "c": 6,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "Foreign language (lessons and exam) 1st sem",
+    "n": "Foreign language (lessons and exam)",
     "c": 4,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "Sustainable Entrepreneurship Workshop 2nd sem.",
+    "n": "Sustainable Entrepreneurship Workshop",
     "c": 3,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "Diversity and Global Policy 1st sem. | Technologies and Systems for Sustainable Mobility 2nd sem",
+    "n": "Diversity and Global Policy | Technologies and Systems for Sustainable Mobility",
     "c": 6,
     "y": 2,
     "k": "g"
@@ -4391,7 +4391,7 @@ export const GRADE_PLANS: {
     "k": "o"
    },
    {
-    "n": "#2",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
@@ -4403,7 +4403,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "#3",
+    "n": "#2",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -4415,7 +4415,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "Second foreign language (lessons + exam 1st semester 2nd year)",
+    "n": "Second foreign language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
@@ -4467,7 +4467,7 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "1 major compulsory course",
+    "n": "Major compulsory course",
     "c": 6,
     "y": 1,
     "k": "g"
@@ -4497,19 +4497,19 @@ export const GRADE_PLANS: {
     "k": "g"
    },
    {
-    "n": "#2",
+    "n": "Internship",
     "c": 8,
     "y": 2,
     "k": "i"
    },
    {
-    "n": "#3",
+    "n": "#2",
     "c": 6,
     "y": 2,
     "k": "o"
    },
    {
-    "n": "#4",
+    "n": "#3",
     "c": 6,
     "y": 2,
     "k": "o"
@@ -4521,16 +4521,16 @@ export const GRADE_PLANS: {
     "k": "p"
    },
    {
-    "n": "Second language (lessons + exam 1st semester 2nd year)",
+    "n": "Second language (lessons + exam)",
     "c": 4,
     "y": 2,
     "k": "g"
    },
    {
-    "n": "1 Innovation Specific Elective**",
+    "n": "#4",
     "c": 6,
     "y": 2,
-    "k": "g"
+    "k": "o"
    }
   ]
  },

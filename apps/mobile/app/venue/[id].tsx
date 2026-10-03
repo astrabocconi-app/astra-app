@@ -28,7 +28,7 @@ export default function VenueDetailScreen() {
   const insets = useSafeAreaInsets();
   // Reuses the Discounts screen's own cached list — opening a venue never
   // fires a fresh network request, it just reads what's already in memory.
-  const partners = useQuery({ queryKey: ["partners"], queryFn: () => api.partners.list(), retry: false });
+  const partners = useQuery({ queryKey: ["partners"], queryFn: () => api.partners.list() });
   const venue = partners.data?.items.find((p) => p.id === id);
 
   return (

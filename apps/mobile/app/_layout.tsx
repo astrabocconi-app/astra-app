@@ -2,7 +2,8 @@ import "../global.css";
 import { useEffect, useState } from "react";
 import { AppState, type AppStateStatus, View } from "react-native";
 import { Stack, router } from "expo-router";
-import { QueryClient, QueryClientProvider, focusManager } from "@tanstack/react-query";
+import { QueryClientProvider, focusManager } from "@tanstack/react-query";
+import { queryClient } from "../lib/query-client";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { initSentry } from "../lib/sentry";
@@ -15,22 +16,6 @@ import BootOverlay from "../components/BootOverlay";
 import { Spinner } from "../components/Icon";
 
 initSentry();
-
-// Default staleTime was 0, so every query refetched on every mount AND every
-// time the app came back to the foreground (see the focusManager wiring
-// below) — switching Home → Discounts → Home re-fetched all four Home
-// queries from scratch each time, which is what made it feel slow to open.
-// A minute-old news post or partner list is still correct; points-balance
-// keeps its own tighter refetchInterval below since scans need to show up
-// promptly.
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000,
-      retry: false,
-    },
-  },
-});
 
 export default function RootLayout() {
   const [ready, setReady] = useState(false);

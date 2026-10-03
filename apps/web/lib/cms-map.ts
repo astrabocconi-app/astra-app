@@ -71,6 +71,9 @@ export function toEventItem(e: EventRow, origin?: string): EventItem {
     published: e.published,
     links: parseLinks(e.links),
     createdAt: e.createdAt.toISOString(),
+    eventbriteEventId: e.eventbriteEventId,
+    appDiscountPercent: e.appDiscountPercent,
+    appDiscountLimit: e.appDiscountLimit,
   };
 }
 

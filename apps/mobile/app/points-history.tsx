@@ -17,7 +17,6 @@ export default function PointsHistoryScreen() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["points-history"],
     queryFn: () => api.points.history(),
-    retry: false,
   });
   const t = useT();
   const locale = useLocale();

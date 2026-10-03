@@ -19,7 +19,6 @@ export default function PartnerHomeScreen() {
   const stats = useQuery({
     queryKey: ["partner-stats", days],
     queryFn: () => api.partner.stats(days),
-    retry: false,
     refetchInterval: 15_000,
   });
 

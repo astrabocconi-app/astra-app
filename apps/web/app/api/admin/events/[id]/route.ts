@@ -33,6 +33,11 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     }
   }
   const endsAt = d.endsAt !== undefined ? (d.endsAt ? new Date(d.endsAt) : null) : undefined;
+  const nextEventbriteId = d.eventbriteEventId !== undefined ? (d.eventbriteEventId ?? null) : existing.eventbriteEventId;
+  const nextPercent = d.appDiscountPercent !== undefined ? (d.appDiscountPercent ?? null) : existing.appDiscountPercent;
+  if (nextPercent && !nextEventbriteId) {
+    return errorResponse(400, "BAD_REQUEST", "Link the Eventbrite event to give an in-app discount.", requestId);
+  }
 
   const updated = await prisma.event.update({
     where: { id },
@@ -46,6 +51,10 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       ...(d.externalTicketUrl !== undefined ? { externalTicketUrl: d.externalTicketUrl ?? null } : {}),
       ...(d.published !== undefined ? { published: d.published } : {}),
       ...(d.links !== undefined ? { links: d.links } : {}),
+      // Codes already handed out keep the percent they were created with.
+      ...(d.eventbriteEventId !== undefined ? { eventbriteEventId: d.eventbriteEventId ?? null } : {}),
+      ...(d.appDiscountPercent !== undefined ? { appDiscountPercent: d.appDiscountPercent ?? null } : {}),
+      ...(d.appDiscountLimit !== undefined ? { appDiscountLimit: d.appDiscountLimit ?? null } : {}),
     },
   });
   await writeAudit({

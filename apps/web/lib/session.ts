@@ -12,6 +12,8 @@ export interface SessionUser {
     id: string;
     email: string;
     name: string | null;
+    /** Better Auth's image field; we keep a DiceBear avatar seed there (see @astra/shared avatar). */
+    image: string | null;
     roles: string[];
     /** Dashboard pages this account may open. Ignored for admins. */
     dashboardPages: string[];
@@ -33,6 +35,7 @@ export async function getSessionUser(
       id: true,
       email: true,
       name: true,
+      image: true,
       roles: true,
       dashboardPages: true,
       staffUsername: true,
@@ -52,6 +55,7 @@ export async function getSessionUser(
       id: user.id,
       email: user.email,
       name: user.name,
+      image: user.image,
       roles: user.roles,
       dashboardPages: user.dashboardPages,
       staffUsername: user.staffUsername,

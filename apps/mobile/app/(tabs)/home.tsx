@@ -15,6 +15,7 @@ import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Icon, MIcon } from "../../components/Icon";
 import { NavRow } from "../../components/NavRow";
+import { Avatar } from "../../components/Avatar";
 import { api } from "../../lib/api";
 import { useLocale, useT } from "../../lib/i18n";
 import { usePrefetchScreens } from "../../lib/prefetch";
@@ -27,15 +28,14 @@ export default function HomeScreen() {
   // Two cards side by side in a 20pt-margin row with a 12pt gap, 1.2 : 1.
   const cardHeight = Math.round((width - 40 - 12) / 2 / 1.2);
   usePrefetchScreens();
-  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
+  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me() });
   const balance = useQuery({
     queryKey: ["points-balance"],
     queryFn: () => api.points.balance(),
-    retry: false,
     refetchInterval: 30_000, // catch a partner scan awarded while this screen is open
   });
-  const history = useQuery({ queryKey: ["points-history"], queryFn: () => api.points.history(), retry: false });
-  const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list(), retry: false });
+  const history = useQuery({ queryKey: ["points-history"], queryFn: () => api.points.history() });
+  const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list() });
 
   const firstName = me.data?.name?.split(" ")[0];
   const recent = history.data?.entries.slice(0, 3) ?? [];
@@ -79,9 +79,9 @@ export default function HomeScreen() {
           onPress={() => router.push("/profile")}
           hitSlop={10}
           accessibilityLabel={t("tabs.profile")}
-          className="h-10 w-10 items-center justify-center rounded-full bg-astra-light dark:bg-white/10 active:opacity-70"
+          className="active:opacity-70"
         >
-          <Icon name="person" size={20} color="#04107E" />
+          <Avatar seed={me.data?.avatarSeed} size={40} />
         </Pressable>
       </View>
 
@@ -183,7 +183,13 @@ export default function HomeScreen() {
           accessibilityLabel={`${t("home.freeAtB")}, ${t("home.freeAtBSub")}`}
           className="flex-1 overflow-hidden rounded-2xl active:opacity-90"
         >
-          <Image source={require("../../assets/freeatb-classroom.jpg")} resizeMode="cover" style={StyleSheet.absoluteFill} />
+          {/* Taller than the card and pinned to its bottom, so the middle and
+              lower part of the photo (the rows of desks) is what shows. */}
+          <Image
+            source={require("../../assets/freeatb-classroom.jpg")}
+            resizeMode="cover"
+            style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: cardHeight * 1.7 }}
+          />
           {/* Brand-blue wash: the photo reads as texture, the text stays legible. */}
           <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(4,16,126,0.62)" }]} />
           <View className="flex-1 justify-between p-3.5">

@@ -79,6 +79,13 @@ export default function EventsScreen() {
               <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
                 {e.title}
               </Text>
+              {e.appDiscountPercent ? (
+                <View className="mt-1 self-start rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5">
+                  <Text className="text-[11px] font-semibold text-astra-primary dark:text-white">
+                    {t("event.appDiscountShort", { n: String(e.appDiscountPercent) })}
+                  </Text>
+                </View>
+              ) : null}
               <View className="mt-1 flex-row items-center gap-1.5">
                 <Icon name="time-outline" size={13} color="#6B7280" />
                 <Text className="text-xs text-gray-500 dark:text-gray-300">{formatWhen(e.startsAt, locale)}</Text>

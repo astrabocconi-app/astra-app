@@ -11,7 +11,7 @@ import { useLocale, useT } from "../../lib/i18n";
 
 export default function NewsDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list(), retry: false });
+  const news = useQuery({ queryKey: ["news"], queryFn: () => api.news.list() });
   const post = news.data?.items.find((n) => n.id === id);
   const t = useT();
   const locale = useLocale();

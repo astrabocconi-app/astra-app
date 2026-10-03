@@ -1,5 +1,7 @@
 export const en = {
   "login.signInWithEmail": "Sign in with your {domains} email.",
+  "login.firstName": "First name",
+  "login.lastName": "Last name",
   "login.enterCode": "Enter the 6-digit code sent to {email}.",
   "login.checkJunkFolder": "Don't see it? Check your junk/spam folder.",
   "login.devSignIn": "Dev sign in",
@@ -23,6 +25,8 @@ export const en = {
 
 export const it: Record<keyof typeof en, string> = {
   "login.signInWithEmail": "Accedi con la tua email {domains}.",
+  "login.firstName": "Nome",
+  "login.lastName": "Cognome",
   "login.enterCode": "Inserisci il codice a 6 cifre inviato a {email}.",
   "login.checkJunkFolder": "Non lo vedi? Controlla la cartella spam/posta indesiderata.",
   "login.devSignIn": "Accesso sviluppatore",

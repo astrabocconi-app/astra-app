@@ -15,3 +15,4 @@ export * from "./grade-plans";
 export * from "./grade-calc";
 export * from "./master-admissions";
 export * from "./master-admissions-data";
+export * from "./avatar";

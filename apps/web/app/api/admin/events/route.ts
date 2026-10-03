@@ -41,6 +41,9 @@ export async function POST(req: Request) {
     return errorResponse(400, "BAD_REQUEST", "Invalid start date.", requestId);
   }
   const endsAt = d.endsAt ? new Date(d.endsAt) : null;
+  if (d.appDiscountPercent && !d.eventbriteEventId) {
+    return errorResponse(400, "BAD_REQUEST", "Link the Eventbrite event to give an in-app discount.", requestId);
+  }
 
   const created = await prisma.event.create({
     data: {
@@ -53,6 +56,9 @@ export async function POST(req: Request) {
       externalTicketUrl: d.externalTicketUrl ?? null,
       published: d.published,
       links: d.links,
+      eventbriteEventId: d.eventbriteEventId ?? null,
+      appDiscountPercent: d.appDiscountPercent ?? null,
+      appDiscountLimit: d.appDiscountLimit ?? null,
     },
   });
   await writeAudit({

@@ -46,7 +46,7 @@ type FlatItem = {
 export default function MaterialsScreen() {
   const t = useT();
   const insets = useSafeAreaInsets();
-  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
+  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me() });
   const myCourse = me.data?.academicProfile?.programme.code ?? null;
   // Students revisit earlier years when resitting or revising, and look ahead
   // before picking electives, so the whole programme is one tap away.

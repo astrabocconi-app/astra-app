@@ -3,6 +3,7 @@ import { prisma } from "@astra/db";
 import { PageHeader } from "@/app/_ui/page-header";
 import { toEventItem } from "@/lib/cms-map";
 import { EventForm } from "../event-form";
+import { issuedCounts } from "@/lib/event-discount";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
   return (
     <>
       <PageHeader title="Edit event" subtitle="Update or unpublish this event." />
-      <EventForm id={id} initial={toEventItem(row)} />
+      <EventForm id={id} initial={toEventItem(row)} issued={(await issuedCounts([id])).get(id) ?? 0} />
     </>
   );
 }

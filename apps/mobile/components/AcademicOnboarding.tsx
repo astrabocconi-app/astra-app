@@ -42,7 +42,7 @@ export function AcademicOnboarding() {
   const qc = useQueryClient();
   const insets = useSafeAreaInsets();
   const booting = useBootStore((s) => s.booting);
-  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
+  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me() });
   const needsProfile = Boolean(me.data && !me.data.academicProfile);
 
   // null until SecureStore answers, so the sheet never flashes for someone who skipped.

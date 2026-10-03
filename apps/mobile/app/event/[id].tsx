@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   View,
   Text,
@@ -72,11 +73,29 @@ function formatWhen(iso: string, locale: string) {
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list(), retry: false });
+  const [opening, setOpening] = useState(false);
+  const events = useQuery({ queryKey: ["events"], queryFn: () => api.events.list() });
   const event = events.data?.items.find((e) => e.id === id);
   const t = useT();
   const locale = useLocale();
   const insets = useSafeAreaInsets();
+
+  // Ask the server for this student's link first: with an in-app discount it
+  // carries their personal code. If that fails, the plain link still sells a
+  // ticket, just at full price.
+  async function getTickets() {
+    if (!event) return;
+    setOpening(true);
+    let url = event.externalTicketUrl ?? `https://www.eventbrite.com/e/${event.eventbriteEventId}`;
+    try {
+      url = (await api.events.ticketLink(event.id)).url;
+    } catch {
+      // keep the plain link
+    } finally {
+      setOpening(false);
+    }
+    openTickets(url);
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
@@ -135,16 +154,25 @@ export default function EventDetailScreen() {
       )}
 
       {/* Get tickets */}
-      {event?.externalTicketUrl ? (
+      {event && (event.externalTicketUrl || event.eventbriteEventId) ? (
         <View
           className="border-t border-gray-100 dark:border-white/10 px-5 pt-3"
           style={{ paddingBottom: insets.bottom + 8 }}
         >
+          {event.appDiscountPercent ? (
+            <View className="mb-2.5 flex-row items-center justify-center gap-1.5">
+              <Icon name="pricetag-outline" size={14} color="#04107E" />
+              <Text className="text-[13px] font-medium text-astra-primary dark:text-white">
+                {t("event.appDiscount", { n: String(event.appDiscountPercent) })}
+              </Text>
+            </View>
+          ) : null}
           <Pressable
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-astra-dark py-3.5 active:opacity-90"
-            onPress={() => openTickets(event.externalTicketUrl!)}
+            disabled={opening}
+            className={`flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-astra-dark py-3.5 ${opening ? "opacity-70" : "active:opacity-90"}`}
+            onPress={getTickets}
           >
-            <Icon name="ticket-outline" size={18} color="#fff" />
+            {opening ? <Spinner color="#FFFFFF" /> : <Icon name="ticket-outline" size={18} color="#fff" />}
             <Text className="text-base font-semibold text-white">{t("event.getTickets")}</Text>
           </Pressable>
         </View>

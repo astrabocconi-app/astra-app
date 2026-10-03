@@ -49,6 +49,8 @@ export default function LoginScreen() {
   const [mode, setMode] = useState<Mode>("student");
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [code, setCode] = useState("");
   const [partnerCode, setPartnerCode] = useState("");
   const [partnerPassword, setPartnerPassword] = useState("");
@@ -102,6 +104,11 @@ export default function LoginScreen() {
       const { token } = await api.auth.verifyOtp(email.trim(), code.trim());
       if (!token) throw new Error(t("login.errorNoToken"));
       await setToken(token);
+      // Home greets students by name. Best effort: a failure here must not
+      // block signing in, and Profile lets them set it later.
+      if (firstName.trim() && lastName.trim()) {
+        await api.updateMe({ firstName: firstName.trim(), lastName: lastName.trim() }).catch(() => {});
+      }
       await enterStudentApp();
     } catch {
       setError(t("login.errorInvalidCode"));
@@ -133,7 +140,9 @@ export default function LoginScreen() {
 
   const studentDisabled =
     loading ||
-    (step === "email" ? !(isAllowedEmail(email) || isDevBypass) : code.length < 4);
+    (step === "email"
+      ? !(isDevBypass || (isAllowedEmail(email) && firstName.trim() && lastName.trim()))
+      : code.length < 4);
   const partnerDisabled = loading || !partnerCode.trim() || partnerPassword.length < 4;
 
   return (
@@ -192,6 +201,30 @@ export default function LoginScreen() {
                   </Text>
                 )}
 
+                {step === "email" && (
+                  <View className="w-full flex-row gap-3">
+                    {[
+                      { value: firstName, set: setFirstName, placeholder: t("login.firstName"), type: "givenName" as const, auto: "name-given" as const },
+                      { value: lastName, set: setLastName, placeholder: t("login.lastName"), type: "familyName" as const, auto: "name-family" as const },
+                    ].map((f) => (
+                      <TextField
+                        key={f.placeholder}
+                        center
+                        className="flex-1 rounded-xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-3 text-center text-gray-900 dark:text-white"
+                        placeholderTextColor="#9CA3AF"
+                        placeholder={f.placeholder}
+                        autoCapitalize="words"
+                        autoCorrect={false}
+                        textContentType={f.type}
+                        autoComplete={f.auto}
+                        maxLength={40}
+                        value={f.value}
+                        onChangeText={f.set}
+                        editable={!loading}
+                      />
+                    ))}
+                  </View>
+                )}
                 {step === "email" ? (
                   <TextField center
                     className="w-full rounded-xl border border-gray-200 dark:border-white/15 bg-white dark:bg-astra-primary px-4 py-3 text-center text-gray-900 dark:text-white"

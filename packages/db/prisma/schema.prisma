@@ -120,6 +120,7 @@ model User {
   rewardRedemptions RewardRedemption[]
   rsvps             Rsvp[]
   tickets           Ticket[]
+  eventAppDiscounts EventAppDiscount[]
   checkedInTickets  Ticket[]                @relation("TicketCheckedInBy")
   newsPosts         NewsPost[]
   pushTokens        PushToken[]
@@ -648,6 +649,12 @@ model Event {
   pointsOnCheckin   Int       @default(0) // legacy; unused in advertise-only v1
   /// Same shape as NewsPost.links — shown at the bottom of the event page.
   links             Json?
+  /// The Eventbrite event tickets are sold on, for in-app discounts.
+  eventbriteEventId  String?
+  /// Percent off for students who buy through the app (null = no discount).
+  appDiscountPercent Int?
+  /// How many students can get it (null = no cap).
+  appDiscountLimit   Int?
   areaId            String?
   published         Boolean   @default(false)
   createdAt         DateTime  @default(now())
@@ -655,10 +662,29 @@ model Event {
   deletedAt         DateTime?
 
   area    Area?    @relation(fields: [areaId], references: [id])
-  rsvps   Rsvp[]
-  tickets Ticket[]
+  rsvps        Rsvp[]
+  tickets      Ticket[]
+  appDiscounts EventAppDiscount[]
 
   @@index([published, startsAt])
+}
+
+/// A student's personal single-use Eventbrite code for an event's in-app
+/// discount, created the first time they tap "Get tickets" and reused after.
+model EventAppDiscount {
+  id                   String   @id @default(cuid())
+  eventId              String
+  userId               String
+  code                 String
+  eventbriteDiscountId String
+  percentOff           Int
+  createdAt            DateTime @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([eventId])
 }
 
 model Rsvp {

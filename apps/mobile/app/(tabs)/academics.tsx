@@ -17,7 +17,7 @@ const SECTIONS: { href: Href; icon: ComponentProps<typeof NavRow>["icon"]; title
 
 export default function AcademicsScreen() {
   const t = useT();
-  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
+  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me() });
   const academic = me.data?.academicProfile ?? null;
 
   return (

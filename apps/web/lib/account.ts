@@ -61,6 +61,7 @@ export async function deleteOwnAccount(userId: string): Promise<DeleteAccountRes
     await drop("consents", tx.consent.deleteMany({ where: { userId } }));
     await drop("rsvps", tx.rsvp.deleteMany({ where: { userId } }));
     await drop("tickets", tx.ticket.deleteMany({ where: { userId } }));
+    await drop("eventAppDiscounts", tx.eventAppDiscount.deleteMany({ where: { userId } }));
     await drop("materialAccesses", tx.materialAccess.deleteMany({ where: { userId } }));
     await drop("discountUsages", tx.discountUsage.deleteMany({ where: { userId } }));
     await drop("areaMemberships", tx.areaMembership.deleteMany({ where: { userId } }));

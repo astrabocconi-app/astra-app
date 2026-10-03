@@ -13,11 +13,10 @@ import { useT } from "../../lib/i18n";
 // is cached so the card still renders offline.
 export default function CardScreen() {
   const t = useT();
-  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me(), retry: false });
+  const me = useQuery({ queryKey: ["me"], queryFn: () => api.me() });
   const card = useQuery({
     queryKey: ["card-token"],
     queryFn: () => api.card.token(),
-    retry: false,
     refetchInterval: 60_000,
   });
 

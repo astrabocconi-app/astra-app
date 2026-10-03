@@ -31,7 +31,6 @@ export default function ScanScreen() {
   const offersQuery = useQuery({
     queryKey: ["partner-offers"],
     queryFn: () => api.partner.offers(),
-    retry: false,
     staleTime: 5 * 60_000,
   });
   const offers: Offer[] = offersQuery.data?.offers ?? [];

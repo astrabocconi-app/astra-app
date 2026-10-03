@@ -8,6 +8,8 @@ import type {
   PartnerListResponse,
   ChatResponse,
   MaterialsResponse,
+  TicketLinkResponse,
+  UpdateMeInput,
   GuidesResponse,
   AcademicCatalogueResponse,
   AcademicCourseSearchResponse,
@@ -30,6 +32,11 @@ export interface ApiClientOptions {
   baseUrl: string;
   /** Supplies the persisted session token, if any. */
   getToken?: () => string | null | undefined;
+  /**
+   * Called when the server rejects the token we sent (401): the session was
+   * revoked, the account deleted or the token expired. The app signs out.
+   */
+  onUnauthorized?: () => void;
 }
 
 export interface ApiError extends Error {
@@ -49,7 +56,7 @@ function makeError(status: number, code: string | undefined, message: string): A
 }
 
 export function createApiClient(options: ApiClientOptions) {
-  const { baseUrl, getToken } = options;
+  const { baseUrl, getToken, onUnauthorized } = options;
 
   async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; res: Response }> {
     const token = getToken?.();
@@ -84,6 +91,9 @@ export function createApiClient(options: ApiClientOptions) {
     const body = text ? (JSON.parse(text) as unknown) : undefined;
 
     if (!res.ok) {
+      // Only when we actually sent a token: a 401 on the sign-in calls
+      // themselves (no token yet) is just a wrong code or password.
+      if (res.status === 401 && token) onUnauthorized?.();
       const b = body as
         { error?: { code?: string; message?: string }; message?: string } | undefined;
       const message = b?.error?.message ?? b?.message ?? `ASTRA API ${res.status} on ${path}`;
@@ -116,6 +126,9 @@ export function createApiClient(options: ApiClientOptions) {
 
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
+    /** PATCH /api/me — name and/or avatar. */
+    updateMe: async (input: UpdateMeInput) =>
+      (await request<MeResponse>("/api/me", { method: "PATCH", body: JSON.stringify(input) })).data,
 
     /**
      * POST /api/support — send a question, issue or idea.
@@ -198,6 +211,9 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/events — published upcoming events. */
     events: {
       list: async () => (await request<EventListResponse>("/api/events")).data,
+      /** The ticket link for this student, with their in-app discount code if any. */
+      ticketLink: async (id: string) =>
+        (await request<TicketLinkResponse>(`/api/events/${id}/ticket-link`, { method: "POST" })).data,
     },
 
     rewards: {

@@ -13,7 +13,6 @@ export default function PartnerProfileScreen() {
   const stats = useQuery({
     queryKey: ["partner-stats"],
     queryFn: () => api.partner.stats(),
-    retry: false,
   });
 
   async function signOut() {

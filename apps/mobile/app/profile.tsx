@@ -26,6 +26,7 @@ import { clearLegacyAcademicProfile, loadLegacyAcademicProfile } from "../lib/pr
 import { useLanguageStore } from "../lib/language-store";
 import { useT } from "../lib/i18n";
 import { TextField } from "../components/TextField";
+import { ProfileIdentity } from "../components/ProfileEditors";
 
 type Picker = "programme" | "track" | "year" | "class" | null;
 
@@ -47,12 +48,10 @@ export default function ProfileScreen() {
   const { data, error, isLoading, refetch } = useQuery({
     queryKey: ["me"],
     queryFn: () => api.me(),
-    retry: false,
   });
   const catalogue = useQuery({
     queryKey: ["academic-catalogue"],
     queryFn: () => api.academic.catalogue(),
-    retry: false,
   });
   const { language, setLanguage } = useLanguageStore();
   const t = useT();
@@ -327,29 +326,26 @@ export default function ProfileScreen() {
           className="flex-1"
           contentContainerStyle={{ padding: 20, flexGrow: 1 }}
         >
-          <View className="items-center gap-2 pt-4">
-            <View className="h-20 w-20 items-center justify-center rounded-full bg-astra-light dark:bg-white/10">
-              <Icon name="person" size={36} color="#04107E" />
-            </View>
-            <Text className="text-xl font-semibold text-gray-900 dark:text-white">
-              {data.name?.split(" ")[0] ?? t("profile.student")}
-            </Text>
-            {/* Programme · year · class shown next to the name once selected */}
-            {academic ? (
-              <Text className="text-sm text-gray-500 dark:text-gray-300">
-                {[
-                  academic.programme.code,
-                  academic.track?.code,
-                  `${t("profile.year")} ${academic.studyYear}`,
-                  academic.classGroup ? `${t("profile.class")} ${academic.classGroup.code}` : null,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
-              </Text>
-            ) : (
-              <Text className="text-sm text-gray-400 dark:text-white/60">{t("profile.addAcademicInfo")}</Text>
-            )}
-          </View>
+          <ProfileIdentity
+            me={data}
+            subtitle={
+              // Programme · year · class shown next to the name once selected
+              academic ? (
+                <Text className="text-sm text-gray-500 dark:text-gray-300">
+                  {[
+                    academic.programme.code,
+                    academic.track?.code,
+                    `${t("profile.year")} ${academic.studyYear}`,
+                    academic.classGroup ? `${t("profile.class")} ${academic.classGroup.code}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </Text>
+              ) : (
+                <Text className="text-sm text-gray-400 dark:text-white/60">{t("profile.addAcademicInfo")}</Text>
+              )
+            }
+          />
 
           {/* Academic selection drives Materials. */}
           <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">

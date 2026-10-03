@@ -9,6 +9,7 @@ import { Button } from "@/app/_ui/button";
 import { Card } from "@/app/_ui/card";
 import { Field, Input, Textarea, Toggle } from "@/app/_ui/field";
 import { ImageInput } from "../_components/image-input";
+import { AppDiscount, type AppDiscountValue } from "./app-discount";
 
 async function send(path: string, method: string, body?: unknown) {
   const res = await fetch(path, {
@@ -31,7 +32,7 @@ function toLocalInput(iso?: string | null) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function EventForm({ id, initial }: { id?: string; initial?: EventItem }) {
+export function EventForm({ id, initial, issued }: { id?: string; initial?: EventItem; issued?: number }) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -42,6 +43,12 @@ export function EventForm({ id, initial }: { id?: string; initial?: EventItem })
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [published, setPublished] = useState(initial?.published ?? false);
   const [links, setLinks] = useState<ContentLink[]>(initial?.links ?? []);
+  const [discount, setDiscount] = useState<AppDiscountValue>({
+    eventbriteEventId: initial?.eventbriteEventId ?? "",
+    enabled: Boolean(initial?.appDiscountPercent),
+    percent: initial?.appDiscountPercent ? String(initial.appDiscountPercent) : "",
+    limit: initial?.appDiscountLimit ? String(initial.appDiscountLimit) : "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,7 +56,29 @@ export function EventForm({ id, initial }: { id?: string; initial?: EventItem })
     setLoading(true);
     setError(null);
     try {
-      const payload = { title, description, location, startsAt, endsAt, externalTicketUrl, imageUrl, published, links };
+      const on = discount.enabled && Boolean(discount.eventbriteEventId);
+      const percent = Number(discount.percent);
+      if (on && !(Number.isInteger(percent) && percent >= 1 && percent <= 100)) {
+        throw new Error("Percent off must be a whole number from 1 to 100.");
+      }
+      const limit = discount.limit.trim() ? Number(discount.limit) : null;
+      if (on && limit !== null && !(Number.isInteger(limit) && limit >= 1)) {
+        throw new Error("Max students must be a whole number, or empty for no limit.");
+      }
+      const payload = {
+        title,
+        description,
+        location,
+        startsAt,
+        endsAt,
+        externalTicketUrl,
+        imageUrl,
+        published,
+        links,
+        eventbriteEventId: discount.eventbriteEventId || null,
+        appDiscountPercent: on ? percent : null,
+        appDiscountLimit: on ? limit : null,
+      };
       if (id) await send(`/api/admin/events/${id}`, "PATCH", payload);
       else await send("/api/admin/events", "POST", payload);
       router.push("/dashboard/events");
@@ -103,6 +132,13 @@ export function EventForm({ id, initial }: { id?: string; initial?: EventItem })
           hint="Recommended: 1200 × 675 px (16:9 landscape)"
         />
       </Field>
+      <AppDiscount
+        value={discount}
+        onChange={setDiscount}
+        issued={issued}
+        ticketUrl={externalTicketUrl}
+        onTicketUrl={setExternalTicketUrl}
+      />
       <Toggle label="Published" hint="Visible in the app" checked={published} onChange={setPublished} />
 
       <LinksEditor value={links} onChange={setLinks} />

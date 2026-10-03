@@ -103,10 +103,20 @@ export const meResponse = z.object({
   id: z.string(),
   email: z.string().email(),
   name: z.string().nullable(),
+  /** DiceBear seed for the profile picture (see avatar.ts). */
+  avatarSeed: z.string(),
   roles: z.array(z.string()),
   academicProfile: academicProfile.nullable(),
 });
 export type MeResponse = z.infer<typeof meResponse>;
+
+/** PATCH /api/me — the student's own name and avatar. */
+export const updateMeInput = z.object({
+  firstName: z.string().trim().min(1).max(40).optional(),
+  lastName: z.string().trim().min(1).max(40).optional(),
+  avatarSeed: z.string().regex(/^[A-Za-z0-9_-]{1,40}$/).optional(),
+});
+export type UpdateMeInput = z.infer<typeof updateMeInput>;
 
 // ── Points ──────────────────────────────────────────────────────────────────
 
@@ -251,6 +261,10 @@ export const eventInput = z.object({
   externalTicketUrl: optionalUrl,
   published: z.boolean().default(false),
   links: contentLinks,
+  /** In-app discount: the Eventbrite event, percent off, optional cap on students. */
+  eventbriteEventId: z.string().trim().regex(/^\d+$/, "Pick an Eventbrite event").nullish(),
+  appDiscountPercent: z.number().int().min(1).max(100).nullish(),
+  appDiscountLimit: z.number().int().min(1).nullish(),
 });
 export type EventInput = z.infer<typeof eventInput>;
 
@@ -266,8 +280,24 @@ export const eventItem = z.object({
   published: z.boolean(),
   links: z.array(contentLink),
   createdAt: z.string(),
+  eventbriteEventId: z.string().nullable(),
+  /** Percent off when buying through the app; null = none. */
+  appDiscountPercent: z.number().nullable(),
+  appDiscountLimit: z.number().nullable(),
 });
 export type EventItem = z.infer<typeof eventItem>;
+
+/**
+ * POST /api/events/:id/ticket-link — where "Get tickets" should go. With an
+ * in-app discount it carries the student's personal code; otherwise it's the
+ * plain ticket link (code null), e.g. once the discount has run out.
+ */
+export const ticketLinkResponse = z.object({
+  url: z.string(),
+  code: z.string().nullable(),
+  percentOff: z.number().nullable(),
+});
+export type TicketLinkResponse = z.infer<typeof ticketLinkResponse>;
 
 export const eventListResponse = z.object({ items: z.array(eventItem) });
 export type EventListResponse = z.infer<typeof eventListResponse>;

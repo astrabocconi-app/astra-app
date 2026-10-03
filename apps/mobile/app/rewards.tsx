@@ -29,17 +29,15 @@ export default function RewardsScreen() {
   const locale = useLocale();
   const insets = useSafeAreaInsets();
   const qc = useQueryClient();
-  const rewards = useQuery({ queryKey: ["rewards"], queryFn: () => api.rewards.list(), retry: false });
+  const rewards = useQuery({ queryKey: ["rewards"], queryFn: () => api.rewards.list() });
   const balance = useQuery({
     queryKey: ["points-balance"],
     queryFn: () => api.points.balance(),
-    retry: false,
     refetchInterval: 30_000,
   });
   const mine = useQuery({
     queryKey: ["redemptions"],
     queryFn: () => api.rewards.redemptions(),
-    retry: false,
     // Catches a redemption being ticked off in the backoffice while the student
     // is standing at the desk looking at this screen.
     refetchInterval: 30_000,

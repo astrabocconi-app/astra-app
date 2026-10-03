@@ -9,7 +9,6 @@ import {
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Animated, { FadeIn, FadeInLeft, FadeInRight } from "react-native-reanimated";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import * as SecureStore from "expo-secure-store";
 import type { AcademicCatalogueResponse } from "@astra/shared";
@@ -55,7 +54,6 @@ export function AcademicOnboarding() {
   }, []);
 
   const [step, setStep] = useState<Step>("programme");
-  const [forward, setForward] = useState(true);
   const [level, setLevel] = useState("BACHELOR");
   const [query, setQuery] = useState("");
   const [programmeId, setProgrammeId] = useState<string | null>(null);
@@ -102,8 +100,7 @@ export function AcademicOnboarding() {
     );
   }, [programmes, query, level]);
 
-  function go(next: Step, isForward = true) {
-    setForward(isForward);
+  function go(next: Step) {
     setError(null);
     setStep(next);
   }
@@ -153,11 +150,10 @@ export function AcademicOnboarding() {
   }
 
   function back() {
-    if (step === "class") go("year", false);
-    else if (step === "year") go("programme", false);
+    if (step === "class") go("year");
+    else if (step === "year") go("programme");
   }
 
-  const entering = (forward ? FadeInRight : FadeInLeft).duration(260);
   const selectedClass = programme?.classGroups.find((c) => c.id === classId);
 
   return (
@@ -187,20 +183,17 @@ export function AcademicOnboarding() {
           >
             {step === "done" ? (
               <View className="flex-1 items-center justify-center px-10">
-                <Animated.View
-                  entering={FadeIn.duration(260)}
+                <View
                   className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10"
                 >
                   <Icon name="checkmark" size={30} color="#04107E" />
-                </Animated.View>
-                <Animated.Text
-                  entering={FadeInRight.delay(120).duration(260)}
+                </View>
+                <Text
                   className="mt-5 text-xl font-semibold text-gray-900 dark:text-white"
                 >
                   {t("onboarding.doneTitle")}
-                </Animated.Text>
-                <Animated.Text
-                  entering={FadeInRight.delay(200).duration(260)}
+                </Text>
+                <Text
                   className="mt-2 text-center text-gray-500 dark:text-gray-300"
                 >
                   {[
@@ -210,7 +203,7 @@ export function AcademicOnboarding() {
                   ]
                     .filter(Boolean)
                     .join("  ·  ")}
-                </Animated.Text>
+                </Text>
               </View>
             ) : (
               <>
@@ -244,9 +237,11 @@ export function AcademicOnboarding() {
                 </View>
 
                 <View style={{ flex: 1 }}>
-                  {/* Entering only: an exiting layout animation inside a Modal can
-                  leave a dead view over the sheet on iOS and swallow every tap. */}
-                  <Animated.View key={step} entering={entering} className="flex-1">
+                  {/* No Reanimated layout animations in here: inside a Modal on iOS
+                      an entering animation can fail to start, leaving the step
+                      invisible (the blank card testers got stuck on), and an
+                      exiting one can leave a dead view that swallows taps. */}
+                  <View key={step} className="flex-1">
                     <View className="px-6 pt-7">
                       <Text className="text-2xl font-semibold text-gray-900 dark:text-white">
                         {t(
@@ -270,11 +265,11 @@ export function AcademicOnboarding() {
                       {/* What's been chosen so far — tap to change it */}
                       {step !== "programme" && programme ? (
                         <View className="mt-4 flex-row flex-wrap gap-2">
-                          <Crumb label={programme.code} onPress={() => go("programme", false)} />
+                          <Crumb label={programme.code} onPress={() => go("programme")} />
                           {step === "class" && year ? (
                             <Crumb
                               label={`${t("onboarding.yearWord")} ${year}`}
-                              onPress={() => go("year", false)}
+                              onPress={() => go("year")}
                             />
                           ) : null}
                         </View>
@@ -471,7 +466,7 @@ export function AcademicOnboarding() {
                         }
                       />
                     ) : null}
-                  </Animated.View>
+                  </View>
                 </View>
 
                 {saving || error ? (

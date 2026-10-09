@@ -83,7 +83,6 @@ Until that is done, build your own Neon branch URL by hand into `apps/web/.env`.
 | `SUPABASE_URL` `SUPABASE_SECRET_KEY` | yes | P | Materials/guides catalogue |
 | `EVENTBRITE_PRIVATE_TOKEN` `EVENTBRITE_ORG_ID` | for Eventbrite features | P | Discount-code generation and reward code import |
 | `MAPBOX_TOKEN` (or `EXPO_PUBLIC_MAPBOX_TOKEN`) | for backoffice geocoding | P | Address search in the partner form |
-| `FREEATB_FUNCTION_URL` `FREEATB_ANON_KEY` | no | P | Overrides for the Free@B classroom feed (public anon key has an in-code default) |
 
 Set automatically by Vercel: `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`,
 `NODE_ENV`. `turbo.json` passes the variables above through to builds; add new

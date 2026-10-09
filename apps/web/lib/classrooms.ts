@@ -9,6 +9,7 @@ import {
   campusRooms,
   collectRooms,
   computeRooms,
+  isEmptyResult,
   looksLikeTimetable,
   parseTime,
   parseTimetableHtml,
@@ -74,10 +75,14 @@ async function loadTimetable(from: string, to: string, timeoutMs: number, room =
   }
   if (!res.ok) throw new TimetableError(`Bocconi timetable returned ${res.status}.`);
   const html = await res.text();
-  // A redesigned page must fail loudly: an unparseable page would otherwise look
-  // like "no lessons today" and show every room as free.
+  // "Nessun risultato" is a real answer: nothing is assigned in that range.
+  if (isEmptyResult(html)) return [];
+  // Anything else that isn't the results table is a redesigned page, and must fail
+  // loudly: reading it as "no lessons" would show every room as free.
   if (!looksLikeTimetable(html)) throw new TimetableError("The Bocconi timetable page has changed shape.");
-  return parseTimetableHtml(html);
+  const rows = parseTimetableHtml(html);
+  if (rows.length === 0) throw new TimetableError("The Bocconi timetable has rows this app can't read.");
+  return rows;
 }
 
 /**
@@ -185,6 +190,21 @@ export async function fetchClassrooms(params: { day?: string; date?: string; tim
   }
 
   const [dayAssignments, uni] = await Promise.all([getDay(date), getUniverse(now.date).catch(() => null)]);
+
+  // No assignments at all means no timetable for that day (a holiday, or not
+  // published yet), not "every room is free".
+  if (dayAssignments.length === 0) {
+    return {
+      rooms: [],
+      freeRooms: 0,
+      totalRooms: 0,
+      timestamp: new Date().toISOString(),
+      date,
+      time: `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`,
+      source: "bocconi",
+      complete: uni?.complete ?? false,
+    };
+  }
 
   const known = new Map<string, RoomRef>((uni?.rooms ?? []).map((r) => [r.key, r]));
   // Rooms seen today but missing from the list (new rooms) join it, as long as

@@ -78,9 +78,18 @@ function cellLines(cell: string): string[] {
     .filter(Boolean);
 }
 
-/** True when the markup looks like the assignment list; a changed page must fail loudly, not look empty. */
+/** The page with a results table (header "Aule assegnate"). */
 export function looksLikeTimetable(html: string): boolean {
   return /<th[^>]*>\s*Aule assegnate\s*<\/th>/i.test(html);
+}
+
+/**
+ * A query with no assignments (a holiday, a day not published yet) does not
+ * render the table: the page says "Nessun risultato" instead. That is an answer,
+ * not a failure.
+ */
+export function isEmptyResult(html: string): boolean {
+  return /Nessun risultato/i.test(html) && !looksLikeTimetable(html);
 }
 
 export function parseTime(hhmm: string): number | null {

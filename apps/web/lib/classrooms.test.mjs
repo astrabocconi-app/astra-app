@@ -7,6 +7,7 @@ import {
   collectRooms,
   computeRooms,
   decodeEntities,
+  isEmptyResult,
   looksLikeTimetable,
   parseRoomCell,
   parseTime,
@@ -52,6 +53,17 @@ test("the real markup parses into assignments, skipping the header row", () => {
 test("a page that is not the assignment list is rejected, not read as empty", () => {
   assert.equal(looksLikeTimetable("<html><body><h1>Manutenzione</h1></body></html>"), false);
   assert.equal(looksLikeTimetable("<table><tr><th>Data</th></tr></table>"), false);
+  assert.equal(isEmptyResult("<html><body><h1>Manutenzione</h1></body></html>"), false);
+});
+
+test("a day with no assignments is an answer, not a failure", () => {
+  const empty = readFileSync(new URL("./__fixtures__/lista_orario_empty.html", import.meta.url), "utf8");
+  assert.match(empty, /Nessun risultato/);
+  assert.equal(isEmptyResult(empty), true);
+  assert.equal(looksLikeTimetable(empty), false);
+  assert.deepEqual(parseTimetableHtml(empty), []);
+  // and a real results page is never mistaken for an empty one
+  assert.equal(isEmptyResult(html), false);
 });
 
 test("multi-room cells, lowercase 'aula', negative floors and basements", () => {

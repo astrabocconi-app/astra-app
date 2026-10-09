@@ -13,8 +13,15 @@ import { z } from "zod";
  * therefore the thing the UI has to make hardest to do by accident.
  */
 export const pushAudience = z.object({
-  /** Restrict to these roles. Empty/absent = any role. */
-  roles: z.array(z.enum(["STUDENT", "STAFF", "AREA_MANAGER", "ADMIN", "PARTNER_MANAGER"])).optional(),
+  /**
+   * Restrict to these roles. Absent = any role. An EMPTY list is rejected: it used
+   * to widen the send to everyone (partner scanners, staff, admins) while the UI
+   * called it "filtered".
+   */
+  roles: z
+    .array(z.enum(["STUDENT", "STAFF", "AREA_MANAGER", "ADMIN", "PARTNER_MANAGER"]))
+    .min(1, "Pick at least one role")
+    .optional(),
   /** Programme codes, e.g. ["BIEM", "BESS"]. */
   programmeCodes: z.array(z.string().trim().min(1)).optional(),
   /** Study years, 1-5. */

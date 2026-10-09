@@ -8,7 +8,12 @@
 // The token is a private (personal) OAuth token — it is read server-side only
 // and never reaches the dashboard bundle.
 
+import { upstreamFetch, log, newRequestId } from "./api";
+
 const API = "https://www.eventbriteapi.com/v3";
+
+/** Eventbrite is on the student's "Get tickets" path: never wait longer than this. */
+const TIMEOUT_MS = 6_000;
 
 /** Codes are single-use: one discount, one ticket, one student. */
 const QUANTITY_PER_CODE = 1;
@@ -60,7 +65,7 @@ async function call<T>(
 
   let res: Response;
   try {
-    res = await fetch(`${API}${path}`, {
+    res = await upstreamFetch("eventbrite", `${API}${path}`, {
       method: init?.method ?? "GET",
       headers: {
         Authorization: `Bearer ${t}`,
@@ -68,13 +73,15 @@ async function call<T>(
       },
       body: init?.body ? JSON.stringify(init.body) : undefined,
       cache: "no-store",
+      timeoutMs: TIMEOUT_MS,
     });
   } catch {
+    // upstreamFetch already logged why (timeout, DNS, reset) with the duration.
     throw new EventbriteError("Couldn't reach Eventbrite. Check the connection and try again.");
   }
 
   // 204s (and DELETE) can come back without a body.
-  const text = await res.text();
+  const text = await res.text().catch(() => "");
   const data = text ? safeJson(text) : {};
 
   if (!res.ok) {
@@ -83,6 +90,12 @@ async function call<T>(
       error_description?: string;
       error_detail?: { ARGUMENTS_ERROR?: Record<string, string[]> };
     };
+    // The detail is for whoever reads the logs; it never reaches a student.
+    log("warn", newRequestId(), "eventbrite error", {
+      status: res.status,
+      method: init?.method ?? "GET",
+      detail: (err.error_description ?? err.error ?? "").slice(0, 200),
+    });
     if (err.error_detail?.ARGUMENTS_ERROR?.["discount.code"]?.includes("DUPLICATE")) {
       throw new DuplicateCodeError("(generated)");
     }
@@ -91,6 +104,9 @@ async function call<T>(
         "Eventbrite rejected the token. It may have been revoked or lacks permission.",
         res.status,
       );
+    }
+    if (res.status === 429) {
+      throw new EventbriteError("Eventbrite is rate limiting us. Try again in a few minutes.", 429);
     }
     throw new EventbriteError(
       err.error_description ?? err.error ?? `Eventbrite returned ${res.status}.`,
@@ -138,23 +154,51 @@ export async function listEvents(): Promise<EventbriteEvent[]> {
   const org = orgId();
   if (!org) throw new EventbriteError("Eventbrite is not configured.");
 
-  const data = await call<{ events?: RawEvent[] }>(
-    `/organizations/${org}/events/?order_by=start_desc&page_size=50`,
-  );
-  const now = Date.now();
+  // Follow the continuation token: the picker used to stop at the first 50, so
+  // an event beyond them could never be linked. Capped so a huge organisation
+  // cannot turn one dashboard load into dozens of calls.
+  const raw: RawEvent[] = [];
+  let continuation: string | undefined;
+  for (let page = 0; page < MAX_EVENT_PAGES; page++) {
+    const data = await call<{
+      events?: RawEvent[];
+      pagination?: { has_more_items?: boolean; continuation?: string };
+    }>(
+      `/organizations/${org}/events/?order_by=start_desc&page_size=50${
+        continuation ? `&continuation=${encodeURIComponent(continuation)}` : ""
+      }`,
+    );
+    raw.push(...(data.events ?? []));
+    continuation = data.pagination?.has_more_items ? data.pagination.continuation : undefined;
+    if (!continuation) break;
+  }
+  return raw.map(toEvent);
+}
 
-  return (data.events ?? []).map((e) => {
-    const start = e.start?.local ?? e.start?.utc ?? null;
-    const startsAt = e.start?.utc ? Date.parse(e.start.utc) : NaN;
-    return {
-      id: e.id,
-      name: e.name?.text?.trim() || "(untitled event)",
-      start,
-      url: e.url ?? "",
-      status: e.status ?? "unknown",
-      upcoming: Number.isNaN(startsAt) ? false : startsAt > now,
-    };
-  });
+/** One event by id, for showing the status of a linked event that fell outside the list. */
+export async function getEvent(eventId: string): Promise<EventbriteEvent | null> {
+  if (!/^\d+$/.test(eventId)) return null;
+  try {
+    return toEvent(await call<RawEvent>(`/events/${eventId}/`));
+  } catch (e) {
+    if (e instanceof EventbriteError && e.status === 404) return null;
+    throw e;
+  }
+}
+
+const MAX_EVENT_PAGES = 6;
+
+function toEvent(e: RawEvent): EventbriteEvent {
+  const start = e.start?.local ?? e.start?.utc ?? null;
+  const startsAt = e.start?.utc ? Date.parse(e.start.utc) : NaN;
+  return {
+    id: e.id,
+    name: e.name?.text?.trim() || "(untitled event)",
+    start,
+    url: e.url ?? "",
+    status: e.status ?? "unknown",
+    upcoming: Number.isNaN(startsAt) ? false : startsAt > Date.now(),
+  };
 }
 
 /** A random voucher code. Short enough to type, long enough not to collide. */
@@ -214,14 +258,17 @@ export async function createDiscount(opts: {
 
 /**
  * Revoke a discount. Best-effort: used both to roll back a half-finished batch
- * and to clean up when an admin removes unused codes, and in neither case
- * should a failure here take down the caller.
+ * and to clean up when something is removed, and in neither case should a
+ * failure here take down the caller. Callers that must not lose track of a
+ * failure go through lib/eventbrite-revoke.ts, which queues it for a retry.
+ *
+ * Already gone (404) counts as revoked: that is the state we wanted.
  */
 export async function deleteDiscount(discountId: string): Promise<boolean> {
   try {
     await call(`/discounts/${discountId}/`, { method: "DELETE" });
     return true;
-  } catch {
-    return false;
+  } catch (e) {
+    return e instanceof EventbriteError && e.status === 404;
   }
 }

@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import { IN_APP_ROUTES } from "@astra/shared";
 import { api } from "./api";
+import { loadPushToken, savePushToken } from "./session";
 
 // Push registration. Native modules (expo-notifications / expo-device) are
 // loaded LAZILY inside the try/catch — importing them at the top level would
@@ -45,9 +46,21 @@ export async function registerForPush(): Promise<void> {
 
     const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
     await api.push.register(token, Platform.OS === "ios" ? "IOS" : "ANDROID");
+    // Remembered so signing out can detach it from this account.
+    await savePushToken(token).catch(() => {});
   } catch {
     // Native module missing (needs a rebuild) or any other issue — no-op.
   }
+}
+
+/**
+ * Detach this phone's push token from the signed-in account, so the next
+ * person to use it does not receive the previous student's notifications.
+ * Needs the session to still be valid; the client caps it at a few seconds.
+ */
+export async function unregisterPush(): Promise<void> {
+  const token = await loadPushToken();
+  if (token) await api.push.unregister(token);
 }
 
 // Fire a LOCAL notification — works on the simulator (unlike remote push). For

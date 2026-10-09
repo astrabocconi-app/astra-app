@@ -1,9 +1,6 @@
-import { router } from "expo-router";
 import { createApiClient } from "@astra/shared/client";
 import { API_URL } from "./config";
-import { clearToken, getToken } from "./session";
-import { queryClient } from "./query-client";
-import { useBootStore } from "./boot-store";
+import { getToken } from "./session";
 
 // The mobile app's ONLY data path. It never imports Prisma or the DB — it calls
 // apps/web's /api/* routes over HTTPS through this typed client. The Bearer
@@ -19,12 +16,13 @@ export const api = createApiClient({
  * Cold boot trusts the stored token so the app opens offline, which used to
  * leave such a student on Home with every screen stuck on "Retry". Sign out
  * and show the login instead — once, however many requests failed together.
+ *
+ * Only when the rejected token is still THE token: a slow request from an
+ * earlier session can come back 401 after a quick re-login and must not sign
+ * the new session out.
  */
-function signOutRejected() {
-  if (!getToken()) return;
-  void clearToken().then(() => {
-    useBootStore.getState().done();
-    queryClient.clear();
-    router.replace("/");
-  });
+function signOutRejected(sentToken: string) {
+  if (getToken() !== sentToken) return;
+  // Imported on demand: sign-out reaches push registration, which uses this client.
+  void import("./sign-out").then((m) => m.signOutAndReset({ serverKnowsUs: false }));
 }

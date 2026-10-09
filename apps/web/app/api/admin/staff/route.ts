@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import {
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 // itself anything, so this stays with the central admin whatever is ticked.
 
 // GET /api/admin/staff — every backoffice account.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const guard = await requireAdmin(req, requestId);
   if ("error" in guard) return guard.error;
@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 }
 
 // POST /api/admin/staff — create an account.
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const guard = await requireAdmin(req, requestId);
   if ("error" in guard) return guard.error;
@@ -65,3 +65,6 @@ export async function POST(req: Request) {
     throw err;
   }
 }
+
+export const GET = withApi(handleGet);
+export const POST = withApi(handlePost);

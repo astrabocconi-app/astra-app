@@ -1,7 +1,7 @@
 /**
  * EmptyState — the web analog of the mobile app's ComingSoon component:
- * an icon in a light-tint rounded square, a title, a description, and an
- * optional "Coming soon" eyebrow. Used for not-yet-built dashboard sections.
+ * an icon in a light-tint rounded square, a title, a description and an optional
+ * action. Used for empty lists and for sections that can't load.
  */
 import type { ReactNode } from "react";
 
@@ -9,13 +9,11 @@ export function EmptyState({
   icon,
   title,
   description,
-  comingSoon = false,
   action,
 }: {
   icon: ReactNode;
   title: string;
   description: string;
-  comingSoon?: boolean;
   action?: ReactNode;
 }) {
   return (
@@ -25,11 +23,6 @@ export function EmptyState({
       </div>
       <h2 className="text-lg font-semibold text-astra-primary">{title}</h2>
       <p className="max-w-md text-sm text-gray-500">{description}</p>
-      {comingSoon && (
-        <p className="mt-1 text-xs font-medium uppercase tracking-wide text-gray-400">
-          Coming soon
-        </p>
-      )}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

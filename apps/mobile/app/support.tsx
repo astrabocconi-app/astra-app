@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   View,
-  Text,
   Pressable,
   ScrollView,
   Alert,
@@ -9,10 +8,13 @@ import {
   Platform,
   Keyboard,
 } from "react-native";
+import { Text } from "../components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Constants from "expo-constants";
-import { Icon, Spinner } from "../components/Icon";
+import { Icon } from "../components/Icon";
+import { Button } from "../components/Button";
+import { announce } from "../lib/use-reduced-motion";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { api } from "../lib/api";
 import { useT } from "../lib/i18n";
@@ -60,6 +62,7 @@ export default function SupportScreen() {
         platform: Platform.OS,
       });
       setSent(true);
+      announce(t("support.sentTitle"));
     } catch {
       Alert.alert(t("support.failedTitle"), t("support.failedBody"));
     } finally {
@@ -75,9 +78,9 @@ export default function SupportScreen() {
         {header}
         <View className="flex-1 items-center justify-center gap-3 px-10">
           <View className="h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/20">
-            <Icon name="checkmark" size={34} color="#16a34a" />
+            <Icon name="checkmark" size={34} color="#15803d" />
           </View>
-          <Text className="text-center text-xl font-semibold text-gray-900 dark:text-white">
+          <Text accessibilityRole="header" className="text-center text-xl font-semibold text-gray-900 dark:text-white">
             {t("support.sentTitle")}
           </Text>
           <Text className="text-center text-gray-500 dark:text-gray-300">
@@ -85,9 +88,10 @@ export default function SupportScreen() {
           </Text>
           <Pressable
             onPress={() => router.back()}
-            className="mt-3 rounded-xl bg-astra-primary dark:bg-white/15 px-6 py-3 active:opacity-90"
+            accessibilityRole="button"
+            className="mt-3 min-h-[48px] justify-center rounded-xl bg-astra-primary dark:bg-white/15 px-6 py-3 active:opacity-90"
           >
-            <Text className="font-semibold text-white">{t("common.done")}</Text>
+            <Text chrome className="font-semibold text-white">{t("common.done")}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -99,7 +103,8 @@ export default function SupportScreen() {
       {header}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        // "padding" on Android too: edge-to-edge windows are not resized for the keyboard.
+        behavior="padding"
       >
         <ScrollView
           className="flex-1"
@@ -112,17 +117,20 @@ export default function SupportScreen() {
 
           {/* What kind of message this is — drives triage in the backoffice. */}
           <View className="gap-2">
-            <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
+            <Text className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-white/70">
               {t("support.kindLabel")}
             </Text>
-            <View className="flex-row gap-2">
+            <View className="flex-row gap-2" accessibilityRole="radiogroup">
               {KINDS.map((k) => {
                 const active = kind === k.value;
                 return (
                   <Pressable
                     key={k.value}
                     onPress={() => setKind(k.value)}
-                    className={`flex-1 items-center gap-1.5 rounded-2xl border py-3 active:opacity-80 ${
+                    accessibilityRole="radio"
+                    accessibilityLabel={t(k.labelKey as never)}
+                    accessibilityState={{ selected: active, checked: active }}
+                    className={`min-h-[64px] flex-1 items-center justify-center gap-1.5 rounded-2xl border py-3 active:opacity-80 ${
                       active
                         ? "border-astra-primary dark:border-white bg-astra-light dark:bg-white/10"
                         : "border-gray-200 dark:border-white/15"
@@ -131,9 +139,10 @@ export default function SupportScreen() {
                     <Icon
                       name={k.icon as never}
                       size={20}
-                      color={active ? "#04107E" : "#9CA3AF"}
+                      color={active ? "#04107E" : "#6B7280"}
                     />
                     <Text
+                      chrome
                       className={`text-xs font-semibold ${
                         active
                           ? "text-astra-primary dark:text-white"
@@ -149,21 +158,22 @@ export default function SupportScreen() {
           </View>
 
           <View className="gap-2">
-            <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
+            <Text className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/70">
               {t("support.messageLabel")}
             </Text>
             <TextField
               value={message}
               onChangeText={setMessage}
               placeholder={t("support.placeholder")}
-              placeholderTextColor="#9CA3AF"
+              accessibilityLabel={t("support.messageLabel")}
+              placeholderTextColor="#6B7280"
               multiline
               maxLength={MAX_LENGTH}
               textAlignVertical="top"
               className="rounded-2xl border border-gray-200 dark:border-white/15 px-4 py-3 text-[15px] text-gray-900 dark:text-white"
               style={{ minHeight: 160 }}
             />
-            <Text className="text-right text-[11px] text-gray-400 dark:text-white/60">
+            <Text className="text-right text-[11px] text-gray-600 dark:text-white/70">
               {trimmed.length}/{MAX_LENGTH}
             </Text>
           </View>
@@ -177,23 +187,14 @@ export default function SupportScreen() {
             </Text>
           </View>
 
-          <Pressable
+          <Button
+            label={
+              trimmed.length < MIN_LENGTH && trimmed.length > 0 ? t("support.tooShort") : t("support.send")
+            }
+            loading={sending}
             disabled={!canSend}
             onPress={submit}
-            className={`items-center rounded-xl bg-astra-primary dark:bg-white/15 py-3.5 active:opacity-90 ${
-              canSend || sending ? "" : "opacity-40"
-            }`}
-          >
-            {sending ? (
-              <Spinner color="#fff" />
-            ) : (
-              <Text className="text-sm font-semibold text-white">
-                {trimmed.length < MIN_LENGTH && trimmed.length > 0
-                  ? t("support.tooShort")
-                  : t("support.send")}
-              </Text>
-            )}
-          </Pressable>
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

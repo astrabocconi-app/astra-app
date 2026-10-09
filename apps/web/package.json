@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --experimental-strip-types lib/*.test.mjs"
+    "test": "node --test --experimental-strip-types \"lib/**/*.test.mjs\" \"app/**/*.test.mjs\""
   },
   "dependencies": {
     "@astra/db": "*",
@@ -18,13 +18,13 @@
     "@xyflow/react": "^12.11.5",
     "better-auth": "^1.6.23",
     "next": "^16.2.10",
-    "nodemailer": "^9.0.3",
+    "nodemailer": "^10.0.16",
     "openai": "^4.104.0",
     "pg": "^8.22.0",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "resend": "^6.17.2",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.5",
     "zod": "^4.4.3"
   },
   "devDependencies": {

@@ -9,16 +9,27 @@ import {
   CalendarIcon,
   ChevronRightIcon,
 } from "@/app/_ui/icons";
-import { requirePage, visibleSections } from "@/lib/dashboard-access";
+import { visibleSections } from "@/lib/dashboard-access";
+import { isAdmin } from "@/lib/authz";
+import { romeDayStart } from "@/app/_ui/rome";
+import { requireDashboardPage } from "./_lib/session";
 import { pageIcon } from "./_components/page-icons";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Overview" };
+
+// Points that were really handed out to students: scans, check-ins and the signup
+// bonus, for accounts that still exist. Manual adjustments and refunds are not awards.
+const AWARD_SOURCES = ["SIGNUP", "PARTNER_SCAN", "EVENT_CHECKIN"] as const;
+const LIVE_STUDENT = { deletedAt: null, roles: { has: "STUDENT" as const } };
 
 export default async function DashboardHome() {
   // No layout.tsx of its own to guard this one: /dashboard's layout wraps every
   // section, so the check has to happen in the page.
-  const session = await requirePage("overview");
+  const session = await requireDashboardPage("overview");
+  // The env-admin account is literally named "ASTRA": "Ciao, ASTRA" reads like a bug.
   const firstName = session.user.name?.split(" ")[0];
+  const greetName = firstName && firstName.toLowerCase() !== "astra" ? firstName : undefined;
 
   // The Manage cards mirror the sidebar rather than a hardcoded list, so a
   // staff account is never shown a section that would bounce it. Overview is
@@ -27,13 +38,15 @@ export default async function DashboardHome() {
 
   // Same "still upcoming" rule the app and the Events page use: keep same-day
   // events counted until the day is over.
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
+  const dayStart = romeDayStart(); // midnight in Milan, whatever the server clock says
 
   const [issued, members, upcomingEvents] = await Promise.all([
     // Only positive deltas — what's been handed out, not the net balance.
-    prisma.pointsLedgerEntry.aggregate({ _sum: { delta: true }, where: { delta: { gt: 0 } } }),
-    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.pointsLedgerEntry.aggregate({
+      _sum: { delta: true },
+      where: { delta: { gt: 0 }, source: { in: [...AWARD_SOURCES] }, user: LIVE_STUDENT },
+    }),
+    prisma.user.count({ where: LIVE_STUDENT }),
     prisma.event.count({
       where: { deletedAt: null, published: true, startsAt: { gte: dayStart } },
     }),
@@ -42,8 +55,12 @@ export default async function DashboardHome() {
   return (
     <>
       <PageHeader
-        title={firstName ? `Ciao, ${firstName}` : "Welcome to ASTRA"}
-        subtitle="Your admin overview of the ASTRA loyalty platform."
+        title={greetName ? `Ciao, ${greetName}` : "Welcome to ASTRA"}
+        subtitle={
+          isAdmin(session.actor)
+            ? "Your admin overview of the ASTRA platform."
+            : "Your overview of the ASTRA platform. The sections below are the ones you can open."
+        }
       />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -51,13 +68,13 @@ export default async function DashboardHome() {
           tone="brand"
           label="Points issued"
           value={(issued._sum.delta ?? 0).toLocaleString()}
-          hint="All time, awards only"
+          hint="All time: scans, check-ins and signup bonuses"
           icon={<CoinsIcon size={22} />}
         />
         <StatCard
-          label="Members"
+          label="Students"
           value={members.toLocaleString()}
-          hint="Signed in at least once"
+          hint="Signed in to the app at least once"
           icon={<UsersIcon size={22} />}
         />
         <StatCard

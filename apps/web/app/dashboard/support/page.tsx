@@ -4,18 +4,13 @@ import { PageHeader } from "@/app/_ui/page-header";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { AuditIcon } from "@/app/_ui/icons";
 import { SupportRow } from "./support-row";
+import { romeDateTime } from "@/app/_ui/rome";
+import { requireDashboardPage } from "../_lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Support" };
 
 const PAGE_SIZE = 200;
-
-const fmt = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 const KIND_LABEL: Record<string, string> = {
   QUESTION: "Question",
@@ -34,6 +29,7 @@ export default async function SupportPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
+  await requireDashboardPage("support");
   const { status } = await searchParams;
   // Default to the open queue: the inbox is a to-do list, not an archive.
   const showResolved = status === "resolved";
@@ -49,7 +45,11 @@ export default async function SupportPage({
     },
   });
 
-  const openCount = await prisma.supportMessage.count({ where: { status: "OPEN" } });
+  const [openCount, resolvedCount] = await Promise.all([
+    prisma.supportMessage.count({ where: { status: "OPEN" } }),
+    prisma.supportMessage.count({ where: { status: "RESOLVED" } }),
+  ]);
+  const shownTotal = showResolved ? resolvedCount : openCount;
 
   return (
     <div className="flex flex-col gap-5">
@@ -77,7 +77,7 @@ export default async function SupportPage({
               : "border border-gray-200 text-gray-600 hover:bg-gray-50"
           }`}
         >
-          Resolved
+          Resolved{resolvedCount > 0 ? ` (${resolvedCount})` : ""}
         </Link>
       </div>
 
@@ -102,7 +102,7 @@ export default async function SupportPage({
               message={row.message}
               status={row.status}
               adminNote={row.adminNote}
-              createdAt={fmt.format(row.createdAt)}
+              createdAt={romeDateTime(row.createdAt)}
               platform={row.platform}
               appVersion={row.appVersion}
               sender={{
@@ -116,9 +116,10 @@ export default async function SupportPage({
         </div>
       )}
 
-      {rows.length === PAGE_SIZE && (
-        <p className="text-xs text-gray-400">
-          Showing the {PAGE_SIZE} most recent. Resolve some to clear the queue.
+      {rows.length > 0 && (
+        <p className="text-xs text-gray-500">
+          Showing {rows.length} of {shownTotal}.
+          {shownTotal > rows.length ? " Only the most recent are listed; resolve some to see older ones." : ""}
         </p>
       )}
     </div>

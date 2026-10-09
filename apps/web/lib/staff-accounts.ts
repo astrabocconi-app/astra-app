@@ -13,9 +13,8 @@
 // on User rather than in a side table means sessions, the audit log and
 // authz.ts all keep working with no special cases.
 
-import crypto from "node:crypto";
 import { prisma, Role } from "@astra/db";
-import { hashPassword, verifyPassword } from "./partner";
+import { hashPassword, verifyPassword, burnPasswordCheck } from "./password";
 import { ADMIN_ONLY_PAGES, ALL_PAGE_KEYS } from "./dashboard-pages";
 
 /** Usernames are matched lowercase, so they are stored lowercase. */
@@ -149,7 +148,7 @@ export async function createStaffAccount(input: {
       roles: [Role.STAFF],
       emailVerified: true,
       staffUsername: username,
-      staffPasswordHash: hashPassword(input.password),
+      staffPasswordHash: await hashPassword(input.password),
       dashboardPages: pages,
     },
     select: { id: true, staffUsername: true, name: true, email: true, dashboardPages: true, createdAt: true },
@@ -179,7 +178,7 @@ export async function setStaffPassword(userId: string, password: string): Promis
   validatePassword(password);
   await prisma.user.update({
     where: { id: account.id },
-    data: { staffPasswordHash: hashPassword(password) },
+    data: { staffPasswordHash: await hashPassword(password) },
   });
   // Signing out everywhere is the point of a password change: a stolen session
   // would otherwise outlive the password it was obtained with.
@@ -249,10 +248,10 @@ export async function verifyStaffCredentials(username: string, password: string)
   });
 
   if (!user?.staffPasswordHash) {
-    crypto.scryptSync(password, "no-such-account", 64);
+    await burnPasswordCheck(password);
     return null;
   }
-  if (!verifyPassword(password, user.staffPasswordHash)) return null;
+  if (!(await verifyPassword(password, user.staffPasswordHash))) return null;
 
   // Better Auth's session cookie wants the whole user record, so the hash is
   // stripped here rather than narrowing the select above.

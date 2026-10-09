@@ -1,13 +1,12 @@
-import { NextResponse } from "next/server";
 import { academicCatalogueResponse } from "@astra/shared";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi, cachedJson } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { getActiveAcademicCatalogue } from "@/lib/academic";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -34,5 +33,8 @@ export async function GET(req: Request) {
       tracks: programme.tracks,
     })),
   });
-  return NextResponse.json(body, { headers: { "x-request-id": requestId } });
+  // The same for every student and changes once a year: let the phone keep it.
+  return cachedJson(req, body, 300);
 }
+
+export const GET = withApi(handleGet);

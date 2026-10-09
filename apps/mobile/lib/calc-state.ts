@@ -1,47 +1,28 @@
-import { GRADE_PLANS, newState, type CalcRow, type CalcState, type CalcType } from "@astra/shared";
+import {
+  GRADE_PLANS,
+  freshSave as freshSaveFor,
+  loadSaved as loadSavedFor,
+  switchPlan as switchPlanFor,
+  toState as toStateFor,
+  type CalcType,
+  type PlanSource,
+} from "@astra/shared";
+import { LEGACY_PLAN_ALIASES, LEGACY_ROW_IDS } from "./calc-legacy-ids";
 
-/**
- * What a calculator saves: the chosen plan and only what the student changed.
- * Rows are rebuilt from the plan, so the value stays well under SecureStore's
- * ~2 KB comfort zone and picks up plan corrections in later releases.
- */
-export interface SavedCalc {
-  plan: string;
-  grades: Record<string, number>;
-  noGrade: string[];
-  credits: Record<string, number>;
-  removed: string[];
-  custom: { id: string; name: string; credits: number; year: number }[];
-  settings: Pick<CalcState, "internship" | "thesis" | "bonus" | "thesisType" | "onTime" | "athlete" | "target">;
-}
+// The save format and its maths live in @astra/shared (tested there); this binds
+// them to the plans and to the frozen map from the positions 1.1.x saved.
+export type { SavedCalc, PlanSwitch } from "@astra/shared";
 
-export function freshSave(type: CalcType, plan: string): SavedCalc {
-  const { internship, thesis, bonus, thesisType, onTime, athlete, target } = newState(
-    type,
-    plan,
-    GRADE_PLANS[type][plan] ?? [],
-  );
-  return {
-    plan,
-    grades: {},
-    noGrade: [],
-    credits: {},
-    removed: [],
-    custom: [],
-    settings: { internship, thesis, bonus, thesisType, onTime, athlete, target },
-  };
-}
+const source: PlanSource = {
+  rows: (type, plan) => GRADE_PLANS[type][plan] ?? [],
+  legacyAliases: LEGACY_PLAN_ALIASES,
+  legacyIds: LEGACY_ROW_IDS,
+};
 
-export function toState(type: CalcType, saved: SavedCalc): CalcState {
-  const base = newState(type, saved.plan, GRADE_PLANS[type][saved.plan] ?? []);
-  const custom: CalcRow[] = saved.custom.map((c) => ({ ...c, kind: "g", grade: null }));
-  const rows = [...base.rows, ...custom]
-    .filter((r) => !saved.removed.includes(r.id))
-    .map((r) => ({
-      ...r,
-      credits: saved.credits[r.id] ?? r.credits,
-      grade: saved.grades[r.id] ?? null,
-      noGrade: saved.noGrade.includes(r.id),
-    }));
-  return { ...base, ...saved.settings, rows };
-}
+export const freshSave = (type: CalcType, plan: string) => freshSaveFor(type, plan, source);
+export const loadSaved = (type: CalcType, raw: unknown) => loadSavedFor(type, raw, source);
+export const toState = (type: CalcType, saved: Parameters<typeof toStateFor>[1]) => toStateFor(type, saved, source);
+export const switchPlan = (type: CalcType, saved: Parameters<typeof switchPlanFor>[1], plan: string) =>
+  switchPlanFor(type, saved, plan, source);
+/** Does a plan with this key exist (a save can name one that was renamed away)? */
+export const planExists = (type: CalcType, plan: string) => plan in GRADE_PLANS[type];

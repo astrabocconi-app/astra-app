@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
   Pressable,
   Image,
@@ -10,11 +9,13 @@ import {
   Alert,
   Platform,
 } from "react-native";
+import { Text } from "../../components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { Icon, Spinner } from "../../components/Icon";
+import { Button } from "../../components/Button";
 import { ContentLinks } from "../../components/ContentLinks";
 import { ScreenHeader } from "../../components/ScreenHeader";
 import { EmptyState } from "../../components/EmptyState";
@@ -26,7 +27,8 @@ function openInMaps(address: string, t: ReturnType<typeof useT>) {
   const q = encodeURIComponent(address);
   const apple = `http://maps.apple.com/?q=${q}`;
   const google = `https://www.google.com/maps/search/?api=1&query=${q}`; // opens the app if installed, else web
-  const go = (url: string) => Linking.openURL(url);
+  const go = (url: string) =>
+    Linking.openURL(url).catch(() => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")));
 
   if (Platform.OS === "ios") {
     ActionSheetIOS.showActionSheetWithOptions(
@@ -52,14 +54,14 @@ function openInMaps(address: string, t: ReturnType<typeof useT>) {
 // Eventbrite's API can't sell tickets on our behalf, so checkout is their page,
 // shown in an in-app sheet rather than a WebView: Apple Pay and saved cards
 // only work in the system browser engine.
-function openTickets(url: string) {
+function openTickets(url: string, onFail: () => void) {
   void WebBrowser.openBrowserAsync(url, {
     presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
     controlsColor: "#04107E",
     toolbarColor: "#FFFFFF",
     dismissButtonStyle: "close",
     enableBarCollapsing: true,
-  }).catch(() => Linking.openURL(url));
+  }).catch(() => Linking.openURL(url).catch(onFail));
 }
 
 function formatWhen(iso: string, locale: string) {
@@ -82,19 +84,43 @@ export default function EventDetailScreen() {
 
   // Ask the server for this student's link first: with an in-app discount it
   // carries their personal code. If that fails, the plain link still sells a
-  // ticket, just at full price.
+  // ticket, but at full price: for an event that advertises a discount the
+  // student is asked rather than silently sent to the dearer page.
+  const [noDiscount, setNoDiscount] = useState(false);
+  const plainUrl = event ? (event.externalTicketUrl ?? `https://www.eventbrite.com/e/${event.eventbriteEventId}`) : "";
+  const open = (url: string) =>
+    openTickets(url, () => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")));
+
   async function getTickets() {
-    if (!event) return;
+    if (!event || opening) return;
     setOpening(true);
-    let url = event.externalTicketUrl ?? `https://www.eventbrite.com/e/${event.eventbriteEventId}`;
+    let failed: boolean;
     try {
-      url = (await api.events.ticketLink(event.id)).url;
+      const link = await api.events.ticketLink(event.id);
+      // No code back means no discount (none on this event, the cap is reached):
+      // stop promising one.
+      if (link.code === null) setNoDiscount(true);
+      // "unavailable" is temporary: worth asking before they pay full price.
+      if (link.discountStatus === "unavailable" && event.appDiscountPercent) {
+        failed = true;
+      } else {
+        open(link.url);
+        return;
+      }
     } catch {
-      // keep the plain link
+      failed = true;
     } finally {
       setOpening(false);
     }
-    openTickets(url);
+    if (failed && event.appDiscountPercent) {
+      Alert.alert(t("event.discountFailedTitle"), t("event.discountFailedBody"), [
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("event.continueFull"), onPress: () => open(plainUrl) },
+        { text: t("common.retry"), onPress: () => void getTickets() },
+      ]);
+    } else if (failed) {
+      open(plainUrl);
+    }
   }
 
   return (
@@ -105,7 +131,7 @@ export default function EventDetailScreen() {
         <View className="flex-1 items-center justify-center">
           <Spinner />
         </View>
-      ) : events.isError ? (
+      ) : events.isError && !events.data ? (
         <EmptyState
           icon="cloud-offline-outline"
           title={t("common.error")}
@@ -116,11 +142,16 @@ export default function EventDetailScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {event.imageUrl ? (
-            <Image source={{ uri: event.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
+            <Image
+              source={{ uri: event.imageUrl }}
+              resizeMode="cover"
+              style={{ width: "100%", aspectRatio: 16 / 9 }}
+              accessibilityIgnoresInvertColors
+            />
           ) : null}
 
           <View className="px-5 pt-5">
-            <Text className="text-2xl font-semibold text-gray-900 dark:text-white">{event.title}</Text>
+            <Text accessibilityRole="header" className="text-2xl font-semibold text-gray-900 dark:text-white">{event.title}</Text>
 
             <View className="mt-3 gap-2">
               <View className="flex-row items-center gap-2">
@@ -129,13 +160,13 @@ export default function EventDetailScreen() {
               </View>
               {event.location ? (
                 <Pressable
-                  className="flex-row items-center gap-2 py-1.5 active:opacity-60"
+                  className="min-h-[44px] flex-row items-center gap-2 py-1.5 active:opacity-60"
                   onPress={() => openInMaps(event.location!, t)}
                   hitSlop={8}
                   accessibilityRole="link"
                 >
                   <Icon name="location-outline" size={16} color="#04107E" />
-                  <Text className="text-sm font-medium text-astra-primary dark:text-white">
+                  <Text className="flex-1 text-sm font-medium text-astra-primary dark:text-white">
                     {event.location}
                   </Text>
                   <Icon name="open-outline" size={13} color="#04107E" />
@@ -159,7 +190,7 @@ export default function EventDetailScreen() {
           className="border-t border-gray-100 dark:border-white/10 px-5 pt-3"
           style={{ paddingBottom: insets.bottom + 8 }}
         >
-          {event.appDiscountPercent ? (
+          {event.appDiscountPercent && !noDiscount ? (
             <View className="mb-2.5 flex-row items-center justify-center gap-1.5">
               <Icon name="pricetag-outline" size={14} color="#04107E" />
               <Text className="text-[13px] font-medium text-astra-primary dark:text-white">
@@ -167,14 +198,12 @@ export default function EventDetailScreen() {
               </Text>
             </View>
           ) : null}
-          <Pressable
-            disabled={opening}
-            className={`flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-astra-dark py-3.5 ${opening ? "opacity-70" : "active:opacity-90"}`}
+          <Button
+            label={t("event.getTickets")}
+            loading={opening}
             onPress={getTickets}
-          >
-            {opening ? <Spinner color="#FFFFFF" /> : <Icon name="ticket-outline" size={18} color="#fff" />}
-            <Text className="text-base font-semibold text-white">{t("event.getTickets")}</Text>
-          </Pressable>
+            icon={<Icon name="ticket-outline" size={18} color="#fff" />}
+          />
         </View>
       ) : null}
     </SafeAreaView>

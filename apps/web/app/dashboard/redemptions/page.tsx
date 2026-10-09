@@ -4,10 +4,16 @@ import { PageHeader } from "@/app/_ui/page-header";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { GiftIcon } from "@/app/_ui/icons";
 import { Input } from "@/app/_ui/field";
+import { Button } from "@/app/_ui/button";
+import { requireDashboardPage } from "../_lib/session";
 import { listRedemptions, countByStatus } from "@/lib/redemptions";
 import { RedemptionRow } from "./redemption-row";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Redemptions" };
+
+// Matches the take in lib/redemptions (listRedemptions).
+const LIST_CAP = 200;
 
 const TABS = [
   { key: "PENDING", label: "To hand over" },
@@ -28,6 +34,7 @@ export default async function RedemptionsPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
+  await requireDashboardPage("redemptions");
   const { status, q } = await searchParams;
   const active = (TABS.find((t) => t.key === status)?.key ?? "PENDING") as RedemptionStatus;
   const query = q?.trim() ?? "";
@@ -62,14 +69,18 @@ export default async function RedemptionsPage({
           );
         })}
 
-        <form className="ml-auto w-64" action="/dashboard/redemptions">
+        <form className="flex w-full gap-2 sm:ml-auto sm:w-80" action="/dashboard/redemptions" role="search">
           <input type="hidden" name="status" value={active} />
           <Input
             name="q"
+            type="search"
             defaultValue={query}
             placeholder="Name, email or code…"
             aria-label="Search redemptions"
           />
+          <Button type="submit" variant="secondary">
+            Search
+          </Button>
         </form>
       </div>
 
@@ -93,6 +104,14 @@ export default async function RedemptionsPage({
         />
       ) : (
         <div className="flex flex-col gap-3">
+          <p className="text-xs text-gray-500">
+            {query
+              ? rows.length >= LIST_CAP
+                ? `Showing the first ${LIST_CAP} matches. Narrow the search to see the rest.`
+                : `${rows.length} ${rows.length === 1 ? "match" : "matches"}`
+              : `Showing ${rows.length} of ${counts[active] ?? rows.length}`}
+            {!query && (counts[active] ?? 0) > rows.length ? ". Search to find a specific one." : ""}
+          </p>
           {/* Props passed explicitly rather than spread. Spreading the row was
               how a field called `ref` reached a client component, which React
               reserves and refuses across the server boundary — the page failed

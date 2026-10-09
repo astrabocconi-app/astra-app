@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable, ScrollView, Linking, Alert, RefreshControl } from "react-native";
+import { View, Pressable, ScrollView, Linking, Alert, RefreshControl } from "react-native";
+import { Text } from "../components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Icon, Spinner } from "../components/Icon";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { EmptyState } from "../components/EmptyState";
+import { Chip } from "../components/Chip";
 import { api } from "../lib/api";
 import { useT, type TranslationKey } from "../lib/i18n";
 import { useRefresh } from "../lib/use-refresh";
@@ -114,28 +116,6 @@ export default function MaterialsScreen() {
     }
   }
 
-  const Chip = ({
-    label,
-    active,
-    onPress,
-  }: {
-    label: string;
-    active: boolean;
-    onPress: () => void;
-  }) => (
-    <Pressable
-      onPress={onPress}
-      hitSlop={{ top: 6, bottom: 6 }}
-      className={`rounded-full px-3.5 py-2 ${active ? "bg-astra-primary dark:bg-white" : "bg-gray-100 dark:bg-white/10"}`}
-    >
-      <Text
-        className={`text-[13px] font-medium ${active ? "text-white dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       <ScreenHeader
@@ -145,9 +125,10 @@ export default function MaterialsScreen() {
           <Pressable
             onPress={() => open(ALL_MATERIALS_URL)}
             hitSlop={8}
-            className="mr-2 flex-row items-center gap-1 rounded-full border border-astra-primary/20 dark:border-white/15 px-3 py-1.5 active:opacity-70"
+            accessibilityRole="link"
+            className="mr-2 min-h-[44px] flex-row items-center gap-1 rounded-full border border-astra-primary/20 dark:border-white/15 px-3 py-1.5 active:opacity-70"
           >
-            <Text className="text-xs font-semibold text-astra-primary dark:text-white">{t("materials.seeAll")}</Text>
+            <Text chrome className="text-xs font-semibold text-astra-primary dark:text-white">{t("materials.seeAll")}</Text>
             <Icon name="open-outline" size={13} color="#04107E" />
           </Pressable>
         }
@@ -156,7 +137,7 @@ export default function MaterialsScreen() {
       {/* Scope: just my year, or the whole programme. Outside the result
           branches, so an empty year can still switch to the whole course. */}
       {myCourse ? (
-        <View className="flex-row gap-2 px-4 pt-3">
+        <View className="flex-row flex-wrap gap-2 px-4 pt-3" accessibilityRole="radiogroup">
           <Chip
             label={t("materials.myYear")}
             active={!allYears}
@@ -180,13 +161,20 @@ export default function MaterialsScreen() {
         <View className="flex-1 items-center justify-center">
           <Spinner />
         </View>
+      ) : me.isError && !me.data ? (
+        // Could not load the profile: that is not the same as having no programme.
+        <EmptyState
+          icon="cloud-offline-outline"
+          title={t("common.error")}
+          action={{ label: t("common.retry"), onPress: () => me.refetch() }}
+        />
       ) : !myCourse ? (
         <EmptyState
           icon="school-outline"
           title={t("materials.setCourseYear")}
           action={{ label: t("materials.goToProfile"), onPress: () => router.push("/profile") }}
         />
-      ) : q.isError ? (
+      ) : q.isError && !q.data ? (
         <EmptyState
           icon="cloud-offline-outline"
           title={t("materials.loadError")}
@@ -204,7 +192,7 @@ export default function MaterialsScreen() {
           {(availYears.length > 1 || availSemesters.length > 1) && (
             <View className="gap-2 px-4 py-3">
               {availYears.length > 1 && (
-                <View className="flex-row flex-wrap gap-2">
+                <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
                   <Chip label={t("materials.allYears")} active={!yearFilter} onPress={() => setYearFilter(null)} />
                   {availYears.map((y) => (
                     <Chip
@@ -217,7 +205,7 @@ export default function MaterialsScreen() {
                 </View>
               )}
               {availSemesters.length > 1 && (
-                <View className="flex-row flex-wrap gap-2">
+                <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
                   <Chip label={t("materials.allSems")} active={!semFilter} onPress={() => setSemFilter(null)} />
                   {availSemesters.map((s) => (
                     <Chip
@@ -239,15 +227,16 @@ export default function MaterialsScreen() {
           >
             {grouped.map(([year, items]) => (
               <View key={year}>
-                <Text className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
-                  {t(YEAR_FULL_KEYS[year]!)}
+                <Text className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/70">
+                  {YEAR_FULL_KEYS[year] ? t(YEAR_FULL_KEYS[year]) : year}
                 </Text>
                 <View className="gap-1.5">
                   {items.map((it) => (
                     <Pressable
                       key={String(it.id)}
                       onPress={() => open(it.url)}
-                      className="flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-3 active:opacity-70"
+                      accessibilityRole="link"
+                      className="min-h-[56px] flex-row items-center gap-3 rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-white/5 px-3 py-3 active:opacity-70"
                     >
                       <View className="h-9 w-9 items-center justify-center rounded-lg bg-astra-light dark:bg-white/10">
                         <Icon name="document-text-outline" size={18} color="#04107E" />
@@ -257,7 +246,7 @@ export default function MaterialsScreen() {
                           {it.title.replace(/\.pdf$/i, "")}
                         </Text>
                         {(it.semester || it.examType) && (
-                          <Text className="text-[11px] text-gray-400 dark:text-white/60">
+                          <Text className="text-[11px] text-gray-600 dark:text-white/70">
                             {[it.examType, it.semester ? t("materials.semLabel", { sem: it.semester }) : null]
                               .filter(Boolean)
                               .join(" · ")}
@@ -273,7 +262,8 @@ export default function MaterialsScreen() {
             ))}
             <Pressable
               onPress={() => open(ALL_MATERIALS_URL)}
-              className="mt-2 flex-row items-center justify-center gap-2 rounded-xl border border-astra-primary/20 dark:border-white/15 py-3 active:opacity-70"
+              accessibilityRole="link"
+              className="mt-2 min-h-[48px] flex-row items-center justify-center gap-2 rounded-xl border border-astra-primary/20 dark:border-white/15 py-3 active:opacity-70"
             >
               <Text className="text-sm font-semibold text-astra-primary dark:text-white">{t("materials.seeAllMaterials")}</Text>
               <Icon name="open-outline" size={15} color="#04107E" />

@@ -102,3 +102,15 @@ test("allYears widens to the whole programme, still without class", () => {
   assert.ok(years.length >= 1, "expected at least the student's own year");
   assert.ok(all.every((entry) => entry.count > 0), "empty years should be dropped");
 });
+
+test("bachelor students also see electives and the no-year languages bucket", () => {
+  const data = structuredClone(materials);
+  data[0].subjects.push({ subject: "ELECTIVES", items: [{ id: "e1", title: "Elective", url: "https://example.com/e.pdf", semester: null, examType: null }] });
+  data.push({ year: "All years", count: 1, subjects: [{ subject: "Languages", items: [{ id: "l1", title: "Lang", url: "https://example.com/l.pdf", semester: null, examType: null }] }] });
+  const bachelor = filterMaterialsForAcademicProfile(data, "BIEM", 1, { level: "BACHELOR" });
+  assert.deepEqual(bachelor.map((y) => y.year), ["First Year", "All years"]);
+  assert.equal(bachelor[0].count, 2);
+  const msc = filterMaterialsForAcademicProfile(data, "BIEM", 1, { level: "MASTER_OF_SCIENCE" });
+  assert.deepEqual(msc.map((y) => y.year), ["First Year"]);
+  assert.equal(msc[0].count, 1);
+});

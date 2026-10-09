@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { getPartnerForUser, partnerStats } from "@/lib/partner";
 
@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // GET /api/partner/stats — scan tallies for the signed-in partner venue.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) {
@@ -29,3 +29,5 @@ export async function GET(req: Request) {
     { headers: { "x-request-id": requestId } },
   );
 }
+
+export const GET = withApi(handleGet);

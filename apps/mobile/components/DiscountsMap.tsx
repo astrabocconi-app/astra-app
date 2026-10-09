@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { View, Text, Pressable, Image, StyleSheet, Linking, Platform } from "react-native";
+import { View, Pressable, Image, StyleSheet, Linking, Platform, Alert } from "react-native";
+import { Text } from "./AppText";
 import Mapbox, { MapView, Camera, MarkerView } from "@rnmapbox/maps";
 import { router } from "expo-router";
 import { Icon } from "./Icon";
@@ -7,6 +8,8 @@ import { BOCCONI_CAMPUS, type PartnerItem } from "@astra/shared";
 import { MAPBOX_TOKEN } from "../lib/config";
 import { CAMPUS_SHAPE, CAMPUS_LABEL_POINT } from "../lib/campus-geo";
 import { useT } from "../lib/i18n";
+import { useEggStore } from "../lib/egg-store";
+import { announce } from "../lib/use-reduced-motion";
 
 const BRAND = "#04107E";
 
@@ -22,18 +25,19 @@ const CAMPUS_CENTER: [number, number] = [BOCCONI_CAMPUS.longitude, BOCCONI_CAMPU
 const CAMPUS_ZOOM = 14.6;
 
 /** Opens the platform maps app with a driving/walking destination. */
-function openDirections(p: PartnerItem) {
+function openDirections(p: PartnerItem, onFail: () => void) {
   if (p.latitude == null || p.longitude == null) return;
   const label = encodeURIComponent(p.name);
   const url = Platform.select({
     ios: `http://maps.apple.com/?daddr=${p.latitude},${p.longitude}&q=${label}`,
     default: `https://www.google.com/maps/dir/?api=1&destination=${p.latitude},${p.longitude}`,
   });
-  if (url) void Linking.openURL(url);
+  if (url) Linking.openURL(url).catch(onFail);
 }
 
 export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
   const t = useT();
+  const inverted = useEggStore((s) => s.inverted);
   const cameraRef = useRef<Camera>(null);
   const [selected, setSelected] = useState<PartnerItem | null>(null);
 
@@ -46,11 +50,11 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
   if (!MAPBOX_TOKEN) {
     return (
       <View className="flex-1 items-center justify-center gap-2 bg-gray-50 dark:bg-white/5 px-10">
-        <Icon name="map-outline" size={32} color="#9CA3AF" />
+        <Icon name="map-outline" size={32} color="#6B7280" />
         <Text className="text-center text-base font-semibold text-gray-700 dark:text-gray-200">
           {t("discounts.mapUnavailable")}
         </Text>
-        <Text className="text-center text-sm text-gray-400 dark:text-white/60">{t("discounts.mapNeedsToken")}</Text>
+        <Text className="text-center text-sm text-gray-500 dark:text-white/70">{t("discounts.mapNeedsToken")}</Text>
       </View>
     );
   }
@@ -67,7 +71,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
     <View className="flex-1">
       <MapView
         style={StyleSheet.absoluteFill}
-        styleURL={Mapbox.StyleURL.Street}
+        styleURL={inverted ? Mapbox.StyleURL.Dark : Mapbox.StyleURL.Street}
         scaleBarEnabled={false}
         logoEnabled
         attributionEnabled
@@ -96,7 +100,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
         <MarkerView coordinate={CAMPUS_LABEL_POINT} anchor={{ x: 0.5, y: 0.5 }}>
           <View style={styles.campus} pointerEvents="none">
             <Icon name="school" size={14} color="#fff" />
-            <Text style={styles.campusLabel}>{t("discounts.campus")}</Text>
+            <Text maxFontSizeMultiplier={1.1} style={styles.campusLabel}>{t("discounts.campus")}</Text>
           </View>
         </MarkerView>
 
@@ -109,7 +113,16 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
               anchor={{ x: 0.5, y: 1 }}
               allowOverlap={active}
             >
-              <Pressable onPress={() => setSelected(p)} hitSlop={8} accessibilityRole="button" accessibilityLabel={p.name}>
+              <Pressable
+                onPress={() => {
+                  setSelected(p);
+                  announce(p.name);
+                }}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel={p.name}
+                accessibilityState={{ selected: active }}
+              >
                 <View style={[styles.pin, active && styles.pinActive]}>
                   <Icon name="pricetag" size={13} color="#fff" />
                 </View>
@@ -128,7 +141,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
           className="absolute left-3.5 top-3.5 rounded-full border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-dark px-3 py-1.5"
         >
           <Text className="text-xs font-medium text-gray-700 dark:text-gray-200">
-            {t("discounts.pinsCount", { count: String(pinned.length) })}
+            {pinned.length === 1 ? t("discounts.pinsCountOne") : t("discounts.pinsCount", { count: String(pinned.length) })}
           </Text>
         </View>
       )}
@@ -149,37 +162,45 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
           or directions buttons) opens the full venue screen. */}
       {selected && (
         <View style={styles.card} className="border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-dark">
-          <Pressable
-            onPress={() => router.push(`/venue/${selected.id}`)}
-            className="flex-row items-start gap-3 active:opacity-70"
-          >
-            {selected.logoUrl ? (
-              <Image
-                source={{ uri: selected.logoUrl }}
-                resizeMode="cover"
-                style={{ width: 40, height: 40, borderRadius: 10 }}
-              />
-            ) : (
-              <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
-                <Icon name="storefront" size={20} color={BRAND} />
+          {/* The venue link and the close button are siblings: nested, the close
+              button was hidden from VoiceOver by its accessible parent. */}
+          <View className="flex-row items-start gap-2">
+            <Pressable
+              onPress={() => router.push(`/venue/${selected.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel={[selected.name, selected.address].filter(Boolean).join(", ")}
+              className="flex-1 flex-row items-start gap-3 active:opacity-70"
+            >
+              {selected.logoUrl ? (
+                <Image
+                  source={{ uri: selected.logoUrl }}
+                  resizeMode="cover"
+                  style={{ width: 40, height: 40, borderRadius: 10 }}
+                  accessibilityIgnoresInvertColors
+                />
+              ) : (
+                <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
+                  <Icon name="storefront" size={20} color={BRAND} />
+                </View>
+              )}
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-gray-900 dark:text-white">{selected.name}</Text>
+                <Text className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
+                  {selected.address ?? t("discounts.noAddress")}
+                </Text>
               </View>
-            )}
-            <View className="flex-1">
-              <Text className="text-base font-semibold text-gray-900 dark:text-white">{selected.name}</Text>
-              <Text className="mt-0.5 text-xs text-gray-500 dark:text-gray-300">
-                {selected.address ?? t("discounts.noAddress")}
-              </Text>
-            </View>
-            <Icon name="chevron-forward" size={18} color="#9CA3AF" />
+              <Icon name="chevron-forward" size={18} color="#6B7280" />
+            </Pressable>
             <Pressable
               onPress={() => setSelected(null)}
-              hitSlop={10}
+              hitSlop={6}
               accessibilityRole="button"
               accessibilityLabel={t("common.close")}
+              className="h-11 w-11 items-center justify-center"
             >
-              <Icon name="close" size={20} color="#9CA3AF" />
+              <Icon name="close" size={20} color="#6B7280" />
             </Pressable>
-          </Pressable>
+          </View>
 
           {selected.offers.length > 0 ? (
             <View className="mt-3 gap-1.5">
@@ -208,15 +229,16 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
               ))}
             </View>
           ) : (
-            <Text className="mt-3 text-[13px] text-gray-400 dark:text-white/60">{t("discounts.noDiscount")}</Text>
+            <Text className="mt-3 text-[13px] text-gray-500 dark:text-white/70">{t("discounts.noDiscount")}</Text>
           )}
 
           <Pressable
-            onPress={() => openDirections(selected)}
-            className="mt-3 flex-row items-center justify-center gap-1.5 rounded-xl bg-astra-light dark:bg-white/10 py-2.5 active:opacity-70"
+            onPress={() => openDirections(selected, () => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")))}
+            accessibilityRole="button"
+            className="mt-3 min-h-[44px] flex-row items-center justify-center gap-1.5 rounded-xl bg-astra-light dark:bg-white/10 py-2.5 active:opacity-70"
           >
             <Icon name="navigate" size={15} color={BRAND} />
-            <Text className="text-sm font-semibold text-astra-primary dark:text-white">
+            <Text chrome className="text-sm font-semibold text-astra-primary dark:text-white">
               {t("discounts.openInMaps")}
             </Text>
           </Pressable>
@@ -271,9 +293,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 14,
     top: 14,
-    height: 40,
-    width: 40,
-    borderRadius: 20,
+    height: 44,
+    width: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",

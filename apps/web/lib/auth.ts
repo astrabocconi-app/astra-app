@@ -10,19 +10,23 @@
 //     `Authorization: Bearer <token>` (matches @astra/shared's typed client),
 //     instead of cookies.
 
+import crypto from "node:crypto";
 import { betterAuth, type BetterAuthPlugin } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthEndpoint, createAuthMiddleware } from "better-auth/api";
 import { setSessionCookie } from "better-auth/cookies";
 import { emailOTP, bearer } from "better-auth/plugins";
-import { prisma, Role, LedgerSource } from "@astra/db";
+import { prisma, Role, LedgerSource, isLocalDatabase } from "@astra/db";
 import { earn } from "./points";
+import { emailHash } from "./email-hash";
+import { writeAudit } from "./audit";
+import { log, newRequestId, describeError } from "./api";
+import { verifyPassword, burnPasswordCheck } from "./password";
 import { ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
 import { Resend } from "resend";
 import nodemailer, { type Transporter } from "nodemailer";
 import { ASTRA_LOGO_PNG_BASE64 } from "./email-logo";
 import { OTP_LOGO_CID, OTP_SUBJECT, otpEmailHtml, otpEmailText } from "./email-template";
-import { verifyPassword } from "./partner";
 import { sendWithFailover, type Mailbox } from "./smtp-failover";
 import {
   verifyAdminCredentials,
@@ -50,11 +54,14 @@ function emailDomainAllowed(email: string): boolean {
 
 // ── DEV-ONLY login bypass ────────────────────────────────────────────────────
 // Lets the two developers sign in by typing a username (no OTP). Enabled ONLY on
-// non-production API instances — on any Vercel deploy NODE_ENV === "production",
-// so this path returns 404 there. Force-enable elsewhere with DEV_LOGIN_ENABLED
-// (do NOT do this on a public server without adding a password).
+// a non-production API instance that is talking to a database on this machine:
+// there is one shared Neon database and it IS production, so a `next dev`
+// pointed at it used to mint an ADMIN session (with a year-long token) in the
+// live data. Force-enable elsewhere with DEV_LOGIN_ENABLED=true (do NOT do this
+// on a public server without adding a password).
 const DEV_LOGIN =
-  process.env.NODE_ENV !== "production" || process.env.DEV_LOGIN_ENABLED === "true";
+  process.env.DEV_LOGIN_ENABLED === "true" ||
+  (process.env.NODE_ENV !== "production" && isLocalDatabase());
 
 const DEV_USERS: Record<string, { email: string; name: string }> = {
   blabmerda: { email: "blabmerda@astra.dev", name: "Dev" },
@@ -156,6 +163,12 @@ function transportFor(account: SmtpAccount): Transporter {
       // true for 465 (implicit TLS); false for 587 (STARTTLS). Overridable.
       secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : port === 465,
       auth: { user: account.user, pass: account.pass },
+      // Without these a mailbox that accepts the TCP connection and then stalls
+      // blocks the sign-in request for minutes (nodemailer's defaults are 2 min /
+      // 30 s / 10 min) before the second mailbox is even tried.
+      connectionTimeout: 8_000,
+      greetingTimeout: 8_000,
+      socketTimeout: 15_000,
     });
   }
   return account.transport;
@@ -274,13 +287,21 @@ async function deliverOtp(email: string, otp: string): Promise<void> {
   // 2) Resend, if configured. (Inline CID logo isn't sent here; text/HTML still
   //    render — Resend is only a fallback when SMTP isn't set.)
   if (resend) {
-    await resend.emails.send({
+    // The Resend SDK reports API failures in the result instead of throwing, so
+    // an unchecked call would tell the student a code was sent when it was not.
+    const result = await resend.emails.send({
       from: EMAIL_FROM,
       to: email,
       subject: OTP_SUBJECT,
       text: otpEmailText(otp),
       html: otpEmailHtml(otp),
     });
+    if (result.error) {
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "Couldn't send the sign-in code. Please try again in a moment.",
+        cause: result.error.message,
+      });
+    }
     return;
   }
   // 3) No provider configured.
@@ -316,7 +337,20 @@ function partnerLoginPlugin(): BetterAuthPlugin {
           where: { loginCode: code },
           include: { user: true, partner: true },
         });
-        if (!membership || !verifyPassword(password, membership.passwordHash)) {
+        // A venue that was deleted or hidden, or a login that was revoked, can no
+        // longer sign in. Same answer as a wrong password (no enumeration), and
+        // the same time spent on it.
+        const usable =
+          membership &&
+          !membership.user.deletedAt &&
+          membership.user.roles.includes(Role.PARTNER_MANAGER) &&
+          !membership.partner.deletedAt &&
+          membership.partner.active;
+        if (!usable) {
+          await burnPasswordCheck(password);
+          throw new APIError("UNAUTHORIZED", { message: "Invalid code or password." });
+        }
+        if (!(await verifyPassword(password, membership.passwordHash))) {
           throw new APIError("UNAUTHORIZED", { message: "Invalid code or password." });
         }
         const user = membership.user;
@@ -341,6 +375,30 @@ function partnerLoginPlugin(): BetterAuthPlugin {
   };
 }
 
+/**
+ * Record a backoffice sign-in. Audited like every other staff action: a
+ * password-only login that nobody can see is exactly how a stolen credential
+ * goes unnoticed. A failure to write the row never blocks the sign-in itself.
+ */
+async function auditSignIn(
+  userId: string,
+  method: "admin" | "admin+otp" | "staff",
+  request: Request | undefined,
+): Promise<void> {
+  const forwarded = request?.headers.get("x-vercel-forwarded-for") ?? request?.headers.get("x-forwarded-for");
+  try {
+    await writeAudit({
+      actorId: userId,
+      action: "auth.signin",
+      targetType: "User",
+      targetId: userId,
+      metadata: { method, ip: forwarded?.split(",")[0]?.trim() ?? null },
+    });
+  } catch (e) {
+    log("error", newRequestId(), "sign-in audit failed", { error: describeError(e) });
+  }
+}
+
 // ASTRA's single central admin: username + password (env) → emailed OTP → session.
 // Two custom endpoints, mounted under /api/auth/admin-login and /admin-verify.
 function adminLoginPlugin(): BetterAuthPlugin {
@@ -354,7 +412,7 @@ function adminLoginPlugin(): BetterAuthPlugin {
 
         // Two kinds of account use this one form. The central admin is checked
         // first, from env; anything else is looked up as a staff account.
-        if (!verifyAdminCredentials(username, password)) {
+        if (!(await verifyAdminCredentials(username, password))) {
           const staff = await verifyStaffCredentials(username, password);
           // Same generic error whichever half is wrong (no enumeration).
           if (!staff) {
@@ -368,6 +426,7 @@ function adminLoginPlugin(): BetterAuthPlugin {
             throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
           }
           await setSessionCookie(ctx, { session, user: staff });
+          await auditSignIn(staff.id, "staff", ctx.request);
           return ctx.json({
             ok: true,
             user: { id: staff.id, email: staff.email, name: staff.name, roles: staff.roles },
@@ -381,6 +440,7 @@ function adminLoginPlugin(): BetterAuthPlugin {
             throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
           }
           await setSessionCookie(ctx, { session, user: { ...user, name: user.name ?? "ASTRA Admin" } });
+          await auditSignIn(user.id, "admin", ctx.request);
           return ctx.json({
             ok: true,
             user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
@@ -408,6 +468,7 @@ function adminLoginPlugin(): BetterAuthPlugin {
           throw new APIError("INTERNAL_SERVER_ERROR", { message: "Session creation failed." });
         }
         await setSessionCookie(ctx, { session, user: { ...user, name: user.name ?? "ASTRA Admin" } });
+        await auditSignIn(user.id, "admin+otp", ctx.request);
         return ctx.json({
           ok: true,
           user: { id: user.id, email: user.email, name: user.name, roles: user.roles },
@@ -415,6 +476,36 @@ function adminLoginPlugin(): BetterAuthPlugin {
       }),
     },
   };
+}
+
+/**
+ * At most this many sign-in codes per address per hour, however many IPs ask.
+ * The per-IP limiter below stops a script; this stops anyone, from anywhere,
+ * flooding one student's inbox (and burning the mailbox's hourly send quota that
+ * every other student's login depends on).
+ */
+const OTP_PER_EMAIL_PER_HOUR = 5;
+
+/** A hash of the address, so the throttle table never holds a real email. */
+function throttleKey(email: string): string {
+  return crypto
+    .createHmac("sha256", process.env.BETTER_AUTH_SECRET ?? "dev")
+    .update(email.trim().toLowerCase())
+    .digest("hex");
+}
+
+// ponytail: count-then-insert is not atomic, so a burst of parallel requests can
+// overshoot the cap by the burst size; harmless for a mail throttle.
+async function assertOtpBudget(email: string): Promise<void> {
+  const key = throttleKey(email);
+  const since = new Date(Date.now() - 60 * 60 * 1000);
+  const sent = await prisma.rateEvent.count({ where: { bucket: "otp-email", key, createdAt: { gte: since } } });
+  if (sent >= OTP_PER_EMAIL_PER_HOUR) {
+    throw new APIError("TOO_MANY_REQUESTS", {
+      message: "Too many codes requested for this address. Please try again in a little while.",
+    });
+  }
+  await prisma.rateEvent.create({ data: { bucket: "otp-email", key } });
 }
 
 export const auth = betterAuth({
@@ -430,6 +521,13 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          // Deleting an account scrubs the address, which would otherwise let the
+          // same person re-register and collect the bonus again. The deleted
+          // shell keeps an HMAC of the address; if one exists, no bonus.
+          const returning = await prisma.user.count({
+            where: { emailHash: emailHash(user.email), id: { not: user.id } },
+          });
+          if (returning > 0) return;
           await earn(user.id, 50, {
             source: LedgerSource.SIGNUP,
             reason: "Welcome bonus for joining ASTRA",
@@ -441,14 +539,31 @@ export const auth = betterAuth({
   // We authenticate exclusively via email OTP; no passwords.
   emailAndPassword: { enabled: false },
   // Long-lasting login: once a user signs in (OTP for students, code+password
-  // for partners), keep them signed in for a year, rolling the expiry forward
-  // each day they use the app. The mobile app already persists the bearer token
-  // in the OS keychain (apps/mobile/lib/session.ts) and restores it on boot, so
-  // this makes "sign in once" effectively permanent unless the app is untouched
-  // for a full year. The web dashboard cookie inherits the same lifetime.
+  // for partners), keep them signed in for 180 days, rolling the expiry forward
+  // each day they use the app. The mobile app persists the bearer token in the
+  // OS keychain (apps/mobile/lib/session.ts) and restores it on boot, so a
+  // student signs in once a semester at most. Backoffice (admin/staff) sessions
+  // are held to an absolute 14 days on top of this — see lib/session.ts.
   session: {
-    expiresIn: 60 * 60 * 24 * 365, // 365 days
+    expiresIn: 60 * 60 * 24 * 180, // 180 days
     updateAge: 60 * 60 * 24, // roll the expiry forward at most once per day of activity
+  },
+  user: {
+    // Read in the same query Better Auth already makes for the session, so the
+    // API does not need a second user lookup on every request (lib/session.ts).
+    // input:false keeps a client from ever setting them.
+    additionalFields: {
+      roles: { type: "string[]", required: false, input: false },
+      dashboardPages: { type: "string[]", required: false, input: false },
+      staffUsername: { type: "string", required: false, input: false },
+      deletedAt: { type: "date", required: false, input: false },
+    },
+  },
+  advanced: {
+    // Vercel sets these itself and overwrites anything the caller sent. Without
+    // naming them Better Auth only trusts a single-valued x-forwarded-for, and
+    // otherwise rate-limits everybody through one shared bucket.
+    ipAddress: { ipAddressHeaders: ["x-vercel-forwarded-for", "x-forwarded-for"] },
   },
   // Hard gate: reject any OTP send/verify for non-@studbocconi.it emails at the
   // API boundary — before user-existence logic — so it can't be bypassed via
@@ -463,6 +578,10 @@ export const auth = betterAuth({
         const email = (ctx.body as { email?: string } | undefined)?.email ?? "";
         if (!emailDomainAllowed(email)) {
           throw new APIError("BAD_REQUEST", { message: DOMAIN_ERROR });
+        }
+        // The App Review account never sends mail, so it has nothing to throttle.
+        if (ctx.path === "/email-otp/send-verification-otp" && !isDemoReviewEmail(email)) {
+          await assertOtpBudget(email);
         }
       }
     }),
@@ -494,11 +613,22 @@ export const auth = betterAuth({
   ],
   rateLimit: {
     enabled: true,
+    // Counters live in Postgres: serverless instances do not share memory, so
+    // an in-memory limit is per lambda and multiplies with concurrency.
+    storage: "database",
     window: 60,
     max: 100,
     customRules: {
-      // Max 3 OTP send requests per minute per client (per docs/ARCHITECTURE.md).
-      "/email-otp/send-verification-otp": { window: 60, max: 3 },
+      // Per client IP. Generous on the student endpoints because a lecture hall
+      // shares one campus Wi-Fi address; the per-address cap in assertOtpBudget
+      // is what actually protects an inbox.
+      "/email-otp/send-verification-otp": { window: 60, max: 30 },
+      "/sign-in/email-otp": { window: 60, max: 30 },
+      // Credentials: a handful of tries a minute is plenty for a human.
+      "/admin-login": { window: 60, max: 5 },
+      "/admin-verify": { window: 60, max: 5 },
+      "/partner-login": { window: 60, max: 10 },
+      "/dev-login": { window: 60, max: 10 },
     },
   },
 });

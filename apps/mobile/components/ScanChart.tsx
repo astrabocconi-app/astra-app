@@ -1,5 +1,7 @@
-import { View, Text, useWindowDimensions } from "react-native";
+import { View, useWindowDimensions } from "react-native";
 import Svg, { Rect } from "react-native-svg";
+import { Text } from "./AppText";
+import { useLocale } from "../lib/i18n";
 
 export type ChartSeries = {
   offerId: string | null;
@@ -25,11 +27,13 @@ export function seriesColor(series: ChartSeries, index: number): string {
     : (SERIES_COLORS[index % SERIES_COLORS.length] as string);
 }
 
-function bucketLabel(iso: string, bucket: "day" | "week"): string {
+// Day buckets show the weekday's short name (Mon, lun): the narrow form was a
+// column of T, T, S, S. Week buckets show the date.
+function bucketLabel(iso: string, bucket: "day" | "week", locale: string): string {
   const d = new Date(iso);
   return bucket === "week"
-    ? d.toLocaleDateString(undefined, { day: "numeric", month: "short" })
-    : d.toLocaleDateString(undefined, { weekday: "narrow" });
+    ? d.toLocaleDateString(locale, { day: "numeric", month: "short" })
+    : d.toLocaleDateString(locale, { weekday: "short" });
 }
 
 /**
@@ -50,7 +54,9 @@ export function ScanChart({
   bucket: "day" | "week";
 }) {
   const { width } = useWindowDimensions();
-  const W = width - 40 - 32; // screen px-5 (2×20) + card p-4 (2×16)
+  const locale = useLocale();
+  // screen px-5 (2×20) + card p-4 (2×16); capped so a tablet does not stretch it
+  const W = Math.min(width, 600) - 40 - 32;
   const H = 160;
   const padTop = 10;
   const axis = 1;
@@ -72,7 +78,8 @@ export function ScanChart({
   const labelEvery = Math.ceil(n / 7);
 
   return (
-    <View>
+    // The legend under the chart is the readable version of the same numbers.
+    <View accessible={false} importantForAccessibility="no-hide-descendants">
       <Svg width={W} height={H}>
         {buckets.map((_, i) => {
           const x = i * slot + (slot - barW) / 2;
@@ -106,8 +113,8 @@ export function ScanChart({
       <View style={{ width: W }} className="mt-1 flex-row">
         {buckets.map((b, i) => (
           <View key={b} style={{ width: slot }} className="items-center">
-            <Text className="text-[10px] text-gray-400 dark:text-white/60">
-              {i % labelEvery === 0 ? bucketLabel(b, bucket) : ""}
+            <Text maxFontSizeMultiplier={1.2} className="text-[10px] text-gray-500 dark:text-white/70">
+              {i % labelEvery === 0 ? bucketLabel(b, bucket, locale) : ""}
             </Text>
           </View>
         ))}

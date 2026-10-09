@@ -6,31 +6,27 @@
 // stamped with the venue (refType/refId) for reporting and with grantedById =
 // the specific login that made them, for traceability.
 
-import crypto from "node:crypto";
 import { prisma, Prisma, LedgerSource } from "@astra/db";
-import { earn, getBalance } from "./points";
+import { getBalance } from "./points";
+import { bucketKeys, romeDateKey, startOfRomeDay, startOfRomeDayKey, addDaysToKey } from "./rome-time";
 
 // Fixed award per scan for now; per-offer / per-venue values come later.
 export const POINTS_PER_SCAN = 10;
 
-export function hashPassword(pw: string): string {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(pw, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-export function verifyPassword(pw: string, stored: string): boolean {
-  const [salt, hash] = stored.split(":");
-  if (!salt || !hash) return false;
-  const test = crypto.scryptSync(pw, salt, 64);
-  const known = Buffer.from(hash, "hex");
-  return known.length === test.length && crypto.timingSafeEqual(known, test);
-}
-
-/** The partner membership for a user (with the venue), or null for non-partners. */
+/**
+ * The partner membership for a user (with the venue), or null for non-partners.
+ *
+ * Also null when the venue was deleted or hidden, or the login's user was
+ * revoked: ending a partnership must end its staff's power to award points, not
+ * just remove the venue from the map.
+ */
 export async function getPartnerForUser(userId: string) {
-  return prisma.partnerMembership.findUnique({
-    where: { userId },
+  return prisma.partnerMembership.findFirst({
+    where: {
+      userId,
+      user: { deletedAt: null },
+      partner: { deletedAt: null, active: true },
+    },
     include: { partner: true },
   });
 }
@@ -44,38 +40,12 @@ export async function getPartnerForUser(userId: string) {
  */
 export const SCAN_COOLDOWN_MS = 60 * 60 * 1000;
 
-/**
- * Has this student already used this perk inside the cooldown?
- *
- * Server-side on purpose: a client-side guard only stops accidental
- * double-taps. It can't survive the card QR rotating (a new token looks like a
- * new code), a second staff phone scanning the same student, or a client that
- * simply doesn't cooperate. Returns when the next scan becomes allowed.
- */
-export async function findRecentScan(params: {
-  studentId: string;
-  partnerId: string;
-  offerId?: string | null;
-}): Promise<{ lastAt: Date; nextAllowedAt: Date } | null> {
-  const since = new Date(Date.now() - SCAN_COOLDOWN_MS);
-  const previous = await prisma.pointsLedgerEntry.findFirst({
-    where: {
-      userId: params.studentId,
-      source: LedgerSource.PARTNER_SCAN,
-      createdAt: { gte: since },
-      // Same promotion when one was chosen; otherwise same venue.
-      ...(params.offerId
-        ? { offerId: params.offerId }
-        : { refType: "Partner", refId: params.partnerId, offerId: null }),
-    },
-    orderBy: { createdAt: "desc" },
-    select: { createdAt: true },
-  });
-  if (!previous) return null;
-  return {
-    lastAt: previous.createdAt,
-    nextAllowedAt: new Date(previous.createdAt.getTime() + SCAN_COOLDOWN_MS),
-  };
+/** The scanned card does not belong to a live student account. */
+export class NotAStudentError extends Error {
+  constructor() {
+    super("That card doesn't belong to a student.");
+    this.name = "NotAStudentError";
+  }
 }
 
 /** Raised when the cooldown blocks a scan. Carries when it lifts. */
@@ -113,6 +83,13 @@ export async function awardScanIfAllowed(params: {
     try {
       await prisma.$transaction(
         async (tx) => {
+          // Only students earn from a scan: a partner or staff login holding a
+          // card QR must not be able to farm points at another venue.
+          const student = await tx.user.findFirst({
+            where: { id: params.studentId, deletedAt: null, roles: { has: "STUDENT" } },
+            select: { id: true },
+          });
+          if (!student) throw new NotAStudentError();
           const since = new Date(Date.now() - SCAN_COOLDOWN_MS);
           const previous = await tx.pointsLedgerEntry.findFirst({
             where: {
@@ -152,7 +129,7 @@ export async function awardScanIfAllowed(params: {
       );
       return getBalance(params.studentId);
     } catch (e) {
-      if (e instanceof ScanTooSoonError) throw e;
+      if (e instanceof ScanTooSoonError || e instanceof NotAStudentError) throw e;
       const conflict =
         e instanceof Prisma.PrismaClientKnownRequestError &&
         (e.code === "P2034" || e.code === "P2028");
@@ -162,31 +139,6 @@ export async function awardScanIfAllowed(params: {
   }
   // Unreachable: the loop either returns or throws.
   throw new Error("Scan could not be recorded.");
-}
-
-/** Award a scan to a student on behalf of a partner. Returns the new balance. */
-export async function awardScan(params: {
-  studentId: string;
-  partnerUserId: string;
-  partnerId: string;
-  partnerName: string;
-  /** Which promotion the scan was for, when the venue runs more than one. */
-  offerId?: string | null;
-  offerTitle?: string | null;
-}): Promise<number> {
-  await earn(params.studentId, POINTS_PER_SCAN, {
-    source: LedgerSource.PARTNER_SCAN,
-    // Name the offer in the reason so the student's own history reads usefully
-    // ("Scanned at Casa di Michele · 20% off any coffee").
-    reason: params.offerTitle
-      ? `Scanned at ${params.partnerName} · ${params.offerTitle}`
-      : `Scanned at ${params.partnerName}`,
-    refType: "Partner",
-    refId: params.partnerId,
-    offerId: params.offerId ?? null,
-    grantedById: params.partnerUserId,
-  });
-  return getBalance(params.studentId);
 }
 
 /** Ranges the venue analytics can be viewed over. */
@@ -207,12 +159,11 @@ export async function partnerStats(partnerId: string, days: number = 7) {
   const range: number = (STATS_RANGES as readonly number[]).includes(days) ? days : 7;
   const unit: "day" | "week" = range <= 14 ? "day" : "week";
 
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-
-  const since = new Date();
-  since.setHours(0, 0, 0, 0);
-  since.setDate(since.getDate() - (range - 1));
+  // "Today" and every chart bucket are Milan days, not UTC days.
+  const todayKey = romeDateKey();
+  const start = startOfRomeDay();
+  const sinceKey = addDaysToKey(todayKey, -(range - 1));
+  const since = startOfRomeDayKey(unit === "week" ? bucketKeys(sinceKey, todayKey, "week")[0]! : sinceKey);
 
   const where = {
     source: LedgerSource.PARTNER_SCAN,
@@ -222,8 +173,8 @@ export async function partnerStats(partnerId: string, days: number = 7) {
 
   const [rows, scansTotal, scansToday, todaySum, offers] = await Promise.all([
     // One pass for the whole grid: bucket × offer.
-    prisma.$queryRaw<{ bucket: Date; offerId: string | null; n: number }[]>`
-      SELECT date_trunc(${unit}::text, "createdAt")::date AS bucket,
+    prisma.$queryRaw<{ bucket: string; offerId: string | null; n: number }[]>`
+      SELECT to_char(date_trunc(${unit}::text, ("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Rome'), 'YYYY-MM-DD') AS bucket,
              "offerId",
              count(*)::int AS n
       FROM "PointsLedgerEntry"
@@ -247,24 +198,13 @@ export async function partnerStats(partnerId: string, days: number = 7) {
   ]);
 
   // Every bucket in the window, so quiet periods read as zero rather than
-  // vanishing and compressing the axis.
-  const buckets: string[] = [];
-  const cursor = new Date(since);
-  if (unit === "week") {
-    // Postgres truncates weeks to Monday; match it so keys line up.
-    const weekday = (cursor.getUTCDay() + 6) % 7;
-    cursor.setUTCDate(cursor.getUTCDate() - weekday);
-  }
-  const last = new Date();
-  while (cursor <= last) {
-    buckets.push(cursor.toISOString().slice(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + (unit === "week" ? 7 : 1));
-  }
+  // vanishing and compressing the axis. Weeks start on Monday, like Postgres.
+  const buckets = bucketKeys(sinceKey, todayKey, unit);
 
   const key = (offerId: string | null, bucket: string) => `${offerId ?? "-"}|${bucket}`;
   const counts = new Map<string, number>();
   for (const r of rows) {
-    counts.set(key(r.offerId, new Date(r.bucket).toISOString().slice(0, 10)), Number(r.n));
+    counts.set(key(r.offerId, r.bucket), Number(r.n));
   }
 
   const seriesFor = (offerId: string | null, title: string) => ({

@@ -1,11 +1,13 @@
 import { useMemo, useState, type ComponentProps } from "react";
-import { View, Text, Pressable, ScrollView, Linking } from "react-native";
+import { View, Pressable, ScrollView, Linking, Alert } from "react-native";
+import { Text } from "../components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Icon, MIcon, Spinner } from "../components/Icon";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { EmptyState } from "../components/EmptyState";
+import { Chip } from "../components/Chip";
 import { api } from "../lib/api";
 import { useT, type TranslationKey } from "../lib/i18n";
 
@@ -79,27 +81,19 @@ export default function GuidesScreen() {
   }, [q.data, lang]);
 
   const chip = (value: Lang, text: string) => (
-    <Pressable
-      key={value}
-      onPress={() => setLang(value)}
-      hitSlop={{ top: 6, bottom: 6 }}
-      accessibilityRole="button"
-      accessibilityState={{ selected: lang === value }}
-      className={`rounded-full px-3.5 py-2 ${lang === value ? "bg-astra-primary dark:bg-white" : "bg-gray-100 dark:bg-white/10"}`}
-    >
-      <Text
-        className={`text-[13px] font-medium ${lang === value ? "text-white dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
-      >
-        {text}
-      </Text>
-    </Pressable>
+    <Chip key={value} label={text} active={lang === value} onPress={() => setLang(value)} />
   );
+
+  // Guides are third-party pages: a dead link gets a message, not an unhandled rejection.
+  function openGuide(url: string) {
+    Linking.openURL(url).catch(() => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")));
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
       <ScreenHeader title={t("guides.title")} subtitle={t("guides.subtitle")} />
 
-      <View className="flex-row gap-2 px-4 pb-1 pt-3">
+      <View className="flex-row flex-wrap gap-2 px-4 pb-1 pt-3" accessibilityRole="radiogroup">
         {chip("all", t("guides.all"))}
         {chip("it", `${FLAG.it}  ${t("guides.italian")}`)}
         {chip("en", `${FLAG.en}  ${t("guides.english")}`)}
@@ -109,7 +103,7 @@ export default function GuidesScreen() {
         <View className="flex-1 items-center justify-center">
           <Spinner />
         </View>
-      ) : q.isError ? (
+      ) : q.isError && !q.data ? (
         <EmptyState
           icon="cloud-offline-outline"
           title={t("guides.loadError")}
@@ -124,27 +118,29 @@ export default function GuidesScreen() {
               <View key={c.category} className="overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10">
                 <Pressable
                   onPress={() => setOpen(expanded ? null : c.category)}
+                  accessibilityRole="button"
                   accessibilityState={{ expanded }}
-                  className="flex-row items-center gap-3 p-4 active:bg-gray-50 dark:active:bg-white/5"
+                  className="min-h-[56px] flex-row items-center gap-3 p-4 active:bg-gray-50 dark:active:bg-white/5"
                 >
                   <View className="h-10 w-10 items-center justify-center rounded-xl bg-astra-light dark:bg-white/10">
                     <MIcon name={ICONS[c.category] ?? "menu-book"} size={20} color="#04107E" />
                   </View>
                   <View className="flex-1">
                     <Text className="text-base font-semibold text-gray-900 dark:text-white">{label(c.category)}</Text>
-                    <Text className="text-xs text-gray-500 dark:text-gray-300">
+                    <Text className="text-xs text-gray-600 dark:text-gray-300">
                       {c.items.length === 1 ? t("guides.countOne") : t("guides.count", { n: String(c.items.length) })}
                     </Text>
                   </View>
-                  <Icon name={expanded ? "chevron-up" : "chevron-down"} size={18} color="#9CA3AF" />
+                  <Icon name={expanded ? "chevron-up" : "chevron-down"} size={18} color="#6B7280" />
                 </Pressable>
                 {expanded &&
                   c.items.map((g) => (
                     <Pressable
                       key={g.id}
-                      onPress={() => Linking.openURL(g.url)}
+                      onPress={() => openGuide(g.url)}
+                      accessibilityRole="link"
                       accessibilityLabel={`${g.title}, ${g.language === "it" ? t("guides.italian") : t("guides.english")}`}
-                      className="flex-row items-center gap-3 border-t border-gray-100 dark:border-white/10 px-4 py-3 active:bg-gray-50 dark:active:bg-white/5"
+                      className="min-h-[52px] flex-row items-center gap-3 border-t border-gray-100 dark:border-white/10 px-4 py-3 active:bg-gray-50 dark:active:bg-white/5"
                     >
                       <Text className="text-lg">{FLAG[g.language]}</Text>
                       <Text className="flex-1 text-sm font-medium text-gray-900 dark:text-white" numberOfLines={2}>

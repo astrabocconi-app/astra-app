@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { academicProfile, academicProfileInput } from "@astra/shared";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { assertCan } from "@/lib/authz";
+import { zodMessage } from "@/lib/validation";
 import { getSessionUser } from "@/lib/session";
 import {
   AcademicSelectionError,
@@ -13,7 +14,7 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
   );
 }
 
-export async function PUT(req: Request) {
+async function handlePut(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -37,7 +38,7 @@ export async function PUT(req: Request) {
     return errorResponse(
       400,
       "BAD_REQUEST",
-      parsed.error.issues[0]?.message ?? "Invalid academic profile.",
+      zodMessage(parsed.error, "Invalid academic profile."),
       requestId
     );
   }
@@ -50,8 +51,11 @@ export async function PUT(req: Request) {
     );
   } catch (error) {
     if (error instanceof AcademicSelectionError) {
-      return errorResponse(400, "INVALID_SELECTION", error.message, requestId);
+      return errorResponse(400, error.code, error.message, requestId);
     }
     throw error;
   }
 }
+
+export const GET = withApi(handleGet);
+export const PUT = withApi(handlePut);

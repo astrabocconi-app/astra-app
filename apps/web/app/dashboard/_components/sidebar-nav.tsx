@@ -71,10 +71,11 @@ export function SidebarNav({ sections }: { sections: DashboardSection[] }) {
                 type="button"
                 onClick={() => toggleSection(section.key)}
                 aria-expanded={isOpen}
-                className="flex items-center justify-between px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-600"
+                className="flex items-center justify-between px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-gray-500 hover:text-gray-600"
               >
                 {section.label}
                 <svg
+                  aria-hidden="true"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                   className={`h-3 w-3 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -102,7 +103,7 @@ export function SidebarNav({ sections }: { sections: DashboardSection[] }) {
                         : "font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                   >
-                    <span className={active ? "text-astra-primary" : "text-gray-400"}>
+                    <span className={active ? "text-astra-primary" : "text-gray-500"}>
                       {pageIcon(page.key)}
                     </span>
                     {page.label}

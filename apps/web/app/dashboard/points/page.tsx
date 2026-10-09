@@ -3,17 +3,16 @@ import { PageHeader } from "@/app/_ui/page-header";
 import { StatCard } from "@/app/_ui/card";
 import { Badge } from "@/app/_ui/badge";
 import { AdjustPointsForm } from "./adjust-form";
+import { romeDateTime } from "@/app/_ui/rome";
+import { requireDashboardPage } from "../_lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Points" };
 
 const RECENT = 25;
 
-const fmt = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+// Students who have not been deleted: the only accounts whose points count.
+const LIVE_STUDENT = { deletedAt: null, roles: { has: "STUDENT" as const } };
 
 const SOURCE_LABEL: Record<string, string> = {
   SIGNUP: "Signup",
@@ -25,14 +24,20 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 export default async function PointsPage() {
+  await requireDashboardPage("points");
   const [aggregate, entries, holders] = await Promise.all([
-    prisma.pointsLedgerEntry.aggregate({ _sum: { delta: true }, _count: { _all: true } }),
+    prisma.pointsLedgerEntry.aggregate({
+      where: { user: LIVE_STUDENT },
+      _sum: { delta: true },
+      _count: { _all: true },
+    }),
     prisma.pointsLedgerEntry.findMany({
+      where: { user: LIVE_STUDENT },
       orderBy: { createdAt: "desc" },
       take: RECENT,
       include: { user: { select: { email: true, name: true } } },
     }),
-    prisma.pointsLedgerEntry.groupBy({ by: ["userId"] }),
+    prisma.user.count({ where: { ...LIVE_STUDENT, ledgerEntries: { some: {} } } }),
   ]);
 
   const inCirculation = aggregate._sum.delta ?? 0;
@@ -45,24 +50,24 @@ export default async function PointsPage() {
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <StatCard label="Points in circulation" value={inCirculation.toLocaleString()} />
+        <StatCard label="Points in circulation" value={inCirculation.toLocaleString()} hint="Net balance held by current students" />
         <StatCard label="Ledger entries" value={aggregate._count._all.toLocaleString()} />
-        <StatCard label="Students with points" value={holders.length.toLocaleString()} />
+        <StatCard label="Students with points" value={holders.toLocaleString()} />
       </div>
 
       <AdjustPointsForm />
 
       <h2 className="mb-2 mt-8 text-sm font-semibold text-gray-800">Recent activity</h2>
       {entries.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+        <p className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
           No points awarded yet.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="px-4 py-3 font-medium">When</th>
+                <th className="px-4 py-3 font-medium">When (Milan)</th>
                 <th className="px-4 py-3 font-medium">Student</th>
                 <th className="px-4 py-3 font-medium">Source</th>
                 <th className="px-4 py-3 font-medium">Reason</th>
@@ -73,9 +78,9 @@ export default async function PointsPage() {
               {entries.map((e) => (
                 <tr key={e.id}>
                   <td className="whitespace-nowrap px-4 py-3 text-gray-500">
-                    {fmt.format(e.createdAt)}
+                    {romeDateTime(e.createdAt)}
                   </td>
-                  <td className="px-4 py-3 text-gray-800">
+                  <td className="break-all px-4 py-3 text-gray-800">
                     {e.user?.name ?? e.user?.email ?? "—"}
                   </td>
                   <td className="px-4 py-3">

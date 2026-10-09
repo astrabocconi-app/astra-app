@@ -1,7 +1,8 @@
 import type { ComponentProps, ReactNode } from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { MIcon, Icon } from "./Icon";
+import { Text } from "./AppText";
 
 // The standalone tappable row: icon tile, title + subtitle, chevron. Home's
 // rewards row, the Academics resources and the Profile rows all use it so they
@@ -46,17 +47,19 @@ export function NavRow({
       </View>
       <View className="flex-1">
         {eyebrow ? <Text className="text-xs text-gray-500 dark:text-gray-300">{eyebrow}</Text> : null}
-        <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
+        {/* Titles may grow with the text size and wrap; a long programme name
+            was cut to one line even at 100%. */}
+        <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
           {title}
         </Text>
         {subtitle ? (
-          <Text className="text-xs text-gray-500 dark:text-gray-300" numberOfLines={2}>
+          <Text className="text-xs text-gray-500 dark:text-gray-300" numberOfLines={3}>
             {subtitle}
           </Text>
         ) : null}
       </View>
       {trailing}
-      <Icon name="chevron-forward" size={18} color="#9CA3AF" />
+      <Icon name="chevron-forward" size={18} color="#6B7280" />
     </Pressable>
   );
 }

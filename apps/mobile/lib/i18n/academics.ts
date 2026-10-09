@@ -1,19 +1,22 @@
 export const en = {
-  "academics.title": "Academics",
   "academics.noProfile": "Add your programme",
   "academics.noProfileSub": "So we can show your handouts and courses",
   "academics.materials": "Handouts",
-  "academics.materialsSub": "Dispense for your course, by year",
+  "academics.materialsSub": "Handouts for your course, by year",
   "academics.guides": "Guides",
   "academics.guidesSub": "Exchange, internships, thesis and more",
   "academics.calculator": "Grade calculator",
   "academics.calculatorSub": "Your average, graduation grade and what you need",
   "academics.masters": "Master admissions",
   "academics.mastersSub": "Your admission score against last year's admits",
+  "academics.yearPromptTitle": "Still in year {n}?",
+  "academics.yearPromptBody": "A new academic year has started. Keep your handouts and exams up to date.",
+  "academics.yearPromptYes": "Yes, year {n}",
+  "academics.yearPromptNext": "I'm in year {n} now",
+  "academics.yearPromptChange": "Change",
 };
 
 export const it: Record<keyof typeof en, string> = {
-  "academics.title": "Didattica",
   "academics.noProfile": "Aggiungi il tuo corso",
   "academics.noProfileSub": "Così ti mostriamo dispense e corsi giusti",
   "academics.materials": "Dispense",
@@ -24,4 +27,9 @@ export const it: Record<keyof typeof en, string> = {
   "academics.calculatorSub": "Media, voto di laurea e cosa ti serve",
   "academics.masters": "Ammissioni magistrali",
   "academics.mastersSub": "Il tuo punteggio a confronto con gli ammessi dell'anno scorso",
+  "academics.yearPromptTitle": "Sei ancora al {n}° anno?",
+  "academics.yearPromptBody": "È iniziato un nuovo anno accademico. Tieni aggiornate dispense ed esami.",
+  "academics.yearPromptYes": "Sì, {n}° anno",
+  "academics.yearPromptNext": "Ora sono al {n}° anno",
+  "academics.yearPromptChange": "Modifica",
 };

@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { partnerInput } from "@astra/shared";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toPartnerItem } from "@/lib/cms-map";
 import { syncPartnerOffers } from "@/lib/partners";
 import { resolveCoordinates } from "@/lib/partner-location";
+import { zodMessage } from "@/lib/validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,7 +17,7 @@ const activeOffers = {
 } as const;
 
 // GET /api/admin/partners — every partner (active + hidden), A→Z.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
@@ -25,22 +26,20 @@ export async function GET(req: Request) {
     where: { deletedAt: null },
     orderBy: { name: "asc" },
     include: activeOffers,
+    take: 1000,
   });
-  return NextResponse.json(
-    { items: rows.map((p) => toPartnerItem(p)) },
-    { headers: { "x-request-id": requestId } },
-  );
+  return NextResponse.json({ items: rows.map((p) => toPartnerItem(p)) });
 }
 
 // POST /api/admin/partners — create a partner venue and its discounts.
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
 
   const parsed = partnerInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
+    return errorResponse(400, "BAD_REQUEST", zodMessage(parsed.error), requestId);
   }
   const d = parsed.data;
   // Pin comes from the address unless coordinates were given explicitly.
@@ -54,9 +53,9 @@ export async function POST(req: Request) {
     const partner = await tx.partner.create({
       data: {
         name: d.name,
-        description: d.description ?? null,
-        category: d.category ?? null,
-        address: d.address ?? null,
+        description: d.description,
+        category: d.category,
+        address: d.address,
         latitude: coords.latitude,
         longitude: coords.longitude,
         logoKey: d.logoUrl ?? null,
@@ -65,18 +64,21 @@ export async function POST(req: Request) {
       },
     });
     await syncPartnerOffers(tx, partner.id, d.offers);
-    return tx.partner.findUniqueOrThrow({ where: { id: partner.id }, include: activeOffers });
+    const full = await tx.partner.findUniqueOrThrow({ where: { id: partner.id }, include: activeOffers });
+    await writeAudit(
+      {
+        actorId: guard.session.user.id,
+        action: "create",
+        targetType: "Partner",
+        targetId: partner.id,
+        metadata: { name: full.name, offers: full.offers.length },
+      },
+      tx,
+    );
+    return full;
   });
-
-  await writeAudit({
-    actorId: guard.session.user.id,
-    action: "create",
-    targetType: "Partner",
-    targetId: created.id,
-    metadata: { name: created.name, offers: created.offers.length },
-  });
-  return NextResponse.json(toPartnerItem(created), {
-    status: 201,
-    headers: { "x-request-id": requestId },
-  });
+  return NextResponse.json(toPartnerItem(created), { status: 201 });
 }
+
+export const GET = withApi(handleGet);
+export const POST = withApi(handlePost);

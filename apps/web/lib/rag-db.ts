@@ -18,7 +18,12 @@ function getPool(): Pool {
       ssl: { rejectUnauthorized: false },
       max: 3,
       idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 5_000,
+      query_timeout: 15_000,
     });
+    // An idle connection dropped by the pooler emits 'error' on the pool; with no
+    // listener that is an uncaught exception that kills the instance.
+    pool.on("error", (e) => console.warn(JSON.stringify({ level: "warn", message: "rag pool error", error: e.message })));
   }
   return pool;
 }

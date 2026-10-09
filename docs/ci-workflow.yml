@@ -1,0 +1,47 @@
+name: CI
+
+# Typecheck, lint and unit tests on every push and pull request. No secrets are
+# needed: nothing here talks to the database or to any external service.
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # `npm ci` runs `prisma generate` (packages/db postinstall); a placeholder
+      # URL keeps Prisma config happy. It is never connected to.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      TURBO_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Format check
+        run: npm run format:check
+        continue-on-error: true # advisory until the two known JSON files are formatted

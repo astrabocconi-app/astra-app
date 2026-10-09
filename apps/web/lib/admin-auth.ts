@@ -14,7 +14,8 @@
 
 import crypto from "node:crypto";
 import { prisma, Role } from "@astra/db";
-import { verifyPassword } from "./partner";
+import { verifyPassword, burnPasswordCheck } from "./password";
+import { writeAudit } from "./audit";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
@@ -43,10 +44,17 @@ export function adminConfigured(): boolean {
   );
 }
 
-/** Constant-time-ish username check + scrypt password verify. */
-export function verifyAdminCredentials(username: string, password: string): boolean {
+/**
+ * Username check + scrypt password verify (async, so a flood of guesses cannot
+ * stall the event loop). A wrong username still spends a scrypt, so it is not
+ * distinguishable from a wrong password by timing.
+ */
+export async function verifyAdminCredentials(username: string, password: string): Promise<boolean> {
   if (!adminConfigured()) return false;
-  if (username.trim().toLowerCase() !== ADMIN_USERNAME!.trim().toLowerCase()) return false;
+  if (username.trim().toLowerCase() !== ADMIN_USERNAME!.trim().toLowerCase()) {
+    await burnPasswordCheck(password);
+    return false;
+  }
   return verifyPassword(password, ADMIN_PASSWORD_HASH!);
 }
 
@@ -101,9 +109,16 @@ export async function consumeAdminOtp(otp: string): Promise<boolean> {
   return ok;
 }
 
-/** Ensure the admin User row exists with the ADMIN role, and return it. */
+/**
+ * Ensure the admin User row exists with the ADMIN role, and return it.
+ *
+ * ADMIN_EMAIL names THE one admin. Any other account holding the ADMIN role (a
+ * previous admin address, a dev-login account that was once created against the
+ * live database) is demoted and signed out here: isAdmin() only looks at the
+ * role, so a leftover row is a full-power credential nobody is watching.
+ */
 export async function upsertAdminUser() {
-  return prisma.user.upsert({
+  const user = await prisma.user.upsert({
     where: { email: ADMIN_EMAIL! },
     update: { roles: { set: [Role.ADMIN] }, emailVerified: true, deletedAt: null },
     create: {
@@ -113,4 +128,24 @@ export async function upsertAdminUser() {
       emailVerified: true,
     },
   });
+
+  const others = await prisma.user.findMany({
+    where: { roles: { has: Role.ADMIN }, id: { not: user.id } },
+    select: { id: true },
+  });
+  if (others.length > 0) {
+    const ids = others.map((o) => o.id);
+    await prisma.$transaction([
+      prisma.user.updateMany({ where: { id: { in: ids } }, data: { roles: { set: [Role.STUDENT] } } }),
+      prisma.session.deleteMany({ where: { userId: { in: ids } } }),
+    ]);
+    await writeAudit({
+      actorId: user.id,
+      action: "auth.demote_admin",
+      targetType: "User",
+      targetId: user.id,
+      metadata: { demoted: ids.length },
+    });
+  }
+  return user;
 }

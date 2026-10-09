@@ -16,3 +16,22 @@ apps/mobile/.env
 # these itself, every time.
 apps/mobile/ios
 apps/mobile/android
+
+# Secrets must never be packed into the archive uploaded to Expo (EAS uses this
+# file INSTEAD of .gitignore). The App Store Connect key is read locally by
+# `eas submit`; local env overrides are developer-only.
+apps/mobile/secrets
+**/secrets
+*.p8
+*.p12
+*.key
+*.jks
+*.mobileprovision
+google-services.json
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+.vercel
+.turbo

@@ -2,20 +2,14 @@ import Link from "next/link";
 import { prisma } from "@astra/db";
 import type { Event as EventRow } from "@astra/db";
 import { PageHeader } from "@/app/_ui/page-header";
-import { Button } from "@/app/_ui/button";
+import { ButtonLink } from "@/app/_ui/button";
+import { romeDateTime, romeDayStart } from "@/app/_ui/rome";
+import { requireDashboardPage } from "../_lib/session";
 import { Badge } from "@/app/_ui/badge";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { CalendarIcon, PlusIcon, ChevronRightIcon } from "@/app/_ui/icons";
 
 export const dynamic = "force-dynamic";
-
-const fmt = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 function EventRowLink({ e, past }: { e: EventRow; past?: boolean }) {
   return (
@@ -28,7 +22,7 @@ function EventRowLink({ e, past }: { e: EventRow; past?: boolean }) {
       <div className="min-w-0 flex-1">
         <span className="truncate font-medium text-gray-900">{e.title}</span>
         <p className="mt-0.5 truncate text-sm text-gray-500">
-          {fmt.format(e.startsAt)}
+          {romeDateTime(e.startsAt)}
           {e.location ? ` · ${e.location}` : ""}
         </p>
       </div>
@@ -40,7 +34,10 @@ function EventRowLink({ e, past }: { e: EventRow; past?: boolean }) {
   );
 }
 
+export const metadata = { title: "Events" };
+
 export default async function EventsListPage() {
+  await requireDashboardPage("events");
   const rows = await prisma.event.findMany({
     where: { deletedAt: null },
     orderBy: { startsAt: "asc" },
@@ -50,9 +47,8 @@ export default async function EventsListPage() {
   // end time, once its start day is over. This mirrors /api/events, which keeps
   // same-day events visible to students all day rather than hiding them the
   // minute they begin.
-  const dayStart = new Date();
-  dayStart.setHours(0, 0, 0, 0);
   const now = new Date();
+  const dayStart = romeDayStart(now); // midnight in Milan, not on the server
   const isPast = (e: EventRow) => (e.endsAt ? e.endsAt < now : e.startsAt < dayStart);
 
   const past = rows.filter(isPast).reverse(); // most recently finished first
@@ -62,13 +58,11 @@ export default async function EventsListPage() {
     <>
       <PageHeader
         title="Events"
-        subtitle="Advertised in the app; students tap through to buy tickets."
+        subtitle="Advertised in the app; students tap through to buy tickets. All times are Milan time."
         actions={
-          <Link href="/dashboard/events/new">
-            <Button>
-              <PlusIcon size={18} /> New event
-            </Button>
-          </Link>
+          <ButtonLink href="/dashboard/events/new">
+            <PlusIcon size={18} /> New event
+          </ButtonLink>
         }
       />
 
@@ -78,11 +72,9 @@ export default async function EventsListPage() {
           title="No events yet"
           description="Create an event with a ticket link — it shows up in the app's Events tab."
           action={
-            <Link href="/dashboard/events/new">
-              <Button>
-                <PlusIcon size={18} /> New event
-              </Button>
-            </Link>
+            <ButtonLink href="/dashboard/events/new">
+              <PlusIcon size={18} /> New event
+            </ButtonLink>
           }
         />
       ) : (
@@ -90,12 +82,12 @@ export default async function EventsListPage() {
           <section className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between">
               <h2 className="text-sm font-semibold text-gray-800">Upcoming</h2>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-500">
                 {upcoming.length === 1 ? "1 event" : `${upcoming.length} events`}
               </span>
             </div>
             {upcoming.length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">
+              <p className="rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
                 Nothing coming up. New events appear here and in the app straight away.
               </p>
             ) : (
@@ -107,12 +99,12 @@ export default async function EventsListPage() {
             <section className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold text-gray-800">Past events</h2>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500">
                   {past.length === 1 ? "1 event" : `${past.length} events`}
                 </span>
               </div>
-              <p className="-mt-1 mb-1 text-xs text-gray-400">
-                Already finished, so students no longer see these. Still editable and reusable.
+              <p className="-mt-1 mb-1 text-xs text-gray-500">
+                Already finished, so students no longer see these. Still editable.
               </p>
               {past.map((e) => (
                 <EventRowLink key={e.id} e={e} past />

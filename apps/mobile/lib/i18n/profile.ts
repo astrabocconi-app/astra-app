@@ -1,5 +1,4 @@
 export const en = {
-  "profile.student": "Student",
   "profile.addAcademicInfo": "Add your programme, year and class below",
   "profile.academic": "Academic",
   "profile.programme": "Programme",
@@ -47,10 +46,12 @@ export const en = {
   "profile.deleteAccountConfirm": "Delete account",
   "profile.deleteAccountFailedTitle": "Could not delete your account",
   "profile.deleteAccountFailedBody": "Please try again, or contact ASTRA if it keeps failing.",
+  "profile.avatarN": "Picture {n}",
+  "profile.editNameHint": "Double tap to edit your name",
+  "profile.saved": "Saved",
 };
 
 export const it: Record<keyof typeof en, string> = {
-  "profile.student": "Studente",
   "profile.addAcademicInfo": "Aggiungi corso, anno e classe qui sotto",
   "profile.academic": "Percorso di studi",
   "profile.programme": "Corso di laurea",
@@ -98,4 +99,7 @@ export const it: Record<keyof typeof en, string> = {
   "profile.deleteAccountConfirm": "Elimina account",
   "profile.deleteAccountFailedTitle": "Impossibile eliminare l'account",
   "profile.deleteAccountFailedBody": "Riprova, oppure contatta ASTRA se il problema persiste.",
+  "profile.avatarN": "Immagine {n}",
+  "profile.editNameHint": "Tocca due volte per modificare il nome",
+  "profile.saved": "Salvato",
 };

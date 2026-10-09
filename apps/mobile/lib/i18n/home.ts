@@ -13,6 +13,10 @@ export const en = {
   "home.tapToSeeHistory": "Tap to see history",
   "home.recentActivity": "Recent activity",
   "home.noActivityYet": "No activity yet.",
+  "home.newsError": "Couldn't load the news.",
+  "home.newsPosition": "Story {n} of {total}",
+  "home.pointsUnavailable": "Couldn't load. Tap to retry.",
+  "home.activityError": "Couldn't load your activity.",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -30,4 +34,8 @@ export const it: Record<keyof typeof en, string> = {
   "home.tapToSeeHistory": "Tocca per vedere lo storico",
   "home.recentActivity": "Attività recente",
   "home.noActivityYet": "Ancora nessuna attività.",
+  "home.newsError": "Impossibile caricare le notizie.",
+  "home.newsPosition": "Notizia {n} di {total}",
+  "home.pointsUnavailable": "Impossibile caricare. Tocca per riprovare.",
+  "home.activityError": "Impossibile caricare la tua attività.",
 };

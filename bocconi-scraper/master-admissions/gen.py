@@ -1,8 +1,21 @@
 # Builds packages/shared/src/master-admissions-data.ts from the two surveys.
 #   python gen.py path/to/Masters-Admission-2026.xlsx
-# The xlsx (ASTRA's first-round survey) is not committed: only the admission
-# scores derived from it end up in the app. lower-bounds.json is hand-copied
-# from B.lab's survey PDF.
+#
+# Sources
+#   ASTRA's survey (the xlsx, not committed: only scores derived from it end up
+#   in the app). First-round admits of the 2025-26 cycle (answers dated Nov 2025).
+#   B.lab's survey PDF, committed as blab-round1-rows.json / blab-round2-rows.json
+#   (2024-25 cycle: first round results 21 Nov 2024, second round 29 May 2025).
+#   Round 1 has one row per admitted respondent; round 2 has one row per programme.
+#
+# What it assumes, and says so at the end of the run:
+#   - a respondent who is not "in corso" has no bonus, so their credits don't
+#     matter and their score is just their GPA;
+#   - an "in corso" respondent whose credits can't be read ("Full", "-", "I
+#     don't remember") has an unknown score (the bonus depends on the credits).
+#     They are left out and counted, never given a made-up 120;
+#   - several numbers in one cell ("112/118") take the first; a GPA written with
+#     a comma is read as a decimal.
 import json, os, re, sys
 import openpyxl
 
@@ -17,6 +30,7 @@ ALIASES = {
     "CHINA MIM": "CHINA-MIM", "IM DUAL DEGREE ESSEC": "ESSEC", "MM": "MM", "TS": "TS", "PPA": "PPA",
 }
 
+
 def num(v):
     if isinstance(v, (int, float)):
         return float(v)
@@ -26,42 +40,94 @@ def num(v):
             return float(m.group(0).replace(",", "."))
     return None
 
+
 def credits(v):
     n = num(v)
-    if n is not None and 60 <= n <= 200:
-        return n
-    # "Full", "Tutti", "Maximum", "all the exams": a complete second year + a bit.
-    if isinstance(v, str) and re.search(r"(?i)full|tutt|max|all|total", v):
-        return 120.0
-    return None
+    return n if n is not None and 60 <= n <= 200 else None
 
+
+def score(gpa, cfu, in_corso, round_min):
+    """Same formula as admissionScore() in master-admissions.ts."""
+    bonus = (1 + 0.05 * max(0, cfu - round_min)) if in_corso else 0
+    return gpa + bonus * 30 / 110
+
+
+def median(v):
+    n = len(v)
+    return v[n // 2] if n % 2 else (v[n // 2 - 1] + v[n // 2]) / 2
+
+
+# ── ASTRA ─────────────────────────────────────────────────────────────────
 ws = openpyxl.load_workbook(sys.argv[1], data_only=True).worksheets[0]
-scores = {}
-skipped = 0
-for r in ws.iter_rows(min_row=2, values_only=True):
-    gpa, cfu, admitted, master, in_corso = num(r[1]), credits(r[2]), r[4], r[5], r[14]
-    key = ALIASES.get(str(master or "").strip().upper())
-    if admitted != "Yes" or not key or gpa is None or not 18 <= gpa <= 31 or cfu is None:
-        skipped += 1
+astra, report = {}, {"not admitted or empty": 0, "unmapped programme": 0, "bad GPA": 0, "unknown credits, in corso": []}
+for i, r in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+    gpa, cfu, admitted, master, in_corso_raw = num(r[1]), credits(r[2]), r[4], r[5], r[14]
+    if admitted != "Yes":
+        report["not admitted or empty"] += 1
         continue
-    bonus = (1 + 0.05 * max(0, cfu - 90)) if in_corso != "No" else 0  # round 1: 90 credits
-    scores.setdefault(key, []).append(round(gpa + bonus * 30 / 110, 2))
+    key = ALIASES.get(str(master or "").strip().upper())
+    if not key:
+        report["unmapped programme"] += 1
+        continue
+    if gpa is None or not 18 <= gpa <= 31:
+        report["bad GPA"] += 1
+        continue
+    in_corso = in_corso_raw != "No"  # a blank answer counts as in corso (no admitted row is blank)
+    if in_corso and cfu is None:
+        report["unknown credits, in corso"].append(f"row {i}: {key} GPA {r[1]} credits {r[2]!r}")
+        continue
+    astra.setdefault(key, []).append(round(score(gpa, cfu if cfu is not None else 0, in_corso, 90), 2))
 
+# ── B.lab ─────────────────────────────────────────────────────────────────
+def blab(file, round_min):
+    d = json.load(open(os.path.join(HERE, file), encoding="utf-8"))
+    out, worst = {}, 0.0
+    for row in d["rows"]:
+        calc = score(row["gpa"], row["credits"], row["inCorso"], round_min)
+        worst = max(worst, abs(calc - row["score"]))
+        # The transcription is only trusted while every row agrees with its own printed score.
+        assert abs(calc - row["score"]) < 0.011, f"transcription error? {row} computes {calc:.3f}"
+        out.setdefault(row["p"], []).append(row["score"])
+    return {k: sorted(v) for k, v in sorted(out.items())}, worst
+
+
+blab1, w1 = blab("blab-round1-rows.json", 90)
+blab2, w2 = blab("blab-round2-rows.json", 110)
 bounds = json.load(open(os.path.join(HERE, "lower-bounds.json"), encoding="utf-8"))
+for rnd, data in (("round1", blab1), ("round2", blab2)):
+    for k, v in data.items():
+        assert abs(v[0] - bounds[rnd][k]) < 1e-9, f"{rnd} {k}: lowest row {v[0]} != PDF lower bound {bounds[rnd][k]}"
+    assert set(data) == set(bounds[rnd]), f"{rnd}: programmes differ from the PDF's lower-bound table"
+
 data = {
-    "survey": {k: sorted(v) for k, v in sorted(scores.items())},
-    "lowerBounds": {"round1": bounds["round1"], "round2": bounds["round2"]},
+    "cycles": {"astra": "2025-26", "blab": "2024-25"},
+    "astra": {k: sorted(v) for k, v in sorted(astra.items())},
+    "blab": {"round1": blab1, "round2": blab2},
 }
 ts = """// Master admission survey data. GENERATED by
 // bocconi-scraper/master-admissions/gen.py — edit that, not this file.
-//   survey       admission scores (out of 30) of students admitted in the first
-//                round, from ASTRA's survey, sorted, per programme
-//   lowerBounds  lowest admitted score per programme in B.lab's survey
+// Scores are out of 30 (GPA plus the in-corso bonus), one per respondent who got in.
+//   astra  ASTRA's survey, first round of the 2025-26 cycle
+//   blab   B.lab Bocconi's survey, 2024-25 cycle: every first-round admit, and
+//          one respondent per programme for the second round
+// Not official Bocconi data, and the two cycles are different years.
 export const MASTER_ADMISSION_DATA: {
-  survey: Record<string, number[]>;
-  lowerBounds: { round1: Record<string, number>; round2: Record<string, number> };
+  cycles: { astra: string; blab: string };
+  astra: Record<string, number[]>;
+  blab: { round1: Record<string, number[]>; round2: Record<string, number[]> };
 } = """ + json.dumps(data, indent=1) + ";\n"
-open(OUT, "w", encoding="utf-8").write(ts)
-print("respondents used:", sum(len(v) for v in scores.values()), "skipped:", skipped)
-for k, v in sorted(scores.items()):
-    print(f"{k:10} n={len(v):3} min={min(v):.2f} median={v[len(v)//2]:.2f} lb1={bounds['round1'].get(k)}")
+open(OUT, "w", encoding="utf-8", newline="\n").write(ts)
+
+print(f"ASTRA admits used: {sum(len(v) for v in astra.values())}")
+print(f"B.lab rows used: round 1 {sum(len(v) for v in blab1.values())} (max |printed - computed| {w1:.4f}), round 2 {sum(len(v) for v in blab2.values())} ({w2:.4f})")
+print("Left out of ASTRA's data:")
+print("  not admitted or empty rows:", report["not admitted or empty"])
+print("  unmapped programme:", report["unmapped programme"], "| GPA outside 18-31:", report["bad GPA"])
+print(f"  in-corso admits with credits that could not be read ({len(report['unknown credits, in corso'])}), score unknown, excluded:")
+for line in report["unknown credits, in corso"]:
+    print("    -", line)
+pooled = {k: sorted(astra.get(k, []) + blab1.get(k, [])) for k in set(astra) | set(blab1)}
+print(f"{'programme':10} {'astra':>5} {'b.lab':>5} {'n':>3} {'lowest':>7} {'median':>7}")
+for k in sorted(pooled):
+    v = pooled[k]
+    print(f"{k:10} {len(astra.get(k, [])):5} {len(blab1.get(k, [])):5} {len(v):3} {v[0]:7.2f} {median(v):7.2f}{'' if len(v) >= 5 else '  (n<5: no median shown)'}")

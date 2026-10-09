@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, ScrollView, Pressable } from "react-native";
+import { Text } from "../../components/AppText";
 import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useIsFocused } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
@@ -16,10 +17,12 @@ type RangeDays = 7 | 14 | 30 | 90;
 export default function PartnerHomeScreen() {
   const t = useT();
   const [days, setDays] = useState<RangeDays>(7);
+  const focused = useIsFocused();
   const stats = useQuery({
     queryKey: ["partner-stats", days],
     queryFn: () => api.partner.stats(days),
-    refetchInterval: 15_000,
+    // Only while this tab is the one on screen.
+    refetchInterval: focused ? 30_000 : false,
   });
 
   const s = stats.data;
@@ -27,19 +30,20 @@ export default function PartnerHomeScreen() {
   return (
     <ScrollView className="flex-1 bg-white dark:bg-astra-primary" contentContainerStyle={{ padding: 20, paddingTop: 12 }}>
       <Text className="text-sm font-medium text-gray-500 dark:text-gray-300">{t("partnerHome.welcomeBack")}</Text>
-      <Text className="text-3xl font-bold text-astra-primary dark:text-white">
+      <Text accessibilityRole="header" className="text-3xl font-bold text-astra-primary dark:text-white">
         {s?.partner.name ?? t("partnerHome.partnerFallback")}
       </Text>
 
       {/* Big scans-today card */}
       <Pressable
+        accessibilityRole="button"
         className="mt-6 rounded-3xl bg-astra-primary dark:bg-astra-dark p-6 active:opacity-90"
         onPress={() => router.push("/partner/scan")}
       >
-        <Text className="text-xs uppercase tracking-wide text-white/70">
+        <Text className="text-xs uppercase tracking-wide text-white/80">
           {t("partnerHome.codesScannedToday")}
         </Text>
-        <Text className="mt-1 text-6xl font-bold text-white">
+        <Text maxFontSizeMultiplier={1.3} className="mt-1 text-6xl font-bold text-white">
           {stats.isLoading ? "…" : (s?.scansToday ?? 0)}
         </Text>
         <View className="mt-3 flex-row items-center gap-1.5">
@@ -65,7 +69,7 @@ export default function PartnerHomeScreen() {
       {/* Scans over time, stacked by promotion */}
       <View className="mt-3 rounded-2xl border border-gray-100 dark:border-white/10 p-4">
         <View className="mb-3 flex-row items-baseline justify-between">
-          <Text className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
+          <Text className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-white/70">
             {t("partnerHome.scansOverTime")}
           </Text>
           <Text className="text-lg font-bold text-gray-900 dark:text-white">{s?.scansInRange ?? 0}</Text>
@@ -103,7 +107,7 @@ export default function PartnerHomeScreen() {
 
       {/* Scans all-time */}
       <View className="mt-4 rounded-2xl border border-gray-100 dark:border-white/10 p-4">
-        <Text className="text-xs uppercase tracking-wide text-gray-400 dark:text-white/60">
+        <Text className="text-xs uppercase tracking-wide text-gray-500 dark:text-white/70">
           {t("partnerHome.scansAllTime")}
         </Text>
         <Text className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
@@ -111,7 +115,7 @@ export default function PartnerHomeScreen() {
         </Text>
       </View>
 
-      {stats.isError && (
+      {stats.isError && !stats.data && (
         <EmptyState
           icon="cloud-offline-outline"
           title={t("partnerHome.loadStatsError")}

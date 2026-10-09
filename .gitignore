@@ -67,3 +67,10 @@ Icon
 
 # Python bytecode
 __pycache__/
+
+# EAS local credentials and Android push config (never committed)
+apps/mobile/secrets/
+google-services.json
+
+# Python
+*.pyc

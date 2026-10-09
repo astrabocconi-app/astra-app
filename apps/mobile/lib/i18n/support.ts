@@ -35,7 +35,7 @@ export const it: Record<keyof typeof en, string> = {
     "Raccontaci cosa è successo, o cosa ti piacerebbe vedere. Più dettagli ci dai, più in fretta possiamo aiutarti.",
   "support.privacyNote":
     "Inviato dal tuo account ASTRA, così abbiamo la tua email per risponderti. Solo il team ASTRA può vederlo.",
-  "support.send": "Invia a ASTRA",
+  "support.send": "Invia ad ASTRA",
   "support.tooShort": "Aggiungi qualche dettaglio in più",
   "support.sentTitle": "Grazie, l'abbiamo ricevuto",
   "support.sentBody": "Il team ASTRA ti risponderà via email.",

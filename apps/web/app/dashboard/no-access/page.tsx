@@ -5,6 +5,7 @@ import { PageHeader } from "@/app/_ui/page-header";
 // redirect can never point at a route that does not resolve.
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "No access" };
 
 export default function NoAccessPage() {
   return (

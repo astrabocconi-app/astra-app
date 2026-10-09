@@ -19,6 +19,9 @@ export const en = {
   "onboarding.later": "Later",
   "onboarding.loadFailed": "We couldn't load the programme list.",
   "onboarding.saveFailed": "That didn't save. Check your connection and try again.",
+  "onboarding.trackTitle": "Which track?",
+  "onboarding.trackSub": "Your programme splits into tracks from this year.",
+  "onboarding.changeHint": "Double tap to change",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -42,4 +45,7 @@ export const it: Record<keyof typeof en, string> = {
   "onboarding.later": "Più tardi",
   "onboarding.loadFailed": "Non siamo riusciti a caricare l'elenco dei corsi.",
   "onboarding.saveFailed": "Salvataggio non riuscito. Controlla la connessione e riprova.",
+  "onboarding.trackTitle": "Quale indirizzo?",
+  "onboarding.trackSub": "Il tuo corso si divide in indirizzi da quest'anno.",
+  "onboarding.changeHint": "Tocca due volte per cambiare",
 };

@@ -1,110 +1,126 @@
-# ASTRA — Setup
+# ASTRA - Setup
 
-**Infrastructure is managed by Vercel.** You provision the DB, email, and storage
-from the Vercel dashboard; env vars are injected there and pulled locally with one
-command — no hand-copying secrets. **Never commit a real `.env`.**
+How the infrastructure is put together and which environment variable does what.
+Day-to-day developer setup is in [`ONBOARDING.md`](../ONBOARDING.md); releasing and
+the runbook are in [`DEPLOY.md`](DEPLOY.md). **Never commit a real `.env`.**
 
-```bash
-npm i -g vercel          # once
-vercel login
-vercel link              # from repo root → pick the astra-app project (Root Dir: apps/web)
-vercel env pull apps/web/.env   # writes all env vars locally
-cp apps/mobile/.env.example apps/mobile/.env   # mobile has no secrets; edit as needed
-```
+## Services
 
-Re-run `vercel env pull apps/web/.env` whenever the Vercel env changes.
+| Service | Used for | Where configured |
+|---|---|---|
+| **Vercel** | Hosts `apps/web` (backoffice + API), region `fra1` (`apps/web/vercel.json`), Node 24 | Project `astra-app`, root directory `apps/web` |
+| **Neon** | Postgres (pooled URL at runtime, direct URL for migrations), provisioned through the Vercel integration, which injects `STORAGE_*` variables | Vercel > Storage |
+| **Aruba SMTP** | Sign-in OTP and staff/admin e-mail. Optional second mailbox (`*_2`) as failover when the first hits Aruba's hourly cap (`apps/web/lib/smtp-failover.ts`) | Vercel env |
+| **Resend** | Last-resort fallback transport, only if no SMTP is configured. **Not used in production** (`RESEND_API_KEY` is unset). | Vercel env |
+| **Supabase** | Read-only catalogue of guides, handouts and materials; files are public storage URLs | Vercel env |
+| **Eventbrite** | Ticket checkout (browser sheet), per-event discount codes, reward code import | Vercel env |
+| **Mapbox** | Discounts map in the app (public `pk.` token baked in per build) and geocoding in the backoffice | EAS env + Vercel env |
+| **OpenAI + separate Postgres** | Optional "Ask ASTRA" chatbot (`/api/chat`), off in the app | Vercel env (`CHAT_ENABLED`) |
+| **Sentry** | Mobile crash and performance reporting. **Web has no server-side error tracking**, use Vercel logs | EAS env |
+| **Expo / EAS** | Builds, store submission, optional OTA updates (owner `mfmatozza`, project id in `app.config.ts`) | expo.dev |
 
----
+Free Vercel Hobby and Expo free plans are in use: logs are kept about a day, and
+EAS builds are queue-limited. See "Plans and ownership" in `DEPLOY.md`.
 
-## 1. Database — Neon (via Vercel Storage)
+## Dev and preview database (owner action, strongly recommended)
 
-Provision it **through Vercel** so the connection strings are injected automatically:
+> **WARNING.** Today the Vercel **Preview** and **Development** environments hold
+> the **same** Neon connection strings and auth secrets as **Production**
+> (`STORAGE_*`, `BETTER_AUTH_SECRET`, `CARD_TOKEN_HMAC_SECRET`,
+> `ALLOWED_EMAIL_DOMAINS`, `MOBILE_ALLOWED_ORIGINS`). Anything you run locally with
+> a pulled env, any preview deployment and any Prisma command reads and writes
+> **live student data**, and the dev-login bypass can create an ADMIN session in
+> production data.
 
-1. Vercel project → **Storage** → **Create** → **Neon** (Postgres). Pick a region
-   close to your functions (e.g. `eu-central-1`) and connect it to the project.
-2. Vercel injects the connection env vars (`DATABASE_URL`, `POSTGRES_PRISMA_URL`,
-   `DATABASE_URL_UNPOOLED` / `POSTGRES_URL_NON_POOLING`, …) into all environments.
-   Our DB layer reads whichever exists — **pooled** for the runtime client,
-   **unpooled/direct** for `prisma migrate` (see `packages/db/prisma.config.ts`).
-3. Pull them locally: `vercel env pull apps/web/.env`.
-4. Apply the schema to that DB: `npm run db:migrate` then `npm run db:seed`.
+Recommended setup, to be done by the project owner in the consoles:
 
-> Serverless functions must use the **pooled** connection (PgBouncer) at runtime;
-> `prisma migrate` uses the **direct/unpooled** one. Both are handled automatically
-> from the injected vars.
+1. **Neon console**: create a branch `dev` (and optionally `preview`) of the
+   production project (branches are instant and free). Copy its pooled and direct
+   connection strings.
+2. **Vercel > Project > Settings > Environment Variables**: edit the Neon-integration
+   variables (`STORAGE_DATABASE_URL`, `STORAGE_DATABASE_URL_UNPOOLED`,
+   `STORAGE_POSTGRES_*`, `STORAGE_PG*`) so they are scoped to **Production only**, and add
+   `DATABASE_URL` / `DIRECT_URL` for **Preview** and **Development** pointing at the
+   branches.
+3. Give Preview and Development **their own** `BETTER_AUTH_SECRET` and
+   `CARD_TOKEN_HMAC_SECRET` (`openssl rand -base64 32`, `openssl rand -hex 32`), so a
+   preview can never mint a production-valid session or card token.
+4. Re-add secrets as **Sensitive** variables (Vercel cannot show them again): the
+   admin trio, the two secrets above, `STORAGE_*` password and URLs, Mapbox token.
+5. Disable the unused **Neon Auth** service on the project (Neon console), it holds
+   an unused `neon_auth` schema with public sign-up enabled.
+6. Only then use `vercel env pull apps/web/.env --environment=development`.
 
-### Preview databases (per-PR branches)
-The Neon–Vercel integration can create a **branch DB per preview deployment**
-automatically — enable it in the integration settings once you deploy.
+Until that is done, build your own Neon branch URL by hand into `apps/web/.env`.
 
-### Run migrations
-The schema is already migrated on the shared dev DB, so you don't need this to
-start. Use it when you change the Prisma schema (uses `DIRECT_URL`):
-```bash
-npm run db:migrate      # prisma migrate dev
-npm run db:seed         # minimal fake data
-npm run db:studio       # browse
-```
+## Environment variables
 
-## 2. Email — Resend (OTP delivery)
+**Scope column:** *P* = Production, *V* = Preview, *D* = Development (Vercel). The
+"recommended" scoping assumes the dev and preview database from the section above.
 
-Install the **Resend** integration from the **Vercel Marketplace** (Project →
-Integrations) — it provisions Resend and injects `RESEND_API_KEY`. Verify a sending
-domain in Resend for real delivery. In **local dev** you don't need it: the OTP
-code is printed to the server console when `RESEND_API_KEY` is unset.
+### `apps/web` (Vercel / `apps/web/.env`)
 
-## 3. File storage — Vercel Blob
+| Variable | Required | Scope (recommended) | Purpose |
+|---|---|---|---|
+| `DATABASE_URL` or `STORAGE_DATABASE_URL` / `POSTGRES_PRISMA_URL` / `POSTGRES_URL` | yes | P (prod DB), V+D (branch) | Pooled runtime connection. The code takes the first one that exists. |
+| `DIRECT_URL` or `STORAGE_DATABASE_URL_UNPOOLED` / `POSTGRES_URL_NON_POOLING` | yes (migrations) | same | Direct connection for `prisma migrate` |
+| `BETTER_AUTH_SECRET` | yes | **separate per environment** | Signs sessions |
+| `BETTER_AUTH_URL` | recommended | P: `https://app.astrabocconi.com` | Public base URL of auth. If unset it falls back to `VERCEL_PROJECT_PRODUCTION_URL`. |
+| `CARD_TOKEN_HMAC_SECRET` | yes | **separate per environment** | Signs QR card tokens |
+| `ALLOWED_EMAIL_DOMAINS` | no (default `studbocconi.it,unibocconi.it`) | all | Domains allowed to request an OTP |
+| `MOBILE_ALLOWED_ORIGINS` | no | all | Extra trusted origins (CORS / auth). Native requests carry no `Origin`. |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_SECURE` `SMTP_USER` `SMTP_PASS` `EMAIL_FROM` | yes in P | P | Primary mailbox (Aruba: `smtps.aruba.it`, 465, secure) |
+| `SMTP_USER_2` `SMTP_PASS_2` `EMAIL_FROM_2` | no | P | Failover mailbox |
+| `RESEND_API_KEY` `RESEND_FROM` | no | none | Dead fallback, leave unset |
+| `ADMIN_USERNAME` `ADMIN_EMAIL` `ADMIN_PASSWORD_HASH` | yes for backoffice admin | P (and your own for D) | The single environment admin. Hash from `node apps/web/scripts/create-admin.mjs <username> <email> [password]`. |
+| `ADMIN_2FA_ENABLED` | no | P | Controls the admin second factor. Factual behaviour: when the variable is set, only the exact string `true` enables the e-mailed code; when it is **unset** the code is on in production and off elsewhere (`apps/web/lib/admin-auth.ts`). Do not change it without the owner. |
+| `DEV_LOGIN_ENABLED` | no | **never set in P** | Forces `POST /api/auth/dev-login` on in a production build. It is always on when `NODE_ENV` is not production. Leave unset in Production. |
+| `DEMO_REVIEW_EMAIL` `DEMO_REVIEW_OTP` | no | P only | App Review demo account with a fixed code |
+| `CRON_SECRET` | yes once the cron routes ship | P | Vercel sends it as `Authorization: Bearer` to `/api/cron/*`; the routes reject anything else. `openssl rand -hex 32`. |
+| `SIGNUP_TOMBSTONE_SECRET` | yes once the hardened deletion ships | P | Secret used by the sign-up tombstone for deleted accounts (backend hardening round). Generate with `openssl rand -hex 32`, keep it stable; check `apps/web/lib/account.ts` for the exact use. |
+| `CHAT_ENABLED` | no | P | `true` turns `/api/chat` on. The app has no chat screen, so leave it unset/false. |
+| `OPENAI_API_KEY` `RAG_DATABASE_URL` `RAG_MIN_SIMILARITY` | only with chat | P | Chatbot upstreams |
+| `SUPABASE_URL` `SUPABASE_SECRET_KEY` | yes | P | Materials/guides catalogue |
+| `EVENTBRITE_PRIVATE_TOKEN` `EVENTBRITE_ORG_ID` | for Eventbrite features | P | Discount-code generation and reward code import |
+| `MAPBOX_TOKEN` (or `EXPO_PUBLIC_MAPBOX_TOKEN`) | for backoffice geocoding | P | Address search in the partner form |
+| `FREEATB_FUNCTION_URL` `FREEATB_ANON_KEY` | no | P | Overrides for the Free@B classroom feed (public anon key has an in-code default) |
 
-Vercel project → **Storage** → **Blob** → create a store and connect it. Vercel
-injects `BLOB_READ_WRITE_TOKEN`. Only needed once the Materials/News-image features
-land (Phase 9–10); no action required before then.
+Set automatically by Vercel: `VERCEL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`,
+`NODE_ENV`. `turbo.json` passes the variables above through to builds; add new
+server variables to its `globalPassThroughEnv` list as well.
 
-## 4. Vercel (hosts everything: app + API + DB + Blob + email)
+### `apps/mobile` (EAS environment variables / `apps/mobile/.env.local`)
 
-See [DEPLOY.md](DEPLOY.md). Import the repo, set **Root Directory** = `apps/web`,
-connect the **Neon**, **Blob**, and **Resend** integrations (they inject their env
-vars), set the few manual secrets, and deploy. Pull env locally with
-`vercel env pull apps/web/.env`.
+All `EXPO_PUBLIC_*` values are **public** (inlined in the JS bundle).
 
-## 5. Expo / EAS (mobile)
+| Variable | Where | Purpose |
+|---|---|---|
+| `APP_ENV` | set by `eas.json` per profile | `development` / `staging` / `production`, selects the API URL in `app.config.ts` |
+| `EXPO_PUBLIC_API_URL` | `eas.json` (preview, production) and `.env.local` for dev | API base URL. Production: `https://app.astrabocconi.com` |
+| `EXPO_PUBLIC_SENTRY_DSN` | **EAS env var** (preview, production) | Without it Sentry silently stays off |
+| `EXPO_PUBLIC_MAPBOX_TOKEN` | **EAS env var** + `.env.local` | Public `pk.` token, without it the map shows an empty state |
+| `RNMAPBOX_MAPS_DOWNLOAD_TOKEN` | EAS **secret** / shell / `~/.netrc` | Secret `sk.` token (scope `DOWNLOADS:READ`), build machine only |
+| `SENTRY_AUTH_TOKEN` (+ `SENTRY_ORG`, `SENTRY_PROJECT`) | EAS **secret** | Enables source-map and debug-file upload. Without the token the Sentry plugin and Metro hook are not loaded (`app.config.ts`, `metro.config.js`). |
+| `GOOGLE_SERVICES_JSON` | EAS **file** env var | Android FCM config (`google-services.json`). Without it Android push does not work. |
 
-1. Create an Expo account at <https://expo.dev>; `npm i -g eas-cli`; `eas login`.
-2. In `apps/mobile`, run `eas init` and paste the returned **projectId** into
-   `app.config.ts` (`extra.eas.projectId`).
-3. Build profiles live in `apps/mobile/eas.json` (`development` / `preview` /
-   `production`). Android targets **API 36** via `expo-build-properties` (required on
-   Play as of 2026-08-31) — verify your Expo SDK supports it before a store build.
-4. `EXPO_PUBLIC_API_URL` points at the right `apps/web` deployment per environment;
-   staging/prod URLs are baked per profile in `app.config.ts`.
+Check what EAS holds with `eas env:list production` (needs `eas login`).
 
-## 6. Sentry (errors)
+## Mobile build prerequisites (EAS)
 
-1. Create projects for **web** and **mobile** at <https://sentry.io>.
-2. Copy each DSN: *Settings → Client Keys (DSN)*. → `SENTRY_DSN` (web),
-   `EXPO_PUBLIC_SENTRY_DSN` (mobile). A DSN is public; disabled in dev by config.
+1. Expo account `mfmatozza`, `npm i -g eas-cli`, `eas login`.
+2. Profiles are in `apps/mobile/eas.json`: `development` (dev client), `preview`
+   (internal), `production` (store, `autoIncrement` build numbers, remote
+   versioning). Each has an OTA `channel` of the same name.
+3. The root `.easignore` keeps `apps/web`, secrets (`*.p8`, `.env*`, `secrets/`) and
+   native folders out of the uploaded archive. `eas submit` reads the App Store
+   Connect key from `apps/mobile/secrets/` locally (never uploaded, gitignored).
+4. Android targets API 36 through `expo-build-properties`.
+5. **Never start an EAS build casually**: the project is on the free Expo plan.
 
----
+## Sentry
 
-## Environment variables reference
-
-### `apps/web/.env`
-| Var | What / where |
-|---|---|
-| DB connection (pooled + direct) | **injected by Vercel's Neon integration** (`DATABASE_URL`, `POSTGRES_PRISMA_URL`, `*_UNPOOLED`/`POSTGRES_URL_NON_POOLING`) |
-| `BETTER_AUTH_SECRET` | manual — `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | manual — public URL of this web app / deployment |
-| `RESEND_API_KEY` | injected by the Resend Marketplace integration |
-| `BLOB_READ_WRITE_TOKEN` | injected by the Vercel Blob store |
-| `CARD_TOKEN_HMAC_SECRET` | manual — `openssl rand -hex 32` (signs scannable card tokens) |
-| `SENTRY_DSN` | manual — Sentry (web) |
-| `ALLOWED_EMAIL_DOMAINS` | comma-separated, e.g. `studbocconi.it,unibocconi.it` — validated before OTP send |
-| `MOBILE_ALLOWED_ORIGINS` | CORS allow-list for `/api/*` |
-
-### `apps/mobile/.env`
-| Var | What / where |
-|---|---|
-| `EXPO_PUBLIC_API_URL` | Base URL of `apps/web` (dev override) — **public** |
-| `EXPO_PUBLIC_SENTRY_DSN` | Sentry (mobile) — **public** |
-| `APP_ENV` | `development` / `staging` / `production` |
-
-> **`EXPO_PUBLIC_*` is inlined into the shipped bundle.** Never put a secret there.
+Mobile only. The DSN goes in `EXPO_PUBLIC_SENTRY_DSN`. For readable stack traces
+create a Sentry auth token (scope `project:releases`, `org:read`) and store it as the EAS
+secret `SENTRY_AUTH_TOKEN`, plus `SENTRY_ORG` and `SENTRY_PROJECT`. The web app
+has no server-side tracking: use Vercel's runtime logs (about one day on Hobby) or
+add a log drain.

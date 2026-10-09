@@ -1,6 +1,7 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Icon } from "./Icon";
+import { Text } from "./AppText";
 import type { ComponentProps } from "react";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
@@ -23,15 +24,23 @@ export function EmptyState({
       <View className="h-16 w-16 items-center justify-center rounded-2xl bg-astra-light dark:bg-white/10">
         <Icon name={icon} size={30} color="#04107E" />
       </View>
-      <Text className="text-center text-base font-semibold text-gray-900 dark:text-white">{title}</Text>
+      <Text
+        accessibilityRole="header"
+        className="text-center text-base font-semibold text-gray-900 dark:text-white"
+      >
+        {title}
+      </Text>
       {body ? <Text className="text-center text-gray-500 dark:text-gray-300">{body}</Text> : null}
       {action ? (
         <Pressable
           onPress={action.onPress}
           accessibilityRole="button"
-          className="mt-1 rounded-xl bg-astra-primary dark:bg-white/15 px-5 py-2.5 active:opacity-80"
+          accessibilityLabel={action.label}
+          className="mt-1 min-h-[44px] justify-center rounded-xl bg-astra-primary dark:bg-white/15 px-5 py-2.5 active:opacity-80"
         >
-          <Text className="text-sm font-semibold text-white">{action.label}</Text>
+          <Text chrome className="text-sm font-semibold text-white">
+            {action.label}
+          </Text>
         </Pressable>
       ) : null}
     </View>

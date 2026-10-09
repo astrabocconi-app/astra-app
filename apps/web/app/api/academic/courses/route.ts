@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { academicCourseSearchResponse } from "@astra/shared";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { getAcademicProfile, searchCourses } from "@/lib/academic";
 
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * picker wants. `all=1` searches the whole catalogue for electives, exchange
  * and courses borrowed from another programme.
  */
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -35,3 +35,5 @@ export async function GET(req: Request) {
     headers: { "x-request-id": requestId },
   });
 }
+
+export const GET = withApi(handleGet);

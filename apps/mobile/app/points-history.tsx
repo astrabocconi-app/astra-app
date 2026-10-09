@@ -1,4 +1,5 @@
-import { View, Text, FlatList, RefreshControl } from "react-native";
+import { View, FlatList, RefreshControl } from "react-native";
+import { Text } from "../components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "../components/Icon";
@@ -7,6 +8,7 @@ import { EmptyState } from "../components/EmptyState";
 import { api } from "../lib/api";
 import { useLocale, useT } from "../lib/i18n";
 import { useRefresh } from "../lib/use-refresh";
+import { useLedgerReason } from "../lib/use-ledger-reason";
 
 function formatDate(iso: string, locale: string): string {
   const d = new Date(iso);
@@ -20,6 +22,7 @@ export default function PointsHistoryScreen() {
   });
   const t = useT();
   const locale = useLocale();
+  const ledgerReason = useLedgerReason();
   const insets = useSafeAreaInsets();
   const refresh = useRefresh(refetch);
 
@@ -33,7 +36,7 @@ export default function PointsHistoryScreen() {
         </View>
       )}
 
-      {error && (
+      {error && !data && (
         <EmptyState
           icon="cloud-offline-outline"
           title={t("common.error")}
@@ -51,15 +54,16 @@ export default function PointsHistoryScreen() {
           renderItem={({ item }) => (
             <View className="flex-row items-center justify-between rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary p-4">
               <View className="flex-1 pr-3">
-                <Text className="font-medium text-gray-900 dark:text-white">{item.reason}</Text>
-                {/* The source is a raw server enum, so only the date is shown. */}
-                <Text className="mt-0.5 text-xs text-gray-400 dark:text-white/60">
+                <Text className="font-medium text-gray-900 dark:text-white">
+                  {ledgerReason(item.source, item.reason)}
+                </Text>
+                <Text className="mt-0.5 text-xs text-gray-500 dark:text-white/70">
                   {formatDate(item.createdAt, locale)}
                 </Text>
               </View>
               <Text
                 className={`text-base font-semibold ${
-                  item.delta >= 0 ? "text-green-600 dark:text-green-300" : "text-red-600 dark:text-red-300"
+                  item.delta >= 0 ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
                 }`}
               >
                 {item.delta >= 0 ? "+" : ""}

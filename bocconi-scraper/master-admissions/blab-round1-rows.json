@@ -1,0 +1,1588 @@
+{
+ "_source": "B.lab Bocconi 'Master Admission - Survey results, first and second round' (PDF, pages 9-13). Transcribed row by row; every row's printed 'score out of 30' agrees with gpa/credits/in-corso through the score formula (max difference 0.0073), and each page was re-read against the transcription.",
+ "_cycle": "2024-25",
+ "rows": [
+  {
+   "p": "AFM",
+   "gpa": 26.8,
+   "credits": 120,
+   "inCorso": true,
+   "score": 27.48
+  },
+  {
+   "p": "AFM",
+   "gpa": 26.67,
+   "credits": 125,
+   "inCorso": true,
+   "score": 27.42
+  },
+  {
+   "p": "AI",
+   "gpa": 30.32,
+   "credits": 115,
+   "inCorso": true,
+   "score": 30.93
+  },
+  {
+   "p": "AI",
+   "gpa": 28.71,
+   "credits": 119,
+   "inCorso": true,
+   "score": 29.38
+  },
+  {
+   "p": "AI",
+   "gpa": 28.08,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.73
+  },
+  {
+   "p": "AI",
+   "gpa": 27.7,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.35
+  },
+  {
+   "p": "CYBER",
+   "gpa": 25.03,
+   "credits": 116,
+   "inCorso": true,
+   "score": 25.66
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.9,
+   "credits": 120,
+   "inCorso": true,
+   "score": 29.58
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.87,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.52
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.3,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.95
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.2,
+   "credits": 116,
+   "inCorso": true,
+   "score": 28.83
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.21,
+   "credits": 112,
+   "inCorso": true,
+   "score": 28.78
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.05,
+   "credits": 117,
+   "inCorso": true,
+   "score": 28.69
+  },
+  {
+   "p": "DSBA",
+   "gpa": 28.06,
+   "credits": 99,
+   "inCorso": true,
+   "score": 28.46
+  },
+  {
+   "p": "DSBA",
+   "gpa": 26.82,
+   "credits": 113,
+   "inCorso": true,
+   "score": 27.4
+  },
+  {
+   "p": "DSBA",
+   "gpa": 26.52,
+   "credits": 116,
+   "inCorso": true,
+   "score": 27.15
+  },
+  {
+   "p": "ESS",
+   "gpa": 30.21,
+   "credits": 122,
+   "inCorso": true,
+   "score": 30.92
+  },
+  {
+   "p": "ESS",
+   "gpa": 30.09,
+   "credits": 120,
+   "inCorso": true,
+   "score": 30.77
+  },
+  {
+   "p": "ESS",
+   "gpa": 30.08,
+   "credits": 114,
+   "inCorso": true,
+   "score": 30.68
+  },
+  {
+   "p": "ESS",
+   "gpa": 29.97,
+   "credits": 118,
+   "inCorso": true,
+   "score": 30.62
+  },
+  {
+   "p": "ESS",
+   "gpa": 29.96,
+   "credits": 105,
+   "inCorso": true,
+   "score": 30.44
+  },
+  {
+   "p": "ESS",
+   "gpa": 29.86,
+   "credits": 119,
+   "inCorso": false,
+   "score": 29.86
+  },
+  {
+   "p": "ESS",
+   "gpa": 29.05,
+   "credits": 122,
+   "inCorso": true,
+   "score": 29.76
+  },
+  {
+   "p": "ESS",
+   "gpa": 28.66,
+   "credits": 108,
+   "inCorso": true,
+   "score": 29.18
+  },
+  {
+   "p": "ESS",
+   "gpa": 28.5,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.11
+  },
+  {
+   "p": "ESS",
+   "gpa": 28.42,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.03
+  },
+  {
+   "p": "ESS",
+   "gpa": 28.4,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.0
+  },
+  {
+   "p": "ESS",
+   "gpa": 28.3,
+   "credits": 113,
+   "inCorso": true,
+   "score": 28.89
+  },
+  {
+   "p": "ESS",
+   "gpa": 28.1,
+   "credits": 120,
+   "inCorso": true,
+   "score": 28.78
+  },
+  {
+   "p": "ESS",
+   "gpa": 27.9,
+   "credits": 114,
+   "inCorso": true,
+   "score": 28.5
+  },
+  {
+   "p": "ESS",
+   "gpa": 27.75,
+   "credits": 123,
+   "inCorso": true,
+   "score": 28.47
+  },
+  {
+   "p": "ESS",
+   "gpa": 27.66,
+   "credits": 116,
+   "inCorso": true,
+   "score": 28.29
+  },
+  {
+   "p": "ESS",
+   "gpa": 27.22,
+   "credits": 116,
+   "inCorso": true,
+   "score": 27.85
+  },
+  {
+   "p": "ESS",
+   "gpa": 26.92,
+   "credits": 114,
+   "inCorso": true,
+   "score": 27.52
+  },
+  {
+   "p": "ESS",
+   "gpa": 26.59,
+   "credits": 129,
+   "inCorso": true,
+   "score": 27.39
+  },
+  {
+   "p": "EMIT",
+   "gpa": 29.71,
+   "credits": 125,
+   "inCorso": true,
+   "score": 30.46
+  },
+  {
+   "p": "EMIT",
+   "gpa": 29.05,
+   "credits": 121,
+   "inCorso": true,
+   "score": 29.75
+  },
+  {
+   "p": "EMIT",
+   "gpa": 27.7,
+   "credits": 119,
+   "inCorso": true,
+   "score": 28.37
+  },
+  {
+   "p": "EMIT",
+   "gpa": 27.31,
+   "credits": 98,
+   "inCorso": true,
+   "score": 27.69
+  },
+  {
+   "p": "EMIT",
+   "gpa": 27.1,
+   "credits": 110,
+   "inCorso": true,
+   "score": 27.65
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.79,
+   "credits": 110,
+   "inCorso": true,
+   "score": 27.34
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.38,
+   "credits": 115,
+   "inCorso": true,
+   "score": 26.99
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.42,
+   "credits": 112,
+   "inCorso": true,
+   "score": 26.99
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.3,
+   "credits": 120,
+   "inCorso": true,
+   "score": 26.98
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.33,
+   "credits": 113,
+   "inCorso": true,
+   "score": 26.92
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.33,
+   "credits": 113,
+   "inCorso": true,
+   "score": 26.92
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.4,
+   "credits": 104,
+   "inCorso": true,
+   "score": 26.86
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.16,
+   "credits": 119,
+   "inCorso": true,
+   "score": 26.83
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.2,
+   "credits": 114,
+   "inCorso": true,
+   "score": 26.8
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.32,
+   "credits": 105,
+   "inCorso": true,
+   "score": 26.8
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.0,
+   "credits": 112,
+   "inCorso": true,
+   "score": 26.57
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.0,
+   "credits": 111,
+   "inCorso": true,
+   "score": 26.56
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.98,
+   "credits": 109,
+   "inCorso": true,
+   "score": 26.51
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.82,
+   "credits": 115,
+   "inCorso": true,
+   "score": 26.43
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.79,
+   "credits": 114,
+   "inCorso": true,
+   "score": 26.39
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.8,
+   "credits": 112,
+   "inCorso": true,
+   "score": 26.37
+  },
+  {
+   "p": "EMIT",
+   "gpa": 26.31,
+   "credits": 118,
+   "inCorso": false,
+   "score": 26.31
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.67,
+   "credits": 105,
+   "inCorso": true,
+   "score": 26.15
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.0,
+   "credits": 111,
+   "inCorso": true,
+   "score": 25.56
+  },
+  {
+   "p": "ACME",
+   "gpa": 28.43,
+   "credits": 122,
+   "inCorso": true,
+   "score": 29.14
+  },
+  {
+   "p": "ACME",
+   "gpa": 28.29,
+   "credits": 122,
+   "inCorso": true,
+   "score": 29.0
+  },
+  {
+   "p": "ACME",
+   "gpa": 27.9,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.55
+  },
+  {
+   "p": "ACME",
+   "gpa": 27.63,
+   "credits": 101,
+   "inCorso": true,
+   "score": 28.05
+  },
+  {
+   "p": "ACME",
+   "gpa": 26.92,
+   "credits": 120,
+   "inCorso": true,
+   "score": 27.6
+  },
+  {
+   "p": "ACME",
+   "gpa": 27.06,
+   "credits": 107,
+   "inCorso": true,
+   "score": 27.56
+  },
+  {
+   "p": "ACME",
+   "gpa": 27.25,
+   "credits": 93,
+   "inCorso": true,
+   "score": 27.56
+  },
+  {
+   "p": "ACME",
+   "gpa": 26.54,
+   "credits": 116,
+   "inCorso": true,
+   "score": 27.17
+  },
+  {
+   "p": "ACME",
+   "gpa": 26.44,
+   "credits": 114,
+   "inCorso": true,
+   "score": 27.04
+  },
+  {
+   "p": "ACME",
+   "gpa": 26.21,
+   "credits": 122,
+   "inCorso": true,
+   "score": 26.92
+  },
+  {
+   "p": "ACME",
+   "gpa": 26.86,
+   "credits": 120,
+   "inCorso": false,
+   "score": 26.86
+  },
+  {
+   "p": "GIO",
+   "gpa": 28.11,
+   "credits": 119,
+   "inCorso": true,
+   "score": 28.78
+  },
+  {
+   "p": "GIO",
+   "gpa": 27.34,
+   "credits": 119,
+   "inCorso": true,
+   "score": 28.01
+  },
+  {
+   "p": "GIO",
+   "gpa": 27.18,
+   "credits": 115,
+   "inCorso": true,
+   "score": 27.79
+  },
+  {
+   "p": "GIO",
+   "gpa": 27.4,
+   "credits": 176,
+   "inCorso": false,
+   "score": 27.4
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.61,
+   "credits": 115,
+   "inCorso": true,
+   "score": 27.22
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.5,
+   "credits": 120,
+   "inCorso": true,
+   "score": 27.18
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.52,
+   "credits": 114,
+   "inCorso": true,
+   "score": 27.12
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.39,
+   "credits": 111,
+   "inCorso": true,
+   "score": 26.95
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.21,
+   "credits": 119,
+   "inCorso": true,
+   "score": 26.88
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.2,
+   "credits": 119,
+   "inCorso": true,
+   "score": 26.87
+  },
+  {
+   "p": "GIO",
+   "gpa": 25.99,
+   "credits": 132,
+   "inCorso": true,
+   "score": 26.84
+  },
+  {
+   "p": "FIN",
+   "gpa": 30.52,
+   "credits": 116,
+   "inCorso": true,
+   "score": 31.15
+  },
+  {
+   "p": "FIN",
+   "gpa": 30.38,
+   "credits": 114,
+   "inCorso": true,
+   "score": 30.98
+  },
+  {
+   "p": "FIN",
+   "gpa": 30.0,
+   "credits": 124,
+   "inCorso": true,
+   "score": 30.74
+  },
+  {
+   "p": "FIN",
+   "gpa": 30.02,
+   "credits": 108,
+   "inCorso": true,
+   "score": 30.54
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.85,
+   "credits": 115,
+   "inCorso": true,
+   "score": 30.46
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.71,
+   "credits": 118,
+   "inCorso": true,
+   "score": 30.36
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.62,
+   "credits": 122,
+   "inCorso": true,
+   "score": 30.33
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.54,
+   "credits": 120,
+   "inCorso": true,
+   "score": 30.22
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.58,
+   "credits": 112,
+   "inCorso": true,
+   "score": 30.15
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.54,
+   "credits": 114,
+   "inCorso": true,
+   "score": 30.14
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.4,
+   "credits": 124,
+   "inCorso": true,
+   "score": 30.14
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.4,
+   "credits": 124,
+   "inCorso": true,
+   "score": 30.14
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.43,
+   "credits": 117,
+   "inCorso": true,
+   "score": 30.07
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.43,
+   "credits": 114,
+   "inCorso": true,
+   "score": 30.03
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.41,
+   "credits": 114,
+   "inCorso": true,
+   "score": 30.01
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.35,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.96
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.21,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.86
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.16,
+   "credits": 121,
+   "inCorso": true,
+   "score": 29.86
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.15,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.8
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.12,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.77
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.16,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.77
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.05,
+   "credits": 119,
+   "inCorso": true,
+   "score": 29.72
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.04,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.69
+  },
+  {
+   "p": "FIN",
+   "gpa": 29.02,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.67
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.99,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.64
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.95,
+   "credits": 116,
+   "inCorso": true,
+   "score": 29.58
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.77,
+   "credits": 125,
+   "inCorso": true,
+   "score": 29.52
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.9,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.51
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.89,
+   "credits": 110,
+   "inCorso": true,
+   "score": 29.44
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.63,
+   "credits": 119,
+   "inCorso": true,
+   "score": 29.3
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.6,
+   "credits": 120,
+   "inCorso": true,
+   "score": 29.28
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.56,
+   "credits": 110,
+   "inCorso": true,
+   "score": 29.11
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.47,
+   "credits": 116,
+   "inCorso": true,
+   "score": 29.1
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.43,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.03
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.42,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.02
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.28,
+   "credits": 114,
+   "inCorso": true,
+   "score": 28.88
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.15,
+   "credits": 121,
+   "inCorso": true,
+   "score": 28.85
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.16,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.81
+  },
+  {
+   "p": "FIN-GLOB",
+   "gpa": 29.3,
+   "credits": 120,
+   "inCorso": true,
+   "score": 29.98
+  },
+  {
+   "p": "FIN-GLOB",
+   "gpa": 29.23,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.84
+  },
+  {
+   "p": "FIN-GLOB",
+   "gpa": 29.21,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.82
+  },
+  {
+   "p": "FIN-GLOB",
+   "gpa": 29.07,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.72
+  },
+  {
+   "p": "CHINA-MIM",
+   "gpa": 27.46,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.11
+  },
+  {
+   "p": "CHINA-MIM",
+   "gpa": 26.5,
+   "credits": 110,
+   "inCorso": true,
+   "score": 27.05
+  },
+  {
+   "p": "CHINA-MIM",
+   "gpa": 26.27,
+   "credits": 121,
+   "inCorso": true,
+   "score": 26.96
+  },
+  {
+   "p": "ESSEC",
+   "gpa": 28.69,
+   "credits": 126,
+   "inCorso": true,
+   "score": 29.45
+  },
+  {
+   "p": "ESSEC",
+   "gpa": 28.71,
+   "credits": 122,
+   "inCorso": true,
+   "score": 29.42
+  },
+  {
+   "p": "ESSEC",
+   "gpa": 28.8,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.41
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.87,
+   "credits": 121,
+   "inCorso": true,
+   "score": 30.57
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.82,
+   "credits": 119,
+   "inCorso": true,
+   "score": 30.49
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.7,
+   "credits": 118,
+   "inCorso": true,
+   "score": 30.35
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.56,
+   "credits": 118,
+   "inCorso": true,
+   "score": 30.21
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.53,
+   "credits": 120,
+   "inCorso": true,
+   "score": 30.21
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.5,
+   "credits": 119,
+   "inCorso": true,
+   "score": 30.17
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.3,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.95
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.25,
+   "credits": 121,
+   "inCorso": true,
+   "score": 29.95
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.34,
+   "credits": 108,
+   "inCorso": true,
+   "score": 29.86
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.99,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.59
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.98,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.58
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.98,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.58
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 29.55,
+   "credits": 112,
+   "inCorso": false,
+   "score": 29.55
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.93,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.54
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.92,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.53
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.85,
+   "credits": 120,
+   "inCorso": true,
+   "score": 29.53
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.6,
+   "credits": 124,
+   "inCorso": true,
+   "score": 29.34
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.58,
+   "credits": 121,
+   "inCorso": true,
+   "score": 29.28
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 28.67,
+   "credits": 114,
+   "inCorso": true,
+   "score": 29.27
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 30.28,
+   "credits": 115,
+   "inCorso": true,
+   "score": 30.89
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 29.75,
+   "credits": 115,
+   "inCorso": true,
+   "score": 30.36
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.91,
+   "credits": 124,
+   "inCorso": true,
+   "score": 29.64
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.95,
+   "credits": 113,
+   "inCorso": true,
+   "score": 29.53
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.7,
+   "credits": 124,
+   "inCorso": true,
+   "score": 29.44
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.57,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.22
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.47,
+   "credits": 112,
+   "inCorso": true,
+   "score": 29.05
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.4,
+   "credits": 115,
+   "inCorso": true,
+   "score": 29.01
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.2,
+   "credits": 125,
+   "inCorso": true,
+   "score": 28.95
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.01,
+   "credits": 124,
+   "inCorso": true,
+   "score": 28.75
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.03,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.68
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.85,
+   "credits": 119,
+   "inCorso": true,
+   "score": 28.52
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 28.21,
+   "credits": 92,
+   "inCorso": true,
+   "score": 28.51
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.75,
+   "credits": 125,
+   "inCorso": true,
+   "score": 28.5
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.78,
+   "credits": 116,
+   "inCorso": true,
+   "score": 28.41
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.6,
+   "credits": 122,
+   "inCorso": true,
+   "score": 28.31
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.77,
+   "credits": 103,
+   "inCorso": true,
+   "score": 28.22
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.66,
+   "credits": 109,
+   "inCorso": true,
+   "score": 28.19
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.5,
+   "credits": 119,
+   "inCorso": true,
+   "score": 28.17
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.52,
+   "credits": 115,
+   "inCorso": true,
+   "score": 28.13
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.58,
+   "credits": 110,
+   "inCorso": true,
+   "score": 28.13
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.4,
+   "credits": 115,
+   "inCorso": true,
+   "score": 28.02
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.32,
+   "credits": 121,
+   "inCorso": true,
+   "score": 28.02
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.39,
+   "credits": 115,
+   "inCorso": true,
+   "score": 28.0
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.27,
+   "credits": 118,
+   "inCorso": true,
+   "score": 27.92
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.3,
+   "credits": 115,
+   "inCorso": true,
+   "score": 27.91
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.21,
+   "credits": 121,
+   "inCorso": true,
+   "score": 27.91
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.14,
+   "credits": 125,
+   "inCorso": true,
+   "score": 27.89
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.2,
+   "credits": 120,
+   "inCorso": true,
+   "score": 27.88
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.23,
+   "credits": 117,
+   "inCorso": true,
+   "score": 27.87
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.55,
+   "credits": 90,
+   "inCorso": true,
+   "score": 27.82
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.09,
+   "credits": 120,
+   "inCorso": true,
+   "score": 27.77
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.04,
+   "credits": 122,
+   "inCorso": true,
+   "score": 27.75
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.19,
+   "credits": 110,
+   "inCorso": true,
+   "score": 27.74
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.03,
+   "credits": 121,
+   "inCorso": true,
+   "score": 27.73
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.95,
+   "credits": 115,
+   "inCorso": true,
+   "score": 27.56
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 27.06,
+   "credits": 100,
+   "inCorso": true,
+   "score": 27.47
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.78,
+   "credits": 119,
+   "inCorso": true,
+   "score": 27.45
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.71,
+   "credits": 122,
+   "inCorso": true,
+   "score": 27.42
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.69,
+   "credits": 119,
+   "inCorso": true,
+   "score": 27.36
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.66,
+   "credits": 118,
+   "inCorso": true,
+   "score": 27.31
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.67,
+   "credits": 114,
+   "inCorso": true,
+   "score": 27.27
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.57,
+   "credits": 119,
+   "inCorso": true,
+   "score": 27.24
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.7,
+   "credits": 103,
+   "inCorso": true,
+   "score": 27.15
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.68,
+   "credits": 108,
+   "inCorso": false,
+   "score": 26.68
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 29.64,
+   "credits": 119,
+   "inCorso": true,
+   "score": 30.31
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 29.31,
+   "credits": 113,
+   "inCorso": true,
+   "score": 29.9
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 28.72,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.38
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 28.5,
+   "credits": 119,
+   "inCorso": true,
+   "score": 29.17
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 28.41,
+   "credits": 118,
+   "inCorso": true,
+   "score": 29.06
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 28.21,
+   "credits": 122,
+   "inCorso": true,
+   "score": 28.92
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 28.15,
+   "credits": 121,
+   "inCorso": true,
+   "score": 28.85
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 27.94,
+   "credits": 121,
+   "inCorso": true,
+   "score": 28.64
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 27.8,
+   "credits": 115,
+   "inCorso": true,
+   "score": 28.41
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 27.64,
+   "credits": 119,
+   "inCorso": true,
+   "score": 28.31
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 27.94,
+   "credits": 93,
+   "inCorso": true,
+   "score": 28.25
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 27.55,
+   "credits": 118,
+   "inCorso": true,
+   "score": 28.2
+  },
+  {
+   "p": "MM",
+   "gpa": 28.05,
+   "credits": 128,
+   "inCorso": true,
+   "score": 28.84
+  },
+  {
+   "p": "MM",
+   "gpa": 27.55,
+   "credits": 122,
+   "inCorso": true,
+   "score": 28.26
+  },
+  {
+   "p": "MM",
+   "gpa": 27.48,
+   "credits": 122,
+   "inCorso": true,
+   "score": 28.19
+  },
+  {
+   "p": "MM",
+   "gpa": 26.38,
+   "credits": 122,
+   "inCorso": true,
+   "score": 27.09
+  },
+  {
+   "p": "MM",
+   "gpa": 26.49,
+   "credits": 110,
+   "inCorso": true,
+   "score": 27.03
+  },
+  {
+   "p": "MM",
+   "gpa": 26.24,
+   "credits": 125,
+   "inCorso": true,
+   "score": 26.99
+  },
+  {
+   "p": "MM",
+   "gpa": 26.17,
+   "credits": 118,
+   "inCorso": true,
+   "score": 26.82
+  },
+  {
+   "p": "MM",
+   "gpa": 26.06,
+   "credits": 115,
+   "inCorso": true,
+   "score": 26.67
+  },
+  {
+   "p": "MM",
+   "gpa": 25.97,
+   "credits": 106,
+   "inCorso": true,
+   "score": 26.46
+  },
+  {
+   "p": "MM",
+   "gpa": 25.89,
+   "credits": 105,
+   "inCorso": true,
+   "score": 26.37
+  },
+  {
+   "p": "MM",
+   "gpa": 25.68,
+   "credits": 115,
+   "inCorso": true,
+   "score": 26.29
+  },
+  {
+   "p": "MM",
+   "gpa": 25.7,
+   "credits": 108,
+   "inCorso": true,
+   "score": 26.22
+  },
+  {
+   "p": "MM",
+   "gpa": 25.52,
+   "credits": 119,
+   "inCorso": true,
+   "score": 26.19
+  },
+  {
+   "p": "MM",
+   "gpa": 25.53,
+   "credits": 115,
+   "inCorso": true,
+   "score": 26.14
+  },
+  {
+   "p": "PPA",
+   "gpa": 27.4,
+   "credits": 120,
+   "inCorso": true,
+   "score": 28.08
+  },
+  {
+   "p": "PPA",
+   "gpa": 26.63,
+   "credits": 111,
+   "inCorso": true,
+   "score": 27.19
+  },
+  {
+   "p": "TS",
+   "gpa": 26.5,
+   "credits": 114,
+   "inCorso": false,
+   "score": 26.5
+  },
+  {
+   "p": "TS",
+   "gpa": 25.57,
+   "credits": 121,
+   "inCorso": true,
+   "score": 26.27
+  },
+  {
+   "p": "TS",
+   "gpa": 25.51,
+   "credits": 125,
+   "inCorso": true,
+   "score": 26.26
+  },
+  {
+   "p": "TS",
+   "gpa": 25.62,
+   "credits": 111,
+   "inCorso": true,
+   "score": 26.18
+  },
+  {
+   "p": "TS",
+   "gpa": 25.41,
+   "credits": 113,
+   "inCorso": true,
+   "score": 26.0
+  }
+ ]
+}

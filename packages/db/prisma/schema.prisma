@@ -110,6 +110,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
+  /// HMAC-SHA256 of the normalised email, written when a student deletes their
+  /// account. The address itself is scrubbed, but this keeps "this person was
+  /// here before" answerable, so deleting and re-registering cannot earn a
+  /// second welcome bonus or reset a per-person reward limit.
+  emailHash     String?
 
   // relations
   areaMemberships   AreaMembership[]
@@ -138,6 +143,7 @@ model User {
   accounts Account[]
 
   @@index([deletedAt])
+  @@index([emailHash])
 }
 
 // ── Better Auth tables (email-OTP). Fields must match Better Auth's schema;
@@ -184,6 +190,50 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@index([identifier])
+}
+
+/// Better Auth's shared rate-limit counters (rateLimit.storage = "database").
+/// In-memory counters are per serverless instance, so they do not hold on Vercel.
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+}
+
+/// One row per throttled event (an OTP email sent, a chat question asked), so a
+/// per-key cap can be counted across instances. Pruned by the daily cron.
+model RateEvent {
+  id        String   @id @default(cuid())
+  /// Which limiter: "otp-email", "chat", ...
+  bucket    String
+  /// What is being limited (a hashed email, a user id).
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([bucket, key, createdAt])
+  @@index([createdAt])
+}
+
+/// An Eventbrite discount that still has to be revoked: its owner was deleted or
+/// the first revoke attempt failed. Drained by the daily cron.
+model EventbriteRevocation {
+  id         String   @id @default(cuid())
+  discountId String   @unique
+  attempts   Int      @default(0)
+  lastError  String?
+  createdAt  DateTime @default(now())
+}
+
+/// An Expo push ticket awaiting its delivery receipt. The daily cron reads the
+/// receipts, prunes tokens Expo reports as dead and deletes the row.
+model PushReceipt {
+  /// Expo's ticket id.
+  id        String   @id
+  token     String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 /// An association sub-team / department. Content and authority are scoped to areas.
@@ -617,6 +667,9 @@ model RewardRedemption {
   status        RedemptionStatus @default(PENDING)
   code          String?          @unique // fulfillment/pickup code
   ledgerEntryId String?          @unique // the SPEND PointsLedgerEntry
+  /// Client-supplied Idempotency-Key, so a retried request after a dropped
+  /// response returns the first redemption instead of charging twice.
+  idempotencyKey String?
   createdAt     DateTime         @default(now())
   fulfilledAt   DateTime?
 
@@ -628,6 +681,7 @@ model RewardRedemption {
   @@index([rewardId, status])
   /// Counting a student's prior redemptions is on the redeem path (perUserLimit).
   @@index([userId, rewardId])
+  @@unique([userId, idempotencyKey])
 }
 
 // ============================================================================
@@ -734,6 +788,9 @@ model NewsPost {
   published     Boolean   @default(false)
   pinned        Boolean   @default(false)
   publishedAt   DateTime?
+  /// When a push notification for this post went out, so re-saving a post
+  /// never notifies everyone again.
+  pushedAt      DateTime?
   /// Call-to-action links shown at the bottom of the article. Array of
   /// { label, kind: "external" | "internal", value } — see @astra/shared
   /// contentLinks. Internal links are in-app routes; external are https URLs.

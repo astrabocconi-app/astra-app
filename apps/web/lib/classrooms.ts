@@ -1,78 +1,189 @@
-// Free@B (freeatb.it) classroom availability — proxied server-side so the mobile
-// app only ever talks to the ASTRA API. Free@B is a public Supabase edge function
-// that live-scrapes Bocconi's timetable. The anon key is public (it ships in
-// Free@B's own web client), so embedding it here is safe; both are overridable
-// via env if the upstream ever moves.
+// Free classrooms. SERVER-ONLY.
+//
+// Read straight from Bocconi's room-assignment page (see classrooms-core.ts for
+// the parsing and the rules). We used to proxy Free@B, a third-party scraper
+// whose room list changed with every query and left out a whole building.
 
-const FREEATB_URL =
-  process.env.FREEATB_FUNCTION_URL ??
-  "https://fcvnrbxwipceoiqflvqs.supabase.co/functions/v1/scrape-rooms";
-const FREEATB_ANON_KEY =
-  process.env.FREEATB_ANON_KEY ??
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZjdm5yYnh3aXBjZW9pcWZsdnFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIxNDk3NDAsImV4cCI6MjA3NzcyNTc0MH0.GsQZVyLHXeJuDEIGgwpC8DD7gjVPtMiQ6j-DwASNg_Q";
+import {
+  addDays,
+  campusRooms,
+  collectRooms,
+  computeRooms,
+  looksLikeTimetable,
+  parseTime,
+  parseTimetableHtml,
+  resolveDate,
+  romeNow,
+  sortRooms,
+  type Assignment,
+  type RoomRef,
+  type RoomStatus,
+} from "./classrooms-core";
 
-export interface Classroom {
-  name: string;
-  building: string;
-  status: "free" | "occupied";
-  freeUntil?: string;
-  isStudyRoom?: boolean;
-}
+const SOURCE_URL = "https://didattica.unibocconi.it/aule/lista_orario.php";
+
+export type Classroom = RoomStatus;
 
 export interface ClassroomsResult {
   rooms: Classroom[];
   freeRooms: number;
   totalRooms: number;
-  timestamp: string | null;
+  /** When the timetable was read (ISO, UTC). */
+  timestamp: string;
+  /** The day and time the answer is for, in Rome time. */
+  date: string;
+  time: string;
+  source: "bocconi";
+  /** False when the full room list couldn't be built and only rooms seen on this day are shown. */
+  complete: boolean;
 }
 
-// Free@B live-scrapes Bocconi on every call, which takes seconds. Every student
-// asking "what's free now" gets the same answer, so share it for a minute and
-// let concurrent requests ride the same upstream call. Failures are evicted so
-// the next request retries.
-// ponytail: per-instance memory, so each warm serverless instance scrapes once
-// a minute; move to a shared KV if upstream load ever matters.
-const CACHE_MS = 60_000;
-const cache = new Map<string, { at: number; result: Promise<ClassroomsResult> }>();
+export class ClassroomsInputError extends Error {}
+export class TimetableError extends Error {}
 
-// time = "HH:MM" (defaults to now), day = "today" | "tomorrow" | "day-after".
-export function fetchClassrooms(params: { time?: string; day?: string }): Promise<ClassroomsResult> {
-  const key = `${params.day ?? "today"}|${params.time ?? "now"}`;
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.result;
-  const result = fetchUpstream(params);
-  cache.set(key, { at: Date.now(), result });
-  result.catch(() => cache.delete(key));
-  return result;
-}
+// Upstream is the university's own server: be gentle and identify ourselves.
+const HEADERS = { "User-Agent": "ASTRA-app/1.0 (+https://app.astrabocconi.com)", Accept: "text/html" };
 
-async function fetchUpstream(params: { time?: string; day?: string }): Promise<ClassroomsResult> {
-  const qs = new URLSearchParams();
-  if (params.time) qs.set("time", params.time);
-  if (params.day) qs.set("day", params.day);
-  const url = FREEATB_URL + (qs.toString() ? `?${qs}` : "");
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      apikey: FREEATB_ANON_KEY,
-      Authorization: `Bearer ${FREEATB_ANON_KEY}`,
-      "Content-Type": "application/json",
-    },
+/** The whole range, from midnight — the page's hour filter only matches slots that START later. */
+function timetableUrl(from: string, to: string): string {
+  const [fy, fm, fd] = from.split("-") as [string, string, string];
+  const [ty, tm, td] = to.split("-") as [string, string, string];
+  const q = new URLSearchParams({
+    ric_tipo: "",
+    ric_aula: "",
+    ric_descriz: "",
+    ric_da_gg: fd,
+    ric_da_mm: fm,
+    ric_da_aa: fy,
+    ric_a_gg: td,
+    ric_a_mm: tm,
+    ric_a_aa: ty,
+    ric_da_hh: "0",
+    ric_da_ii: "00",
+    cerca: "CERCA",
   });
-  if (!res.ok) throw new Error(`Free@B upstream ${res.status}`);
+  return `${SOURCE_URL}?${q}`;
+}
 
-  const data = (await res.json()) as {
-    rooms?: Classroom[];
-    freeRooms?: number;
-    totalRooms?: number;
-    timestamp?: string;
-  };
-  const rooms = Array.isArray(data.rooms) ? data.rooms : [];
+async function loadTimetable(from: string, to: string, timeoutMs: number): Promise<Assignment[]> {
+  let res: Response;
+  try {
+    res = await fetch(timetableUrl(from, to), { headers: HEADERS, cache: "no-store", signal: AbortSignal.timeout(timeoutMs) });
+  } catch {
+    throw new TimetableError("Couldn't reach the Bocconi timetable.");
+  }
+  if (!res.ok) throw new TimetableError(`Bocconi timetable returned ${res.status}.`);
+  const html = await res.text();
+  // A redesigned page must fail loudly: an unparseable page would otherwise look
+  // like "no lessons today" and show every room as free.
+  if (!looksLikeTimetable(html)) throw new TimetableError("The Bocconi timetable page has changed shape.");
+  return parseTimetableHtml(html);
+}
+
+// ── Caches (per warm serverless instance) ───────────────────────────────────
+
+const DAY_TTL_MS = 90_000;
+const days = new Map<string, { at: number; value: Promise<Assignment[]> }>();
+
+function getDay(date: string): Promise<Assignment[]> {
+  const now = Date.now();
+  for (const [k, v] of days) if (now - v.at > DAY_TTL_MS) days.delete(k); // bounded: only live keys stay
+  const hit = days.get(date);
+  if (hit) return hit.value;
+  const value = loadTimetable(date, date, 10_000);
+  days.set(date, { at: now, value });
+  value.catch(() => days.delete(date));
+  return value;
+}
+
+// The room list: every room used in the 150 days around today. The page never
+// lists empty rooms, so this is the only way to know a quiet room exists.
+const UNIVERSE_TTL_MS = 6 * 60 * 60_000;
+const UNIVERSE_RETRY_MS = 5 * 60_000;
+const WINDOW_DAYS = 75;
+const CHUNK_DAYS = 30;
+
+interface Universe {
+  rooms: RoomRef[];
+  complete: boolean;
+}
+let universe: { at: number; ttl: number; value: Promise<Universe> } | null = null;
+
+async function buildUniverse(today: string): Promise<Universe> {
+  const chunks: [string, string][] = [];
+  for (let from = addDays(today, -WINDOW_DAYS); from <= addDays(today, WINDOW_DAYS); from = addDays(from, CHUNK_DAYS)) {
+    chunks.push([from, addDays(from, CHUNK_DAYS - 1)]);
+  }
+  const results = await Promise.allSettled(chunks.map(([from, to]) => loadTimetable(from, to, 15_000)));
+  const rooms = new Map<string, RoomRef>();
+  let failed = 0;
+  for (const r of results) {
+    if (r.status === "fulfilled") collectRooms(r.value, rooms);
+    else failed++;
+  }
+  if (failed === results.length) throw new TimetableError("Couldn't build the room list.");
+  return { rooms: campusRooms(rooms), complete: failed === 0 };
+}
+
+function getUniverse(today: string): Promise<Universe> {
+  const now = Date.now();
+  if (universe && now - universe.at < universe.ttl) return universe.value;
+  const value = buildUniverse(today);
+  const entry = { at: now, ttl: UNIVERSE_TTL_MS, value };
+  universe = entry;
+  value.then(
+    (u) => {
+      // A partial list is retried soon rather than trusted for six hours.
+      if (!u.complete && universe === entry) entry.ttl = UNIVERSE_RETRY_MS;
+    },
+    () => {
+      if (universe === entry) universe = null;
+    },
+  );
+  return value;
+}
+
+// ── Public ──────────────────────────────────────────────────────────────────
+
+/** Furthest day ahead we answer for; the timetable is published a few weeks out. */
+const MAX_DAYS_AHEAD = 30;
+
+export async function fetchClassrooms(params: { day?: string; date?: string; time?: string }): Promise<ClassroomsResult> {
+  const now = romeNow();
+  const date = resolveDate(params, now.date);
+  if (!date) throw new ClassroomsInputError("Invalid day.");
+  if (date < now.date || date > addDays(now.date, MAX_DAYS_AHEAD)) throw new ClassroomsInputError("Day out of range.");
+
+  let minute: number;
+  if (params.time) {
+    const parsed = parseTime(params.time);
+    if (parsed === null) throw new ClassroomsInputError("Invalid time.");
+    minute = parsed;
+  } else {
+    // "Now" only means something today; any other day starts with the morning.
+    minute = date === now.date ? now.minutes : 8 * 60;
+  }
+
+  const [dayAssignments, uni] = await Promise.all([getDay(date), getUniverse(now.date).catch(() => null)]);
+
+  const known = new Map<string, RoomRef>((uni?.rooms ?? []).map((r) => [r.key, r]));
+  // Rooms seen today but missing from the list (new rooms) join it, as long as
+  // their building is a real one.
+  const seenToday = collectRooms(dayAssignments);
+  const campus = new Set(campusRooms(uni ? new Map([...known, ...seenToday]) : seenToday).map((r) => r.key));
+  for (const [key, room] of seenToday) if (campus.has(key) && !known.has(key)) known.set(key, room);
+
+  const rooms = sortRooms(computeRooms([...known.values()].filter((r) => campus.has(r.key)), dayAssignments, minute));
+  const hh = String(Math.floor(minute / 60)).padStart(2, "0");
+  const mm = String(minute % 60).padStart(2, "0");
   return {
     rooms,
-    freeRooms: data.freeRooms ?? rooms.filter((r) => r.status === "free").length,
-    totalRooms: data.totalRooms ?? rooms.length,
-    timestamp: data.timestamp ?? null,
+    freeRooms: rooms.filter((r) => r.status === "free").length,
+    totalRooms: rooms.length,
+    timestamp: new Date().toISOString(),
+    date,
+    time: `${hh}:${mm}`,
+    source: "bocconi",
+    complete: uni?.complete ?? false,
   };
 }

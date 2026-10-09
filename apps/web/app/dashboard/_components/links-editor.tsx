@@ -6,6 +6,24 @@ import { Button } from "@/app/_ui/button";
 
 const MAX_LINKS = 6;
 
+/** Blocking problems with the links list, as short sentences. Empty = fine. */
+export function linkProblems(links: ContentLink[]): string[] {
+  const out: string[] = [];
+  links.forEach((l, i) => {
+    if (!l.label.trim()) out.push(`Link ${i + 1} needs a button label`);
+    if (l.kind === "external") {
+      let ok: boolean;
+      try {
+        ok = new URL(l.value.trim()).protocol === "https:";
+      } catch {
+        ok = false;
+      }
+      if (!ok) out.push(`Link ${i + 1} needs a web address starting with https://`);
+    }
+  });
+  return out;
+}
+
 /**
  * Buttons shown at the bottom of a news post or an event.
  *
@@ -39,7 +57,7 @@ export function LinksEditor({
     <div className="flex flex-col gap-3">
       <div>
         <h3 className="text-sm font-semibold text-gray-800">Links</h3>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           Shown as buttons at the bottom, in order. Each one either opens a web page or takes the
           reader to a screen inside the app.
         </p>
@@ -52,12 +70,13 @@ export function LinksEditor({
       {value.map((link, i) => (
         <div key={i} className="flex flex-col gap-3 rounded-xl border border-gray-200 p-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Link {i + 1}
             </span>
             <button
               type="button"
               onClick={() => onChange(value.filter((_, j) => j !== i))}
+              aria-label={`Remove link ${i + 1}`}
               className="text-xs font-medium text-red-600 hover:text-red-700"
             >
               Remove

@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, ScrollView, Image } from "react-native";
+import { Text } from "../../components/AppText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
@@ -28,7 +29,7 @@ export default function NewsDetailScreen() {
         <View className="flex-1 items-center justify-center">
           <Spinner />
         </View>
-      ) : news.isError ? (
+      ) : news.isError && !news.data ? (
         <EmptyState
           icon="cloud-offline-outline"
           title={t("common.error")}
@@ -39,11 +40,16 @@ export default function NewsDetailScreen() {
       ) : (
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {post.imageUrl ? (
-            <Image source={{ uri: post.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 2 / 1 }} />
+            <Image
+              source={{ uri: post.imageUrl }}
+              resizeMode="cover"
+              style={{ width: "100%", aspectRatio: 2 / 1 }}
+              accessibilityIgnoresInvertColors
+            />
           ) : null}
           <View className="px-5 pt-5">
-            <Text className="text-2xl font-semibold text-gray-900 dark:text-white">{post.title}</Text>
-            {when ? <Text className="mt-1 text-xs text-gray-400 dark:text-white/60">{when}</Text> : null}
+            <Text accessibilityRole="header" className="text-2xl font-semibold text-gray-900 dark:text-white">{post.title}</Text>
+            {when ? <Text className="mt-1 text-xs text-gray-500 dark:text-white/70">{when}</Text> : null}
             <Text selectable className="mt-4 text-base leading-6 text-gray-600 dark:text-gray-300">
               {post.body}
             </Text>

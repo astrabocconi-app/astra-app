@@ -13,9 +13,10 @@ export const en = {
   "discounts.noDiscount": "Discount coming soon",
   "discounts.campus": "Università Bocconi",
   "discounts.mapUnavailable": "Map unavailable",
-  "discounts.mapNeedsToken": "The map needs a Mapbox token to load.",
+  "discounts.mapNeedsToken": "The map is temporarily unavailable. Use the list view.",
   "discounts.openInMaps": "Directions",
   "discounts.pinsCount": "{count} venues on the map",
+  "discounts.pinsCountOne": "1 venue on the map",
   "discounts.recenter": "Re-centre on Bocconi",
 };
 
@@ -34,8 +35,9 @@ export const it: Record<keyof typeof en, string> = {
   "discounts.noDiscount": "Sconto in arrivo",
   "discounts.campus": "Università Bocconi",
   "discounts.mapUnavailable": "Mappa non disponibile",
-  "discounts.mapNeedsToken": "Serve un token Mapbox per caricare la mappa.",
+  "discounts.mapNeedsToken": "La mappa non è disponibile al momento. Usa la vista elenco.",
   "discounts.openInMaps": "Indicazioni",
   "discounts.pinsCount": "{count} locali sulla mappa",
+  "discounts.pinsCountOne": "1 locale sulla mappa",
   "discounts.recenter": "Torna alla Bocconi",
 };

@@ -6,7 +6,8 @@
 // Without this, those redemptions sat in PENDING forever: the points were gone,
 // the student saw "awaiting fulfilment", and nobody could change it.
 
-import { prisma, Prisma, LedgerSource, RedemptionStatus } from "@astra/db";
+import { prisma, LedgerSource, RedemptionStatus } from "@astra/db";
+import { serializable } from "./tx";
 
 export class RedemptionError extends Error {}
 
@@ -102,10 +103,12 @@ export async function fulfilRedemption(id: string) {
  * Runs in one transaction, and re-reads the row inside it, so two admins
  * clicking Cancel at the same moment cannot refund the same redemption twice.
  * Stock is handed back too, otherwise cancelling would quietly destroy a unit.
+ *
+ * Retried on a write conflict, so two admins clicking at once both get an
+ * answer instead of one of them seeing a 500.
  */
 export async function cancelRedemption(id: string, actorId: string) {
-  return prisma.$transaction(
-    async (tx) => {
+  return serializable(async (tx) => {
       const row = await tx.rewardRedemption.findUnique({
         where: { id },
         include: { reward: { select: { title: true, stock: true } } },
@@ -127,8 +130,10 @@ export async function cancelRedemption(id: string, actorId: string) {
           delta: row.costPoints,
           source: LedgerSource.ADMIN_ADJUSTMENT,
           reason: `Refund: ${row.reward.title}`,
-          refType: "Reward",
-          refId: row.rewardId,
+          // Tied to the redemption it reverses (not just the reward), so "which
+          // redemption does this refund belong to" is answerable from the ledger.
+          refType: "RewardRedemption",
+          refId: id,
           grantedById: actorId,
         },
       });
@@ -152,7 +157,5 @@ export async function cancelRedemption(id: string, actorId: string) {
       }
 
       return { alreadyCancelled: false, refunded: row.costPoints };
-    },
-    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-  );
+  });
 }

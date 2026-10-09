@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { deleteOwnAccount, AccountDeletionError } from "@/lib/account";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 // DELETE /api/admin/users/:id — delete a student's account from the backoffice.
 // Same anonymisation as in-app deletion (see lib/account.ts); admin only.
-export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handleDelete(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requireAdmin(req, requestId);
   if ("error" in guard) return guard.error;
@@ -42,3 +42,5 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }
     throw err;
   }
 }
+
+export const DELETE = withApi(handleDelete);

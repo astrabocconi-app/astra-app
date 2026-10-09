@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/app/_ui/button";
 import { Card } from "@/app/_ui/card";
 import { Field, Input, Select, Textarea } from "@/app/_ui/field";
+import { adminFetch, errorMessage } from "../_lib/admin-fetch";
 
 /**
  * Voucher pool for a reward — in practice, Eventbrite discount codes for our
@@ -50,20 +51,18 @@ export function CodePool({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/admin/eventbrite/events", { credentials: "include" });
-        const data = await res.json().catch(() => ({}));
+        const data = await adminFetch<{ configured?: boolean; events?: EventbriteEvent[] }>(
+          "/api/admin/eventbrite/events",
+        );
         if (cancelled) return;
-        if (!res.ok) {
-          setEventsError(data?.error?.message ?? "Couldn't load Eventbrite events.");
-          return;
-        }
         setConfigured(data.configured !== false);
         setEvents(data.events ?? []);
         // Default to the soonest upcoming event — the usual case.
-        const upcoming = (data.events ?? []).filter((e: EventbriteEvent) => e.upcoming);
-        if (upcoming.length) setEventId(upcoming[upcoming.length - 1].id);
-      } catch {
-        if (!cancelled) setEventsError("Couldn't load Eventbrite events.");
+        const upcoming = (data.events ?? []).filter((e) => e.upcoming);
+        const soonest = upcoming[upcoming.length - 1];
+        if (soonest) setEventId(soonest.id);
+      } catch (e) {
+        if (!cancelled) setEventsError(errorMessage(e, "Couldn't load Eventbrite events."));
       }
     })();
     return () => {
@@ -76,23 +75,22 @@ export function CodePool({
     setError(null);
     setDone(null);
     try {
-      const res = await fetch(`/api/admin/rewards/${rewardId}/codes`, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: body ? JSON.stringify(body) : undefined,
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error?.message ?? "Something went wrong.");
+      const data = await adminFetch<{
+        added?: number;
+        skipped?: number;
+        removed?: number;
+        revoked?: number;
+        revokeFailed?: number;
+      }>(`/api/admin/rewards/${rewardId}/codes`, { method, body });
       if (method === "POST") {
         setDone(
-          `Added ${data.added} code${data.added === 1 ? "" : "s"}` +
+          `Added ${data.added ?? 0} code${data.added === 1 ? "" : "s"}` +
             (data.skipped ? ` · ${data.skipped} already in the pool` : ""),
         );
         setCodes("");
       } else {
         setDone(
-          `Removed ${data.removed} unused code${data.removed === 1 ? "" : "s"}` +
+          `Removed ${data.removed ?? 0} unused code${data.removed === 1 ? "" : "s"}` +
             (data.revoked ? ` · ${data.revoked} revoked on Eventbrite` : "") +
             (data.revokeFailed
               ? ` · ${data.revokeFailed} could not be revoked on Eventbrite`
@@ -101,36 +99,36 @@ export function CodePool({
       }
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
   }
 
   async function generate() {
+    const picked = (events ?? []).find((e) => e.id === eventId);
+    if (
+      !confirm(
+        `Create ${quantity} single-use ${percentOff}% discount code${Number(quantity) === 1 ? "" : "s"} on Eventbrite for "${picked?.name ?? "this event"}"? They are real discounts on your Eventbrite account.`,
+      )
+    ) {
+      return;
+    }
     setBusy(true);
     setError(null);
     setDone(null);
     try {
-      const res = await fetch(`/api/admin/rewards/${rewardId}/codes/eventbrite`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          eventId,
-          percentOff: Number(percentOff),
-          quantity: Number(quantity),
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error?.message ?? "Something went wrong.");
+      const data = await adminFetch<{ added?: number; failed?: number; firstError?: string }>(
+        `/api/admin/rewards/${rewardId}/codes/eventbrite`,
+        { method: "POST", body: { eventId, percentOff: Number(percentOff), quantity: Number(quantity) } },
+      );
       setDone(
-        `Generated ${data.added} single-use code${data.added === 1 ? "" : "s"} on Eventbrite` +
+        `Generated ${data.added ?? 0} single-use code${data.added === 1 ? "" : "s"} on Eventbrite` +
           (data.failed ? ` · ${data.failed} failed (${data.firstError ?? "unknown"})` : ""),
       );
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -156,7 +154,7 @@ export function CodePool({
     <Card className="flex flex-col gap-5">
       <div>
         <h2 className="text-sm font-semibold text-gray-800">Voucher codes</h2>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           Every code is single-use: one code, one ticket, one student. Each redemption hands out a
           different one, so a code can never be reused or passed around. With an empty pool a
           redemption still works — it just waits for someone to fulfil it by hand.
@@ -165,11 +163,11 @@ export function CodePool({
 
       <div className="flex gap-3">
         <div className="flex-1 rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-gray-400">Available</div>
+          <div className="text-xs text-gray-500">Available</div>
           <div className="text-xl font-bold text-gray-900">{available}</div>
         </div>
         <div className="flex-1 rounded-xl border border-gray-200 p-3">
-          <div className="text-xs text-gray-400">Handed out</div>
+          <div className="text-xs text-gray-500">Handed out</div>
           <div className="text-xl font-bold text-gray-900">{claimed}</div>
         </div>
       </div>
@@ -185,7 +183,7 @@ export function CodePool({
       <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
         <div>
           <h3 className="text-sm font-semibold text-gray-800">Generate on Eventbrite</h3>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-gray-500">
             Creates real single-use discounts on the event and drops them straight into the pool.
             No copy-pasting.
           </p>
@@ -197,9 +195,11 @@ export function CodePool({
             <code>EVENTBRITE_ORG_ID</code>, then redeploy.
           </p>
         ) : eventsError ? (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">{eventsError}</p>
+          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700">
+            {eventsError}
+          </p>
         ) : events === null ? (
-          <p className="text-xs text-gray-400">Loading events…</p>
+          <p className="text-xs text-gray-500">Loading events…</p>
         ) : events.length === 0 ? (
           <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
             No events on the Eventbrite account yet. Publish one, then come back.
@@ -215,6 +215,7 @@ export function CodePool({
                       <option key={e.id} value={e.id}>
                         {e.name}
                         {e.start ? ` — ${e.start.slice(0, 10)}` : ""}
+                        {e.status && e.status !== "live" && e.status !== "started" ? ` [${e.status}]` : ""}
                       </option>
                     ))}
                   </optgroup>
@@ -279,12 +280,21 @@ export function CodePool({
         />
       </Field>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {done && <p className="text-sm text-green-700">{done}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {done && (
+        <p role="status" className="text-sm text-green-700">
+          {done}
+        </p>
+      )}
 
       <div className="flex items-center justify-between">
         {available > 0 ? (
           <button
+            type="button"
             onClick={() => {
               if (
                 confirm(

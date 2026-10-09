@@ -142,6 +142,8 @@ export type LedgerEntry = z.infer<typeof ledgerEntry>;
 /** GET /api/points/history — recent ledger entries, newest first. */
 export const pointsHistoryResponse = z.object({
   entries: z.array(ledgerEntry),
+  /** Pass back as ?cursor= for the next page; null/absent at the end. Optional so older builds keep parsing. */
+  nextCursor: z.string().nullable().optional(),
 });
 export type PointsHistoryResponse = z.infer<typeof pointsHistoryResponse>;
 
@@ -165,6 +167,19 @@ export const IN_APP_ROUTES = [
   "/polare",
 ] as const;
 export type InAppRoute = (typeof IN_APP_ROUTES)[number];
+
+/** A single news post, event or venue page, as opened from a notification tap. */
+const IN_APP_ITEM_ROUTE = /^\/(news|event|venue)\/[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * Is this somewhere the app can open? The static list above (what the backoffice
+ * picker offers) plus a specific news post, event or venue (what the server puts
+ * in a notification about that item). Builds before this existed only know the
+ * static list and simply ignore an item route, which is the same as no route.
+ */
+export function isInAppRoute(route: string): boolean {
+  return (IN_APP_ROUTES as readonly string[]).includes(route) || IN_APP_ITEM_ROUTE.test(route);
+}
 
 /** Human labels for the backoffice picker. */
 export const IN_APP_ROUTE_LABELS: Record<InAppRoute, string> = {
@@ -197,39 +212,71 @@ export type ContentLink = z.infer<typeof contentLink>;
 /** At most six, so the bottom of an article doesn't turn into a link farm. */
 export const contentLinks = z.array(contentLink).max(6).default([]);
 
-// ── CMS: News ─────────────────────────────────────────────────────────────
-// `imageUrl` is either a pasted absolute URL or a /api/media/:id path for an
-// image uploaded to our own store. Empty string → null on the wire.
+// ── CMS: shared field helpers ─────────────────────────────────────────────
 
-const optionalUrl = z
-  .string()
-  .trim()
-  .url()
-  .nullish()
-  .or(z.literal("").transform(() => null));
+/** Optional free text: blank or missing becomes null, never "". */
+const optText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max, `Must be ${max} characters or fewer`)
+    .nullish()
+    .transform((v) => v || null);
 
-// Image reference: an absolute http(s) URL OR a relative /api/media/:id path
-// (uploads to our own store). Empty → null.
+/** https only: an http link is blocked by App Transport Security, and javascript:/data: must never reach the app. */
+const httpsUrl = z.string().trim().url().startsWith("https://", "Must start with https://");
+
+const optionalUrl = httpsUrl.nullish().or(z.literal("").transform(() => null));
+
+// Image reference: an https URL OR a relative /api/media/:id path (uploads to our
+// own store). Empty → null. http:// is refused: iOS would silently not load it.
 const optionalImageRef = z
   .string()
   .trim()
   .nullish()
   .transform((v) => (v ? v : null))
-  .refine((v) => v === null || v.startsWith("/api/media/") || /^https?:\/\/\S+$/.test(v), {
-    message: "Enter a valid image URL",
+  .refine(
+    (v) => v === null || /^\/api\/media\/[A-Za-z0-9_-]+$/.test(v) || /^https:\/\/\S+$/.test(v),
+    { message: "Enter an https:// image URL, or upload one" },
+  );
+
+/** A date-time WITH its zone offset ("2026-10-10T21:30:00+02:00"). A bare local time would be read as UTC by the server. */
+const isoWithOffset = z
+  .string()
+  .trim()
+  .refine((v) => z.iso.datetime({ offset: true }).safeParse(v).success && !Number.isNaN(Date.parse(v)), {
+    message: "Enter a valid date and time (with its timezone)",
   });
 
-/** Admin create/update payload for a news post. */
-export const newsInput = z.object({
-  title: z.string().trim().min(1, "Title is required"),
-  body: z.string().trim().min(1, "Body is required"),
-  excerpt: z.string().trim().max(240).nullish(),
+// ── CMS: News ─────────────────────────────────────────────────────────────
+// `imageUrl` is either a pasted absolute URL or a /api/media/:id path for an
+// image uploaded to our own store. Empty string → null on the wire.
+
+const newsFields = {
+  title: z.string().trim().min(1, "Title is required").max(200, "Must be 200 characters or fewer"),
+  body: z.string().trim().min(1, "Body is required").max(20000, "Must be 20,000 characters or fewer"),
+  excerpt: optText(240),
   imageUrl: optionalImageRef,
+};
+
+/** Admin create payload for a news post. */
+export const newsInput = z.object({
+  ...newsFields,
   published: z.boolean().default(false),
   pinned: z.boolean().default(false),
   links: contentLinks,
 });
 export type NewsInput = z.infer<typeof newsInput>;
+
+/**
+ * Admin update payload: every field optional, and NO defaults — a partial save
+ * that omits `published` must leave it alone, not switch it to false.
+ */
+export const newsPatchInput = z.object(newsFields).partial().extend({
+  published: z.boolean().optional(),
+  pinned: z.boolean().optional(),
+  links: z.array(contentLink).max(6).optional(),
+});
 
 export const newsItem = z.object({
   id: z.string(),
@@ -250,23 +297,48 @@ export type NewsListResponse = z.infer<typeof newsListResponse>;
 
 // ── CMS: Events (advertise-only) ────────────────────────────────────────────
 
-/** Admin create/update payload for an event. */
-export const eventInput = z.object({
-  title: z.string().trim().min(1, "Title is required"),
-  description: z.string().trim().nullish(),
+const eventFields = {
+  title: z.string().trim().min(1, "Title is required").max(200, "Must be 200 characters or fewer"),
+  description: optText(5000),
   imageUrl: optionalImageRef,
-  location: z.string().trim().nullish(),
-  startsAt: z.string().min(1, "Start date is required"), // ISO; parsed server-side
-  endsAt: z.string().nullish(),
+  location: optText(200),
+  startsAt: isoWithOffset,
+  endsAt: isoWithOffset.nullish().or(z.literal("").transform(() => null)),
   externalTicketUrl: optionalUrl,
-  published: z.boolean().default(false),
-  links: contentLinks,
   /** In-app discount: the Eventbrite event, percent off, optional cap on students. */
   eventbriteEventId: z.string().trim().regex(/^\d+$/, "Pick an Eventbrite event").nullish(),
   appDiscountPercent: z.number().int().min(1).max(100).nullish(),
   appDiscountLimit: z.number().int().min(1).nullish(),
-});
+  /**
+   * Re-pointing an event at another Eventbrite event after students already
+   * hold codes strands those codes (they were minted for the old event). The
+   * API refuses with 409 unless this is set.
+   */
+  forceRelink: z.boolean().optional(),
+};
+
+const endsAfterStart = (d: { startsAt?: string; endsAt?: string | null }, ctx: z.RefinementCtx) => {
+  if (d.startsAt && d.endsAt && Date.parse(d.endsAt) < Date.parse(d.startsAt)) {
+    ctx.addIssue({ code: "custom", path: ["endsAt"], message: "End can't be before the start" });
+  }
+};
+
+/** Admin create payload for an event. */
+export const eventInput = z
+  .object({
+    ...eventFields,
+    published: z.boolean().default(false),
+    links: contentLinks,
+  })
+  .superRefine(endsAfterStart);
 export type EventInput = z.infer<typeof eventInput>;
+
+/** Admin update payload (partial, no defaults). See newsPatchInput. */
+export const eventPatchInput = z
+  .object(eventFields)
+  .partial()
+  .extend({ published: z.boolean().optional(), links: z.array(contentLink).max(6).optional() })
+  .superRefine(endsAfterStart);
 
 export const eventItem = z.object({
   id: z.string(),
@@ -296,6 +368,11 @@ export const ticketLinkResponse = z.object({
   url: z.string(),
   code: z.string().nullable(),
   percentOff: z.number().nullable(),
+  /**
+   * Why there is (not) a code, so the app can tell "no discount on this event"
+   * from "temporarily unavailable, try again". Absent from older servers.
+   */
+  discountStatus: z.enum(["applied", "none", "cap_reached", "unavailable"]).optional(),
 });
 export type TicketLinkResponse = z.infer<typeof ticketLinkResponse>;
 
@@ -324,18 +401,33 @@ export type SupportMessageInput = z.infer<typeof supportMessageInput>;
 
 // ── CMS: Rewards ──────────────────────────────────────────────────────────
 
-/** Admin create/update payload for a reward. */
-export const rewardInput = z.object({
-  title: z.string().trim().min(1, "Title is required"),
-  description: z.string().trim().nullish(),
+/** "" from an empty form field means "not given", never a number. */
+const blankToNull = (v: unknown) => (v === "" ? null : v);
+
+const rewardFields = {
+  title: z.string().trim().min(1, "Title is required").max(120, "Must be 120 characters or fewer"),
+  description: optText(1000),
   imageUrl: optionalImageRef,
-  costPoints: z.coerce.number().int().min(0, "Cost must be ≥ 0"),
-  stock: z.coerce.number().int().min(0).nullish(), // null = unlimited
-  /** How many times one account may redeem this. null = no limit. */
-  perUserLimit: z.coerce.number().int().min(1).nullish(),
-  active: z.boolean().default(true),
-});
+  costPoints: z.coerce.number().int().min(0, "Cost must be 0 or more").max(1_000_000, "Cost is too high"),
+  /**
+   * null = unlimited; a number = that many left. An empty box is an error, not
+   * "0" (out of stock at once) and not "unlimited" (the opposite of what a
+   * half-filled form means).
+   */
+  stock: z.preprocess(
+    (v) => (v === "" ? Number.NaN : v),
+    z.coerce.number({ error: "Enter the stock, or switch on Unlimited stock" }).int().min(0).max(1_000_000).nullish(),
+  ),
+  /** How many times one account may redeem this. Empty / null = no limit. */
+  perUserLimit: z.preprocess(blankToNull, z.coerce.number().int().min(1, "Must be at least 1").max(1000).nullish()),
+};
+
+/** Admin create payload for a reward. */
+export const rewardInput = z.object({ ...rewardFields, active: z.boolean().default(true) });
 export type RewardInput = z.infer<typeof rewardInput>;
+
+/** Admin update payload (partial, no defaults). See newsPatchInput. */
+export const rewardPatchInput = z.object(rewardFields).partial().extend({ active: z.boolean().optional() });
 
 export const rewardItem = z.object({
   id: z.string(),
@@ -364,37 +456,53 @@ export const discountTypeEnum = z.enum(discountTypeValues);
 export type DiscountTypeValue = (typeof discountTypeValues)[number];
 
 /** One discount attached to a partner. `id` is present when editing an existing row. */
-export const partnerOfferInput = z.object({
-  id: z.string().nullish(),
-  title: z.string().trim().min(1, "Discount title is required"),
-  description: z.string().trim().nullish(),
-  discountType: discountTypeEnum.default("OTHER"),
-  // Percent (0-100) for PERCENT, cents for FIXED, unused otherwise.
-  discountValue: z.coerce.number().int().min(0).nullish(),
-  // Redeemed by scanning the student's card QR (the /api/partner/scan flow)
-  // versus an informal discount with no digital redemption.
-  qrEnabled: z.boolean().default(true),
-});
+export const partnerOfferInput = z
+  .object({
+    id: z.string().nullish(),
+    title: z.string().trim().min(1, "Discount title is required").max(120, "Must be 120 characters or fewer"),
+    description: optText(500),
+    discountType: discountTypeEnum.default("OTHER"),
+    // Percent (0-100) for PERCENT, cents for FIXED, unused otherwise.
+    discountValue: z.coerce.number().int().min(0).max(1_000_000).nullish(),
+    // Redeemed by scanning the student's card QR (the /api/partner/scan flow)
+    // versus an informal discount with no digital redemption.
+    qrEnabled: z.boolean().default(true),
+  })
+  .superRefine((o, ctx) => {
+    if (o.discountType === "PERCENT" && o.discountValue != null && o.discountValue > 100) {
+      ctx.addIssue({ code: "custom", path: ["discountValue"], message: "A percentage can't be more than 100" });
+    }
+  });
 export type PartnerOfferInput = z.infer<typeof partnerOfferInput>;
 
-/** Admin create/update payload for a partner venue. */
-export const partnerInput = z.object({
-  name: z.string().trim().min(1, "Name is required"),
-  description: z.string().trim().nullish(),
-  category: z.string().trim().nullish(),
-  address: z.string().trim().nullish(),
+const partnerFields = {
+  name: z.string().trim().min(1, "Name is required").max(120, "Must be 120 characters or fewer"),
+  description: optText(2000),
+  category: optText(60),
+  address: optText(300),
   // Nullable so a partner can be saved before its coordinates are known; such a
   // partner simply doesn't get a map pin (the list view still shows it).
-  latitude: z.coerce.number().min(-90).max(90).nullish(),
-  longitude: z.coerce.number().min(-180).max(180).nullish(),
+  latitude: z.preprocess(blankToNull, z.coerce.number().min(-90).max(90).nullish()),
+  longitude: z.preprocess(blankToNull, z.coerce.number().min(-180).max(180).nullish()),
   logoUrl: optionalImageRef,
   // Wider photo shown on the venue's detail screen; logoUrl stays the small
   // square mark used in list/map rows.
   photoUrl: optionalImageRef,
+};
+
+/** Admin create payload for a partner venue. */
+export const partnerInput = z.object({
+  ...partnerFields,
   active: z.boolean().default(true),
-  offers: z.array(partnerOfferInput).default([]),
+  offers: z.array(partnerOfferInput).max(20).default([]),
 });
 export type PartnerInput = z.infer<typeof partnerInput>;
+
+/** Admin update payload (partial, no defaults). See newsPatchInput. */
+export const partnerPatchInput = z
+  .object(partnerFields)
+  .partial()
+  .extend({ active: z.boolean().optional(), offers: z.array(partnerOfferInput).max(20).optional() });
 
 export const partnerOffer = z.object({
   id: z.string(),
@@ -433,11 +541,20 @@ export type PartnerListResponse = z.infer<typeof partnerListResponse>;
 // ── Push notifications ──────────────────────────────────────────────────────
 
 /** POST /api/push/register — register this device's Expo push token. */
+const expoPushToken = z
+  .string()
+  .trim()
+  .regex(/^Expo(nent)?PushToken\[[^\]]+\]$/, "Not an Expo push token");
+
 export const pushRegisterInput = z.object({
-  token: z.string().min(1),
+  token: expoPushToken,
   platform: z.enum(["IOS", "ANDROID"]),
 });
 export type PushRegisterInput = z.infer<typeof pushRegisterInput>;
+
+/** DELETE /api/push/register — forget this device's token (sign-out). */
+export const pushUnregisterInput = z.object({ token: expoPushToken });
+export type PushUnregisterInput = z.infer<typeof pushUnregisterInput>;
 
 // ── Ask ASTRA (RAG chatbot) ─────────────────────────────────────────────────
 

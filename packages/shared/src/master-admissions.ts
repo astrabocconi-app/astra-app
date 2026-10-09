@@ -1,10 +1,15 @@
-// MSc admission score and how it compares with last cycle's admits. Pure.
+// MSc admission score and where it sits against what past admits reported. Pure.
 //
 // Bocconi ranks applicants on: weighted GPA (/30), plus — for "in corso"
 // students only — 1 point and 0.05 per credit above the minimum needed to
 // apply (90 in the first round, 110 in the second), those points being out of
 // 110. Survey scores are on the same /30 scale, so we compare like with like.
 // The data is passed in (see master-admissions-data.ts) to keep this testable.
+//
+// What the data can and can't say: it holds only people who were admitted, a
+// handful per programme, from two different cycles, self-reported. So nothing
+// here is a probability. A score above the lowest admit we know of is "above",
+// not "likely"; a programme with few answers says so.
 
 export type AdmissionRound = 1 | 2;
 
@@ -20,8 +25,9 @@ export const MASTER_PROGRAMMES: MasterProgramme[] = [
   { key: "AI", name: "Artificial Intelligence", selective: true },
   { key: "CYBER", name: "Cyber Risk Strategy and Governance", selective: true },
   { key: "DSBA", name: "Data Science and Business Analytics" },
-  { key: "ESS", name: "Economics and Social Sciences" },
-  { key: "EMIT", name: "Economics and Management of Innovation and Technology" },
+  { key: "ESS", name: "Economic and Social Sciences" },
+  // Renamed INTENT in the 2026-27 regulation; the surveys call it EMIT/INTENT.
+  { key: "EMIT", name: "EMIT / INTENT · Innovation, Technology and Entrepreneurship" },
   { key: "ACME", name: "Arts, Culture, Media and Entertainment" },
   { key: "GIO", name: "Government and International Organizations" },
   { key: "FIN", name: "Finance" },
@@ -38,6 +44,8 @@ export const MASTER_PROGRAMMES: MasterProgramme[] = [
 
 /** Credits needed to apply in each round; extra credits above it earn points. */
 export const MIN_CREDITS: Record<AdmissionRound, number> = { 1: 90, 2: 110 };
+/** The most credits a bachelor can have recorded; anything above is a typo. */
+export const MAX_CREDITS = 200;
 
 /** Points out of 110 on top of the GPA (in corso only). */
 export function admissionBonus(credits: number, inCorso: boolean, round: AdmissionRound): number {
@@ -50,49 +58,119 @@ export function admissionScore(gpa: number, credits: number, inCorso: boolean, r
   return gpa + (admissionBonus(credits, inCorso, round) * 30) / 110;
 }
 
-export type Chance = "likely" | "possible" | "unlikely" | "unknown";
+/** "27,45" or "27.45" → 27.45; anything else → null. */
+export function parseDecimal(s: string): number | null {
+  const t = s.trim().replace(",", ".");
+  if (!/^\d+(\.\d+)?$/.test(t)) return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+export type AdmissionInputField = "gpa" | "credits";
+
+export interface AdmissionInputs {
+  gpa: string;
+  credits: string;
+  inCorso: boolean;
+  round: AdmissionRound;
+}
+
+export interface ScoreResult {
+  score: number | null;
+  /** Typed, but not a valid value. */
+  error: AdmissionInputField | null;
+  /** Not typed yet (and needed). */
+  missing: AdmissionInputField | null;
+}
+
+/**
+ * The score for what a student typed, or what is wrong with it. Credits only
+ * matter for an on-track student (they are the bonus), and then they are
+ * required: a blank must not quietly mean "the minimum".
+ */
+export function scoreForInputs(inputs: AdmissionInputs): ScoreResult {
+  const none = { score: null, error: null, missing: null };
+  const gpa = parseDecimal(inputs.gpa);
+  if (gpa == null || gpa < 18 || gpa > 31) {
+    return inputs.gpa.trim() === "" ? { ...none, missing: "gpa" } : { ...none, error: "gpa" };
+  }
+  if (!inputs.inCorso) return { ...none, score: admissionScore(gpa, 0, false, inputs.round) };
+  const credits = parseDecimal(inputs.credits);
+  if (credits == null || !Number.isInteger(credits) || credits < MIN_CREDITS[inputs.round] || credits > MAX_CREDITS) {
+    return inputs.credits.trim() === "" ? { ...none, missing: "credits" } : { ...none, error: "credits" };
+  }
+  return { ...none, score: admissionScore(gpa, credits, true, inputs.round) };
+}
+
+/** Where a score sits against the lowest admit we know of. */
+export type Standing = "above" | "close" | "below" | "none";
+
+/** Within this many points under the lowest admit counts as "close". */
+export const CLOSE_MARGIN = 0.5;
+/** Fewer admits than this and the numbers say little: flagged, and no median. */
+export const MIN_ADMITS_FOR_MEDIAN = 5;
 
 export interface ProgrammeOutlook {
   programme: MasterProgramme;
-  chance: Chance;
-  /** Lowest score anyone reported getting in with, this round. */
+  standing: Standing;
+  /** Lowest score any respondent reported getting in with, this round. */
   lowest: number | null;
-  /** Middle score of the admits we have (first round only). */
+  /** Middle score of the admits we have; only with enough of them. */
   median: number | null;
-  /** Admits in ASTRA's survey behind the median (first round only). */
-  respondents: number;
+  /** How many admits stand behind the numbers. */
+  admits: number;
+  /** Too few admits to lean on. */
+  lowData: boolean;
   /** score − lowest */
   margin: number | null;
 }
 
 export interface AdmissionData {
-  survey: Record<string, number[]>;
-  lowerBounds: { round1: Record<string, number>; round2: Record<string, number> };
+  cycles?: { astra: string; blab: string };
+  /** ASTRA's survey: first-round admits' scores per programme. */
+  astra: Record<string, number[]>;
+  blab: {
+    /** B.lab's survey: first-round admits' scores per programme. */
+    round1: Record<string, number[]>;
+    /** One respondent per programme in the second round. */
+    round2: Record<string, number[]>;
+  };
 }
 
-// The second round has only lower bounds, so "likely" means a clear margin.
-const ROUND2_MARGIN = 0.5;
+/** The true median: the middle value, or the mean of the two in the middle. */
+export function median(sorted: number[]): number | null {
+  const n = sorted.length;
+  if (n === 0) return null;
+  return n % 2 ? sorted[(n - 1) / 2]! : (sorted[n / 2 - 1]! + sorted[n / 2]!) / 2;
+}
+
+export function standing(score: number, lowest: number | null): Standing {
+  if (lowest == null) return "none";
+  const margin = score - lowest;
+  // The margin is a difference of two-decimal numbers: compare in hundredths.
+  const cents = Math.round(margin * 100);
+  return cents >= 0 ? "above" : cents >= -CLOSE_MARGIN * 100 ? "close" : "below";
+}
+
+const ORDER: Record<Standing, number> = { above: 0, close: 1, below: 2, none: 3 };
 
 export function outlook(score: number, round: AdmissionRound, data: AdmissionData): ProgrammeOutlook[] {
-  const order: Record<Chance, number> = { likely: 0, possible: 1, unlikely: 2, unknown: 3 };
   return MASTER_PROGRAMMES.map((programme) => {
-    const admits = round === 1 ? (data.survey[programme.key] ?? []) : [];
-    const bound = (round === 1 ? data.lowerBounds.round1 : data.lowerBounds.round2)[programme.key];
-    const candidates = [bound, admits[0]].filter((n): n is number => typeof n === "number");
-    const lowest = candidates.length ? Math.min(...candidates) : null;
-    const median = admits.length >= 3 ? admits[Math.floor(admits.length / 2)]! : null;
-    let chance: Chance = "unknown";
-    if (lowest != null) {
-      const likelyFrom = median ?? lowest + ROUND2_MARGIN;
-      chance = score >= likelyFrom ? "likely" : score >= lowest ? "possible" : "unlikely";
-    }
+    const admits = (
+      round === 1
+        ? [...(data.astra[programme.key] ?? []), ...(data.blab.round1[programme.key] ?? [])]
+        : [...(data.blab.round2[programme.key] ?? [])]
+    ).sort((a, b) => a - b);
+    const lowest = admits.length ? admits[0]! : null;
+    const enough = admits.length >= MIN_ADMITS_FOR_MEDIAN;
     return {
       programme,
-      chance,
+      standing: standing(score, lowest),
       lowest,
-      median,
-      respondents: admits.length,
+      median: enough ? median(admits) : null,
+      admits: admits.length,
+      lowData: admits.length < MIN_ADMITS_FOR_MEDIAN,
       margin: lowest == null ? null : score - lowest,
     };
-  }).sort((a, b) => order[a.chance] - order[b.chance] || (b.margin ?? -99) - (a.margin ?? -99));
+  }).sort((a, b) => ORDER[a.standing] - ORDER[b.standing] || (b.margin ?? -99) - (a.margin ?? -99));
 }

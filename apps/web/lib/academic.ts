@@ -2,9 +2,10 @@
 
 import { prisma } from "@astra/db";
 import type { AcademicProfileInput } from "@astra/shared";
+import { compareClassGroupCodes, trackRequired } from "./academic-policy";
 
 export async function getActiveAcademicCatalogue() {
-  return prisma.academicCatalogue.findFirst({
+  const catalogue = await prisma.academicCatalogue.findFirst({
     where: { active: true },
     orderBy: { createdAt: "desc" },
     include: {
@@ -18,6 +19,11 @@ export async function getActiveAcademicCatalogue() {
       },
     },
   });
+  // Class codes are text, so the database sorts "10" before "8"; order them as numbers.
+  if (catalogue) {
+    for (const p of catalogue.programmes) p.classGroups.sort((a, b) => compareClassGroupCodes(a.code, b.code));
+  }
+  return catalogue;
 }
 
 /**
@@ -109,7 +115,7 @@ export function toAcademicProfile(
 export async function saveAcademicProfile(userId: string, input: AcademicProfileInput) {
   const programme = await prisma.academicProgramme.findFirst({
     where: { id: input.programmeId, active: true, catalogue: { active: true } },
-    include: { catalogue: true },
+    include: { catalogue: true, tracks: { select: { active: true, fromYear: true } } },
   });
   if (!programme) throw new AcademicSelectionError("Programme is not in the active catalogue.");
   if (input.studyYear > programme.durationYears) {
@@ -120,6 +126,16 @@ export async function saveAcademicProfile(userId: string, input: AcademicProfile
 
   // Both checks hang off the same programme, so there is no reason to pay for
   // two sequential round trips.
+  // Escape hatch while older app builds (which never send a track) are still
+  // in the field: ACADEMIC_TRACK_REQUIRED=false turns the rule off.
+  if (
+    process.env.ACADEMIC_TRACK_REQUIRED !== "false" &&
+    !input.trackId &&
+    trackRequired(programme.tracks, input.studyYear)
+  ) {
+    throw new AcademicSelectionError("Choose your track.", "TRACK_REQUIRED");
+  }
+
   const [track, classGroup] = await Promise.all([
     input.trackId
       ? prisma.academicTrack.findFirst({
@@ -162,4 +178,11 @@ export async function saveAcademicProfile(userId: string, input: AcademicProfile
   });
 }
 
-export class AcademicSelectionError extends Error {}
+export class AcademicSelectionError extends Error {
+  constructor(
+    message: string,
+    readonly code: "INVALID_SELECTION" | "TRACK_REQUIRED" = "INVALID_SELECTION",
+  ) {
+    super(message);
+  }
+}

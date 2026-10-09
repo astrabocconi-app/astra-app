@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { originFromRequest } from "@/lib/cms-map";
 
 export const runtime = "nodejs";
@@ -36,7 +36,7 @@ function withAbsoluteMedia(data: unknown, origin: string): unknown {
 // 404 when unset is meaningful rather than an error: the app then uses its
 // bundled copy, which is the correct behaviour on a fresh install or if the row
 // is ever deleted.
-export async function GET(req: Request, ctx: { params: Promise<{ key: string }> }) {
+async function handleGet(req: Request, ctx: { params: Promise<{ key: string }> }) {
   const requestId = newRequestId();
   const { key } = await ctx.params;
 
@@ -61,3 +61,5 @@ export async function GET(req: Request, ctx: { params: Promise<{ key: string }> 
     },
   );
 }
+
+export const GET = withApi(handleGet);

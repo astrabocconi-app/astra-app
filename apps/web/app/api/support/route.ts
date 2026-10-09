@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma, SupportKind } from "@astra/db";
 import { supportMessageInput } from "@astra/shared";
-import { newRequestId, errorResponse, log } from "@/lib/api";
+import { newRequestId, errorResponse, log, withApi } from "@/lib/api";
+import { zodMessage } from "@/lib/validation";
 import { getSessionUser } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -20,7 +21,7 @@ const MAX_PER_HOUR = 5;
 // Authenticated on purpose: the point of this feature is being able to write
 // back, so the reporter's identity comes from the session rather than a
 // self-reported email field that can be mistyped or faked.
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     return errorResponse(
       400,
       "BAD_REQUEST",
-      parsed.error.issues[0]?.message ?? "Invalid input.",
+      zodMessage(parsed.error),
       requestId,
     );
   }
@@ -69,3 +70,5 @@ export async function POST(req: Request) {
     { status: 201, headers: { "x-request-id": requestId } },
   );
 }
+
+export const POST = withApi(handlePost);

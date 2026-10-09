@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/app/_ui/card";
 import { Button } from "@/app/_ui/button";
+import { romeDate, romeDateTime } from "@/app/_ui/rome";
+import { adminFetch, errorMessage } from "../_lib/admin-fetch";
 
 const STATUS_STYLE: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-800",
@@ -43,9 +45,13 @@ export function RedemptionRow({
 
   async function act(action: "fulfil" | "cancel") {
     if (action === "cancel") {
-      const extra = code
-        ? "\n\nWARNING: this redemption already handed out a voucher code, which the student may have used already. Refunding gives the points back on top of that."
-        : "";
+      const extra =
+        (code
+          ? "\n\nWARNING: this redemption already handed out a voucher code, which the student may have used already. Refunding gives the points back on top of that."
+          : "") +
+        (status === "FULFILLED"
+          ? "\n\nWARNING: this is marked as already collected, so the item was handed over. Refunding gives the points back without getting the item back."
+          : "");
       if (
         !window.confirm(
           `Cancel this redemption and refund ${costPoints} points to ${student.name ?? "the student"}?${extra}`,
@@ -57,17 +63,10 @@ export function RedemptionRow({
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/redemptions/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ action }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error?.message ?? "Something went wrong.");
+      await adminFetch(`/api/admin/redemptions/${id}`, { method: "PATCH", body: { action } });
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
@@ -85,15 +84,15 @@ export function RedemptionRow({
         <span className="rounded-md bg-gray-100 px-2 py-1 font-mono text-xs font-bold text-gray-700">
           {pickupRef}
         </span>
-        <span className="text-xs text-gray-400">
-          {new Date(createdAt).toLocaleString("en-GB")}
-          {fulfilledAt ? ` · collected ${new Date(fulfilledAt).toLocaleDateString("en-GB")}` : ""}
+        <span className="text-xs text-gray-500">
+          {romeDateTime(createdAt)}
+          {fulfilledAt ? ` · collected ${romeDate(fulfilledAt)}` : ""}
         </span>
       </div>
 
       <div className="flex flex-wrap items-baseline gap-x-2">
         <span className="text-base font-semibold text-gray-900">{rewardTitle}</span>
-        <span className="text-sm text-gray-500">· {costPoints.toLocaleString()} points</span>
+        <span className="text-sm text-gray-500">· {costPoints.toLocaleString("en-GB")} points</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-gray-100 pt-3 text-sm">
@@ -101,12 +100,12 @@ export function RedemptionRow({
         {student.email ? (
           <a
             href={`mailto:${student.email}`}
-            className="text-astra-primary underline underline-offset-2 hover:opacity-80"
+            className="break-all text-astra-primary underline underline-offset-2 hover:opacity-80"
           >
             {student.email}
           </a>
         ) : (
-          <span className="text-xs text-gray-400">account deleted</span>
+          <span className="text-xs text-gray-500">account deleted</span>
         )}
         {code && (
           <span className="ml-auto rounded-md bg-astra-light px-2 py-1 font-mono text-xs font-bold text-astra-primary">
@@ -115,11 +114,16 @@ export function RedemptionRow({
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       {status !== "CANCELLED" && (
         <div className="flex items-center justify-between gap-2">
           <button
+            type="button"
             onClick={() => act("cancel")}
             disabled={busy}
             className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-40"
@@ -131,7 +135,7 @@ export function RedemptionRow({
               {busy ? "Saving…" : "Mark as handed over"}
             </Button>
           ) : (
-            <span className="text-xs text-gray-400">Already collected</span>
+            <span className="text-xs text-gray-500">Already collected</span>
           )}
         </div>
       )}

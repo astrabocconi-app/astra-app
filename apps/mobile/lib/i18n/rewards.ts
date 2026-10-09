@@ -29,6 +29,14 @@ export const en = {
   "rewards.copiedTitle": "Copied",
   "rewards.failedTitle": "Couldn't redeem",
   "rewards.failedBody": "Please try again.",
+  "rewards.errInsufficient": "You don't have enough points for this reward.",
+  "rewards.errLimit": "You've reached the limit for this reward.",
+  "rewards.errStock": "This reward has just run out.",
+  "rewards.errBusy": "ASTRA is busy right now. Please try again in a moment.",
+  "rewards.errUnknown": "We couldn't confirm your redemption. Check the Redeemed tab before trying again.",
+  "rewards.leftCountOne": "1 left",
+  "rewards.spentPointsOne": "1 point",
+  "rewards.morePointsOne": "1 more point",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -62,4 +70,12 @@ export const it: Record<keyof typeof en, string> = {
   "rewards.copiedTitle": "Copiato",
   "rewards.failedTitle": "Impossibile riscattare",
   "rewards.failedBody": "Riprova.",
+  "rewards.errInsufficient": "Non hai abbastanza punti per questo premio.",
+  "rewards.errLimit": "Hai raggiunto il limite per questo premio.",
+  "rewards.errStock": "Questo premio è appena terminato.",
+  "rewards.errBusy": "ASTRA è occupata al momento. Riprova tra poco.",
+  "rewards.errUnknown": "Non siamo riusciti a confermare il riscatto. Controlla la scheda Riscattati prima di riprovare.",
+  "rewards.leftCountOne": "Ne resta 1",
+  "rewards.spentPointsOne": "1 punto",
+  "rewards.morePointsOne": "Manca 1 punto",
 };

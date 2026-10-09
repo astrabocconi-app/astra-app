@@ -160,15 +160,6 @@ export function ChevronRightIcon(props: IconProps) {
   );
 }
 
-export function SparkleIcon(props: IconProps) {
-  return (
-    <svg {...base(props)} aria-hidden="true">
-      <path d="M12 3.5c.4 4.2 1.8 5.6 6 6-4.2.4-5.6 1.8-6 6-.4-4.2-1.8-5.6-6-6 4.2-.4 5.6-1.8 6-6Z" />
-      <path d="M18.5 14.5c.2 1.6.7 2.1 2.3 2.3-1.6.2-2.1.7-2.3 2.3-.2-1.6-.7-2.1-2.3-2.3 1.6-.2 2.1-.7 2.3-2.3Z" />
-    </svg>
-  );
-}
-
 export function ShieldIcon(props: IconProps) {
   return (
     <svg {...base(props)} aria-hidden="true">

@@ -7,7 +7,7 @@
 // onto what the person will actually see. Both come from DASHBOARD_SECTIONS, so
 // they cannot drift apart.
 
-import { useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import {
   ReactFlow,
   Background,
@@ -51,7 +51,7 @@ function BandNode({ data }: NodeProps) {
       style={{ width: LABEL_W - PAD }}
     >
       <span className="text-sm font-semibold text-gray-800">{d.label}</span>
-      <span className="text-xs text-gray-400">
+      <span className="text-xs text-gray-500">
         {d.count} of {d.total}
       </span>
       {/* Source only: the band is where the arrows to its pages start. */}
@@ -93,7 +93,7 @@ function PageNode({ data }: NodeProps) {
           {d.label}
         </span>
       </span>
-      <span className="truncate text-xs text-gray-400">{d.blurb}</span>
+      <span className="truncate text-xs text-gray-500">{d.blurb}</span>
       <Handle type="target" position={Position.Left} className="!opacity-0" />
     </button>
   );
@@ -101,15 +101,81 @@ function PageNode({ data }: NodeProps) {
 
 const NODE_TYPES = { band: BandNode, page: PageNode };
 
-export function PermissionFlow({
-  value,
-  onChange,
-  disabled = false,
-}: {
-  value: string[];
-  onChange: (next: string[]) => void;
-  disabled?: boolean;
-}) {
+// The graph needs about 1,000 px of width. Narrower than this it is cut off and
+// cannot be panned, so a plain grouped checklist (same data) is shown instead.
+const FLOW_MIN_WIDTH = 1360;
+const FLOW_QUERY = `(min-width: ${FLOW_MIN_WIDTH}px)`;
+
+function useWide() {
+  return useSyncExternalStore(
+    (notify) => {
+      const mq = window.matchMedia(FLOW_QUERY);
+      mq.addEventListener("change", notify);
+      return () => mq.removeEventListener("change", notify);
+    },
+    () => window.matchMedia(FLOW_QUERY).matches,
+    () => false, // server and first paint: the list, which works at any width
+  );
+}
+
+type FlowProps = { value: string[]; onChange: (next: string[]) => void; disabled?: boolean };
+
+export function PermissionFlow(props: FlowProps) {
+  return useWide() ? <PermissionGraph {...props} /> : <PermissionList {...props} />;
+}
+
+/** Same sections and pages as the graph, as checkboxes: phones, tablets, narrow windows. */
+function PermissionList({ value, onChange, disabled = false }: FlowProps) {
+  const toggle = (key: string) => {
+    const next = new Set(value);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    onChange(GRANTABLE_KEYS.filter((k) => next.has(k)));
+  };
+  return (
+    <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-4">
+      {GRANTABLE_SECTIONS.map((section) => {
+        const on = section.pages.filter((p) => value.includes(p.key)).length;
+        return (
+          <fieldset key={section.key} disabled={disabled} className="min-w-0">
+            <legend className="mb-1.5 flex w-full items-baseline justify-between gap-2 text-sm font-semibold text-gray-800">
+              {section.label}
+              <span className="text-xs font-normal text-gray-500">
+                {on} of {section.pages.length}
+              </span>
+            </legend>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {section.pages.map((page) => {
+                const checked = value.includes(page.key);
+                return (
+                  <label
+                    key={page.key}
+                    className={`flex cursor-pointer items-start gap-2.5 rounded-xl border px-3 py-2.5 transition-colors ${
+                      checked ? "border-astra-primary bg-astra-light" : "border-gray-200 hover:bg-gray-50"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(page.key)}
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#04107e]"
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-gray-800">{page.label}</span>
+                      <span className="block text-xs text-gray-500">{page.blurb}</span>
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+        );
+      })}
+    </div>
+  );
+}
+
+function PermissionGraph({ value, onChange, disabled = false }: FlowProps) {
   const selected = useMemo(() => new Set(value), [value]);
 
   const { nodes, edges, height } = useMemo(() => {

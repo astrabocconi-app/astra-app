@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { z } from "zod";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
+import { zodMessage } from "@/lib/validation";
 import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { createPartnerAccount } from "@/lib/partner-accounts";
@@ -18,12 +19,14 @@ const input = z.object({
 });
 
 // GET /api/admin/partner-accounts — every venue login, grouped-ready.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
 
   const rows = await prisma.partnerMembership.findMany({
+    // Logins of deleted venues are revoked and must not be listed as live.
+    where: { partner: { deletedAt: null }, user: { deletedAt: null } },
     include: { partner: { select: { id: true, name: true } } },
     orderBy: [{ partner: { name: "asc" } }, { createdAt: "asc" }],
   });
@@ -44,14 +47,14 @@ export async function GET(req: Request) {
 }
 
 // POST /api/admin/partner-accounts — issue a new login for a venue.
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
 
   const parsed = input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
+    return errorResponse(400, "BAD_REQUEST", zodMessage(parsed.error), requestId);
   }
 
   try {
@@ -79,3 +82,6 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const GET = withApi(handleGet);
+export const POST = withApi(handlePost);

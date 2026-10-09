@@ -1,7 +1,9 @@
 # ASTRA — Architecture
 
 This document records the load-bearing decisions and the rules that keep the
-system safe as three part-time developers build on it. Short ADRs are at the end.
+system safe as a small part-time team builds on it. Short ADRs are at the end. See
+[SETUP.md](SETUP.md) for services and environment variables and
+[DEPLOY.md](DEPLOY.md) for releasing and the runbook.
 
 ## Shape of the system
 
@@ -22,7 +24,16 @@ system safe as three part-time developers build on it. Short ADRs are at the end
 - **The API is not a separate service.** It is `apps/web/app/api/**/route.ts`. The
   mobile app calls `apps/web`'s deployed URL directly.
 - **`packages/shared` is the contract.** Zod schemas + inferred types + the typed
-  client live there and are imported by both sides.
+  client live there and are imported by both sides. It also holds the pure,
+  unit-tested logic both sides need (grade and master-admissions calculators, Rome
+  time helpers, avatar seed helpers).
+- **The app talks to `https://app.astrabocconi.com`** (custom domain). The older
+  `astra-app-cyan.vercel.app` hostname serves the same deployment and must stay alive
+  for builds already installed on phones.
+- **Side services:** Supabase (read-only guides, handouts and materials catalogue, public
+  file URLs), Eventbrite (ticket checkout and discount codes), Mapbox (map and
+  geocoding), Expo push, Sentry (mobile only). Images uploaded in the backoffice are
+  stored in Postgres (`ImageAsset`) and served by `/api/media/[id]`.
 - **`packages/db` is server-only.** It owns Prisma + the Neon client singleton.
 
 ## Rules (enforced, not aspirational)
@@ -48,7 +59,7 @@ the DB without an explicit check from it. Deny-by-default once implemented.
 ### 4. The server/client boundary inside one Next.js app
 Because the API lives inside the Next.js app, two leaks must be actively prevented:
 - Route handlers must **not** import client-only React code.
-- Server-only env vars (`DATABASE_URL`, `BETTER_AUTH_SECRET`, Blob token / HMAC secrets) must
+- Server-only env vars (`DATABASE_URL`, `BETTER_AUTH_SECRET`, SMTP, Supabase, Eventbrite and HMAC secrets) must
   **not** be imported into any file that can end up in a client bundle. Keep them in
   server modules (`lib/*.ts` used only by route handlers / server components).
   `packages/db` and `@prisma/client` are listed in `serverExternalPackages` in
@@ -68,9 +79,11 @@ migration (the raw-SQL parts Prisma can't express are documented in
 - **Immutability at the DB level.** A trigger / revoked grant must block
   `UPDATE`/`DELETE` on `PointsLedgerEntry` (raw SQL in a migration). Document the
   Postgres role used.
-- **`MaterialStats` view: aggregated counts only, never per-user rows** — protects
-  student privacy from Head Media.
-- **`DiscountUsage`** has a Postgres **generated** `usageDate` (`usedAt::date`)
+- **Material statistics are aggregated counts only, never per-user rows**, to protect
+  student privacy.
+- **No gradebook.** Grade calculators are pure client-side tools: the grades a student
+  types stay on the device (SecureStore), the server never sees them.
+- **`DiscountUsage`** (legacy) has a Postgres **generated** `usageDate` (`usedAt::date`)
   with `@@unique([userId, offerId, usageDate])` — one use per offer per day.
   Generated columns require an IMMUTABLE expression, so the day is **UTC** (not
   Rome-local); Prisma maps it as `@default(dbgenerated(...))` and never writes it.
@@ -90,9 +103,26 @@ on Neon (`apps/web/lib/auth.ts`). Allowed domains (`@studbocconi.it` /
 `@unibocconi.it`, configurable via `ALLOWED_EMAIL_DOMAINS`) are validated
 **server-side before** an OTP is issued — enforced in a `before` hook so Better
 Auth's anti-enumeration "silent success" for unknown emails can't bypass it.
-Sends are rate-limited (max 3/min). Delivery is via **Resend**, or logged to the
-server console in dev when no `RESEND_API_KEY` is set. The mobile app
-authenticates with a **Bearer token** (not cookies) via `@astra/shared`'s client.
+Sends are rate-limited (max 3/min). Delivery order: **Aruba SMTP** (with an optional
+second mailbox as failover, `lib/smtp-failover.ts`), then Resend if no SMTP is
+configured, else logged to the server console (local dev). The mobile app
+authenticates with a **Bearer token** (not cookies) via `@astra/shared`'s client;
+tokens last 365 days and are rows in the `Session` table, so they can be revoked
+(see DEPLOY.md). The backoffice has three more logins: the single **environment
+admin** (username + password hash from env + an e-mailed code, `lib/admin-auth.ts`),
+**staff accounts** and **partner accounts** (login code + password). Authorization
+for all of them goes through `lib/authz.ts`.
+
+## Operational facts
+
+- API handlers are wrapped by `lib/api.ts`: request id, one structured log line per
+  request, standard error body.
+- Account deletion (`lib/account.ts`) anonymises the user and deletes personal rows; the
+  append-only points ledger is kept by design.
+- Scheduled maintenance runs as Vercel cron jobs under `app/api/cron/*` (declared in
+  `apps/web/vercel.json`), protected by `CRON_SECRET`.
+- Preview and Development currently share the production database (SETUP.md explains the
+  fix the owner has to apply).
 
 ---
 
@@ -103,7 +133,7 @@ authenticates with a **Bearer token** (not cookies) via `@astra/shared`'s client
 Vercel manages and injects the connection env vars. **Why:** we need serverless
 Postgres with cheap per-PR **branch** databases and pooled connections for Vercel
 functions; we don't need Supabase's bundled auth/storage/realtime (we use Better
-Auth + **Vercel Blob**). Consolidating infra under Vercel means one dashboard and
+Auth, and images live in Postgres). Consolidating infra under Vercel means one dashboard and
 `vercel env pull` instead of hand-managed secrets. The DB layer reads both our env
 names and Vercel's injected ones (see `packages/db`).
 
@@ -126,11 +156,10 @@ DX and migration tooling for a team ramping up fast; `prisma migrate diff` can p
 a schema-vs-migrations drift check (to be re-added to CI). Views/triggers it can't
 model are handled with raw-SQL migrations.
 
-### ADR-005 — Admin work during the pilot without a full panel
-**Decision:** the dashboard is a **skeleton** in Phase 1; real admin actions happen
-via seeded roles, Prisma Studio, and targeted scripts/endpoints as needed. **Why:**
-building a full admin panel now would dwarf the pilot's actual scope. The nav for the
-planned sections exists so the shape is agreed; pages fill in as stories land.
+### ADR-005 — A real backoffice, role-gated per page
+**Decision:** the dashboard is a full backoffice (events, news, partners, rewards,
+points, push, users, staff, support, audit log) whose pages are gated per role in
+`lib/dashboard-access.ts`. Originally a skeleton; superseded when the pilot went live.
 
 ### ADR-006 — TypeScript 5.9, not 7.0
 **Decision:** pin TypeScript `5.9.x`. **Why:** at scaffold time npm's `latest` for

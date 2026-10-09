@@ -1,0 +1,24 @@
+# Keep line endings stable across Windows/macOS/Linux. Deliberately minimal:
+# git decides text vs binary itself (text=auto); only files whose bytes matter
+# (shell scripts, SQL migrations whose checksums Prisma verifies) are pinned to LF.
+* text=auto
+*.sh text eol=lf
+*.sql text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.prisma text eol=lf
+bocconi-scraper/fixtures/** -text
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.p8 binary

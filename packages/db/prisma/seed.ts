@@ -10,6 +10,7 @@
 import { fileURLToPath } from "node:url";
 import { PrismaClient, Role, DiscountType, LedgerSource } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { assertSafeToSeed } from "./seed-guard";
 
 // Prisma 7 doesn't auto-load .env; load the web app's env, then build a client.
 process.loadEnvFile(fileURLToPath(new URL("../../../apps/web/.env", import.meta.url)));
@@ -21,6 +22,7 @@ const pooledUrl =
   process.env.STORAGE_DATABASE_URL ||
   process.env.STORAGE_POSTGRES_PRISMA_URL ||
   process.env.STORAGE_POSTGRES_URL;
+assertSafeToSeed(pooledUrl);
 const adapter = new PrismaPg(pooledUrl!);
 const prisma = new PrismaClient({ adapter });
 

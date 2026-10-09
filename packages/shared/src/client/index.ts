@@ -35,42 +35,79 @@ export interface ApiClientOptions {
   /**
    * Called when the server rejects the token we sent (401): the session was
    * revoked, the account deleted or the token expired. The app signs out.
+   * It receives the token that was rejected, so a late 401 from an earlier
+   * session can be told apart from the current one and ignored.
    */
-  onUnauthorized?: () => void;
+  onUnauthorized?: (sentToken: string) => void;
 }
 
 export interface ApiError extends Error {
+  /** HTTP status; 0 when no response arrived (timeout, no connection). */
   status: number;
+  /** Server error code, or TIMEOUT / NETWORK / BAD_RESPONSE raised by the client. */
   code?: string;
+  /** The x-request-id the server stamped on the response, for support and Sentry. */
+  requestId?: string;
 }
 
-/** Long enough for a cold server start; short enough that a dead connection surfaces. */
-const REQUEST_TIMEOUT_MS = 20_000;
+/** Per-call overrides. */
+export interface RequestOptions {
+  /** Abort after this long. Defaults: 10 s for GET, 20 s for anything that writes. */
+  timeoutMs?: number;
+}
 
-function makeError(status: number, code: string | undefined, message: string): ApiError {
+/** Reads fail fast so a dead connection shows Retry; the screens keep their last data. */
+export const GET_TIMEOUT_MS = 10_000;
+/** Writes may wait on a cold server or a third party (Eventbrite), and must not be repeated blindly. */
+export const WRITE_TIMEOUT_MS = 20_000;
+
+function makeError(
+  status: number,
+  code: string | undefined,
+  message: string,
+  requestId?: string,
+): ApiError {
   const err = new Error(message) as ApiError;
   err.name = "ApiError";
   err.status = status;
   err.code = code;
+  err.requestId = requestId;
   return err;
+}
+
+/**
+ * True when asking again could succeed: no answer at all, or a server-side
+ * failure. A 4xx will not change by repeating the request.
+ */
+export function isTransientError(error: unknown): boolean {
+  const status = (error as { status?: unknown } | null)?.status;
+  if (typeof status !== "number") return true; // not an ApiError: assume a network blip
+  return status === 0 || status >= 500;
 }
 
 export function createApiClient(options: ApiClientOptions) {
   const { baseUrl, getToken, onUnauthorized } = options;
 
-  async function request<T>(path: string, init?: RequestInit): Promise<{ data: T; res: Response }> {
+  async function request<T>(
+    path: string,
+    init?: RequestInit,
+    opts?: RequestOptions,
+  ): Promise<{ data: T; res: Response }> {
     const token = getToken?.();
     // fetch never gives up on a stalled connection (campus Wi-Fi handing over to
     // mobile data), which left spinners — and the first-login sheet — stuck for
-    // good. Abort after REQUEST_TIMEOUT_MS so callers get an error to retry on.
+    // good. Abort after the timeout so callers get an error to retry on.
+    const timeoutMs =
+      opts?.timeoutMs ?? (!init?.method || init.method === "GET" ? GET_TIMEOUT_MS : WRITE_TIMEOUT_MS);
     const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), REQUEST_TIMEOUT_MS);
+    const timer = setTimeout(() => abort.abort(), timeoutMs);
     let res: Response;
     let text: string;
     try {
       res = await fetch(new URL(path, baseUrl), {
-        signal: abort.signal,
         ...init,
+        // After the spread: a caller's signal must not switch the timeout off.
+        signal: abort.signal,
         // Bearer-only client: never send cookies. A stray session cookie (e.g. one
         // the platform auto-stored from a prior response) would trigger Better
         // Auth's origin check, which fails because RN fetch sends no Origin header.
@@ -84,21 +121,35 @@ export function createApiClient(options: ApiClientOptions) {
       text = await res.text();
     } catch (e) {
       if (abort.signal.aborted) throw makeError(0, "TIMEOUT", `ASTRA API timed out on ${path}`);
-      throw e;
+      // fetch rejects with a bare TypeError when there is no connection; give it
+      // the same shape as every other failure so callers can branch on status.
+      throw makeError(0, "NETWORK", e instanceof Error ? e.message : `Network error on ${path}`);
     } finally {
       clearTimeout(timer);
     }
-    const body = text ? (JSON.parse(text) as unknown) : undefined;
+    const requestId = res.headers.get("x-request-id") ?? undefined;
+    // Parsed inside a try: a gateway's HTML 502/429 page must still surface its
+    // status, not a SyntaxError that looks like a client bug.
+    let body: unknown;
+    let parsed = true;
+    if (text) {
+      try {
+        body = JSON.parse(text);
+      } catch {
+        parsed = false;
+      }
+    }
 
     if (!res.ok) {
       // Only when we actually sent a token: a 401 on the sign-in calls
       // themselves (no token yet) is just a wrong code or password.
-      if (res.status === 401 && token) onUnauthorized?.();
-      const b = body as
+      if (res.status === 401 && token) onUnauthorized?.(token);
+      const b = (parsed ? body : undefined) as
         { error?: { code?: string; message?: string }; message?: string } | undefined;
       const message = b?.error?.message ?? b?.message ?? `ASTRA API ${res.status} on ${path}`;
-      throw makeError(res.status, b?.error?.code, message);
+      throw makeError(res.status, b?.error?.code, message, requestId);
     }
+    if (!parsed) throw makeError(res.status, "BAD_RESPONSE", `ASTRA API sent non-JSON on ${path}`, requestId);
     return { data: body as T, res };
   }
 
@@ -194,8 +245,17 @@ export function createApiClient(options: ApiClientOptions) {
     points: {
       /** GET /api/points/balance — current spendable balance. */
       balance: async () => (await request<PointsBalanceResponse>("/api/points/balance")).data,
-      /** GET /api/points/history — recent ledger entries, newest first. */
-      history: async () => (await request<PointsHistoryResponse>("/api/points/history")).data,
+      /**
+       * GET /api/points/history — ledger entries, newest first. Pass the previous
+       * response's `nextCursor` as `cursor` to load older ones.
+       */
+      history: async (opts?: { cursor?: string | null; limit?: number }) => {
+        const qs = new URLSearchParams();
+        if (opts?.cursor) qs.set("cursor", opts.cursor);
+        if (opts?.limit) qs.set("limit", String(opts.limit));
+        const q = qs.toString();
+        return (await request<PointsHistoryResponse>(`/api/points/history${q ? `?${q}` : ""}`)).data;
+      },
     },
 
     card: {
@@ -213,7 +273,14 @@ export function createApiClient(options: ApiClientOptions) {
       list: async () => (await request<EventListResponse>("/api/events")).data,
       /** The ticket link for this student, with their in-app discount code if any. */
       ticketLink: async (id: string) =>
-        (await request<TicketLinkResponse>(`/api/events/${id}/ticket-link`, { method: "POST" })).data,
+        (
+          await request<TicketLinkResponse>(
+            `/api/events/${id}/ticket-link`,
+            { method: "POST" },
+            // Eventbrite is on the other end of this one; give it the full write budget.
+            { timeoutMs: WRITE_TIMEOUT_MS },
+          )
+        ).data,
     },
 
     rewards: {
@@ -224,7 +291,7 @@ export function createApiClient(options: ApiClientOptions) {
        * single-use voucher when the reward has a code pool, otherwise a
        * pending claim for staff to fulfil.
        */
-      redeem: async (rewardId: string) =>
+      redeem: async (rewardId: string, idempotencyKey?: string) =>
         (
           await request<{
             redemptionId: string;
@@ -232,12 +299,19 @@ export function createApiClient(options: ApiClientOptions) {
             status: "PENDING" | "FULFILLED" | "CANCELLED";
             costPoints: number;
             balance: number;
-          }>(`/api/rewards/${rewardId}/redeem`, { method: "POST" })
+          }>(`/api/rewards/${rewardId}/redeem`, {
+            method: "POST",
+            // The server may ignore it today; sending it means a retry after a
+            // timeout can be recognised as the same purchase once it doesn't.
+            headers: idempotencyKey ? { "idempotency-key": idempotencyKey } : undefined,
+          })
         ).data,
       /** GET /api/me/redemptions — the student's own vouchers. */
-      redemptions: async () =>
+      redemptions: async (opts?: { cursor?: string | null }) =>
         (
           await request<{
+            /** Pass as `cursor` for older vouchers; null at the end. */
+            nextCursor?: string | null;
             items: {
               id: string;
               pickupRef: string;
@@ -248,7 +322,7 @@ export function createApiClient(options: ApiClientOptions) {
               code: string | null;
               createdAt: string;
             }[];
-          }>("/api/me/redemptions")
+          }>(`/api/me/redemptions${opts?.cursor ? `?cursor=${encodeURIComponent(opts.cursor)}` : ""}`)
         ).data,
     },
 
@@ -294,27 +368,56 @@ export function createApiClient(options: ApiClientOptions) {
             body: JSON.stringify({ token, platform }),
           })
         ).data,
+      /**
+       * DELETE /api/push/register — detach this device's token from the account
+       * before signing out, so the next person on the phone doesn't get the
+       * previous student's notifications. Short timeout: sign-out must not hang.
+       */
+      unregister: async (token: string) =>
+        (
+          await request<{ ok: boolean }>(
+            "/api/push/register",
+            { method: "DELETE", body: JSON.stringify({ token }) },
+            { timeoutMs: 4_000 },
+          )
+        ).data,
     },
 
     classrooms: {
-      /** GET /api/classrooms — live Bocconi free-classroom availability (Free@B). */
-      list: async (params?: { time?: string; day?: string }) => {
+      /**
+       * GET /api/classrooms — free classrooms, computed from Bocconi's own
+       * room-assignment page. `day` is today | tomorrow | day-after (older app
+       * versions); `date` (YYYY-MM-DD) wins when both are given.
+       */
+      list: async (params?: { time?: string; day?: string; date?: string }) => {
         const qs = new URLSearchParams();
         if (params?.time) qs.set("time", params.time);
         if (params?.day) qs.set("day", params.day);
+        if (params?.date) qs.set("date", params.date);
         const q = qs.toString();
         return (
           await request<{
             rooms: {
               name: string;
               building: string;
+              floor?: string | null;
               status: "free" | "occupied";
+              /** Free: when the next slot starts; absent = free for the rest of the day. */
               freeUntil?: string;
+              /** Free inside an open "Aule studio" slot. */
               isStudyRoom?: boolean;
+              studyUntil?: string;
+              /** Occupied: when the current run of slots ends. */
+              occupiedUntil?: string;
             }[];
             freeRooms: number;
             totalRooms: number;
             timestamp: string | null;
+            /** The day (YYYY-MM-DD) and time (HH:MM) the answer is for, in Rome time. */
+            date?: string;
+            time?: string;
+            /** False when only the rooms seen on this day could be listed. */
+            complete?: boolean;
           }>(`/api/classrooms${q ? `?${q}` : ""}`)
         ).data;
       },
@@ -385,16 +488,6 @@ export function createApiClient(options: ApiClientOptions) {
         );
         // Bearer plugin returns the token in the `set-auth-token` header; the
         // body also carries it for email-otp sign-in. Prefer the header.
-        const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
-        return { token, user: data?.user ?? null };
-      },
-
-      /** DEV-ONLY bypass: sign in by username, no OTP. Server rejects in prod. */
-      devLogin: async (username: string) => {
-        const { data, res } = await request<{ token?: string; user?: MeResponse }>(
-          "/api/auth/dev-login",
-          { method: "POST", body: JSON.stringify({ username }) }
-        );
         const token = res.headers.get("set-auth-token") ?? data?.token ?? null;
         return { token, user: data?.user ?? null };
       },

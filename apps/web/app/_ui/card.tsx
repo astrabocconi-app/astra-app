@@ -65,7 +65,7 @@ export function StatCard({
         {value}
       </p>
       {hint && (
-        <p className={`mt-1 text-xs ${brand ? "text-white/60" : "text-gray-400"}`}>
+        <p className={`mt-1 text-xs ${brand ? "text-white/60" : "text-gray-500"}`}>
           {hint}
         </p>
       )}

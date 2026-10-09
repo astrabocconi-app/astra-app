@@ -16,6 +16,7 @@ type Tx = Prisma.TransactionClient;
  *     can't be hijacked into someone else's venue)
  *   - rows without an `id` are created
  *   - existing rows absent from the set are soft-deleted
+ *   - rows whose `id` is already soft-deleted are ignored, never brought back
  */
 export async function syncPartnerOffers(
   tx: Tx,
@@ -40,8 +41,9 @@ export async function syncPartnerOffers(
     if (o.id) {
       // updateMany (not update) so the partnerId scope is enforced in SQL.
       await tx.offer.updateMany({
-        where: { id: o.id, partnerId },
-        data: { ...data, active: true, deletedAt: null },
+        // deletedAt: null so a stale form cannot resurrect an offer another admin removed.
+        where: { id: o.id, partnerId, deletedAt: null },
+        data: { ...data, active: true },
       });
     } else {
       await tx.offer.create({ data: { ...data, partnerId } });

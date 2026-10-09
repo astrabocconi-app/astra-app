@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { PrismaClient, Role } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { assertSafeToSeed } from "./seed-guard";
 
 process.loadEnvFile(fileURLToPath(new URL("../../../apps/web/.env", import.meta.url)));
 
@@ -14,6 +15,7 @@ const pooledUrl =
   process.env.POSTGRES_PRISMA_URL ||
   process.env.POSTGRES_URL ||
   process.env.STORAGE_DATABASE_URL;
+assertSafeToSeed(pooledUrl);
 const prisma = new PrismaClient({ adapter: new PrismaPg(pooledUrl!) });
 
 // Must match verifyPassword() in apps/web/lib/partner.ts (scrypt, salt:hash).

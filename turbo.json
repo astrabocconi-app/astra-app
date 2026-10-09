@@ -7,18 +7,36 @@
   "globalPassThroughEnv": [
     "DATABASE_URL",
     "DIRECT_URL",
+    "STORAGE_DATABASE_URL",
+    "STORAGE_DATABASE_URL_UNPOOLED",
+    "STORAGE_POSTGRES_URL",
+    "STORAGE_POSTGRES_PRISMA_URL",
+    "STORAGE_POSTGRES_URL_NON_POOLING",
     "BETTER_AUTH_SECRET",
     "BETTER_AUTH_URL",
-    "RESEND_API_KEY",
-    "R2_ACCOUNT_ID",
-    "R2_ACCESS_KEY_ID",
-    "R2_SECRET_ACCESS_KEY",
-    "R2_BUCKET",
     "CARD_TOKEN_HMAC_SECRET",
-    "SENTRY_DSN",
-    "ALLOWED_EMAIL_DOMAIN"
+    "ALLOWED_EMAIL_DOMAINS",
+    "MOBILE_ALLOWED_ORIGINS",
+    "CRON_SECRET",
+    "CHAT_ENABLED",
+    "SIGNUP_TOMBSTONE_SECRET",
+    "OPENAI_API_KEY",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_SECURE",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "SMTP_USER_2",
+    "SMTP_PASS_2",
+    "SUPABASE_URL",
+    "SUPABASE_SECRET_KEY",
+    "VERCEL_URL",
+    "VERCEL_PROJECT_PRODUCTION_URL"
   ],
   "tasks": {
+    "@astra/db#generate": {
+      "cache": false
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
@@ -31,7 +49,7 @@
       "dependsOn": ["^build"]
     },
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "@astra/db#generate"]
     },
     "test": {
       "dependsOn": ["^build"]

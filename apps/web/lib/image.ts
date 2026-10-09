@@ -36,7 +36,13 @@ function toBytes(buf: Buffer): Uint8Array<ArrayBuffer> {
  * GIFs are passed through untouched — re-encoding would drop the animation.
  */
 export async function optimizeImage(input: Buffer, mimeType: string): Promise<OptimizedImage> {
-  if (mimeType === "image/gif") return { data: toBytes(input), mimeType };
+  if (mimeType === "image/gif") {
+    // Passed through untouched, so prove it IS a GIF (and a readable one) rather
+    // than trusting the client-declared type for bytes served back as-is.
+    const meta = await sharp(input, { failOn: "none" }).metadata();
+    if (meta.format !== "gif") throw new Error("Not a GIF.");
+    return { data: toBytes(input), mimeType };
+  }
 
   const pipeline = sharp(input, { failOn: "none" })
     .rotate() // honour EXIF orientation before we strip the metadata

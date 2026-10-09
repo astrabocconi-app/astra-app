@@ -4,7 +4,8 @@ export const en = {
   "card.loadError": "Couldn't load your card.",
   "card.memberFallback": "Member",
   "card.autoRefresh": "Refreshes automatically, no need to screenshot",
-  "card.worksOffline": "Works offline",
+  "card.stale": "Reconnect to refresh your card",
+  "card.qrLabel": "Your ASTRA card QR code",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -13,5 +14,6 @@ export const it: Record<keyof typeof en, string> = {
   "card.loadError": "Impossibile caricare la tua tessera.",
   "card.memberFallback": "Socio",
   "card.autoRefresh": "Si aggiorna automaticamente, non serve fare uno screenshot",
-  "card.worksOffline": "Funziona anche offline",
+  "card.stale": "Riconnettiti per aggiornare la tessera",
+  "card.qrLabel": "Codice QR della tua tessera ASTRA",
 };

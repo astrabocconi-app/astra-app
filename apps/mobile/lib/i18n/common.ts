@@ -10,6 +10,11 @@ export const en = {
   "common.back": "Back",
   "common.close": "Close",
   "common.or": "or",
+  "common.crashTitle": "Something went wrong",
+  "common.crashBody": "The screen hit an unexpected problem. Reloading usually fixes it.",
+  "common.reload": "Reload",
+  "common.misconfigured": "This version of ASTRA is not set up correctly. Please update the app from the App Store.",
+  "common.dismiss": "Dismiss",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -24,4 +29,9 @@ export const it: Record<keyof typeof en, string> = {
   "common.back": "Indietro",
   "common.close": "Chiudi",
   "common.or": "o",
+  "common.crashTitle": "Qualcosa è andato storto",
+  "common.crashBody": "La schermata ha avuto un problema imprevisto. Di solito basta ricaricarla.",
+  "common.reload": "Ricarica",
+  "common.misconfigured": "Questa versione di ASTRA non è configurata correttamente. Aggiorna l'app dall'App Store.",
+  "common.dismiss": "Chiudi",
 };

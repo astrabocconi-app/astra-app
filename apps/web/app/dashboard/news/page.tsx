@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { prisma } from "@astra/db";
 import { PageHeader } from "@/app/_ui/page-header";
-import { Button } from "@/app/_ui/button";
+import { ButtonLink } from "@/app/_ui/button";
+import { requireDashboardPage } from "../_lib/session";
 import { Badge } from "@/app/_ui/badge";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { NewspaperIcon, PlusIcon, ChevronRightIcon } from "@/app/_ui/icons";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "News" };
+
 export default async function NewsListPage() {
+  await requireDashboardPage("news");
   const rows = await prisma.newsPost.findMany({
     where: { deletedAt: null },
     orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
@@ -20,11 +24,9 @@ export default async function NewsListPage() {
         title="News"
         subtitle="Announcements shown in the app feed."
         actions={
-          <Link href="/dashboard/news/new">
-            <Button>
-              <PlusIcon size={18} /> New post
-            </Button>
-          </Link>
+          <ButtonLink href="/dashboard/news/new">
+            <PlusIcon size={18} /> New post
+          </ButtonLink>
         }
       />
 
@@ -34,11 +36,9 @@ export default async function NewsListPage() {
           title="No news yet"
           description="Publish your first announcement — it appears instantly in the app feed."
           action={
-            <Link href="/dashboard/news/new">
-              <Button>
-                <PlusIcon size={18} /> New post
-              </Button>
-            </Link>
+            <ButtonLink href="/dashboard/news/new">
+              <PlusIcon size={18} /> New post
+            </ButtonLink>
           }
         />
       ) : (

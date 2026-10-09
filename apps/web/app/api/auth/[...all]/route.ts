@@ -7,7 +7,10 @@
 
 import { toNextJsHandler } from "better-auth/next-js";
 import { auth } from "@/lib/auth";
+import { withApi } from "@/lib/api";
 
 export const runtime = "nodejs";
 
-export const { GET, POST } = toNextJsHandler(auth);
+const handlers = toNextJsHandler(auth);
+export const GET = withApi(handlers.GET);
+export const POST = withApi(handlers.POST);

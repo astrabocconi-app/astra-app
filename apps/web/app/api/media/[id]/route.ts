@@ -1,10 +1,11 @@
 import { prisma } from "@astra/db";
+import { withApi } from "@/lib/api";
 
 export const runtime = "nodejs";
 
 // GET /api/media/:id — serve stored image bytes. Public (referenced by an
 // unguessable cuid); immutable + long-cached.
-export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handleGet(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const asset = await prisma.imageAsset.findUnique({
     where: { id },
@@ -22,3 +23,5 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     },
   });
 }
+
+export const GET = withApi(handleGet);

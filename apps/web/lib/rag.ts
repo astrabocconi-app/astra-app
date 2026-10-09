@@ -34,7 +34,7 @@ const FREEB_PASSAGE = `The ASTRA app has a built-in tool called Free@B — "Find
 
 let client: OpenAI | null = null;
 function openai(): OpenAI {
-  if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 1 });
   return client;
 }
 

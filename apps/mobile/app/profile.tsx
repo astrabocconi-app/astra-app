@@ -1,36 +1,37 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   View,
-  Text,
   Pressable,
   Modal,
   ScrollView,
   Alert,
   StyleSheet,
   KeyboardAvoidingView,
-  Platform,
 } from "react-native";
+import { Text } from "../components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import type { MeResponse } from "@astra/shared";
+import type { AcademicCatalogueResponse, MeResponse } from "@astra/shared";
 import { Icon, Spinner } from "../components/Icon";
 import { NavRow } from "../components/NavRow";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { EmptyState } from "../components/EmptyState";
 import { SegmentedToggle } from "../components/SegmentedToggle";
 import { api } from "../lib/api";
-import { clearToken } from "../lib/session";
+import { signOutAndReset } from "../lib/sign-out";
 import { sendTestNotification } from "../lib/push";
-import { clearLegacyAcademicProfile, loadLegacyAcademicProfile } from "../lib/profile-store";
+import { alertAfterModal } from "../lib/alert";
+import { announce } from "../lib/use-reduced-motion";
 import { useLanguageStore } from "../lib/language-store";
 import { useT } from "../lib/i18n";
 import { TextField } from "../components/TextField";
 import { ProfileIdentity } from "../components/ProfileEditors";
 
 type Picker = "programme" | "track" | "year" | "class" | null;
+type Programme = AcademicCatalogueResponse["programmes"][number];
 
-/** Sentinel row in the track/class sheets — both are optional, so both clear. */
+/** Sentinel row in the class sheet — class is optional, so it can be cleared. */
 const CLEAR = "__clear__";
 
 /** Programme sheet sections, in the order a student scans for theirs. */
@@ -41,6 +42,11 @@ const LEVEL_SECTIONS = [
 ] as const;
 
 type SheetRow = { header: string } | { value: string; label: string; sub?: string };
+
+/** Tracks a student of `year` can already choose (BIEF splits into Economics / Finance in year 2). */
+const tracksOpenAt = (p: Programme | undefined | null, year: number) =>
+  // `?? 1`: an API from before fromYear existed sends tracks without it.
+  p?.tracks.filter((item) => (item.fromYear ?? 1) <= year) ?? [];
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -58,43 +64,16 @@ export default function ProfileScreen() {
   const [picker, setPicker] = useState<Picker>(null);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const migrationStarted = useRef(false);
+  // A programme or year change that needs a track the student has not chosen
+  // yet. Nothing is saved until they do: the server refuses a profile without
+  // one (TRACK_REQUIRED), and half a change must not be written.
+  const [draft, setDraft] = useState<{ programme: Programme; year: number } | null>(null);
 
-  // One-time migration from the former SecureStore-only course/year selection.
-  useEffect(() => {
-    if (migrationStarted.current || !data || data.academicProfile || !catalogue.data) {
-      return;
-    }
-    migrationStarted.current = true;
-    void (async () => {
-      const legacy = await loadLegacyAcademicProfile();
-      const programme = catalogue.data.programmes.find(
-        (item) =>
-          item.code === legacy.programmeCode ||
-          item.name === legacy.programmeCode ||
-          legacy.programmeCode?.includes(item.name)
-      );
-      if (!programme) return;
-      await api.academic.updateProfile({
-        programmeId: programme.id,
-        studyYear: Math.min(legacy.studyYear ?? 1, programme.durationYears),
-        trackId: null,
-        classGroupId: null,
-      });
-      await clearLegacyAcademicProfile();
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["me"] }),
-        queryClient.invalidateQueries({ queryKey: ["materials"] }),
-      ]);
-    })().catch(() => {
-      migrationStarted.current = false;
-    });
-  }, [catalogue.data, data, queryClient]);
-
-  async function signOut() {
-    await clearToken();
-    queryClient.clear();
-    router.replace("/");
+  /**
+   * Signing out and deleting end the same way: a full reset, then the login.
+   */
+  function signOut() {
+    void signOutAndReset();
   }
 
   /**
@@ -128,10 +107,9 @@ export default function ProfileScreen() {
     setDeleting(true);
     try {
       await api.deleteAccount();
-      // The account is gone; drop the token and every cached response with it.
-      await clearToken();
-      queryClient.clear();
-      router.replace("/");
+      // The account is gone; drop the token, every cached response and
+      // everything saved on this phone with it.
+      await signOutAndReset({ serverKnowsUs: false });
     } catch {
       setDeleting(false);
       Alert.alert(
@@ -145,11 +123,11 @@ export default function ProfileScreen() {
   const selectedProgramme = catalogue.data?.programmes.find(
     (item) => item.id === academic?.programme.id
   );
-  // Tracks only open from a given year (BIEF splits into Economics / Finance
-  // in year 2), so the sheet and the row only offer what fits the year.
   const studyYear = academic?.studyYear ?? 1;
-  // `?? 1`: an API from before fromYear existed sends tracks without it.
-  const tracksForYear = selectedProgramme?.tracks.filter((item) => (item.fromYear ?? 1) <= studyYear) ?? [];
+  // What the track/year/class sheets are about: the change in progress, or the saved selection.
+  const activeProgramme = draft?.programme ?? selectedProgramme;
+  const activeYear = draft?.year ?? studyYear;
+  const tracksForYear = tracksOpenAt(selectedProgramme, studyYear);
 
   function programmeRows(): SheetRow[] {
     const q = search.trim().toLowerCase();
@@ -180,12 +158,10 @@ export default function ProfileScreen() {
     picker === "programme"
       ? programmeRows()
       : picker === "track"
-        ? [
-            { value: CLEAR, label: t("profile.noTrack") },
-            ...tracksForYear.map((item) => ({ value: item.id, label: item.name, sub: item.code })),
-          ]
+        ? // Required when one is open, so there is no "no track" row.
+          tracksOpenAt(activeProgramme, activeYear).map((item) => ({ value: item.id, label: item.name, sub: item.code }))
       : picker === "year"
-        ? Array.from({ length: selectedProgramme?.durationYears ?? 0 }, (_, index) => ({
+        ? Array.from({ length: activeProgramme?.durationYears ?? 0 }, (_, index) => ({
             value: String(index + 1),
             label: `${t("profile.year")} ${index + 1}`,
           }))
@@ -198,69 +174,27 @@ export default function ProfileScreen() {
           ];
   const currentValue =
     picker === "programme"
-      ? academic?.programme.id
+      ? (draft?.programme.id ?? academic?.programme.id)
       : picker === "track"
-        ? (academic?.track?.id ?? CLEAR)
+        ? academic?.track?.id
       : picker === "year"
-        ? String(academic?.studyYear ?? "")
+        ? String(draft?.year ?? academic?.studyYear ?? "")
         : (academic?.classGroup?.id ?? CLEAR);
 
   function closePicker() {
     setPicker(null);
     setSearch("");
+    setDraft(null);
   }
 
-  async function choose(value: string) {
+  /** Paint the new selection at once, save it, and put the old one back if the save fails. */
+  async function commit(programme: Programme, year: number, trackId: string | null, classGroupId: string | null) {
     if (!catalogue.data) return;
-    const current = picker;
-    const programme =
-      current === "programme"
-        ? catalogue.data.programmes.find((item) => item.id === value)
-        : selectedProgramme;
-    if (!programme) return;
-
-    // Changing programme invalidates the track and class, which belong to it.
-    const cleared = value === CLEAR;
-    const nextYear =
-      current === "year"
-        ? Number(value)
-        : Math.min(academic?.studyYear ?? 1, programme.durationYears);
-    const keptTrack = programme.tracks.find((item) => item.id === academic?.track?.id);
-    const nextTrackId =
-      current === "track"
-        ? (cleared ? null : value)
-        : current === "programme"
-          ? null
-          : // A year change can land before the track opens; drop it then.
-            keptTrack && (keptTrack.fromYear ?? 1) <= nextYear
-            ? keptTrack.id
-            : null;
-    const nextClassId =
-      current === "class"
-        ? (cleared ? null : value)
-        : current === "programme"
-          ? null
-          : (academic?.classGroup?.id ?? null);
-
-    // Move on first. Waiting for the write and the refetches before dismissing
-    // made the sheet sit there for seconds and feel broken. Picking a programme
-    // leads straight to the year, and a year that opens tracks leads to the
-    // track, so a new student fills the whole thing in one go.
-    const tracksOpen = programme.tracks.some((item) => (item.fromYear ?? 1) <= nextYear);
-    setSearch("");
-    setPicker(
-      current === "programme"
-        ? "year"
-        : current === "year" && tracksOpen && !nextTrackId
-          ? "track"
-          : null
-    );
-
-    // Then paint the new selection immediately. Without this the row kept
-    // showing the OLD value until the refetch came back — you tapped "Year 2"
-    // and the row still said "Year 1" for a beat, which is what made these
-    // pickers feel broken. The write is confirmed by the refetch below.
     const previous = queryClient.getQueryData<MeResponse>(["me"]);
+    // Paint first. Without this the row kept showing the OLD value until the
+    // refetch came back — you tapped "Year 2" and the row still said "Year 1"
+    // for a beat, which is what made these pickers feel broken. The write is
+    // confirmed by the refetch below.
     const { tracks, classGroups, ...programmeSummary } = programme;
     queryClient.setQueryData<MeResponse>(["me"], (old) =>
       old
@@ -274,36 +208,90 @@ export default function ProfileScreen() {
                 version: catalogue.data.version,
                 sourceUrl: catalogue.data.sourceUrl,
               },
-              studyYear: nextYear,
-              track: tracks.find((item) => item.id === nextTrackId) ?? null,
-              classGroup: classGroups.find((item) => item.id === nextClassId) ?? null,
+              studyYear: year,
+              track: tracks.find((item) => item.id === trackId) ?? null,
+              classGroup: classGroups.find((item) => item.id === classGroupId) ?? null,
               updatedAt: new Date().toISOString(),
             },
           }
         : old,
     );
-
     try {
-      await api.academic.updateProfile({
-        programmeId: programme.id,
-        studyYear: nextYear,
-        trackId: nextTrackId,
-        classGroupId: nextClassId,
-      });
+      await api.academic.updateProfile({ programmeId: programme.id, studyYear: year, trackId, classGroupId });
+      announce(t("profile.saved"));
     } catch {
       // Put the old selection back rather than leaving a value on screen that
-      // was never actually saved.
+      // was never actually saved. The sheet that started this is still fading
+      // out, so the alert waits for it.
       if (previous) queryClient.setQueryData(["me"], previous);
-      Alert.alert(
-        t("profile.saveFailedTitle"),
-        t("profile.saveFailedBody"),
-      );
+      alertAfterModal(t("profile.saveFailedTitle"), t("profile.saveFailedBody"));
     } finally {
       // Refresh in the background — the sheet is already gone.
       void queryClient.invalidateQueries({ queryKey: ["me"] });
       void queryClient.invalidateQueries({ queryKey: ["materials"] });
     }
   }
+
+  function choose(value: string) {
+    if (!catalogue.data) return;
+    setSearch("");
+
+    if (picker === "programme") {
+      const programme = catalogue.data.programmes.find((item) => item.id === value);
+      if (!programme) return;
+      // The track and class belong to the old programme, so they go; the year stays when it still exists.
+      const year = Math.min(academic?.studyYear ?? 1, programme.durationYears);
+      if (tracksOpenAt(programme, year).length) {
+        // Needs a track: ask for the year, then the track, and save once.
+        setDraft({ programme, year });
+      } else {
+        void commit(programme, year, null, null);
+      }
+      // Picking a programme leads straight to the year.
+      setPicker("year");
+      return;
+    }
+
+    const programme = activeProgramme;
+    if (!programme) return;
+
+    if (picker === "year") {
+      const year = Number(value);
+      const keptTrack = programme.tracks.find((item) => item.id === (draft ? null : academic?.track?.id));
+      const tracks = tracksOpenAt(programme, year);
+      if (tracks.length && !(keptTrack && (keptTrack.fromYear ?? 1) <= year)) {
+        // A year that opens tracks leads to the track.
+        setDraft({ programme, year });
+        setPicker("track");
+        return;
+      }
+      setDraft(null);
+      setPicker(null);
+      void commit(programme, year, tracks.length ? (keptTrack?.id ?? null) : null, draft ? null : (academic?.classGroup?.id ?? null));
+      return;
+    }
+
+    if (picker === "track") {
+      const year = draft?.year ?? studyYear;
+      setDraft(null);
+      setPicker(null);
+      void commit(programme, year, value, draft ? null : (academic?.classGroup?.id ?? null));
+      return;
+    }
+
+    // class
+    setPicker(null);
+    void commit(programme, studyYear, academic?.track?.id ?? null, value === CLEAR ? null : value);
+  }
+
+  const sheetTitle =
+    picker === "programme"
+      ? t("profile.selectProgramme")
+      : picker === "track"
+        ? t("profile.selectTrack")
+        : picker === "year"
+          ? t("profile.selectYear")
+          : t("profile.selectClass");
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
@@ -315,12 +303,23 @@ export default function ProfileScreen() {
         <View className="flex-1 items-center justify-center">
           <Spinner />
         </View>
-      ) : error || !data ? (
-        <EmptyState
-          icon="cloud-offline-outline"
-          title={t("common.error")}
-          action={{ label: t("common.retry"), onPress: () => refetch() }}
-        />
+      ) : (error && !data) || !data ? (
+        <View className="flex-1">
+          <EmptyState
+            icon="cloud-offline-outline"
+            title={t("common.error")}
+            action={{ label: t("common.retry"), onPress: () => refetch() }}
+          />
+          {/* A profile that will not load must not be a dead end: signing out has to stay reachable. */}
+          <Pressable
+            onPress={signOut}
+            accessibilityRole="button"
+            className="mb-6 min-h-[44px] items-center justify-center self-center px-6"
+            style={{ marginBottom: insets.bottom + 16 }}
+          >
+            <Text chrome className="font-semibold text-red-700 dark:text-red-300">{t("common.signOut")}</Text>
+          </Pressable>
+        </View>
       ) : (
         <ScrollView
           className="flex-1"
@@ -331,7 +330,7 @@ export default function ProfileScreen() {
             subtitle={
               // Programme · year · class shown next to the name once selected
               academic ? (
-                <Text className="text-sm text-gray-500 dark:text-gray-300">
+                <Text className="text-center text-sm text-gray-600 dark:text-gray-300">
                   {[
                     academic.programme.code,
                     academic.track?.code,
@@ -342,13 +341,13 @@ export default function ProfileScreen() {
                     .join(" · ")}
                 </Text>
               ) : (
-                <Text className="text-sm text-gray-400 dark:text-white/60">{t("profile.addAcademicInfo")}</Text>
+                <Text className="text-center text-sm text-gray-600 dark:text-white/70">{t("profile.addAcademicInfo")}</Text>
               )
             }
           />
 
           {/* Academic selection drives Materials. */}
-          <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
+          <Text accessibilityRole="header" className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-white/70">
             {t("profile.academic")}
           </Text>
           <View className="gap-2">
@@ -400,7 +399,7 @@ export default function ProfileScreen() {
           </View>
 
           {/* Services */}
-          <Text className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60">
+          <Text accessibilityRole="header" className="mt-8 mb-2 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-white/70">
             {t("profile.services")}
           </Text>
           <View className="gap-2">
@@ -428,12 +427,12 @@ export default function ProfileScreen() {
                 </View>
                 <View className="flex-1">
                   <Text className="text-base font-semibold text-gray-900 dark:text-white">{t("profile.language")}</Text>
-                  <Text className="text-xs text-gray-500 dark:text-gray-300">{t("profile.languageSub")}</Text>
+                  <Text className="text-xs text-gray-600 dark:text-gray-300">{t("profile.languageSub")}</Text>
                 </View>
               </View>
               <SegmentedToggle
                 value={language}
-                onChange={setLanguage}
+                onChange={(l) => void setLanguage(l)}
                 options={[
                   { value: "it", label: t("profile.languageIt") },
                   { value: "en", label: t("profile.languageEn") },
@@ -445,12 +444,12 @@ export default function ProfileScreen() {
           <View className="flex-1" />
 
           <Pressable
-            className="mt-8 flex-row items-center justify-center gap-2 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary py-3.5 active:bg-gray-50 dark:active:bg-white/5"
+            className="mt-8 min-h-[48px] flex-row items-center justify-center gap-2 rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary py-3.5 active:bg-gray-50 dark:active:bg-white/5"
             onPress={signOut}
             accessibilityRole="button"
           >
-            <Icon name="log-out-outline" size={18} color="#DC2626" />
-            <Text className="text-center font-semibold text-red-600 dark:text-red-300">{t("common.signOut")}</Text>
+            <Icon name="log-out-outline" size={18} color="#B91C1C" />
+            <Text chrome className="text-center font-semibold text-red-700 dark:text-red-300">{t("common.signOut")}</Text>
           </Pressable>
 
           {/* Account deletion has to be reachable from inside the app (App Store
@@ -458,18 +457,17 @@ export default function ProfileScreen() {
               reads as the deliberate, rarely-wanted action it is. */}
           <Pressable
             disabled={deleting}
-            className="mt-4 items-center py-2 active:opacity-60"
+            className="mt-4 min-h-[44px] flex-row items-center justify-center gap-2 py-2 active:opacity-60"
             style={{ marginBottom: insets.bottom + 16 }}
             onPress={confirmDelete}
             accessibilityRole="button"
+            accessibilityLabel={t("profile.deleteAccount")}
+            accessibilityState={{ disabled: deleting, busy: deleting }}
           >
-            {deleting ? (
-              <Spinner color="#DC2626" />
-            ) : (
-              <Text className="text-sm font-medium text-red-600 dark:text-red-300">
-                {t("profile.deleteAccount")}
-              </Text>
-            )}
+            {deleting ? <Spinner color="#B91C1C" /> : null}
+            <Text chrome className="text-sm font-medium text-red-700 dark:text-red-300">
+              {t("profile.deleteAccount")}
+            </Text>
           </Pressable>
         </ScrollView>
       )}
@@ -481,8 +479,9 @@ export default function ProfileScreen() {
         animationType="fade"
         onRequestClose={closePicker}
       >
-        {/* Keeps the search field and the results above the keyboard. */}
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+        {/* Keeps the search field and the results above the keyboard ("padding" on
+            Android too: edge-to-edge windows are not resized for it). */}
+        <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }} accessibilityViewIsModal>
           {/* Backdrop is a SIBLING behind the sheet, not its parent: nesting the
               sheet inside a Pressable meant the parent intercepted taps and the
               options often didn't register. */}
@@ -491,28 +490,25 @@ export default function ProfileScreen() {
               style={StyleSheet.absoluteFill}
               className="bg-black/40"
               onPress={closePicker}
+              accessibilityRole="button"
+              accessibilityLabel={t("common.close")}
             />
             <View
               className="rounded-t-3xl bg-white dark:bg-astra-primary pt-3"
               style={{ maxHeight: picker === "programme" ? "88%" : "70%", paddingBottom: insets.bottom + 12 }}
             >
-              <Text className="px-5 pb-2 text-lg font-semibold text-gray-900 dark:text-white">
-                {picker === "programme"
-                  ? t("profile.selectProgramme")
-                  : picker === "track"
-                    ? t("profile.selectTrack")
-                  : picker === "year"
-                    ? t("profile.selectYear")
-                    : t("profile.selectClass")}
+              <Text accessibilityRole="header" className="px-5 pb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                {sheetTitle}
               </Text>
               {picker === "programme" && (
-                <View className="mx-5 mb-2 flex-row items-center gap-2 rounded-xl bg-gray-100 dark:bg-white/10 px-3">
-                  <Icon name="search" size={16} color="#9CA3AF" />
+                <View className="mx-5 mb-2 min-h-[44px] flex-row items-center gap-2 rounded-xl bg-gray-100 dark:bg-white/10 px-3">
+                  <Icon name="search" size={16} color="#6B7280" />
                   <TextField
                     value={search}
                     onChangeText={setSearch}
                     placeholder={t("profile.searchProgramme")}
-                    placeholderTextColor="#9CA3AF"
+                    accessibilityLabel={t("profile.searchProgramme")}
+                    placeholderTextColor="#6B7280"
                     autoCorrect={false}
                     autoCapitalize="none"
                     clearButtonMode="while-editing"
@@ -520,16 +516,17 @@ export default function ProfileScreen() {
                   />
                 </View>
               )}
-              <ScrollView keyboardShouldPersistTaps="handled">
+              <ScrollView keyboardShouldPersistTaps="handled" accessibilityRole={picker === "programme" ? undefined : "radiogroup"}>
                 {picker === "programme" && pickerOptions.length === 0 && (
-                  <Text className="px-5 py-6 text-center text-gray-400 dark:text-white/60">{t("profile.noResults")}</Text>
+                  <Text className="px-5 py-6 text-center text-gray-600 dark:text-white/70">{t("profile.noResults")}</Text>
                 )}
                 {pickerOptions.map((opt) => {
                   if ("header" in opt) {
                     return (
                       <Text
                         key={`h-${opt.header}`}
-                        className="px-5 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-white/60"
+                        accessibilityRole="header"
+                        className="px-5 pb-1 pt-4 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-white/70"
                       >
                         {opt.header}
                       </Text>
@@ -539,8 +536,10 @@ export default function ProfileScreen() {
                   return (
                     <Pressable
                       key={opt.value}
-                      className="flex-row items-center justify-between px-5 py-3.5 active:bg-gray-50 dark:active:bg-white/5"
+                      className="min-h-[52px] flex-row items-center justify-between px-5 py-3.5 active:bg-gray-50 dark:active:bg-white/5"
                       onPress={() => choose(opt.value)}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected, checked: selected }}
                     >
                       <View className="flex-1 pr-3">
                         <Text
@@ -549,7 +548,7 @@ export default function ProfileScreen() {
                           {opt.label}
                         </Text>
                         {opt.sub ? (
-                          <Text className="text-[13px] text-gray-500 dark:text-gray-300" numberOfLines={2}>
+                          <Text className="text-[13px] text-gray-600 dark:text-gray-300" numberOfLines={3}>
                             {opt.sub}
                           </Text>
                         ) : null}

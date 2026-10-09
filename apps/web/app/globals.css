@@ -48,3 +48,22 @@ body {
 .astra-fade-up {
   animation: astra-fade-up 0.35s ease-out both;
 }
+
+/* Placeholders stay legible (WCAG AA) rather than Tailwind's default light grey */
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280;
+}
+
+/* Respect "reduce motion": no entrance animation, no sliding toggles or chevrons.
+   Nothing depends on the motion to be usable. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

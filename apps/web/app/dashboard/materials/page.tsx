@@ -4,8 +4,10 @@ import { StatCard } from "@/app/_ui/card";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { BookIcon } from "@/app/_ui/icons";
 import { fetchMaterials, isConfigured } from "@/lib/materials";
+import { requireDashboardPage } from "../_lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Materials" };
 
 /**
  * Read-only view of the handout catalogue.
@@ -18,6 +20,7 @@ export const dynamic = "force-dynamic";
  * built, files are managed at astrabocconi.com/dispense.
  */
 export default async function MaterialsPage() {
+  await requireDashboardPage("materials");
   if (!isConfigured()) {
     return (
       <>
@@ -75,7 +78,7 @@ export default async function MaterialsPage() {
         >
           astrabocconi.com/dispense
         </a>
-        . Tell me if you want upload and delete built in here too.
+        .
       </p>
 
       {years.length === 0 ? (
@@ -90,16 +93,16 @@ export default async function MaterialsPage() {
             <section key={y.year} className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold text-gray-800">{y.year}</h2>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-500">
                   {y.count === 1 ? "1 file" : `${y.count} files`}
                 </span>
               </div>
-              <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-sm">
                 <table className="w-full text-sm">
                   <tbody className="divide-y divide-gray-100">
                     {y.subjects.map((s) => (
                       <tr key={`${y.year}-${s.subject}`} className="align-top">
-                        <td className="w-48 px-4 py-3">
+                        <td className="w-32 px-4 py-3 sm:w-48">
                           <Badge tone="neutral">{s.subject}</Badge>
                         </td>
                         <td className="px-4 py-3">
@@ -115,7 +118,7 @@ export default async function MaterialsPage() {
                                   {it.title.replace(/\.pdf$/i, "")}
                                 </a>
                                 {(it.semester || it.examType) && (
-                                  <span className="ml-2 text-xs text-gray-400">
+                                  <span className="ml-2 text-xs text-gray-500">
                                     {[it.examType, it.semester].filter(Boolean).join(" · ")}
                                   </span>
                                 )}

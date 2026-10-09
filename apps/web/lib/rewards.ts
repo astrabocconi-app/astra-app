@@ -8,6 +8,8 @@
 
 import { prisma, Prisma, LedgerSource, RedemptionStatus } from "@astra/db";
 import { pickupRef } from "./redemptions";
+import { emailHash } from "./email-hash";
+import { isWriteConflict } from "./tx";
 
 export class InsufficientPointsError extends Error {
   constructor(
@@ -47,19 +49,6 @@ export class PerUserLimitError extends Error {
   }
 }
 
-/**
- * Serializable transactions legitimately abort when two of them touch the same
- * rows — Postgres reports a write conflict and expects the caller to retry.
- * Without this, two students redeeming the same reward at the same instant both
- * got an opaque 500 even though the data was fine.
- */
-function isWriteConflict(e: unknown): boolean {
-  return (
-    e instanceof Prisma.PrismaClientKnownRequestError &&
-    (e.code === "P2034" || e.code === "P2028")
-  );
-}
-
 const MAX_ATTEMPTS = 5;
 
 export interface RedeemResult {
@@ -71,11 +60,26 @@ export interface RedeemResult {
   balance: number;
 }
 
-export async function redeemReward(userId: string, rewardId: string): Promise<RedeemResult> {
+export async function redeemReward(
+  userId: string,
+  rewardId: string,
+  /** The app's Idempotency-Key: a retry after a dropped response replays, not recharges. */
+  idempotencyKey?: string | null,
+): Promise<RedeemResult> {
+  const key = idempotencyKey?.trim() || null;
+  if (key) {
+    const replay = await findReplay(userId, rewardId, key);
+    if (replay) return replay;
+  }
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      return await attemptRedeem(userId, rewardId);
+      return await attemptRedeem(userId, rewardId, key);
     } catch (e) {
+      // Two requests with the same key raced: the other one won, return its result.
+      if (key && e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+        const replay = await findReplay(userId, rewardId, key);
+        if (replay) return replay;
+      }
       if (!isWriteConflict(e) || attempt === MAX_ATTEMPTS) throw e;
       // Back off a little, with jitter, so retries don't collide again.
       await new Promise((r) => setTimeout(r, attempt * 25 + Math.floor(Math.random() * 25)));
@@ -84,7 +88,25 @@ export async function redeemReward(userId: string, rewardId: string): Promise<Re
   throw new RedeemBusyError();
 }
 
-async function attemptRedeem(userId: string, rewardId: string): Promise<RedeemResult> {
+async function findReplay(userId: string, rewardId: string, key: string): Promise<RedeemResult | null> {
+  const row = await prisma.rewardRedemption.findUnique({
+    where: { userId_idempotencyKey: { userId, idempotencyKey: key } },
+  });
+  if (!row || row.rewardId !== rewardId) return null;
+  const rows = await prisma.$queryRaw<{ balance: bigint }[]>`
+    SELECT COALESCE(SUM("delta"), 0)::bigint AS balance
+    FROM "PointsLedgerEntry"
+    WHERE "userId" = ${userId} AND "kind" = 'POINTS'::"PointsKind"`;
+  return {
+    redemptionId: row.id,
+    code: row.code,
+    status: row.status,
+    costPoints: row.costPoints,
+    balance: Number(rows[0]?.balance ?? 0),
+  };
+}
+
+async function attemptRedeem(userId: string, rewardId: string, idempotencyKey: string | null): Promise<RedeemResult> {
   return prisma.$transaction(
     async (tx) => {
       const reward = await tx.reward.findFirst({
@@ -92,12 +114,21 @@ async function attemptRedeem(userId: string, rewardId: string): Promise<RedeemRe
       });
       if (!reward) throw new RewardUnavailableError();
 
-      // Per-account cap. Counted inside the Serializable transaction so a
+      // Per-person cap. Counted inside the Serializable transaction so a
       // student firing several redeems at once can't slip past it — the same
       // reason stock uses a conditional update rather than read-then-write.
+      // A cancelled (refunded) redemption does not use the allowance up, and
+      // redemptions made under an earlier, since-deleted account of the same
+      // person (same email hash) count: deleting and re-registering must not
+      // reset the limit.
       if (reward.perUserLimit !== null) {
+        const me = await tx.user.findUnique({ where: { id: userId }, select: { email: true } });
         const mine = await tx.rewardRedemption.count({
-          where: { userId, rewardId },
+          where: {
+            rewardId,
+            status: { not: RedemptionStatus.CANCELLED },
+            user: me ? { OR: [{ id: userId }, { emailHash: emailHash(me.email) }] } : { id: userId },
+          },
         });
         if (mine >= reward.perUserLimit) {
           throw new PerUserLimitError(reward.perUserLimit);
@@ -108,7 +139,7 @@ async function attemptRedeem(userId: string, rewardId: string): Promise<RedeemRe
       const rows = await tx.$queryRaw<{ balance: bigint }[]>`
         SELECT COALESCE(SUM("delta"), 0)::bigint AS balance
         FROM "PointsLedgerEntry"
-        WHERE "userId" = ${userId} AND "kind"::text = 'POINTS'`;
+        WHERE "userId" = ${userId} AND "kind" = 'POINTS'::"PointsKind"`;
       const balance = Number(rows[0]?.balance ?? 0);
       if (balance < reward.costPoints) {
         throw new InsufficientPointsError(balance, reward.costPoints);
@@ -160,6 +191,7 @@ async function attemptRedeem(userId: string, rewardId: string): Promise<RedeemRe
           fulfilledAt: voucher ? new Date() : null,
           code: voucher?.code ?? null,
           ledgerEntryId: spend.id,
+          idempotencyKey,
         },
       });
 
@@ -182,26 +214,37 @@ async function attemptRedeem(userId: string, rewardId: string): Promise<RedeemRe
   );
 }
 
-/** A student's own redemptions, newest first — the "your vouchers" list. */
-export async function listRedemptions(userId: string) {
+export const REDEMPTIONS_PAGE_SIZE = 50;
+
+/** A student's own redemptions, newest first — the "your vouchers" list, one page at a time. */
+export async function listRedemptions(
+  userId: string,
+  opts: { limit?: number; cursor?: string | null } = {},
+) {
+  const limit = Math.min(Math.max(opts.limit ?? REDEMPTIONS_PAGE_SIZE, 1), 100);
   const rows = await prisma.rewardRedemption.findMany({
     where: { userId },
-    orderBy: { createdAt: "desc" },
-    take: 50,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: limit + 1,
+    ...(opts.cursor ? { cursor: { id: opts.cursor }, skip: 1 } : {}),
     include: { reward: { select: { title: true } } },
   });
-  return rows.map((r) => ({
-    id: r.id,
-    // Short reference the student reads out at the desk; the backoffice shows
-    // the same one, derived from the id rather than stored.
-    pickupRef: pickupRef(r.id),
-    rewardId: r.rewardId,
-    rewardTitle: r.reward.title,
-    costPoints: r.costPoints,
-    status: r.status,
-    code: r.code,
-    createdAt: r.createdAt.toISOString(),
-  }));
+  const page = rows.slice(0, limit);
+  return {
+    items: page.map((r) => ({
+      id: r.id,
+      // Short reference the student reads out at the desk; the backoffice shows
+      // the same one, derived from the id rather than stored.
+      pickupRef: pickupRef(r.id),
+      rewardId: r.rewardId,
+      rewardTitle: r.reward.title,
+      costPoints: r.costPoints,
+      status: r.status,
+      code: r.code,
+      createdAt: r.createdAt.toISOString(),
+    })),
+    nextCursor: rows.length > limit ? page[page.length - 1]!.id : null,
+  };
 }
 
 /** How many vouchers a reward still has — surfaced in the dashboard. */

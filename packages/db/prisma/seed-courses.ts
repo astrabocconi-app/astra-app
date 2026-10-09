@@ -11,6 +11,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { assertSafeToSeed } from "./seed-guard";
 
 process.loadEnvFile(fileURLToPath(new URL("../../../apps/web/.env", import.meta.url)));
 
@@ -19,6 +20,7 @@ const pooledUrl =
   process.env.POSTGRES_PRISMA_URL ||
   process.env.POSTGRES_URL ||
   process.env.STORAGE_DATABASE_URL;
+assertSafeToSeed(pooledUrl);
 const prisma = new PrismaClient({ adapter: new PrismaPg(pooledUrl!) });
 
 const DEFAULT_JSON = fileURLToPath(

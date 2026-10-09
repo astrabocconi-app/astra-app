@@ -7,6 +7,7 @@ import { Card } from "@/app/_ui/card";
 import { Badge } from "@/app/_ui/badge";
 import { Field, Input, Select, Toggle } from "@/app/_ui/field";
 import { PlusIcon } from "@/app/_ui/icons";
+import { adminFetch, errorMessage } from "../_lib/admin-fetch";
 
 export interface PartnerOption {
   id: string;
@@ -20,19 +21,12 @@ export interface AccountRow {
   loginCode: string;
   label: string | null;
   scanOnly: boolean;
+  /** The venue was deleted but this login still exists: it should be revoked. */
+  venueDeleted: boolean;
 }
 
-async function send(path: string, method: string, body?: unknown) {
-  const res = await fetch(path, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message ?? "Something went wrong.");
-  return data;
-}
+const send = (path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown) =>
+  adminFetch(path, { method, body });
 
 /** Readable, typo-resistant on a phone keypad — no ambiguous 0/O or 1/l. */
 function suggestPassword(): string {
@@ -83,7 +77,7 @@ function NewAccountForm({
       setScanOnly(false);
       onDone();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't create the account.");
+      setError(errorMessage(e, "Couldn't create the account."));
     } finally {
       setSaving(false);
     }
@@ -118,7 +112,7 @@ function NewAccountForm({
     <Card className="flex flex-col gap-5">
       <div>
         <h2 className="text-sm font-semibold text-gray-800">New login</h2>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-500">
           A venue can have as many logins as it needs — one per till, per shift, however they work.
           Scans are recorded against the specific login that made them.
         </p>
@@ -140,6 +134,8 @@ function NewAccountForm({
             value={loginCode}
             onChange={(e) => setLoginCode(e.target.value)}
             placeholder="e.g. casadimichele-bar"
+            autoComplete="off"
+            autoCapitalize="none"
           />
         </Field>
         <Field label="Label" hint="Only to tell logins apart in this list.">
@@ -149,7 +145,7 @@ function NewAccountForm({
 
       <Field label="Password" required hint="At least 8 characters. Shown once after saving.">
         <div className="flex gap-2">
-          <Input value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Input value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
           <Button variant="secondary" onClick={() => setPassword(suggestPassword())}>
             Regenerate
           </Button>
@@ -163,7 +159,11 @@ function NewAccountForm({
         onChange={setScanOnly}
       />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       <div className="flex justify-end">
         <Button
@@ -191,13 +191,20 @@ function AccountRowItem({ account, onChanged }: { account: AccountRow; onChanged
       });
       onChanged();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't update.");
+      setError(errorMessage(e, "Couldn't update."));
     } finally {
       setBusy(false);
     }
   }
 
   async function resetPassword() {
+    if (
+      !confirm(
+        `Reset the password for "${account.loginCode}"? The current password stops working at once and anyone signed in with this login is signed out, so the venue needs the new password before their next scan.`,
+      )
+    ) {
+      return;
+    }
     const next = suggestPassword();
     setBusy(true);
     setError(null);
@@ -206,22 +213,28 @@ function AccountRowItem({ account, onChanged }: { account: AccountRow; onChanged
       setResetTo(next);
       onChanged();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't reset the password.");
+      setError(errorMessage(e, "Couldn't reset the password."));
     } finally {
       setBusy(false);
     }
   }
 
   async function remove() {
-    if (!confirm(`Revoke the login "${account.loginCode}"? Staff using it will be signed out.`)) {
+    if (
+      !confirm(
+        `Revoke the login "${account.loginCode}"? Staff using it are signed out and can't sign in again. You can create a new login with the same code afterwards.`,
+      )
+    ) {
       return;
     }
     setBusy(true);
+    setError(null);
     try {
       await send(`/api/admin/partner-accounts/${account.id}`, "DELETE");
       onChanged();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't revoke the login.");
+      setError(errorMessage(e, "Couldn't revoke the login."));
+    } finally {
       setBusy(false);
     }
   }
@@ -233,8 +246,10 @@ function AccountRowItem({ account, onChanged }: { account: AccountRow; onChanged
           <span className="font-mono font-medium text-gray-900">{account.loginCode}</span>
           {account.label && <span className="ml-2 text-sm text-gray-500">{account.label}</span>}
         </div>
+        {account.venueDeleted && <Badge tone="neutral">Venue deleted</Badge>}
         <AccessBadge scanOnly={account.scanOnly} />
         <button
+          type="button"
           onClick={toggleScanOnly}
           disabled={busy}
           className="text-xs font-medium text-astra-accent hover:text-astra-primary disabled:opacity-40"
@@ -242,6 +257,7 @@ function AccountRowItem({ account, onChanged }: { account: AccountRow; onChanged
           {account.scanOnly ? "Give full access" : "Make scan only"}
         </button>
         <button
+          type="button"
           onClick={resetPassword}
           disabled={busy}
           className="text-xs font-medium text-gray-500 hover:text-gray-700 disabled:opacity-40"
@@ -249,6 +265,7 @@ function AccountRowItem({ account, onChanged }: { account: AccountRow; onChanged
           Reset password
         </button>
         <button
+          type="button"
           onClick={remove}
           disabled={busy}
           className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-40"
@@ -262,7 +279,11 @@ function AccountRowItem({ account, onChanged }: { account: AccountRow; onChanged
           can&apos;t be shown again.
         </p>
       )}
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -299,13 +320,13 @@ export function PartnerAccountManager({
             <PlusIcon size={18} /> New login
           </Button>
           {partners.length === 0 && (
-            <p className="mt-2 text-xs text-gray-400">Add a partner venue first.</p>
+            <p className="mt-2 text-xs text-gray-500">Add a partner venue first.</p>
           )}
         </div>
       )}
 
       {accounts.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-sm text-gray-400">
+        <p className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-sm text-gray-500">
           No venue logins yet. Create one and hand the code and password to the venue.
         </p>
       ) : (
@@ -313,7 +334,7 @@ export function PartnerAccountManager({
           <section key={partnerId} className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between">
               <h2 className="text-sm font-semibold text-gray-800">{rows[0]!.partnerName}</h2>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-500">
                 {rows.length === 1 ? "1 login" : `${rows.length} logins`}
               </span>
             </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { toRewardItem, originFromRequest } from "@/lib/cms-map";
 
@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // GET /api/rewards — active catalog for the mobile rewards screen.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -24,3 +24,5 @@ export async function GET(req: Request) {
     { headers: { "x-request-id": requestId } },
   );
 }
+
+export const GET = withApi(handleGet);

@@ -54,18 +54,33 @@ Run these and make sure they pass — don't push red code onto `develop`:
 
 ```bash
 npm run format
-npm run lint && npm run typecheck && npm run build
+npm run ci          # typecheck + lint + unit tests, same as GitHub Actions
 ```
+
+Node 24 is required (`nvm use`).
+
+## Tests
+
+Unit tests use the built-in runner (`node --test --experimental-strip-types`), no
+framework. Put `*.test.mjs` next to the code: `apps/web/lib/*.test.mjs`,
+`packages/shared/src/*.test.mjs`, `apps/mobile/lib/**/*.test.mjs`. Run everything
+with `npm test`, one package with `npm test -w @astra/web`. Any change to logic with
+a branch, money, points, authorization or parsing leaves at least one test behind.
+Pure logic (calculators, token signing, time helpers) belongs in `@astra/shared` or a
+side-effect-free module so it can be tested without a database.
+
+Never run tests, seeds or scripts against the production database (see
+[`docs/SETUP.md`](docs/SETUP.md)).
 
 ## Going to production (Michele only)
 
 Contributors don't do this — it's here so you know what happens to your work.
 
 When `develop` is ready to ship, Michele opens a release PR (`develop → main`)
-and reviews it before merging. (Automated CI checks are not wired yet — the
-scaffold workflow was removed because it failed on the still-scaffolded apps; a
-working pipeline will be reintroduced once the apps build green. Until then, run
-the "Before you push" checks locally.)
+and reviews it before merging. GitHub Actions (the workflow in `docs/ci-workflow.yml`, once enabled — see docs/DEPLOY.md) runs
+typecheck, lint and tests on every push and pull request; it must be green. The
+release steps (web deploy, EAS build and submit, OTA, migrations) are in
+[`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Code rules (non-negotiable)
 

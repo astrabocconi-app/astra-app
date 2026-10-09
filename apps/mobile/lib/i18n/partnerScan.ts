@@ -13,6 +13,11 @@ export const en = {
   "partnerScan.whichOfferTitle": "Which offer?",
   "partnerScan.whichOfferBody": "Pick what this scan was for, so it counts towards the right promotion.",
   "partnerScan.noSpecificOffer": "No specific offer",
+  "partnerScan.errTooSoon": "This member already used the perk recently.",
+  "partnerScan.errInvalid": "Invalid or expired code. Ask the member to reopen their card.",
+  "partnerScan.errTimeout": "No answer from the server. It may have been awarded: check before scanning again.",
+  "partnerScan.openSettings": "Open Settings",
+  "partnerScan.offersError": "Couldn't load your offers",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -30,4 +35,9 @@ export const it: Record<keyof typeof en, string> = {
   "partnerScan.whichOfferTitle": "Quale offerta?",
   "partnerScan.whichOfferBody": "Scegli a cosa si riferisce questa scansione, così conta per la promozione giusta.",
   "partnerScan.noSpecificOffer": "Nessuna offerta specifica",
+  "partnerScan.errTooSoon": "Questo membro ha già usato il vantaggio di recente.",
+  "partnerScan.errInvalid": "Codice non valido o scaduto. Chiedi al membro di riaprire la tessera.",
+  "partnerScan.errTimeout": "Nessuna risposta dal server. Potrebbe essere stato assegnato: controlla prima di scansionare di nuovo.",
+  "partnerScan.openSettings": "Apri Impostazioni",
+  "partnerScan.offersError": "Impossibile caricare le offerte",
 };

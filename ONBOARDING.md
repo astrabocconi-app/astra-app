@@ -1,139 +1,136 @@
-# ASTRA — Developer Onboarding
+# ASTRA - Developer Onboarding
 
-Get the ASTRA app running locally in ~15 minutes. This covers the monorepo, the
-mobile app (Expo), and the web app + API. For the deep "why", see
-[`README.md`](README.md) and [`docs/`](docs/).
+Get the ASTRA app running locally. This covers the monorepo, the mobile app (Expo
+development build) and the web app + API. For the "why" see [`README.md`](README.md)
+and [`docs/`](docs/).
 
-> **Secrets are NOT in this file.** The `.env` files hold live dev credentials
-> (Neon DB, auth signing keys). Get them from the team lead via a **secure
-> channel** (shared password manager / encrypted DM) — never commit or paste
-> them in chat/email. `.env` files are gitignored on purpose.
+> **Secrets are NOT in this repo.** Real credentials live in Vercel and the EAS
+> project. Ask the team lead for access and never paste secrets in chat, e-mail
+> or commits. `.env*` files are gitignored on purpose (only `*.env.example` is
+> tracked).
 
 ---
 
 ## 1. Prerequisites
 
-- **Node ≥ 20** and **npm ≥ 10** (`node -v`, `npm -v`).
-- **Git** + access to the private repo `astrabocconi-app/astra-app`.
-- **To run the mobile app on the iOS Simulator (macOS):** the **full Xcode** app
-  (Mac App Store) — the Command Line Tools alone are not enough. See §5.
-- **To run on a physical phone:** the **Expo Go** app (App Store / Play Store).
+- **Node 24** (`nvm use` reads `.nvmrc`) and **npm 11**. Older Node does not work: the
+  tests rely on `node --test --experimental-strip-types`.
+- **Git** and access to the repo `astrabocconi-app/astra-app`.
+- **Mobile:** the app uses native modules (Mapbox, camera, notifications), so it
+  **cannot run in Expo Go**. You need a **development build**:
+  - iOS Simulator (macOS, full **Xcode**, not just the Command Line Tools), or
+  - a physical iPhone, see [`docs/RUNNING-ON-IPHONE.md`](docs/RUNNING-ON-IPHONE.md), or
+  - an EAS `development` build (`eas build --profile development`; the free Expo
+    plan has a small build queue, ask before starting one).
+- A **Mapbox download token** (`RNMAPBOX_MAPS_DOWNLOAD_TOKEN`, secret, scope
+  `DOWNLOADS:READ`) in your shell or `~/.netrc` for the first native build.
 
-## 2. Clone & install
+## 2. Clone and install
 
 ```bash
 git clone https://github.com/astrabocconi-app/astra-app.git
 cd astra-app
-npm install            # one install for the whole monorepo (Turborepo)
+npm ci                 # one install for the whole monorepo (also runs prisma generate)
 ```
 
-## 3. Environment (pulled from Vercel)
+## 3. Environment
 
-Infra is managed by Vercel, so you don't hand-copy secrets — you **pull** them.
-Ask the team lead to add you to the Vercel project, then:
+### Web (`apps/web/.env`)
+
+The variable list and where each comes from is in
+[`docs/SETUP.md`](docs/SETUP.md#environment-variables). The important rule:
+
+> **Do not `vercel env pull` and use the result for development yet.** The Vercel
+> *Development* and *Preview* environments currently contain the **production**
+> database URL and auth secrets. Running the app, a seed or a Prisma command with
+> them touches live student data. Until the owner creates separate Neon branches
+> (docs/SETUP.md, "Dev and preview database"), use your own Neon branch URLs or a
+> local Postgres.
 
 ```bash
-npm i -g vercel
-vercel login
-vercel link                       # from repo root → select the astra-app project
-vercel env pull apps/web/.env     # writes DB / auth / email / etc. locally
-cp apps/mobile/.env.example apps/mobile/.env   # mobile has NO secrets — edit if needed
+cp apps/web/.env.example apps/web/.env      # fill in DATABASE_URL / DIRECT_URL of a NON-production DB,
+                                            # BETTER_AUTH_SECRET, CARD_TOKEN_HMAC_SECRET
 ```
 
-`.env` files are gitignored (won't show in `git status`). Re-run
-`vercel env pull apps/web/.env` whenever the Vercel env changes. Everyone points
-at the **same shared dev database**, so no migration is needed to start (§4).
-In local dev the OTP code prints to the server console — see §6.
+With no SMTP configured, the sign-in code is **printed in the `apps/web` console**.
 
-## 4. Run the app
+### Mobile (`apps/mobile/.env.local`)
 
 ```bash
-# terminal 1 — web dashboard + API
-npm run dev -w @astra/web            # http://localhost:3000
-
-# terminal 2 — mobile (Metro + Expo)
-npm run dev -w @astra/mobile
-#   press  i  → open in the iOS Simulator   (a → Android)
+cp apps/mobile/.env.example apps/mobile/.env.local   # NOT .env: EAS Build loads .env into cloud builds
 ```
 
-Sanity check the API: <http://localhost:3000/api/health> → `{"status":"ok","db":"up",...}`.
+Set `EXPO_PUBLIC_API_URL` to `http://localhost:3000` (simulator) or
+`http://<your-LAN-IP>:3000` (phone), and optionally `EXPO_PUBLIC_MAPBOX_TOKEN`
+(public `pk.` token) so the Discounts map renders. `EXPO_PUBLIC_*` values are
+**public**, never put a secret in them. Restart Metro after changing them.
 
-The database schema is already migrated on the shared Neon dev DB, so you don't
-need to run migrations to start. (If you change the Prisma schema, see §7.)
-
-## 5. One-time iOS Simulator setup (macOS)
-
-Installing Xcode is **not enough by itself** — point the tools at it and install
-a simulator runtime:
+## 4. Run
 
 ```bash
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-sudo xcodebuild -license accept
-xcodebuild -runFirstLaunch
-xcodebuild -downloadPlatform iOS      # or: Xcode → Settings → Components
-xcrun simctl list runtimes            # should list an "iOS <version>"
+npm run dev -w @astra/web          # http://localhost:3000   (/api/health -> {"status":"ok","db":"up"})
+npm run dev -w @astra/mobile       # Metro for the dev client (i = iOS simulator)
 ```
 
-Expo Go is installed into the simulator automatically on first launch — on that
-first launch tap **"Open"** on the *"Open in Expo Go?"* dialog.
+Mobile needs the dev client installed first: `npx expo run:ios` (from `apps/mobile`)
+builds and installs it.
 
-**Physical iPhone instead:** the phone can't reach `localhost`, so set
-`EXPO_PUBLIC_API_URL="http://<your-mac-LAN-IP>:3000"` in `apps/mobile/.env`
-(`ipconfig getifaddr en0`), restart Metro, and open the dev server in Expo Go
-(same Wi-Fi, Local Network permission on).
+## 5. Signing in locally
 
-## 6. Signing in (local dev)
+1. Enter an `@studbocconi.it` or `@unibocconi.it` e-mail, tap **Send code**.
+2. Read the 6-digit code in the `apps/web` terminal.
+3. Enter it.
 
-No Resend key locally → the email-OTP code is **printed to the `apps/web` server
-console** instead of emailed:
+**Dev bypass (non-production API only):** in a development build, typing
+`blabmerda` as the e-mail calls `POST /api/auth/dev-login` and signs in as an
+**ADMIN**. The server enables it only when `NODE_ENV !== "production"` (or
+`DEV_LOGIN_ENABLED=true`), which is exactly why a dev environment must never hold
+production data. `DEV_LOGIN_ENABLED` must **not** be set in Vercel Production.
 
-1. Enter your `@studbocconi.it` or `@unibocconi.it` email → **Send code** (only these domains are accepted).
-2. Copy the 6-digit code from the `apps/web` terminal.
-3. Enter it → you're in.
-
-**Dev bypass (local only):** in a dev build you can skip OTP entirely — type
-**`blabmerda`** in the email field and tap the button. This hits
-`POST /api/auth/dev-login`, which creates/returns an **ADMIN** session.
-It works **only** against a local (`NODE_ENV !== production`) API and only in dev
-builds of the app — it's disabled on every deployment, so it's not a prod hole.
-
-To give yourself dashboard/admin access, promote your user after first sign-in:
+To give your user backoffice access:
 
 ```sql
 UPDATE "User" SET roles = ARRAY['ADMIN']::"Role"[] WHERE email = 'you@studbocconi.it';
 ```
 
-## 7. Working on the project
+## 6. Working on the project
 
-Branch flow and commit rules: [`CONTRIBUTING.md`](CONTRIBUTING.md) — work on
-`develop`, PR to `main`. Roadmap of what's built / what's next:
-[`docs/ROADMAP.md`](docs/ROADMAP.md).
+Branch flow and commit rules: [`CONTRIBUTING.md`](CONTRIBUTING.md). Before pushing:
 
-Common commands (from repo root; Turbo fans out across workspaces):
+```bash
+npm run ci          # typecheck + lint + test (same as GitHub Actions)
+npm run format
+```
 
 | Command | Does |
 |---|---|
 | `npm run dev` | All dev servers |
-| `npm run typecheck` | `tsc --noEmit` across the monorepo |
-| `npm run lint` | ESLint across the monorepo |
-| `npm run db:migrate` | Prisma migrate (needs `DIRECT_URL`) |
-| `npm run db:studio` | Browse the DB (Prisma Studio) |
-| `npm run db:seed` | Seed local/dev data |
+| `npm run typecheck` | `prisma generate` + `tsc --noEmit` everywhere |
+| `npm run lint` | ESLint (mobile, web, shared) |
+| `npm test` | Unit tests |
+| `npm run db:migrate:deploy` | Apply committed migrations to the DB in `apps/web/.env` |
+| `npm run db:studio` | Prisma Studio |
 
-**Architecture rules to know before writing code** (full detail in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)):
-- Mobile **never** touches the DB — it calls `apps/web`'s `/api/*` via the typed
-  client in `@astra/shared`.
+**Never run `npm run db:migrate` (`prisma migrate dev`).** Two old migrations have
+drift and `migrate dev` then wants to reset the database. Write a new
+`packages/db/prisma/migrations/<timestamp>_name/migration.sql` by hand and apply it
+with `migrate:deploy` (see [`docs/DEPLOY.md`](docs/DEPLOY.md#migrations)).
+
+**Architecture rules** (details in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)):
+- Mobile **never** touches the DB. It calls `apps/web`'s `/api/*` through the typed client in `@astra/shared`.
 - **Zod** validates every API request at the boundary.
-- All authorization goes through `apps/web/lib/authz.ts` (no route queries the DB
-  without it).
+- All authorization goes through `apps/web/lib/authz.ts`.
+- User-facing strings exist in Italian **and** English (`apps/mobile/lib/i18n/*`).
 
-## 8. Troubleshooting (mobile)
+## 7. Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| `xcodebuild requires Xcode`, no simulators | Run the `xcode-select -s …` switch in §5; open Xcode once. |
-| `xcrun simctl list runtimes` empty | Delete a corrupt runtime (`xcrun simctl runtime list` → `... runtime delete <id>`) and re-run `xcodebuild -downloadPlatform iOS`. |
-| `simctl` hangs / "server died" | `xcrun simctl shutdown all` then `killall -9 com.apple.CoreSimulator.CoreSimulatorService`; relaunch. |
-| Phone can't reach the API | Point `EXPO_PUBLIC_API_URL` at your current LAN IP and restart Metro. |
-| `EXPO_PUBLIC_*` change not taking effect | Restart Metro — those values are inlined at bundle time. |
+| Expo Go says the project is incompatible / native module missing | Expo Go is not supported, use a dev build. |
+| `xcodebuild requires Xcode`, no simulators | `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`, open Xcode once, `xcodebuild -downloadPlatform iOS`. |
+| `simctl` hangs / "server died" | `xcrun simctl shutdown all`, `killall -9 com.apple.CoreSimulator.CoreSimulatorService`, relaunch. |
+| Phone can't reach the API | Point `EXPO_PUBLIC_API_URL` at your current LAN IP and restart Metro (`npx expo start -c`). |
+| `EXPO_PUBLIC_*` change not applied | Restart Metro, those values are inlined at bundle time. |
+| `npm test` fails with "unknown option --experimental-strip-types" | You are on Node < 22.6. Use Node 24. |
+| Map shows "Map unavailable" | `EXPO_PUBLIC_MAPBOX_TOKEN` is not set for this build. |
+| Every screen shows "Retry" | See the runbook in [`docs/DEPLOY.md`](docs/DEPLOY.md#runbook-every-screen-shows-retry). |

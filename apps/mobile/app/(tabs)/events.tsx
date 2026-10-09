@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Pressable, Image, RefreshControl } from "react-native";
+import { View, ScrollView, Pressable, Image, RefreshControl } from "react-native";
+import { Text } from "../../components/AppText";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Icon, Spinner } from "../../components/Icon";
@@ -29,8 +30,9 @@ export default function EventsScreen() {
     );
   }
 
-  // Error before empty: offline must not read as "no events".
-  if (events.isError || items.length === 0) {
+  // Error before empty: offline must not read as "no events". A failed refresh
+  // that still has events to show keeps showing them.
+  if ((events.isError && !events.data) || items.length === 0) {
     return (
       <View className="flex-1 bg-white dark:bg-astra-primary">
         {events.isError ? (
@@ -56,6 +58,7 @@ export default function EventsScreen() {
         <Pressable
           key={e.id}
           onPress={() => router.push(`/event/${e.id}`)}
+          accessibilityRole="button"
           className="overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10 bg-white dark:bg-astra-primary active:opacity-90"
           style={{
             shadowColor: "#04107E",
@@ -66,7 +69,12 @@ export default function EventsScreen() {
           }}
         >
           {e.imageUrl ? (
-            <Image source={{ uri: e.imageUrl }} resizeMode="cover" style={{ width: "100%", aspectRatio: 16 / 9 }} />
+            <Image
+              source={{ uri: e.imageUrl }}
+              resizeMode="cover"
+              style={{ width: "100%", aspectRatio: 16 / 9 }}
+              accessibilityIgnoresInvertColors
+            />
           ) : null}
           {/* No cover: a small icon tile beside the text rather than a filler hero. */}
           <View className="flex-row items-start gap-3 p-4">
@@ -76,24 +84,24 @@ export default function EventsScreen() {
               </View>
             )}
             <View className="flex-1">
-              <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
+              <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={3}>
                 {e.title}
               </Text>
               {e.appDiscountPercent ? (
                 <View className="mt-1 self-start rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5">
-                  <Text className="text-[11px] font-semibold text-astra-primary dark:text-white">
+                  <Text maxFontSizeMultiplier={1.3} className="text-[11px] font-semibold text-astra-primary dark:text-white">
                     {t("event.appDiscountShort", { n: String(e.appDiscountPercent) })}
                   </Text>
                 </View>
               ) : null}
               <View className="mt-1 flex-row items-center gap-1.5">
                 <Icon name="time-outline" size={13} color="#6B7280" />
-                <Text className="text-xs text-gray-500 dark:text-gray-300">{formatWhen(e.startsAt, locale)}</Text>
+                <Text className="flex-1 text-xs text-gray-600 dark:text-gray-300">{formatWhen(e.startsAt, locale)}</Text>
               </View>
               {e.location ? (
                 <View className="mt-1 flex-row items-center gap-1.5">
                   <Icon name="location-outline" size={13} color="#6B7280" />
-                  <Text className="flex-1 text-xs text-gray-500 dark:text-gray-300" numberOfLines={1}>
+                  <Text className="flex-1 text-xs text-gray-600 dark:text-gray-300" numberOfLines={2}>
                     {e.location}
                   </Text>
                 </View>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { requireAdmin } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import {
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 // PATCH /api/admin/staff/:id — change the page list, the password, or the name.
 // Each field is optional; anything omitted is left alone.
-export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requireAdmin(req, requestId);
   if ("error" in guard) return guard.error;
@@ -63,7 +63,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
 // DELETE /api/admin/staff/:id — revoke the account. See revokeStaffAccount for
 // why the row survives.
-export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handleDelete(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requireAdmin(req, requestId);
   if ("error" in guard) return guard.error;
@@ -85,3 +85,6 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }
     throw err;
   }
 }
+
+export const PATCH = withApi(handlePatch);
+export const DELETE = withApi(handleDelete);

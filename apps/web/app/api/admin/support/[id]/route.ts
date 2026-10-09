@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma, SupportStatus } from "@astra/db";
 import { z } from "zod";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
+import { zodMessage } from "@/lib/validation";
 import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 
@@ -14,7 +15,7 @@ const input = z.object({
 });
 
 // PATCH /api/admin/support/:id — mark handled, or leave a note for the team.
-export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "support");
   if ("error" in guard) return guard.error;
@@ -28,7 +29,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     return errorResponse(
       400,
       "BAD_REQUEST",
-      parsed.error.issues[0]?.message ?? "Invalid input.",
+      zodMessage(parsed.error),
       requestId,
     );
   }
@@ -61,3 +62,5 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     { headers: { "x-request-id": requestId } },
   );
 }
+
+export const PATCH = withApi(handlePatch);

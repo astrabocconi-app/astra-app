@@ -45,12 +45,24 @@ interface ClmgRow {
 }
 
 export async function fetchTable<T>(table: string, query: string): Promise<T[]> {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
-    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
-    next: { revalidate: 60 },
-  });
-  if (!res.ok)
-    throw new Error(`Supabase ${table} ${res.status}: ${await res.text().catch(() => "")}`);
+  const started = Date.now();
+  let res: Response;
+  try {
+    res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+      next: { revalidate: 60 },
+      // A slow Supabase must not hold the request (and the student's spinner).
+      signal: AbortSignal.timeout(6_000),
+    });
+  } catch (e) {
+    console.error(JSON.stringify({ level: "error", message: "upstream failed", upstream: "supabase", table, ms: Date.now() - started }));
+    throw e;
+  }
+  // Status only: the upstream body is an error page that must not travel further.
+  if (!res.ok) {
+    console.warn(JSON.stringify({ level: "warn", message: "upstream non-2xx", upstream: "supabase", table, status: res.status, ms: Date.now() - started }));
+    throw new Error(`Supabase ${table} ${res.status}`);
+  }
   return (await res.json()) as T[];
 }
 
@@ -64,15 +76,21 @@ function yearFromNumber(v: string | number | null): string | null {
   return null;
 }
 
+/** Handouts that belong to no particular year (languages) get their own bucket instead of being dropped. */
+export const NO_YEAR = "All years";
+
+/** Subjects every bachelor student may open, whatever their programme. */
+const SHARED_BACHELOR_SUBJECTS = ["ELECTIVES", "Languages", "Spanish"];
+
 // CLMG (Giurisprudenza) is a 5-year single-cycle degree, so 4th/5th years exist.
-const YEAR_ORDER = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year"];
+const YEAR_ORDER = ["First Year", "Second Year", "Third Year", "Fourth Year", "Fifth Year", NO_YEAR];
 
 function normYear(y: string | null): string | null {
   const s = (y ?? "").trim().toLowerCase();
   if (s.startsWith("first") || s.startsWith("1")) return "First Year";
   if (s.startsWith("second") || s.startsWith("2")) return "Second Year";
   if (s.startsWith("third") || s.startsWith("3")) return "Third Year";
-  return null; // drop NULL / unknown years
+  return null; // unknown years are decided by the caller (see fetchMaterials)
 }
 
 function normSubject(s: string | null): string {
@@ -113,9 +131,11 @@ export async function fetchMaterials(): Promise<MaterialYear[]> {
   for (const r of handouts) {
     const url = (r.file_url ?? "").trim();
     if (!url.startsWith("http")) continue;
-    const year = normYear(r.year);
+    const subject = normSubject(r.subject);
+    // Languages rows carry no year; keep them in their own bucket.
+    const year = normYear(r.year) ?? (SHARED_BACHELOR_SUBJECTS.includes(subject) ? NO_YEAR : null);
     if (!year) continue;
-    push(year, normSubject(r.subject), {
+    push(year, subject, {
       id: r.id,
       title: str(r.filename) ?? "Untitled",
       url,
@@ -164,16 +184,21 @@ export function filterMaterialsForAcademicProfile(
    * Students revisit earlier years' handouts when resitting or revising, and
    * look ahead before choosing electives.
    */
-  options?: { allYears?: boolean }
+  options?: { allYears?: boolean; level?: string }
 ): MaterialYear[] {
   const year = PROFILE_YEAR[studyYear - 1];
   if (!options?.allYears && !year) return [];
+  const bachelor = options?.level === "BACHELOR";
   return years
-    .filter((entry) => (options?.allYears ? true : entry.year === year))
+    // The "no year" bucket is for bachelor students and shows whichever year they are in.
+    .filter((entry) => (entry.year === NO_YEAR ? bachelor : options?.allYears ? true : entry.year === year))
     .map((entry) => {
       const subjects = entry.subjects.filter(
         (subject) =>
-          subject.subject === programmeCode || subject.subject.split("-").includes(programmeCode)
+          subject.subject === programmeCode ||
+          subject.subject.split("-").includes(programmeCode) ||
+          // Electives and languages are open to every bachelor student.
+          (bachelor && SHARED_BACHELOR_SUBJECTS.includes(subject.subject))
       );
       return {
         ...entry,

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { getPartnerForUser } from "@/lib/partner";
 import { offerLabel } from "@/lib/cms-map";
@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 // GET /api/partner/offers — the venue's live promotions, so the scanner can ask
 // which one a scan was for. Available to every partner login including
 // scan-only ones: choosing the offer is part of scanning, not analytics.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -34,3 +34,5 @@ export async function GET(req: Request) {
     { headers: { "x-request-id": requestId } },
   );
 }
+
+export const GET = withApi(handleGet);

@@ -10,47 +10,115 @@ const APP_ENV = (process.env.APP_ENV ?? "development") as
 const API_URL: Record<typeof APP_ENV, string> = {
   // Dev uses localhost (so the dev-login bypass works against the local API).
   development: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000",
-  staging: "https://astra-app-cyan.vercel.app",
-  production: "https://astra-app-cyan.vercel.app",
+  // Custom domain: it serves the very same deployment as the old
+  // astra-app-cyan.vercel.app hostname (which must stay alive forever, because
+  // builds already installed on phones still point at it). See docs/DEPLOY.md.
+  staging: "https://app.astrabocconi.com",
+  production: "https://app.astrabocconi.com",
 };
+
+const EAS_PROJECT_ID = "69b09e81-0608-41b8-8979-fd3e854ab3d5";
+
+// One string for both the Info.plist key and the expo-camera plugin.
+const CAMERA_PURPOSE = "ASTRA uses the camera to scan members' loyalty cards.";
+
+// Sentry source maps + debug files are uploaded at build time, which needs an
+// auth token (EAS secret SENTRY_AUTH_TOKEN, plus SENTRY_ORG / SENTRY_PROJECT).
+// Without the token the plugin would add an Xcode build phase that FAILS the
+// build, so it is only wired in when the token is present: no token = no-op.
+const SENTRY_UPLOAD = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
 const config: ExpoConfig = {
   name: APP_ENV === "production" ? "ASTRA" : `ASTRA (${APP_ENV})`,
   slug: "astra-app",
   owner: "mfmatozza",
   scheme: "astra",
-  version: "1.1.3",
+  version: "1.1.4",
   orientation: "portrait",
+  // Stays "automatic" on purpose: the hidden inverted mode (lib/egg-store.ts)
+  // flips the whole app through NativeWind's colorScheme.set(), which drives
+  // Appearance, and a hard "light" lock here would stop that from working.
   userInterfaceStyle: "automatic",
   icon: "./assets/icon.png",
   backgroundColor: "#FFFFFF",
+  // ── OTA updates (expo-updates) ────────────────────────────────────────────
+  // Inert until `npx expo install expo-updates` has been run and a native build
+  // containing it is shipped; installed builds without the module ignore these
+  // fields. Channels are set per build profile in eas.json. The runtime version
+  // follows `version`, so bump it whenever native code or native dependencies
+  // change, and an OTA bundle can only reach binaries that can run it.
+  runtimeVersion: { policy: "appVersion" },
+  updates: {
+    url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
+    enabled: true,
+    checkAutomatically: "ON_LOAD",
+    fallbackToCacheTimeout: 0,
+  },
   ios: {
     bundleIdentifier: "it.astrabocconi.app",
     supportsTablet: false,
     infoPlist: {
       // Required for the partner scanner (expo-camera). Kept here so every
       // prebuild includes it regardless of plugin ordering.
-      NSCameraUsageDescription: "ASTRA uses the camera to scan member loyalty cards.",
-      NSMicrophoneUsageDescription:
-        "ASTRA uses the microphone only as part of the camera scanner.",
+      NSCameraUsageDescription: CAMERA_PURPOSE,
+      // No microphone string: nothing records audio (the expo-camera plugin is
+      // told `microphonePermission: false` below).
       // Required by Apple (ITMS-90683): the bundled Mapbox SDK references the
-      // location APIs, so the purpose string must be present even though ASTRA
-      // never asks for location — the Discounts map only shows partner pins and
-      // the campus, and no permission prompt is triggered.
+      // location APIs, so a purpose string must exist even though ASTRA never
+      // asks for location: the Discounts map only shows partner pins and the
+      // campus, and no permission prompt is ever triggered. The text is kept
+      // literally true for that reason.
       NSLocationWhenInUseUsageDescription:
-        "ASTRA can show your position on the Discounts map to help you find nearby partner venues. The map works fine without it.",
+        "ASTRA does not use your location. This notice is required because the map component bundled in the app can read it; the Discounts map only shows partner venues.",
       // The app only makes standard HTTPS calls (no custom/non-exempt encryption),
       // so it qualifies for the export compliance exemption. Without this, every
       // build sits in "Missing Compliance" in App Store Connect and can't be
       // distributed to TestFlight testers until answered manually.
       ITSAppUsesNonExemptEncryption: false,
     },
+    // Required-reason APIs used by the app and its pods. React Native, expo-*
+    // and the Sentry/Mapbox pods ship their own manifests; these app-level
+    // entries mirror the reasons found in the installed packages (see
+    // node_modules/*/PrivacyInfo.xcprivacy) so the merged manifest is complete.
+    // No tracking, no tracking domains.
+    privacyManifests: {
+      NSPrivacyAccessedAPITypes: [
+        {
+          NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryUserDefaults",
+          NSPrivacyAccessedAPITypeReasons: ["CA92.1"],
+        },
+        {
+          NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryFileTimestamp",
+          NSPrivacyAccessedAPITypeReasons: ["C617.1"],
+        },
+        {
+          NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategorySystemBootTime",
+          NSPrivacyAccessedAPITypeReasons: ["35F9.1"],
+        },
+        {
+          NSPrivacyAccessedAPIType: "NSPrivacyAccessedAPICategoryDiskSpace",
+          NSPrivacyAccessedAPITypeReasons: ["E174.1"],
+        },
+      ],
+    },
   },
   android: {
     package: "it.astrabocconi.app",
+    // FCM credentials for Android push. Supplied as an EAS file environment
+    // variable (GOOGLE_SERVICES_JSON); absent = Android push stays off. The
+    // file is never committed.
+    ...(process.env.GOOGLE_SERVICES_JSON
+      ? { googleServicesFile: process.env.GOOGLE_SERVICES_JSON }
+      : {}),
+    // Explicit, because with target SDK 36 the window is edge to edge and the
+    // keyboard must still resize it (see audit A-25; verify on API 34-36).
+    softwareKeyboardLayoutMode: "resize",
   },
   plugins: [
     "expo-router",
+    // Source maps + debug files for Sentry (token-gated, see SENTRY_UPLOAD).
+    // Org/project come from SENTRY_ORG / SENTRY_PROJECT in the build env.
+    ...(SENTRY_UPLOAD ? ["@sentry/react-native/expo"] : []),
     "expo-secure-store",
     "expo-notifications",
     "expo-web-browser",
@@ -67,7 +135,8 @@ const config: ExpoConfig = {
       // Partner venues use the camera to scan members' loyalty-card QR codes.
       "expo-camera",
       {
-        cameraPermission: "ASTRA uses the camera to scan members' loyalty cards.",
+        cameraPermission: CAMERA_PURPOSE,
+        microphonePermission: false,
         recordAudioAndroid: false,
       },
     ],
@@ -111,8 +180,8 @@ const config: ExpoConfig = {
       ],
     ],
     [
-      // Android must target API 36 (required on Play as of 2026-08-31).
-      // TODO(scaffold): verify the pinned Expo SDK 57 fully supports API 36.
+      // Android must target API 36 (required on Play as of 2026-08-31); SDK 57
+      // supports it.
       "expo-build-properties",
       {
         android: {
@@ -130,7 +199,7 @@ const config: ExpoConfig = {
     // builds render the map without relying on a local .env.
     mapboxToken: process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? "",
     eas: {
-      projectId: "69b09e81-0608-41b8-8979-fd3e854ab3d5",
+      projectId: EAS_PROJECT_ID,
     },
   },
   experiments: {

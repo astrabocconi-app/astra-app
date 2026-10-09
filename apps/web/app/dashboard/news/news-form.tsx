@@ -1,28 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import type { ContentLink } from "@astra/shared";
-import { LinksEditor } from "../_components/links-editor";
 import { useRouter } from "next/navigation";
-import type { NewsItem } from "@astra/shared";
+import type { ContentLink, NewsItem } from "@astra/shared";
+import { LinksEditor, linkProblems } from "../_components/links-editor";
 import { Button } from "@/app/_ui/button";
 import { Card } from "@/app/_ui/card";
-import { Field, Input, Textarea, Toggle } from "@/app/_ui/field";
+import { Counter, Field, Input, Textarea, Toggle } from "@/app/_ui/field";
 import { ImageInput } from "../_components/image-input";
+import { adminFetch, errorMessage } from "../_lib/admin-fetch";
+import { useDirtyGuard } from "../_lib/use-dirty-guard";
 
-async function send(path: string, method: string, body?: unknown) {
-  const res = await fetch(path, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message ?? "Something went wrong.");
-  return data;
-}
+const EXCERPT_MAX = 240;
 
-export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
+/**
+ * `canPush` is decided on the server (the signed-in account has the Notifications
+ * page); without it the push toggle is not shown and the API refuses it anyway.
+ */
+export function NewsForm({ id, initial, canPush = false }: { id?: string; initial?: NewsItem; canPush?: boolean }) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
@@ -34,18 +29,58 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
   const [notify, setNotify] = useState(false); // per-save action, not stored
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const guard = useDirtyGuard({ title, excerpt, body, imageUrl, published, pinned, links });
+
+  const problems: string[] = [];
+  if (!title.trim()) problems.push("Add a title");
+  if (!body.trim()) problems.push("Write the body");
+  if (notify && !published) problems.push("Turn on Published to send a notification (or turn the notification off)");
+  problems.push(...linkProblems(links));
 
   async function save() {
+    if (problems.length) return;
     setLoading(true);
     setError(null);
     try {
-      const payload = { title, excerpt, body, imageUrl, published, pinned, links, notify };
-      if (id) await send(`/api/admin/news/${id}`, "PATCH", payload);
-      else await send("/api/admin/news", "POST", payload);
+      const sendPush = canPush && notify && published;
+      if (sendPush) {
+        // Say exactly who is about to be interrupted before anything is saved.
+        const count = await adminFetch<{ preview?: { reachable: number; devices: number } }>("/api/admin/push", {
+          method: "POST",
+          body: { title: "preview", body: "preview", audience: { roles: ["STUDENT"] }, confirm: false },
+        });
+        const p = count.preview;
+        const reach = p
+          ? `${p.reachable} student${p.reachable === 1 ? "" : "s"} on ${p.devices} device${p.devices === 1 ? "" : "s"}`
+          : "every student with notifications on";
+        const again = initial?.published ? "\n\nThis post is already published, so they get a second notification." : "";
+        if (
+          !confirm(
+            `Save and notify ${reach}?\n\nOnly students are notified (not partners or staff). A notification cannot be recalled.${again}`,
+          )
+        ) {
+          return;
+        }
+      }
+      const payload = {
+        title: title.trim(),
+        excerpt: excerpt.trim() || null,
+        body,
+        imageUrl,
+        published,
+        pinned,
+        links,
+        ...(sendPush ? { notify: true } : {}),
+      };
+      if (id) await adminFetch(`/api/admin/news/${id}`, { method: "PATCH", body: payload });
+      else await adminFetch("/api/admin/news", { method: "POST", body: payload });
+      guard.release();
       router.push("/dashboard/news");
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save.");
+      setError(errorMessage(e, "Couldn't save."));
     } finally {
       setLoading(false);
     }
@@ -54,12 +89,15 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
   async function remove() {
     if (!id || !confirm("Delete this post? This can't be undone.")) return;
     setLoading(true);
+    setError(null);
     try {
-      await send(`/api/admin/news/${id}`, "DELETE");
+      await adminFetch(`/api/admin/news/${id}`, { method: "DELETE" });
+      guard.release();
       router.push("/dashboard/news");
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't delete.");
+      setError(errorMessage(e, "Couldn't delete."));
+    } finally {
       setLoading(false);
     }
   }
@@ -69,16 +107,18 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
       <Field label="Title" required>
         <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Freshers' week is here" />
       </Field>
-      <Field label="Excerpt" hint="Short summary shown in the feed (optional).">
-        <Input value={excerpt} onChange={(e) => setExcerpt(e.target.value)} maxLength={240} />
+      <Field label="Excerpt" hint="Short summary shown in the feed (optional). Also the text of the push notification.">
+        <Input value={excerpt} onChange={(e) => setExcerpt(e.target.value)} maxLength={EXCERPT_MAX} />
+        <Counter value={excerpt} max={EXCERPT_MAX} />
       </Field>
       <Field label="Body" required>
         <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write the announcement…" />
       </Field>
-      <Field label="Cover image">
+      <Field label="Cover image" composite>
         <ImageInput
           value={imageUrl}
           onChange={setImageUrl}
+          onBusy={setUploading}
           hint="Recommended: 1200 × 600 px (2:1 landscape)"
         />
       </Field>
@@ -91,30 +131,56 @@ export function NewsForm({ id, initial }: { id?: string; initial?: NewsItem }) {
           onChange={setPinned}
         />
       </div>
-      <Toggle
-        label="Send push notification"
-        hint="Alerts every student's phone when you save this as published"
-        checked={notify}
-        onChange={setNotify}
-      />
+      {canPush && (
+        <Toggle
+          label="Send push notification"
+          hint={
+            initial?.published
+              ? "Students only. Already published: saving with this on sends it again."
+              : "Students only (not partners or staff). You will see how many before it goes out."
+          }
+          checked={notify}
+          onChange={setNotify}
+        />
+      )}
 
       <LinksEditor value={links} onChange={setLinks} />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {problems.length > 0 && (
+        <ul className="list-disc rounded-lg bg-amber-50 py-2 pl-8 pr-3 text-xs text-amber-800">
+          {problems.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+      )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {id ? (
-          <button onClick={remove} disabled={loading} className="text-sm font-medium text-red-600 hover:text-red-700">
+          <button
+            type="button"
+            onClick={remove}
+            disabled={loading}
+            className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+          >
             Delete
           </button>
         ) : (
           <span />
         )}
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => router.push("/dashboard/news")} disabled={loading}>
+          <Button
+            variant="secondary"
+            onClick={() => guard.confirmLeave() && router.push("/dashboard/news")}
+            disabled={loading}
+          >
             Cancel
           </Button>
-          <Button onClick={save} disabled={loading || !title || !body}>
+          <Button onClick={save} disabled={loading || uploading || problems.length > 0}>
             {loading ? "Saving…" : id ? "Save changes" : published ? "Publish" : "Save draft"}
           </Button>
         </div>

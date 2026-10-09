@@ -1,10 +1,13 @@
 import { prisma } from "@astra/db";
 import { PageHeader } from "@/app/_ui/page-header";
 import { PartnerAccountManager } from "./account-manager";
+import { requireDashboardPage } from "../_lib/session";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Venue logins" };
 
 export default async function PartnerLoginsPage() {
+  await requireDashboardPage("partner-logins");
   const [partners, accounts] = await Promise.all([
     prisma.partner.findMany({
       where: { deletedAt: null },
@@ -12,7 +15,7 @@ export default async function PartnerLoginsPage() {
       select: { id: true, name: true },
     }),
     prisma.partnerMembership.findMany({
-      include: { partner: { select: { id: true, name: true } } },
+      include: { partner: { select: { id: true, name: true, deletedAt: true } } },
       orderBy: [{ partner: { name: "asc" } }, { createdAt: "asc" }],
     }),
   ]);
@@ -20,8 +23,8 @@ export default async function PartnerLoginsPage() {
   return (
     <>
       <PageHeader
-        title="Partner logins"
-        subtitle="Venue accounts for the scanner app — separate from student users."
+        title="Venue logins"
+        subtitle="Accounts venue staff use to scan student cards. Separate from student accounts."
       />
       <PartnerAccountManager
         partners={partners}
@@ -32,6 +35,7 @@ export default async function PartnerLoginsPage() {
           loginCode: a.loginCode,
           label: a.label,
           scanOnly: a.scanOnly,
+          venueDeleted: a.partner.deletedAt !== null,
         }))}
       />
     </>

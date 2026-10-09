@@ -1,0 +1,111 @@
+{
+ "_source": "B.lab Bocconi 'Master Admission - Survey results, first and second round' (PDF, pages 15). Transcribed row by row; every row's printed 'score out of 30' agrees with gpa/credits/in-corso through the score formula (max difference 0.0073), and each page was re-read against the transcription.",
+ "_cycle": "2024-25",
+ "rows": [
+  {
+   "p": "AFM",
+   "gpa": 27.0,
+   "credits": 132,
+   "inCorso": true,
+   "score": 27.57
+  },
+  {
+   "p": "CYBER",
+   "gpa": 23.3,
+   "credits": 158,
+   "inCorso": true,
+   "score": 24.23
+  },
+  {
+   "p": "ESS",
+   "gpa": 30.12,
+   "credits": 157,
+   "inCorso": true,
+   "score": 31.03
+  },
+  {
+   "p": "EMIT",
+   "gpa": 25.32,
+   "credits": 148,
+   "inCorso": true,
+   "score": 26.11
+  },
+  {
+   "p": "ACME",
+   "gpa": 29.59,
+   "credits": 164,
+   "inCorso": true,
+   "score": 30.6
+  },
+  {
+   "p": "GIO",
+   "gpa": 26.89,
+   "credits": 110,
+   "inCorso": true,
+   "score": 27.16
+  },
+  {
+   "p": "FIN",
+   "gpa": 28.55,
+   "credits": 161,
+   "inCorso": true,
+   "score": 29.52
+  },
+  {
+   "p": "CHINA-MIM",
+   "gpa": 26.84,
+   "credits": 152,
+   "inCorso": true,
+   "score": 27.69
+  },
+  {
+   "p": "ESSEC",
+   "gpa": 27.3,
+   "credits": 155,
+   "inCorso": true,
+   "score": 28.19
+  },
+  {
+   "p": "IM-CEMS",
+   "gpa": 27.8,
+   "credits": 146,
+   "inCorso": true,
+   "score": 28.56
+  },
+  {
+   "p": "IM-CONC",
+   "gpa": 26.47,
+   "credits": 121,
+   "inCorso": true,
+   "score": 26.89
+  },
+  {
+   "p": "IM-GLOB",
+   "gpa": 26.5,
+   "credits": 158,
+   "inCorso": true,
+   "score": 27.43
+  },
+  {
+   "p": "MM",
+   "gpa": 24.98,
+   "credits": 136,
+   "inCorso": true,
+   "score": 25.61
+  },
+  {
+   "p": "PPA",
+   "gpa": 25.33,
+   "credits": 121,
+   "inCorso": true,
+   "score": 25.75
+  },
+  {
+   "p": "TS",
+   "gpa": 24.64,
+   "credits": 130,
+   "inCorso": true,
+   "score": 25.19
+  }
+ ]
+}

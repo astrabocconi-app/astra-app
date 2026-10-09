@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { prisma } from "@astra/db";
 import { PageHeader } from "@/app/_ui/page-header";
-import { Button } from "@/app/_ui/button";
+import { ButtonLink } from "@/app/_ui/button";
+import { requireDashboardPage } from "../_lib/session";
 import { Badge } from "@/app/_ui/badge";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { StoreIcon, PlusIcon, ChevronRightIcon } from "@/app/_ui/icons";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Venues" };
+
 export default async function PartnersListPage() {
+  await requireDashboardPage("partners");
   const rows = await prisma.partner.findMany({
     where: { deletedAt: null },
     orderBy: { name: "asc" },
@@ -23,11 +27,9 @@ export default async function PartnersListPage() {
         title="Partners"
         subtitle="Venues and their discounts — students see these on the Discounts map."
         actions={
-          <Link href="/dashboard/partners/new">
-            <Button>
-              <PlusIcon size={18} /> New partner
-            </Button>
-          </Link>
+          <ButtonLink href="/dashboard/partners/new">
+            <PlusIcon size={18} /> New partner
+          </ButtonLink>
         }
       />
 
@@ -37,11 +39,9 @@ export default async function PartnersListPage() {
           title="No partners yet"
           description="Add a venue with its address and discount — it appears in the app straight away, no app update needed."
           action={
-            <Link href="/dashboard/partners/new">
-              <Button>
-                <PlusIcon size={18} /> New partner
-              </Button>
-            </Link>
+            <ButtonLink href="/dashboard/partners/new">
+              <PlusIcon size={18} /> New partner
+            </ButtonLink>
           }
         />
       ) : (

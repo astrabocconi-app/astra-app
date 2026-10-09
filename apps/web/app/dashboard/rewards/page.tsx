@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { prisma } from "@astra/db";
 import { PageHeader } from "@/app/_ui/page-header";
-import { Button } from "@/app/_ui/button";
+import { ButtonLink } from "@/app/_ui/button";
+import { requireDashboardPage } from "../_lib/session";
 import { Badge } from "@/app/_ui/badge";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { GiftIcon, PlusIcon, ChevronRightIcon } from "@/app/_ui/icons";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { title: "Rewards" };
+
 export default async function RewardsListPage() {
+  await requireDashboardPage("rewards");
   const rows = await prisma.reward.findMany({
     where: { deletedAt: null },
     orderBy: { createdAt: "desc" },
@@ -20,11 +24,9 @@ export default async function RewardsListPage() {
         title="Rewards"
         subtitle="The catalog students spend their points on."
         actions={
-          <Link href="/dashboard/rewards/new">
-            <Button>
-              <PlusIcon size={18} /> New reward
-            </Button>
-          </Link>
+          <ButtonLink href="/dashboard/rewards/new">
+            <PlusIcon size={18} /> New reward
+          </ButtonLink>
         }
       />
 
@@ -34,11 +36,9 @@ export default async function RewardsListPage() {
           title="No rewards yet"
           description="Add a reward with a point cost — active rewards appear in the app catalog."
           action={
-            <Link href="/dashboard/rewards/new">
-              <Button>
-                <PlusIcon size={18} /> New reward
-              </Button>
-            </Link>
+            <ButtonLink href="/dashboard/rewards/new">
+              <PlusIcon size={18} /> New reward
+            </ButtonLink>
           }
         />
       ) : (

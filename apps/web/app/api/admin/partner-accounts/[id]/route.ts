@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
+import { zodMessage } from "@/lib/validation";
 import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { updatePartnerAccount, deletePartnerAccount } from "@/lib/partner-accounts";
@@ -18,7 +19,7 @@ const patchInput = z.object({
 
 // PATCH /api/admin/partner-accounts/:id — rename, reset password, or switch
 // between scan-only and full access.
-export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
@@ -26,7 +27,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   const parsed = patchInput.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
+    return errorResponse(400, "BAD_REQUEST", zodMessage(parsed.error), requestId);
   }
 
   try {
@@ -57,7 +58,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 }
 
 // DELETE /api/admin/partner-accounts/:id — revoke a login.
-export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handleDelete(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partner-logins");
   if ("error" in guard) return guard.error;
@@ -81,3 +82,6 @@ export async function DELETE(req: Request, ctx: { params: Promise<{ id: string }
     );
   }
 }
+
+export const PATCH = withApi(handlePatch);
+export const DELETE = withApi(handleDelete);

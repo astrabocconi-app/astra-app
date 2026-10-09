@@ -1,9 +1,8 @@
 # Running ASTRA on a physical iPhone (dev build)
 
-Expo Go **can't run this app on a physical iPhone**: the project is on **Expo SDK 57**,
-and the App Store version of Expo Go may be older (e.g. 54), so the phone reports
-*"incompatible with this version of Expo Go."* (The iOS **Simulator** works because
-Expo ships SDK-matched simulator builds of Expo Go directly.)
+Expo Go **can't run this app** (simulator or phone): it uses native modules
+(`@rnmapbox/maps`, camera, notifications) that Expo Go does not contain, and the project
+is on **Expo SDK 57**, which the App Store version of Expo Go may not match.
 
 The fix is a **development build** — a custom "ASTRA (development)" app compiled for
 your phone. It behaves like Expo Go (connects to Metro, hot-reloads JS) but bundles
@@ -25,7 +24,7 @@ builds later (EAS).
 
 ### 1. Point the app at the Mac's LAN IP (not localhost)
 On a physical phone, `localhost` means the *phone*, so it can't reach the Mac's dev
-server. Find the Mac IP and set it in `apps/mobile/.env` (gitignored):
+server. Find the Mac IP and set it in `apps/mobile/.env.local` (gitignored; never `.env`, EAS Build loads that into cloud builds):
 
 ```bash
 ipconfig getifaddr en0          # e.g. 192.168.1.15

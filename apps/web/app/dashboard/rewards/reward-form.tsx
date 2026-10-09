@@ -7,20 +7,24 @@ import { Button } from "@/app/_ui/button";
 import { Card } from "@/app/_ui/card";
 import { Field, Input, Textarea, Toggle } from "@/app/_ui/field";
 import { ImageInput } from "../_components/image-input";
+import { adminFetch, errorMessage } from "../_lib/admin-fetch";
+import { useDirtyGuard } from "../_lib/use-dirty-guard";
 
-async function send(path: string, method: string, body?: unknown) {
-  const res = await fetch(path, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data?.error?.message ?? "Something went wrong.");
-  return data;
-}
+const isWhole = (v: string, min: number) => v.trim() !== "" && Number.isInteger(Number(v)) && Number(v) >= min;
 
-export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem }) {
+export function RewardForm({
+  id,
+  initial,
+  unusedCodes = 0,
+  pendingRedemptions = 0,
+}: {
+  id?: string;
+  initial?: RewardItem;
+  /** Unused voucher codes in the pool: deleting the reward revokes them. */
+  unusedCodes?: number;
+  /** Redemptions not yet handed over: they stay in the queue after a delete. */
+  pendingRedemptions?: number;
+}) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
@@ -36,40 +40,69 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
   const [active, setActive] = useState(initial?.active ?? true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const guard = useDirtyGuard({
+    title, description, imageUrl, costPoints, unlimited, stock, capPerUser, perUserLimit, active,
+  });
+
+  const problems: string[] = [];
+  if (!title.trim()) problems.push("Add a title");
+  if (!isWhole(costPoints, 0)) problems.push("Cost must be a whole number of points, 0 or more");
+  if (!unlimited && !isWhole(stock, 0)) problems.push("Enter the stock, or turn on Unlimited stock");
+  if (capPerUser && !isWhole(perUserLimit, 1)) problems.push("Max per account must be a whole number, 1 or more");
 
   async function save() {
+    if (problems.length) return;
     setLoading(true);
     setError(null);
     try {
       const payload = {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim() || null,
         imageUrl,
         costPoints: Number(costPoints),
         stock: unlimited ? null : Number(stock),
         perUserLimit: capPerUser ? Number(perUserLimit) : null,
         active,
       };
-      if (id) await send(`/api/admin/rewards/${id}`, "PATCH", payload);
-      else await send("/api/admin/rewards", "POST", payload);
+      if (id) await adminFetch(`/api/admin/rewards/${id}`, { method: "PATCH", body: payload });
+      else await adminFetch("/api/admin/rewards", { method: "POST", body: payload });
+      guard.release();
       router.push("/dashboard/rewards");
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save.");
+      setError(errorMessage(e, "Couldn't save."));
     } finally {
       setLoading(false);
     }
   }
 
   async function remove() {
-    if (!id || !confirm("Delete this reward? This can't be undone.")) return;
+    if (!id) return;
+    const extra: string[] = [];
+    if (unusedCodes > 0) {
+      extra.push(
+        `${unusedCodes} unused voucher code${unusedCodes === 1 ? "" : "s"} will stop working (Eventbrite codes are revoked too)`,
+      );
+    }
+    if (pendingRedemptions > 0) {
+      extra.push(
+        `${pendingRedemptions} redemption${pendingRedemptions === 1 ? " is" : "s are"} still waiting to be handed over; they stay in the Redemptions queue`,
+      );
+    }
+    const detail = extra.length ? `\n\nHeads up:\n- ${extra.join("\n- ")}` : "";
+    if (!confirm(`Delete this reward? This can't be undone.${detail}`)) return;
     setLoading(true);
+    setError(null);
     try {
-      await send(`/api/admin/rewards/${id}`, "DELETE");
+      await adminFetch(`/api/admin/rewards/${id}`, { method: "DELETE" });
+      guard.release();
       router.push("/dashboard/rewards");
       router.refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't delete.");
+      setError(errorMessage(e, "Couldn't delete."));
+    } finally {
       setLoading(false);
     }
   }
@@ -87,15 +120,17 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
           <Input
             type="number"
             min={0}
+            step={1}
             value={costPoints}
             onChange={(e) => setCostPoints(e.target.value)}
             placeholder="e.g. 500"
           />
         </Field>
-        <Field label="Stock" hint={unlimited ? "Unlimited" : "Units available"}>
+        <Field label="Stock" hint={unlimited ? "Unlimited" : "Units available (required)"}>
           <Input
             type="number"
             min={0}
+            step={1}
             value={stock}
             onChange={(e) => setStock(e.target.value)}
             disabled={unlimited}
@@ -114,16 +149,18 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
         <Input
           type="number"
           min={1}
+          step={1}
           value={perUserLimit}
           onChange={(e) => setPerUserLimit(e.target.value)}
           disabled={!capPerUser}
           placeholder="e.g. 1"
         />
       </Field>
-      <Field label="Image">
+      <Field label="Image" composite>
         <ImageInput
           value={imageUrl}
           onChange={setImageUrl}
+          onBusy={setUploading}
           hint="Recommended: 800 × 800 px (square)"
         />
       </Field>
@@ -138,21 +175,41 @@ export function RewardForm({ id, initial }: { id?: string; initial?: RewardItem 
         <Toggle label="Active" hint="Visible in the app" checked={active} onChange={setActive} />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {problems.length > 0 && (
+        <ul className="list-disc rounded-lg bg-amber-50 py-2 pl-8 pr-3 text-xs text-amber-800">
+          {problems.map((p) => (
+            <li key={p}>{p}</li>
+          ))}
+        </ul>
+      )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         {id ? (
-          <button onClick={remove} disabled={loading} className="text-sm font-medium text-red-600 hover:text-red-700">
+          <button
+            type="button"
+            onClick={remove}
+            disabled={loading}
+            className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+          >
             Delete
           </button>
         ) : (
           <span />
         )}
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={() => router.push("/dashboard/rewards")} disabled={loading}>
+          <Button
+            variant="secondary"
+            onClick={() => guard.confirmLeave() && router.push("/dashboard/rewards")}
+            disabled={loading}
+          >
             Cancel
           </Button>
-          <Button onClick={save} disabled={loading || !title || !costPoints}>
+          <Button onClick={save} disabled={loading || uploading || problems.length > 0}>
             {loading ? "Saving…" : id ? "Save changes" : "Create reward"}
           </Button>
         </div>

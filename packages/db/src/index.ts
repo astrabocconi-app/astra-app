@@ -29,6 +29,26 @@ function pooledConnectionString(): string {
   return url;
 }
 
+/** The host the app would connect to, or null when no URL is configured. */
+export function databaseHost(): string | null {
+  try {
+    return new URL(pooledConnectionString()).hostname;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Is the configured database a throwaway on this machine? Everything on the
+ * network (Neon included) counts as shared: there is a single Neon project and
+ * it IS production. Dev-only back doors and the seed scripts check this before
+ * they will touch it.
+ */
+export function isLocalDatabase(): boolean {
+  const host = databaseHost();
+  return host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]" || host === "host.docker.internal";
+}
+
 function createClient(): PrismaClient {
   const adapter = new PrismaPg(pooledConnectionString());
   return new PrismaClient({ adapter });

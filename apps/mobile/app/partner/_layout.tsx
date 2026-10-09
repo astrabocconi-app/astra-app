@@ -8,23 +8,28 @@ import { getPartnerScanOnly } from "../../lib/session";
 import { useEggStore } from "../../lib/egg-store";
 
 const BRAND = "#04107E";
-const INACTIVE = "#9CA3AF";
+// gray-500: the old gray-400 was 2.5:1 on the white bar, too faint for 11pt labels.
+const INACTIVE = "#6B7280";
 
 // Inverted mode, as in the student tabs: white on blue.
 const INVERTED_BAR = "#020A52";
-const INVERTED_INACTIVE = "rgba(255,255,255,0.55)";
+const INVERTED_INACTIVE = "rgba(255,255,255,0.7)";
 
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 type PressableOnPress = ComponentProps<typeof Pressable>["onPress"];
 
 // Raised circular button for the center "Scan" tab — camera icon (mirrors the
 // student card button, but for scanning instead of showing a QR).
+// A custom tabBarButton must pass on the selected state the navigator hands it,
+// or a screen reader never hears which tab is open.
 function CenterScanButton({
   onPress,
+  selected,
   ringColor,
   label,
 }: {
   onPress?: PressableOnPress;
+  selected: boolean;
   ringColor: string;
   label: string;
 }) {
@@ -34,13 +39,26 @@ function CenterScanButton({
         onPress={onPress}
         style={[styles.centerButton, { borderColor: ringColor }]}
         hitSlop={12}
-        accessibilityRole="button"
+        accessibilityRole="tab"
         accessibilityLabel={label}
+        accessibilityState={{ selected }}
       >
-        <Ionicons name="camera" size={30} color="#fff" />
+        <Ionicons
+          name="camera"
+          size={30}
+          color="#fff"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        />
       </Pressable>
     </View>
   );
+}
+
+/** The navigator reports the open tab as aria-selected (and, on older versions, accessibilityState). */
+function isSelected(props: object): boolean {
+  const p = props as { "aria-selected"?: boolean; accessibilityState?: { selected?: boolean } | null };
+  return Boolean(p["aria-selected"] ?? p.accessibilityState?.selected);
 }
 
 function tabIcon(name: IoniconName) {
@@ -68,6 +86,8 @@ export default function PartnerTabsLayout() {
         headerStyle: { backgroundColor: inverted ? BRAND : "#FFFFFF" },
         headerTintColor: fg,
         headerShadowVisible: false,
+        // Fixed-height bar: labels must not outgrow it (see the student tabs).
+        tabBarAllowFontScaling: false,
         // Respect the home-indicator inset so the icons don't hug the bottom edge.
         tabBarStyle: [
           styles.tabBar,
@@ -96,7 +116,12 @@ export default function PartnerTabsLayout() {
           title: t("partnerTabs.scan"),
           tabBarLabel: () => null,
           tabBarButton: (props) => (
-            <CenterScanButton onPress={props.onPress ?? undefined} ringColor={barBg} label={t("partnerTabs.scan")} />
+            <CenterScanButton
+              onPress={props.onPress ?? undefined}
+              selected={isSelected(props)}
+              ringColor={barBg}
+              label={t("partnerTabs.scan")}
+            />
           ),
         }}
       />

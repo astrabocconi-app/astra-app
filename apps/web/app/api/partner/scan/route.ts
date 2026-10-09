@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { verifyCardToken } from "@/lib/card-token";
 import {
   awardScanIfAllowed,
   ScanTooSoonError,
+  NotAStudentError,
   getPartnerForUser,
   POINTS_PER_SCAN,
 } from "@/lib/partner";
@@ -15,8 +16,8 @@ export const dynamic = "force-dynamic";
 
 // POST /api/partner/scan { token } — a partner scans a student's card QR and
 // awards points. Auth: the caller must be a PARTNER_MANAGER with a membership.
-// (Cooldown / replay-block are deferred — see Phase 5 notes.)
-export async function POST(req: Request) {
+// The per-perk cooldown and replay protection live in lib/partner.ts.
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) {
@@ -85,6 +86,9 @@ export async function POST(req: Request) {
       offerTitle: offer?.title ?? null,
     });
   } catch (e) {
+    if (e instanceof NotAStudentError) {
+      return errorResponse(404, "NOT_FOUND", "Unknown member.", requestId);
+    }
     if (e instanceof ScanTooSoonError) {
       const minutes = Math.max(1, Math.ceil((e.nextAllowedAt.getTime() - Date.now()) / 60000));
       return NextResponse.json(
@@ -100,7 +104,7 @@ export async function POST(req: Request) {
           student: { name: student.name },
           nextAllowedAt: e.nextAllowedAt.toISOString(),
         },
-        { status: 429, headers: { "x-request-id": requestId } },
+        { status: 429 },
       );
     }
     throw e;
@@ -113,6 +117,7 @@ export async function POST(req: Request) {
       balance,
       offer: offer ? { id: offer.id, title: offer.title } : null,
     },
-    { headers: { "x-request-id": requestId } },
   );
 }
+
+export const POST = withApi(handlePost);

@@ -1,8 +1,9 @@
 // Profile pictures: DiceBear "adventurer-neutral" avatars, chosen by seed.
 //
-// The seed lives in the user's `image` field as "dicebear:<seed>". Without one,
-// the user id is the seed — so every account has its own avatar from day one,
-// and changing it just means picking another seed.
+// The seed lives in the user's `image` field as "dicebear:<seed>". Without one
+// the server derives a default (never the raw user id: seeds travel in URLs and
+// logs). The picture itself is rendered by ASTRA's own API, which caches it, so
+// phones never talk to a third party.
 
 export const AVATAR_PREFIX = "dicebear:";
 /** What a client may send as a seed: short and URL-safe. */
@@ -12,7 +13,11 @@ export function avatarSeed(userId: string, image: string | null | undefined): st
   return image?.startsWith(AVATAR_PREFIX) ? image.slice(AVATAR_PREFIX.length) : userId;
 }
 
-/** PNG, since React Native's Image can't draw SVG. */
-export function avatarUrl(seed: string, size = 128): string {
-  return `https://api.dicebear.com/10.x/adventurer-neutral/png?seed=${encodeURIComponent(seed)}&size=${size}`;
+/**
+ * PNG, since React Native's Image can't draw SVG. Served by the API at
+ * `GET /api/avatar/<seed>?size=N`; `apiBaseUrl` is the same base the API client uses.
+ */
+export function avatarUrl(apiBaseUrl: string, seed: string, size = 128): string {
+  const base = apiBaseUrl.replace(/\/+$/, "");
+  return `${base}/api/avatar/${encodeURIComponent(seed)}?size=${Math.round(size)}`;
 }

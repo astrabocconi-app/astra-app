@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { z } from "zod";
 import { IN_APP_ROUTES } from "@astra/shared";
-import { newRequestId, errorResponse, log } from "@/lib/api";
+import { newRequestId, errorResponse, log, withApi } from "@/lib/api";
 import { requirePageApi } from "@/lib/admin-route";
-import { writeAudit } from "@/lib/audit";
-import { pushAudience, previewAudience, audienceTokens, audienceOptions } from "@/lib/push-audience";
-import { sendPushToTokens } from "@/lib/push";
+import { pushAudience, previewAudience, audienceOptions } from "@/lib/push-audience";
+import { sendCampaign, NoRecipientsError } from "@/lib/push-campaign";
+import { zodMessage } from "@/lib/validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ const input = z.object({
 });
 
 // GET /api/admin/push — filter options + recent sends.
-export async function GET(req: Request) {
+async function handleGet(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "push");
   if ("error" in guard) return guard.error;
@@ -57,12 +57,11 @@ export async function GET(req: Request) {
         createdAt: c.createdAt.toISOString(),
       })),
     },
-    { headers: { "x-request-id": requestId } },
   );
 }
 
 // POST /api/admin/push — preview an audience, or send to it.
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "push");
   if ("error" in guard) return guard.error;
@@ -72,7 +71,7 @@ export async function POST(req: Request) {
     return errorResponse(
       400,
       "BAD_REQUEST",
-      parsed.error.issues[0]?.message ?? "Invalid input.",
+      zodMessage(parsed.error),
       requestId,
     );
   }
@@ -82,62 +81,37 @@ export async function POST(req: Request) {
   if (!confirm) {
     return NextResponse.json(
       { preview: await previewAudience(audience) },
-      { headers: { "x-request-id": requestId } },
-    );
+      );
   }
 
-  const { tokens, userCount } = await audienceTokens(audience);
-  if (tokens.length === 0) {
-    return errorResponse(
-      400,
-      "NO_RECIPIENTS",
-      "Nobody in that audience has notifications enabled, so nothing was sent.",
-      requestId,
-    );
-  }
-
-  const result = await sendPushToTokens(tokens, {
-    title,
-    body,
-    // The app reads `route` to deep-link when the notification is tapped.
-    data: route ? { route } : {},
-  });
-
-  const campaign = await prisma.pushCampaign.create({
-    data: {
+  try {
+    const sent = await sendCampaign({
+      actorId: guard.session.user.id,
       title,
       body,
       route: route ?? null,
-      filters: audience,
-      sentCount: result.accepted,
-      userCount,
-      sentById: guard.session.user.id,
-    },
-  });
-
-  await writeAudit({
-    actorId: guard.session.user.id,
-    action: "create",
-    targetType: "PushCampaign",
-    targetId: campaign.id,
-    metadata: { title, accepted: result.accepted, failed: result.failed },
-  });
-
-  log("info", requestId, "POST /api/admin/push", {
-    accepted: result.accepted,
-    failed: result.failed,
-  });
-
-  return NextResponse.json(
-    {
-      id: campaign.id,
-      accepted: result.accepted,
-      failed: result.failed,
-      userCount,
-      // Surfaced rather than hidden: "sent to 300, 42 failed" is actionable,
-      // "sent" is not.
-      errors: result.errors,
-    },
-    { status: 201, headers: { "x-request-id": requestId } },
-  );
+      audience,
+    });
+    log("info", requestId, "push campaign sent", { accepted: sent.accepted, failed: sent.failed });
+    return NextResponse.json(
+      {
+        id: sent.campaign.id,
+        accepted: sent.accepted,
+        failed: sent.failed,
+        userCount: sent.userCount,
+        // Surfaced rather than hidden: "sent to 300, 42 failed" is actionable,
+        // "sent" is not.
+        errors: sent.errors,
+      },
+      { status: 201 },
+    );
+  } catch (e) {
+    if (e instanceof NoRecipientsError) {
+      return errorResponse(400, "NO_RECIPIENTS", e.message, requestId);
+    }
+    throw e;
+  }
 }
+
+export const GET = withApi(handleGet);
+export const POST = withApi(handlePost);

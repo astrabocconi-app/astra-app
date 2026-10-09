@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
+import { zodMessage } from "@/lib/validation";
 import { requirePageApi } from "@/lib/admin-route";
 import { geocodeAddress, isGeocodingConfigured, GeocodeError } from "@/lib/geocode";
 
@@ -11,14 +12,14 @@ const input = z.object({ address: z.string().trim().min(1, "Enter an address") }
 
 // POST /api/admin/geocode — resolve an address so the partner form can preview
 // the pin before saving. Admin-only: it spends our Mapbox quota.
-export async function POST(req: Request) {
+async function handlePost(req: Request) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "partners");
   if ("error" in guard) return guard.error;
 
   const parsed = input.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
-    return errorResponse(400, "BAD_REQUEST", parsed.error.issues[0]?.message ?? "Invalid input.", requestId);
+    return errorResponse(400, "BAD_REQUEST", zodMessage(parsed.error), requestId);
   }
   if (!isGeocodingConfigured()) {
     return errorResponse(503, "NOT_CONFIGURED", "Address lookup isn't configured.", requestId);
@@ -35,3 +36,5 @@ export async function POST(req: Request) {
     return errorResponse(502, "UPSTREAM_ERROR", message, requestId);
   }
 }
+
+export const POST = withApi(handlePost);

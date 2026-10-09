@@ -5,7 +5,6 @@ import * as profile from "./profile";
 import * as home from "./home";
 import * as materials from "./materials";
 import * as classrooms from "./classrooms";
-import * as ask from "./ask";
 import * as partnerScan from "./partnerScan";
 import * as event from "./event";
 import * as partnerHome from "./partnerHome";
@@ -35,7 +34,6 @@ const namespaces = [
   home,
   materials,
   classrooms,
-  ask,
   partnerScan,
   event,
   partnerHome,
@@ -92,4 +90,16 @@ export const useLocale = () => (useLanguage() === "it" ? "it-IT" : "en-GB");
 export function useT() {
   const language = useLanguageStore((s) => s.language);
   return (key: TranslationKey, vars?: Record<string, string>) => translate(key, language, vars);
+}
+
+/**
+ * Like `t`, with a singular form: for n === 1 it uses `<key>One` when that key
+ * exists ("1 point", not "1 points"), otherwise the plain key.
+ */
+export function useTn() {
+  const t = useT();
+  return (key: TranslationKey, n: number, vars?: Record<string, string>) => {
+    const one = `${key}One` as TranslationKey;
+    return t(n === 1 && one in en ? one : key, vars);
+  };
 }

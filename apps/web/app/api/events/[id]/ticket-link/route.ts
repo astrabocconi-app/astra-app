@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { newRequestId, errorResponse, log } from "@/lib/api";
+import { newRequestId, errorResponse, log, withApi } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { ticketLinkFor, TicketLinkError } from "@/lib/event-discount";
 
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // POST /api/events/:id/ticket-link — where "Get tickets" should send this
 // student: with their personal in-app discount code when the event has one.
 // POST because the first call creates the code on Eventbrite.
-export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handlePost(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const session = await getSessionUser(req.headers);
   if (!session) return errorResponse(401, "UNAUTHORIZED", "Not signed in.", requestId);
@@ -24,3 +24,5 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     throw e;
   }
 }
+
+export const POST = withApi(handlePost);

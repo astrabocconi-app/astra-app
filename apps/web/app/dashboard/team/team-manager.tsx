@@ -8,6 +8,8 @@ import { Field, Input } from "@/app/_ui/field";
 import { EmptyState } from "@/app/_ui/empty-state";
 import { ShieldIcon, PlusIcon } from "@/app/_ui/icons";
 import { PermissionFlow, GRANTABLE_KEYS, GRANTABLE_SECTIONS } from "./permission-flow";
+import { romeDate } from "@/app/_ui/rome";
+import { adminFetch, errorMessage } from "../_lib/admin-fetch";
 
 export interface StaffRow {
   id: string;
@@ -18,13 +20,10 @@ export interface StaffRow {
   lastSignInAt: string | null;
 }
 
-const dateFmt = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
-/** The two buttons: everything a staff account can have, or a blank slate. */
+/**
+ * Two shortcuts: every page a staff account can be given (never Team or Audit log,
+ * which stay admin-only), or a blank slate. Neither makes the account an admin.
+ */
 function AccessPresets({
   value,
   onChange,
@@ -40,17 +39,18 @@ function AccessPresets({
         variant={isFull ? "primary" : "secondary"}
         onClick={() => onChange([...GRANTABLE_KEYS])}
       >
-        Admin · everything
+        All pages
       </Button>
       <Button
         type="button"
-        variant={!isFull ? "primary" : "secondary"}
+        variant="secondary"
         onClick={() => onChange([])}
+        disabled={value.length === 0}
       >
-        Custom · pick pages
+        Clear selection
       </Button>
-      <span className="text-xs text-gray-400">
-        {value.length} of {GRANTABLE_KEYS.length} pages
+      <span className="text-xs text-gray-500">
+        {value.length} of {GRANTABLE_KEYS.length} pages. Team and Audit log are admin-only.
       </span>
     </div>
   );
@@ -68,22 +68,18 @@ function CreateForm({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const res = await fetch("/api/admin/staff", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ username, name, password, pages }),
-    });
-    setBusy(false);
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setError(body?.error?.message ?? "Could not create the account.");
-      return;
+    try {
+      await adminFetch("/api/admin/staff", { method: "POST", body: { username, name, password, pages } });
+      setUsername("");
+      setName("");
+      setPassword("");
+      setPages([]);
+      onDone();
+    } catch (err) {
+      setError(errorMessage(err, "Could not create the account."));
+    } finally {
+      setBusy(false);
     }
-    setUsername("");
-    setName("");
-    setPassword("");
-    setPages([]);
-    onDone();
   };
 
   return (
@@ -96,6 +92,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
             placeholder="giulia"
             autoComplete="off"
             required
+            minLength={3}
           />
         </Field>
         <Field label="Full name" hint="Shown in the audit log.">
@@ -114,6 +111,7 @@ function CreateForm({ onDone }: { onDone: () => void }) {
             placeholder="a long passphrase"
             autoComplete="new-password"
             required
+            minLength={10}
           />
         </Field>
       </div>
@@ -123,10 +121,14 @@ function CreateForm({ onDone }: { onDone: () => void }) {
         <PermissionFlow value={pages} onChange={setPages} />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       <div className="flex items-center gap-2">
-        <Button type="submit" disabled={busy}>
+        <Button type="submit" disabled={busy || password.length < 10 || !username.trim()}>
           {busy ? "Creating…" : "Create account"}
         </Button>
         <Button type="button" variant="secondary" onClick={onDone} disabled={busy}>
@@ -153,20 +155,19 @@ function AccountCard({ account, onChanged }: { account: StaffRow; onChanged: () 
   const save = async () => {
     setBusy(true);
     setError(null);
-    const res = await fetch(`/api/admin/staff/${account.id}`, {
-      method: "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(password ? { pages, password } : { pages }),
-    });
-    setBusy(false);
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      setError(body?.error?.message ?? "Could not save.");
-      return;
+    try {
+      await adminFetch(`/api/admin/staff/${account.id}`, {
+        method: "PATCH",
+        body: password ? { pages, password } : { pages },
+      });
+      setPassword("");
+      setSaved(true);
+      onChanged();
+    } catch (err) {
+      setError(errorMessage(err, "Could not save."));
+    } finally {
+      setBusy(false);
     }
-    setPassword("");
-    setSaved(true);
-    onChanged();
   };
 
   const revoke = async () => {
@@ -177,13 +178,15 @@ function AccountCard({ account, onChanged }: { account: StaffRow; onChanged: () 
     )
       return;
     setBusy(true);
-    const res = await fetch(`/api/admin/staff/${account.id}`, { method: "DELETE" });
-    setBusy(false);
-    if (!res.ok) {
-      setError("Could not revoke the account.");
-      return;
+    setError(null);
+    try {
+      await adminFetch(`/api/admin/staff/${account.id}`, { method: "DELETE" });
+      onChanged();
+    } catch (err) {
+      setError(errorMessage(err, "Could not revoke the account."));
+    } finally {
+      setBusy(false);
     }
-    onChanged();
   };
 
   const sectionSummary = GRANTABLE_SECTIONS.filter((s) =>
@@ -196,6 +199,7 @@ function AccountCard({ account, onChanged }: { account: StaffRow; onChanged: () 
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
         className="flex w-full items-center gap-3 px-5 py-4 text-left"
       >
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-astra-light text-sm font-semibold uppercase text-astra-primary">
@@ -219,9 +223,9 @@ function AccountCard({ account, onChanged }: { account: StaffRow; onChanged: () 
               : "nothing assigned"}
           </span>
         </span>
-        <span className="hidden shrink-0 text-xs text-gray-400 sm:block">
+        <span className="hidden shrink-0 text-xs text-gray-500 sm:block">
           {account.lastSignInAt
-            ? `last in ${dateFmt.format(new Date(account.lastSignInAt))}`
+            ? `last in ${romeDate(account.lastSignInAt)}`
             : "never signed in"}
         </span>
       </button>
@@ -247,7 +251,7 @@ function AccountCard({ account, onChanged }: { account: StaffRow; onChanged: () 
           <div className="max-w-sm">
             <Field
               label="Set a new password"
-              hint="Leave blank to keep the current one. Saving a new one signs them out everywhere."
+              hint="Leave blank to keep the current one. At least 10 characters. Saving a new one signs them out everywhere."
             >
               <Input
                 value={password}
@@ -259,10 +263,14 @@ function AccountCard({ account, onChanged }: { account: StaffRow; onChanged: () 
             </Field>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-red-600">
+              {error}
+            </p>
+          )}
 
-          <div className="flex items-center gap-2">
-            <Button type="button" onClick={save} disabled={busy || !dirty}>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" onClick={save} disabled={busy || !dirty || (password.length > 0 && password.length < 10)}>
               {busy ? "Saving…" : saved && !dirty ? "Saved" : "Save changes"}
             </Button>
             <Button

@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { z } from "zod";
-import { newRequestId, errorResponse } from "@/lib/api";
+import { newRequestId, errorResponse, withApi } from "@/lib/api";
 import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
+import { revokeDiscounts } from "@/lib/eventbrite-revoke";
+import { zodMessage } from "@/lib/validation";
 import {
   createDiscount,
-  deleteDiscount,
   generateCode,
   isEventbriteConfigured,
   DuplicateCodeError,
@@ -39,7 +40,7 @@ interface Made {
 
 // POST /api/admin/rewards/:id/codes/eventbrite
 // Create single-use discounts on Eventbrite and add them to the reward's pool.
-export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+async function handlePost(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const requestId = newRequestId();
   const guard = await requirePageApi(req, requestId, "rewards");
   if ("error" in guard) return guard.error;
@@ -62,7 +63,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return errorResponse(
       400,
       "BAD_REQUEST",
-      parsed.error.issues[0]?.message ?? "Invalid input.",
+      zodMessage(parsed.error),
       requestId,
     );
   }
@@ -147,7 +148,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     });
     added = result.count;
   } catch {
-    await Promise.all(made.map((m) => deleteDiscount(m.discountId)));
+    // Queued for the cron too if Eventbrite does not confirm, so none is forgotten.
+    await revokeDiscounts(made.map((m) => m.discountId));
     return errorResponse(
       500,
       "SAVE_FAILED",
@@ -180,6 +182,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
       // Surfaced so a partial batch says why, instead of a silent short count.
       firstError: failures[0] ?? null,
     },
-    { status: 201, headers: { "x-request-id": requestId } },
+    { status: 201 },
   );
 }
+
+export const POST = withApi(handlePost);

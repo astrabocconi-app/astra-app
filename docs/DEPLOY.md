@@ -47,8 +47,8 @@ Once the backend-hardening release is deployed, `apps/web/vercel.json` declares 
 scheduled maintenance jobs (session and image cleanup, token pruning, and the like;
 if `vercel.json` has no `crons` block yet, they have not shipped). Vercel calls `/api/cron/*` with
 `Authorization: Bearer <CRON_SECRET>`; set `CRON_SECRET` in Production before the
-release that introduces them, otherwise the jobs answer 401. Hobby allows one run
-per job per day. Check runs in Vercel > Project > Cron Jobs, and trigger one by hand
+release that introduces them, otherwise the jobs answer 401. The cleanup job runs
+once a day. Check runs in Vercel > Project > Cron Jobs, and trigger one by hand
 with `curl -H "Authorization: Bearer $CRON_SECRET" https://app.astrabocconi.com/api/cron/<job>`.
 
 ## Migrations
@@ -199,8 +199,8 @@ Backoffice sessions are rows in the `Session` table (Better Auth).
 
 ## Plans and ownership
 
-The Vercel project is on a personal Hobby team and the EAS project belongs to
-`mfmatozza`. Before the App Store release the owner should move both to
-association-owned accounts (Vercel Pro team, Expo organisation). The custom domain
-makes that move invisible to the app, provided `app.astrabocconi.com` is moved with
-it and `astra-app-cyan.vercel.app` stays an alias.
+The Vercel project is on the Pro plan, in the `mfmatozza's projects` team (checked
+with `vercel teams ls` on 2026-10-09), and the EAS project belongs to `mfmatozza` on
+Expo's free plan. If either is later moved to an association-owned account, the custom
+domain makes that invisible to the app, provided `app.astrabocconi.com` moves with it
+and `astra-app-cyan.vercel.app` stays an alias.

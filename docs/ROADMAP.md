@@ -31,8 +31,8 @@ or store · 🤖 code/config work.
 - [ ] 🙋 Separate **dev/preview database** (Neon branch) and separate auth secrets for
       Preview/Development (SETUP.md). Highest-priority risk today.
 - [ ] 🙋 Confirm Neon backup window / plan, run one restore drill, disable the unused Neon Auth service.
-- [ ] 🙋 Move Vercel and EAS to association-owned accounts (Vercel Pro); attach
-      `app.astrabocconi.com` and keep `astra-app-cyan.vercel.app` as an alias.
+- [ ] 🙋 Optional: move Vercel and EAS to association-owned accounts; keep
+      `app.astrabocconi.com` attached and `astra-app-cyan.vercel.app` as an alias.
 - [ ] 🙋 Verify EAS environment variables (`EXPO_PUBLIC_SENTRY_DSN`, `EXPO_PUBLIC_MAPBOX_TOKEN`)
       and add `SENTRY_AUTH_TOKEN` for source maps.
 - [ ] 🤖 Install `expo-updates` and run the SDK alignment (`npx expo install --fix`), then

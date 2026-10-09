@@ -19,8 +19,8 @@ the runbook are in [`DEPLOY.md`](DEPLOY.md). **Never commit a real `.env`.**
 | **Sentry** | Mobile crash and performance reporting. **Web has no server-side error tracking**, use Vercel logs | EAS env |
 | **Expo / EAS** | Builds, store submission, optional OTA updates (owner `mfmatozza`, project id in `app.config.ts`) | expo.dev |
 
-Free Vercel Hobby and Expo free plans are in use: logs are kept about a day, and
-EAS builds are queue-limited. See "Plans and ownership" in `DEPLOY.md`.
+Vercel is on the Pro plan; Expo is on the free plan, so EAS builds are limited and
+queued. See "Plans and ownership" in `DEPLOY.md`.
 
 ## Dev and preview database (owner action, strongly recommended)
 
@@ -121,5 +121,5 @@ Check what EAS holds with `eas env:list production` (needs `eas login`).
 Mobile only. The DSN goes in `EXPO_PUBLIC_SENTRY_DSN`. For readable stack traces
 create a Sentry auth token (scope `project:releases`, `org:read`) and store it as the EAS
 secret `SENTRY_AUTH_TOKEN`, plus `SENTRY_ORG` and `SENTRY_PROJECT`. The web app
-has no server-side tracking: use Vercel's runtime logs (about one day on Hobby) or
+has no server-side tracking: use Vercel's runtime logs (retention depends on the plan) or
 add a log drain.

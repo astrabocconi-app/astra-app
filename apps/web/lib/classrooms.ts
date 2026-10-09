@@ -45,12 +45,12 @@ export class TimetableError extends Error {}
 const HEADERS = { "User-Agent": "ASTRA-app/1.0 (+https://app.astrabocconi.com)", Accept: "text/html" };
 
 /** The whole range, from midnight — the page's hour filter only matches slots that START later. */
-function timetableUrl(from: string, to: string): string {
+function timetableUrl(from: string, to: string, room = ""): string {
   const [fy, fm, fd] = from.split("-") as [string, string, string];
   const [ty, tm, td] = to.split("-") as [string, string, string];
   const q = new URLSearchParams({
     ric_tipo: "",
-    ric_aula: "",
+    ric_aula: room,
     ric_descriz: "",
     ric_da_gg: fd,
     ric_da_mm: fm,
@@ -65,10 +65,10 @@ function timetableUrl(from: string, to: string): string {
   return `${SOURCE_URL}?${q}`;
 }
 
-async function loadTimetable(from: string, to: string, timeoutMs: number): Promise<Assignment[]> {
+async function loadTimetable(from: string, to: string, timeoutMs: number, room = ""): Promise<Assignment[]> {
   let res: Response;
   try {
-    res = await fetch(timetableUrl(from, to), { headers: HEADERS, cache: "no-store", signal: AbortSignal.timeout(timeoutMs) });
+    res = await fetch(timetableUrl(from, to, room), { headers: HEADERS, cache: "no-store", signal: AbortSignal.timeout(timeoutMs) });
   } catch {
     throw new TimetableError("Couldn't reach the Bocconi timetable.");
   }
@@ -78,6 +78,26 @@ async function loadTimetable(from: string, to: string, timeoutMs: number): Promi
   // like "no lessons today" and show every room as free.
   if (!looksLikeTimetable(html)) throw new TimetableError("The Bocconi timetable page has changed shape.");
   return parseTimetableHtml(html);
+}
+
+/**
+ * Can this server reach Bocconi's page, and does it still look like the
+ * assignment list? Asks for a room that doesn't exist, so the answer is tiny.
+ * Cached, because health checks run often and the page isn't ours to hammer.
+ */
+const PROBE_TTL_MS = 5 * 60_000;
+const PROBE_FAIL_TTL_MS = 30_000;
+let probe: { at: number; ttl: number; value: Promise<void> } | null = null;
+
+export function probeTimetable(): Promise<void> {
+  const now = Date.now();
+  if (probe && now - probe.at < probe.ttl) return probe.value;
+  const entry = { at: now, ttl: PROBE_TTL_MS, value: loadTimetable(romeNow().date, romeNow().date, 6_000, "astra-health-probe").then(() => undefined) };
+  probe = entry;
+  entry.value.catch(() => {
+    entry.ttl = PROBE_FAIL_TTL_MS;
+  });
+  return entry.value;
 }
 
 // ── Caches (per warm serverless instance) ───────────────────────────────────

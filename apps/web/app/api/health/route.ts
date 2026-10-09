@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newRequestId, log, withApi, describeError, upstreamFetch } from "@/lib/api";
+import { probeTimetable } from "@/lib/classrooms";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,7 +26,7 @@ async function timed(run: () => Promise<void>): Promise<Probe> {
 async function handleGet() {
   const requestId = newRequestId();
   const supabaseUrl = process.env.SUPABASE_URL;
-  const [db, supabase] = await Promise.all([
+  const [db, supabase, timetable] = await Promise.all([
     timed(async () => {
       await prisma.$queryRaw`SELECT 1`;
     }).then((p) => {
@@ -42,12 +43,14 @@ async function handleGet() {
           if (res.status >= 500) throw new Error(`status ${res.status}`);
         })
       : Promise.resolve<Probe>({ status: "skipped", ms: 0 }),
+    // Free@B reads Bocconi's timetable: "down" here means unreachable or the page changed shape.
+    timed(probeTimetable),
   ]);
   return NextResponse.json(
     {
       status: "ok",
       db: db.status,
-      checks: { db, supabase },
+      checks: { db, supabase, timetable },
       requestId,
       timestamp: new Date().toISOString(),
     },

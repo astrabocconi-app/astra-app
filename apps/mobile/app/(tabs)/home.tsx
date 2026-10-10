@@ -222,13 +222,12 @@ export default function HomeScreen() {
       {/* The row has a minimum height (the 1.2 : 1 shape at the default text
           size) and grows with the text, so nothing is clipped at larger sizes;
           both cards stretch to the same height. */}
-      <View className="mx-5 mt-5 flex-row items-stretch gap-3">
+      <View className="mx-5 mt-5 flex-row gap-3" style={{ height: cardMinHeight(width) }}>
         <Pressable
           onPress={() => router.push("/classrooms")}
           accessibilityRole="button"
           accessibilityLabel={`${t("home.freeAtB")}, ${t("home.freeAtBSub")}`}
           className="flex-1 overflow-hidden rounded-2xl bg-astra-primary active:opacity-90"
-          style={{ minHeight: cardMinHeight(width) }}
         >
           {/* Taller than the card and pinned to its bottom, so the middle and
               lower part of the photo (the rows of desks) is what shows. */}
@@ -264,7 +263,7 @@ export default function HomeScreen() {
           accessibilityLabel={`${t("polare.title")}, ${t("home.polareSub")}`}
           className="flex-1 justify-between overflow-hidden rounded-2xl p-3.5 active:opacity-90"
           // Same blue as the logo's own background, so the artwork has no edge.
-          style={{ backgroundColor: "#04107E", minHeight: cardMinHeight(width) }}
+          style={{ backgroundColor: "#04107E" }}
         >
           <Image
             source={IMAGES.stellaPolare}

@@ -239,11 +239,11 @@ export default function HomeScreen() {
             accessibilityIgnoresInvertColors
           />
           {/* Brand-blue wash: the photo reads as texture, the text stays legible. */}
-          <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(4,16,126,0.74)" }]} />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(4,16,126,0.62)" }]} />
           <View className="flex-1 justify-between gap-3 p-3.5">
             <View className="flex-row items-center gap-1.5">
               <View className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: "#4ADE80" }} />
-              <Text maxFontSizeMultiplier={1.3} className="text-[10px] font-semibold uppercase tracking-wider text-white">
+              <Text maxFontSizeMultiplier={1.3} className="text-[10px] font-semibold uppercase tracking-wider text-white/80">
                 {t("home.freeAtBEyebrow")}
               </Text>
             </View>
@@ -251,7 +251,7 @@ export default function HomeScreen() {
               <Text maxFontSizeMultiplier={1.3} className="text-lg font-semibold text-white">
                 {t("home.freeAtB")}
               </Text>
-              <Text maxFontSizeMultiplier={1.3} className="text-xs text-white">
+              <Text maxFontSizeMultiplier={1.3} className="text-xs text-white/80" numberOfLines={2}>
                 {t("home.freeAtBSub")}
               </Text>
             </View>
@@ -272,7 +272,7 @@ export default function HomeScreen() {
             style={{ width: "100%", flex: 1, minHeight: 0 }}
             accessibilityIgnoresInvertColors
           />
-          <Text maxFontSizeMultiplier={1.3} className="mt-2 text-xs text-white">
+          <Text maxFontSizeMultiplier={1.3} className="mt-2 text-xs text-white/80" numberOfLines={2}>
             {t("home.polareSub")}
           </Text>
         </Pressable>

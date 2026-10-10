@@ -7,7 +7,7 @@
 // dashboard edit forms) the raw stored value is returned so re-saving is stable.
 
 import { z } from "zod";
-import { contentLink } from "@astra/shared";
+import { contentLink, polareMedia } from "@astra/shared";
 import type {
   NewsItem,
   EventItem,
@@ -15,8 +15,9 @@ import type {
   PartnerItem,
   PartnerOffer,
   ContentLink,
+  PolarePost as PolarePostItem,
 } from "@astra/shared";
-import type { NewsPost, Event as EventRow, Reward, Partner, Offer } from "@astra/db";
+import type { NewsPost, PolarePost, Event as EventRow, Reward, Partner, Offer } from "@astra/db";
 
 export function resolveImageUrl(value: string | null, origin?: string): string | null {
   if (!value) return null;
@@ -55,6 +56,26 @@ export function toNewsItem(n: NewsPost, origin?: string): NewsItem {
     publishedAt: n.publishedAt ? n.publishedAt.toISOString() : null,
     links: parseLinks(n.links),
     createdAt: n.createdAt.toISOString(),
+  };
+}
+
+/** Media comes out of a JSON column: parsed, not cast. A bad row shows no media rather than breaking the feed. */
+export function toPolarePost(p: PolarePost, origin?: string): PolarePostItem {
+  const parsed = z.array(polareMedia).safeParse(p.media);
+  return {
+    id: p.id,
+    kind: p.kind as PolarePostItem["kind"],
+    caption: p.caption,
+    media: (parsed.success ? parsed.data : []).map((m) => ({
+      ...m,
+      url: resolveImageUrl(m.url, origin) ?? m.url,
+      posterUrl: resolveImageUrl(m.posterUrl, origin),
+    })),
+    externalUrl: p.externalUrl,
+    pinned: p.pinned,
+    published: p.published,
+    publishedAt: p.publishedAt ? p.publishedAt.toISOString() : null,
+    createdAt: p.createdAt.toISOString(),
   };
 }
 

@@ -9,6 +9,7 @@
 // Keep these barrels as the only public surface.
 
 export * from "./schemas";
+export * from "./polare";
 export * from "./client";
 export * from "./domain";
 export * from "./grade-plans";

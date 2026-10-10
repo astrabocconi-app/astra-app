@@ -122,6 +122,7 @@ const config: ExpoConfig = {
     "expo-secure-store",
     "expo-notifications",
     "expo-web-browser",
+    "expo-video",
     [
       "expo-splash-screen",
       {

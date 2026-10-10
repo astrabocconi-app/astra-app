@@ -16,6 +16,7 @@ import type {
   AcademicProfile,
   AcademicProfileInput,
 } from "../schemas";
+import type { PolareListResponse } from "../polare";
 
 // Typed API client used by the mobile app to call apps/web's /api/* routes.
 // Mobile NEVER touches the DB — this HTTPS client is its only data path.
@@ -266,6 +267,11 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/news — published news posts for the feed. */
     news: {
       list: async () => (await request<NewsListResponse>("/api/news")).data,
+    },
+
+    /** GET /api/polare — the Stella Polare feed (pinned first, newest). */
+    polare: {
+      list: async () => (await request<PolareListResponse>("/api/polare")).data,
     },
 
     /** GET /api/events — published upcoming events. */

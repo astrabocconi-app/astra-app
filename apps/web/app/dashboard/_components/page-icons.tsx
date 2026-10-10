@@ -20,6 +20,7 @@ import {
   BellIcon,
   ShieldIcon,
   KeyIcon,
+  StarIcon,
 } from "@/app/_ui/icons";
 
 export function pageIcon(key: string, size = 18): ReactNode {
@@ -30,6 +31,8 @@ export function pageIcon(key: string, size = 18): ReactNode {
       return <NewspaperIcon size={size} />;
     case "events":
       return <CalendarIcon size={size} />;
+    case "polare":
+      return <StarIcon size={size} />;
     case "materials":
       return <BookIcon size={size} />;
     case "rewards":

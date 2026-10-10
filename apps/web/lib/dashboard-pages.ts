@@ -45,6 +45,12 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         blurb: "Create events students can see",
       },
       {
+        key: "polare",
+        label: "Stella Polare",
+        href: "/dashboard/polare",
+        blurb: "Photos, carousels and reels for the Stella Polare feed",
+      },
+      {
         key: "materials",
         label: "Materials",
         href: "/dashboard/materials",

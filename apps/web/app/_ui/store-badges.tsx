@@ -7,9 +7,9 @@
 // and the badge lights up on its own.
 
 /** null until the App Store listing is ready. */
-const APP_STORE_URL: string | null = null;
+const APP_STORE_URL: string | null = "https://apps.apple.com/app/id6805444602";
 /** null until the Play Store listing exists. */
-const PLAY_STORE_URL: string | null = null;
+const PLAY_STORE_URL: string | null = "https://play.google.com/store/apps/details?id=it.astrabocconi.app";
 
 function BadgeInner({
   eyebrow,

@@ -120,6 +120,24 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
     ],
   },
   {
+    key: "bi",
+    label: "BI",
+    pages: [
+      {
+        key: "bi",
+        label: "Installs & growth",
+        href: "/dashboard/bi",
+        blurb: "Installs over time, and breakdowns by year and programme",
+      },
+      {
+        key: "bi-classes",
+        label: "Class coverage",
+        href: "/dashboard/bi/classes",
+        blurb: "Share of each class roster that has installed the app",
+      },
+    ],
+  },
+  {
     key: "admin",
     label: "Administration",
     pages: [

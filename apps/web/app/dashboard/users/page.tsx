@@ -10,6 +10,7 @@ import { romeDate } from "@/app/_ui/rome";
 import { isAdmin } from "@/lib/authz";
 import { requireDashboardPage } from "../_lib/session";
 import { DeleteUserButton } from "./delete-user-button";
+import { RefreshButton } from "./refresh-button";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Students" };
@@ -100,6 +101,7 @@ export default async function UsersPage({
           className="max-w-sm"
         />
         <Button type="submit">Search</Button>
+        <RefreshButton />
         {query && (
           <Link href="/dashboard/users" className="self-center text-sm text-gray-500 hover:text-gray-700">
             Clear

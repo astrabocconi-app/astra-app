@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/app/_ui/button";
 import { Card } from "@/app/_ui/card";
 import { Field, Input, Select } from "@/app/_ui/field";
 import { adminFetch, errorMessage } from "../_lib/admin-fetch";
-import { lookUpStudent, type StudentLookup } from "./actions";
+import { lookUpStudent, searchStudents, type StudentHit, type StudentLookup } from "./actions";
 
 type Direction = "grant" | "deduct";
 
@@ -23,6 +23,8 @@ type Review = Extract<StudentLookup, { found: true }>;
 export function AdjustPointsForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [nameQuery, setNameQuery] = useState("");
+  const [hits, setHits] = useState<StudentHit[]>([]);
   const [direction, setDirection] = useState<Direction>("grant");
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
@@ -31,6 +33,20 @@ export function AdjustPointsForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+
+  // Debounced name search; the cleanup drops stale responses.
+  useEffect(() => {
+    let live = true;
+    const t = setTimeout(() => {
+      searchStudents(nameQuery)
+        .then((r) => live && setHits(r))
+        .catch(() => live && setHits([]));
+    }, 250);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [nameQuery]);
 
   const amountNum = Number(amount);
   const amountError =
@@ -107,6 +123,36 @@ export function AdjustPointsForm() {
           correct a mistake.
         </p>
       </div>
+
+      <Field composite label="Find student by name" hint="Type part of a name (any order), then pick the student.">
+        <Input
+          value={nameQuery}
+          disabled={review !== null}
+          onChange={(e) => setNameQuery(e.target.value)}
+          placeholder="e.g. rossi mario"
+          autoComplete="off"
+        />
+        {hits.length > 0 && (
+          <ul className="mt-2 divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 bg-white">
+            {hits.map((h) => (
+              <li key={h.email}>
+                <button
+                  type="button"
+                  className="block w-full px-3 py-2 text-left text-sm hover:bg-gray-50"
+                  onClick={() => {
+                    setEmail(h.email);
+                    setNameQuery("");
+                    setHits([]);
+                  }}
+                >
+                  <span className="font-medium text-gray-900">{h.name ?? "Unnamed"}</span>{" "}
+                  <span className="break-all text-xs text-gray-500">{h.email}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Field>
 
       <Field label="Student email" required>
         <Input

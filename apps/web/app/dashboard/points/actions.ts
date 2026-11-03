@@ -27,3 +27,30 @@ export async function lookUpStudent(rawEmail: string): Promise<StudentLookup> {
   }
   return { found: true, email: user.email, name: user.name, balance: await getBalance(user.id) };
 }
+
+export interface StudentHit {
+  email: string;
+  name: string | null;
+}
+
+/** Name-or-email search for the adjustment form. Every word must match, in any order. */
+export async function searchStudents(raw: string): Promise<StudentHit[]> {
+  await requireDashboardPage("points");
+  const words = String(raw ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 5);
+  if (words.join("").length < 2) return [];
+  return prisma.user.findMany({
+    where: {
+      deletedAt: null,
+      roles: { has: "STUDENT" },
+      AND: words.map((w) => ({
+        OR: [
+          { name: { contains: w, mode: "insensitive" as const } },
+          { email: { contains: w, mode: "insensitive" as const } },
+        ],
+      })),
+    },
+    select: { email: true, name: true },
+    orderBy: { name: "asc" },
+    take: 8,
+  });
+}

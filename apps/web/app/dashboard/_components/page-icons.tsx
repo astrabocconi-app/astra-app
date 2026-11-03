@@ -50,6 +50,9 @@ export function pageIcon(key: string, size = 18): ReactNode {
       return <UsersIcon size={size} />;
     case "support":
       return <SupportIcon size={size} />;
+    case "bi":
+    case "bi-classes":
+      return <AuditIcon size={size} />;
     case "team":
       return <ShieldIcon size={size} />;
     case "audit":

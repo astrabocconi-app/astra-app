@@ -10,8 +10,8 @@ the runbook are in [`DEPLOY.md`](DEPLOY.md). **Never commit a real `.env`.**
 |---|---|---|
 | **Vercel** | Hosts `apps/web` (backoffice + API), region `fra1` (`apps/web/vercel.json`), Node 24 | Project `astra-app`, root directory `apps/web` |
 | **Neon** | Postgres (pooled URL at runtime, direct URL for migrations), provisioned through the Vercel integration, which injects `STORAGE_*` variables | Vercel > Storage |
-| **Aruba SMTP** | Sign-in OTP and staff/admin e-mail. Optional second mailbox (`*_2`) as failover when the first hits Aruba's hourly cap (`apps/web/lib/smtp-failover.ts`) | Vercel env |
-| **Resend** | Last-resort fallback transport, only if no SMTP is configured. **Not used in production** (`RESEND_API_KEY` is unset). | Vercel env |
+| **Aruba SMTP** | **Off in production since 2026-11-03** (`SMTP_HOST` renamed to `SMTP_HOST_OFF`; rename it back and redeploy to restore). Sign-in OTP and staff/admin e-mail. Optional second mailbox (`*_2`) as failover when the first hits Aruba's hourly cap (`apps/web/lib/smtp-failover.ts`) | Vercel env |
+| **Resend** | **Active sender in production since 2026-11-03** (domain `astrabocconi.com` verified, DNS at Aruba). Used whenever no SMTP is configured. | Vercel env |
 | **Supabase** | Read-only catalogue of guides, handouts and materials; files are public storage URLs | Vercel env |
 | **Eventbrite** | Ticket checkout (browser sheet), per-event discount codes, reward code import | Vercel env |
 | **Mapbox** | Discounts map in the app (public `pk.` token baked in per build) and geocoding in the backoffice | EAS env + Vercel env |
@@ -69,7 +69,7 @@ Until that is done, build your own Neon branch URL by hand into `apps/web/.env`.
 | `CARD_TOKEN_HMAC_SECRET` | yes | **separate per environment** | Signs QR card tokens |
 | `ALLOWED_EMAIL_DOMAINS` | no (default `studbocconi.it,unibocconi.it`) | all | Domains allowed to request an OTP |
 | `MOBILE_ALLOWED_ORIGINS` | no | all | Extra trusted origins (CORS / auth). Native requests carry no `Origin`. |
-| `SMTP_HOST` `SMTP_PORT` `SMTP_SECURE` `SMTP_USER` `SMTP_PASS` `EMAIL_FROM` | yes in P | P | Primary mailbox (Aruba: `smtps.aruba.it`, 465, secure) |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_SECURE` `SMTP_USER` `SMTP_PASS` `EMAIL_FROM` | no (Resend active) | P | Primary mailbox (Aruba: `smtps.aruba.it`, 465, secure) |
 | `SMTP_USER_2` `SMTP_PASS_2` `EMAIL_FROM_2` | no | P | Failover mailbox |
 | `RESEND_API_KEY` `RESEND_FROM` | no | none | Dead fallback, leave unset |
 | `ADMIN_USERNAME` `ADMIN_EMAIL` `ADMIN_PASSWORD_HASH` | yes for backoffice admin | P (and your own for D) | The single environment admin. Hash from `node apps/web/scripts/create-admin.mjs <username> <email> [password]`. |

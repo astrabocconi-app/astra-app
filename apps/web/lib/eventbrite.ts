@@ -221,14 +221,19 @@ export interface CreatedDiscount {
  * percentOff is 1-100; 100 makes the ticket free, which is how the "free
  * ticket" rewards work.
  */
-export async function createDiscount(opts: {
-  eventId: string;
-  code: string;
-  percentOff: number;
-}): Promise<CreatedDiscount> {
+export async function createDiscount(
+  opts: { eventId: string; code: string } & (
+    | { percentOff: number; ticketClassId?: undefined }
+    /** An access code that unlocks this hidden ticket type, at that type's own price. */
+    | { ticketClassId: string; percentOff?: undefined }
+  ),
+): Promise<CreatedDiscount> {
   const org = orgId();
   if (!org) throw new EventbriteError("Eventbrite is not configured.");
-  if (!Number.isFinite(opts.percentOff) || opts.percentOff < 1 || opts.percentOff > 100) {
+  if (
+    opts.ticketClassId === undefined &&
+    (!Number.isFinite(opts.percentOff) || opts.percentOff < 1 || opts.percentOff > 100)
+  ) {
     throw new EventbriteError("Discount must be between 1% and 100%.");
   }
 
@@ -239,11 +244,12 @@ export async function createDiscount(opts: {
         method: "POST",
         body: {
           discount: {
-            type: "coded",
             code: opts.code,
             event_id: opts.eventId,
-            percent_off: String(opts.percentOff),
             quantity_available: QUANTITY_PER_CODE,
+            ...(opts.ticketClassId !== undefined
+              ? { type: "access", ticket_class_ids: [opts.ticketClassId] }
+              : { type: "coded", percent_off: String(opts.percentOff) }),
           },
         },
       },
@@ -271,4 +277,79 @@ export async function deleteDiscount(discountId: string): Promise<boolean> {
   } catch (e) {
     return e instanceof EventbriteError && e.status === 404;
   }
+}
+
+interface RawTicketClass {
+  id: string;
+  name?: string;
+  free?: boolean;
+  donation?: boolean;
+  hidden?: boolean;
+  cost?: { currency?: string; value?: number } | null;
+}
+
+const APP_TICKET_NAME = "ASTRA app";
+
+/**
+ * Create or update the hidden ticket type students buy through the app.
+ *
+ * It sells at exactly `priceCents` with Eventbrite's fee absorbed into the price
+ * (`include_fee`), so the student pays what the backoffice says and ASTRA takes
+ * the fee. It is hidden: only a student's access code reveals it. Capacity is
+ * the per-event cap, so Eventbrite enforces it too.
+ *
+ * Returns the ticket type's id and the cheapest public price (for working out
+ * the "-X%" that apps already in the stores display).
+ */
+export async function upsertAppTicketClass(opts: {
+  eventId: string;
+  priceCents: number;
+  limit: number | null;
+  ticketClassId: string | null;
+}): Promise<{ ticketClassId: string; fullPriceCents: number }> {
+  const data = await call<{ ticket_classes?: RawTicketClass[] }>(`/events/${opts.eventId}/ticket_classes/`);
+  const classes = data.ticket_classes ?? [];
+  const publicPaid = classes.filter(
+    (c) => c.id !== opts.ticketClassId && !c.hidden && !c.free && !c.donation && (c.cost?.value ?? 0) > 0,
+  );
+  if (publicPaid.length === 0) {
+    throw new EventbriteError("The Eventbrite event has no paid public ticket, so there is no full price to discount.");
+  }
+  const cheapest = publicPaid.reduce((a, b) => ((a.cost!.value! <= b.cost!.value!) ? a : b));
+  const fullPriceCents = cheapest.cost!.value!;
+  const currency = cheapest.cost!.currency ?? "EUR";
+  if (opts.priceCents >= fullPriceCents) {
+    throw new EventbriteError(
+      `The app price must be lower than the cheapest public ticket (${currency} ${(fullPriceCents / 100).toFixed(2)}).`,
+    );
+  }
+
+  const free = opts.priceCents === 0;
+  const ticketClass = {
+    name: APP_TICKET_NAME,
+    description: "Reserved for ASTRA app users.",
+    hidden: true,
+    free,
+    donation: false,
+    ...(free ? {} : { cost: `${currency},${opts.priceCents}`, include_fee: true }),
+    // ponytail: no cap = 1000 seats on the hidden type; the event's own capacity still applies on top.
+    capacity: opts.limit ?? 1000,
+    minimum_quantity: 1,
+    maximum_quantity: 1,
+  };
+
+  // Reuse ours when it still exists on this event (the admin may have deleted it,
+  // or re-linked the ASTRA event to another Eventbrite event).
+  if (opts.ticketClassId && classes.some((c) => c.id === opts.ticketClassId)) {
+    await call(`/events/${opts.eventId}/ticket_classes/${opts.ticketClassId}/`, {
+      method: "POST",
+      body: { ticket_class: ticketClass },
+    });
+    return { ticketClassId: opts.ticketClassId, fullPriceCents };
+  }
+  const created = await call<{ id: string }>(`/events/${opts.eventId}/ticket_classes/`, {
+    method: "POST",
+    body: { ticket_class: ticketClass },
+  });
+  return { ticketClassId: created.id, fullPriceCents };
 }

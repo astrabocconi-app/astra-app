@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { withDiscount, ticketUrl, isEventbriteUrl } from "./ticket-url.ts";
+import { withDiscount, ticketUrl, isEventbriteUrl, appPercent } from "./ticket-url.ts";
 
 test("discount code goes on the ticket link, keeping its own query", () => {
   assert.equal(
@@ -37,4 +37,10 @@ test("discountProblem requires a linked event and an Eventbrite ticket link", as
   assert.match(discountProblem(20, "1", "https://x.test/t"), /Eventbrite page/);
   assert.equal(discountProblem(20, "1", "https://www.eventbrite.com/e/1"), null);
   assert.equal(discountProblem(20, "1", null), null);
+});
+
+test("app price shown as a percent the old apps understand", () => {
+  assert.equal(appPercent(1000, 1500), 33);
+  assert.equal(appPercent(0, 1500), 100);
+  assert.equal(appPercent(1499, 1500), 1);
 });

@@ -34,7 +34,7 @@ export function ticketUrl(externalTicketUrl: string | null, eventbriteEventId: s
  * is appended to that link, and on another site it would be useless and leaked.
  */
 export function discountProblem(
-  percent: number | null | undefined,
+  percent: number | boolean | null | undefined,
   eventbriteEventId: string | null | undefined,
   externalTicketUrl: string | null | undefined,
 ): string | null {
@@ -44,4 +44,13 @@ export function discountProblem(
     return "An in-app discount needs the ticket link to be an Eventbrite page. Clear the ticket link or use the Eventbrite one.";
   }
   return null;
+}
+
+/**
+ * The "-X%" shown for a fixed app price, for apps that only know percentages.
+ * Rounded, and kept within 1-100 (the column's range): a price a few cents under
+ * the full one still reads as a discount, and 0 reads as free.
+ */
+export function appPercent(priceCents: number, fullPriceCents: number): number {
+  return Math.min(100, Math.max(1, Math.round((1 - priceCents / fullPriceCents) * 100)));
 }

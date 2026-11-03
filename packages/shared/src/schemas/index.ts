@@ -309,6 +309,8 @@ const eventFields = {
   eventbriteEventId: z.string().trim().regex(/^\d+$/, "Pick an Eventbrite event").nullish(),
   appDiscountPercent: z.number().int().min(1).max(100).nullish(),
   appDiscountLimit: z.number().int().min(1).nullish(),
+  /** Fixed price in cents students pay through the app (0 = free). Overrides the percent. */
+  appPriceCents: z.number().int().min(0).max(10_000_000).nullish(),
   /**
    * Re-pointing an event at another Eventbrite event after students already
    * hold codes strands those codes (they were minted for the old event). The
@@ -356,6 +358,8 @@ export const eventItem = z.object({
   /** Percent off when buying through the app; null = none. */
   appDiscountPercent: z.number().nullable(),
   appDiscountLimit: z.number().nullable(),
+  /** Price in cents students pay through the app; null = none. Absent from older servers. */
+  appPriceCents: z.number().nullable().optional(),
 });
 export type EventItem = z.infer<typeof eventItem>;
 

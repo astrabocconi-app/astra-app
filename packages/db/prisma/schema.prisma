@@ -709,6 +709,11 @@ model Event {
   appDiscountPercent Int?
   /// How many students can get it (null = no cap).
   appDiscountLimit   Int?
+  /// Price in cents students pay through the app, on a hidden Eventbrite ticket
+  /// type with fees absorbed (null = percent mode / no discount).
+  appPriceCents      Int?
+  /// That hidden Eventbrite ticket type, created by the backoffice on save.
+  appTicketClassId   String?
   areaId            String?
   published         Boolean   @default(false)
   createdAt         DateTime  @default(now())

@@ -7,6 +7,8 @@ import { writeAudit, changedFields, auditVerb } from "@/lib/audit";
 import { toEventItem } from "@/lib/cms-map";
 import { discountProblem } from "@/lib/ticket-url";
 import { revokeDiscounts } from "@/lib/eventbrite-revoke";
+import { EventbriteError } from "@/lib/eventbrite";
+import { syncAppPrice } from "@/lib/event-discount";
 import { zodMessage } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -26,6 +28,7 @@ const FIELDS = [
   "eventbriteEventId",
   "appDiscountPercent",
   "appDiscountLimit",
+  "appPriceCents",
 ] as const;
 
 // PATCH /api/admin/events/:id — update (incl. publish/unpublish).
@@ -57,12 +60,20 @@ async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> 
     eventbriteEventId: d.eventbriteEventId !== undefined ? d.eventbriteEventId : existing.eventbriteEventId,
     appDiscountPercent: d.appDiscountPercent !== undefined ? d.appDiscountPercent : existing.appDiscountPercent,
     appDiscountLimit: d.appDiscountLimit !== undefined ? d.appDiscountLimit : existing.appDiscountLimit,
+    appPriceCents: d.appPriceCents !== undefined ? d.appPriceCents : existing.appPriceCents,
+    appTicketClassId: existing.appTicketClassId,
   };
+  // With a fixed price the percent is derived (by syncAppPrice below), never sent.
+  if (next.appPriceCents != null) next.appDiscountPercent = existing.appDiscountPercent;
   // A new start can land after the stored end (or the reverse) even when each is valid alone.
   if (next.endsAt && next.endsAt < next.startsAt) {
     return errorResponse(400, "BAD_REQUEST", "End: End can't be before the start", requestId);
   }
-  const problem = discountProblem(next.appDiscountPercent, next.eventbriteEventId, next.externalTicketUrl);
+  const problem = discountProblem(
+    next.appPriceCents != null || next.appDiscountPercent,
+    next.eventbriteEventId,
+    next.externalTicketUrl,
+  );
   if (problem) return errorResponse(400, "BAD_REQUEST", problem, requestId);
 
   const changes = changedFields(
@@ -93,6 +104,21 @@ async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> 
     }
   }
 
+  // Fixed app price: keep the hidden Eventbrite ticket type in step, only when
+  // something it depends on changed (an unrelated edit must not need Eventbrite).
+  if (
+    next.appPriceCents != null &&
+    next.eventbriteEventId &&
+    (changes.appPriceCents || changes.appDiscountLimit || changes.eventbriteEventId || !next.appTicketClassId)
+  ) {
+    try {
+      Object.assign(next, await syncAppPrice({ ...next, eventbriteEventId: next.eventbriteEventId, appPriceCents: next.appPriceCents }));
+    } catch (e) {
+      if (e instanceof EventbriteError) return errorResponse(400, "BAD_REQUEST", e.message, requestId);
+      throw e;
+    }
+  }
+
   const updated = await prisma.$transaction(async (tx) => {
     const row = await tx.event.update({
       where: { id },
@@ -110,6 +136,8 @@ async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> 
         eventbriteEventId: next.eventbriteEventId,
         appDiscountPercent: next.appDiscountPercent,
         appDiscountLimit: next.appDiscountLimit,
+        appPriceCents: next.appPriceCents,
+        appTicketClassId: next.appTicketClassId,
       },
     });
     await writeAudit(

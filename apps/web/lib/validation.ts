@@ -21,6 +21,7 @@ const LABELS: Record<string, string> = {
   eventbriteEventId: "Eventbrite event",
   appDiscountPercent: "Discount",
   appDiscountLimit: "Discount limit",
+  appPriceCents: "App price",
   costPoints: "Cost",
   stock: "Stock",
   perUserLimit: "Max per account",

@@ -1,7 +1,8 @@
 // In-app ticket discounts. SERVER-ONLY.
 //
 // An event linked to its Eventbrite event can give students who buy through the
-// app a percentage off. Each student gets a personal single-use Eventbrite code
+// app a percentage off, or a fixed price: then the code is an access code that
+// unlocks a hidden ticket type at that price (see upsertAppTicketClass). Each student gets a personal single-use Eventbrite code
 // the first time they tap "Get tickets" — a shared code would end up in group
 // chats — and the same code on every later tap.
 //
@@ -13,9 +14,9 @@
 
 import { prisma, Prisma } from "@astra/db";
 import type { TicketLinkResponse } from "@astra/shared";
-import { createDiscount, generateCode, isEventbriteConfigured, DuplicateCodeError } from "./eventbrite";
+import { createDiscount, generateCode, isEventbriteConfigured, DuplicateCodeError, upsertAppTicketClass } from "./eventbrite";
 import { revokeDiscounts } from "./eventbrite-revoke";
-import { ticketUrl, withDiscount, isEventbriteUrl } from "./ticket-url";
+import { ticketUrl, withDiscount, isEventbriteUrl, appPercent } from "./ticket-url";
 import { log, newRequestId } from "./api";
 
 export class TicketLinkError extends Error {}
@@ -73,7 +74,11 @@ export async function ticketLinkFor(eventId: string, userId: string): Promise<Ti
   // plain link and let them pay full price rather than nothing.
   let created;
   try {
-    created = await createWithFreshCode(event.eventbriteEventId, percent);
+    created = await createWithFreshCode(
+      event.eventbriteEventId,
+      percent,
+      event.appPriceCents != null ? event.appTicketClassId : null,
+    );
   } catch (e) {
     log("warn", newRequestId(), "ticket discount not created", { eventId, status: (e as { status?: number }).status });
     await prisma.eventAppDiscount.deleteMany({ where: { id: reservation.id, eventbriteDiscountId: "" } });
@@ -126,10 +131,11 @@ async function reserveSlot(
   }
 }
 
-async function createWithFreshCode(eventbriteEventId: string, percentOff: number) {
+async function createWithFreshCode(eventbriteEventId: string, percentOff: number, ticketClassId: string | null) {
   for (let attempt = 0; ; attempt++) {
+    const base = { eventId: eventbriteEventId, code: generateCode("APP") };
     try {
-      return await createDiscount({ eventId: eventbriteEventId, code: generateCode("APP"), percentOff });
+      return await createDiscount(ticketClassId ? { ...base, ticketClassId } : { ...base, percentOff });
     } catch (e) {
       if (!(e instanceof DuplicateCodeError) || attempt >= 2) throw e;
     }
@@ -144,4 +150,24 @@ export async function issuedCounts(eventIds: string[]): Promise<Map<string, numb
     where: { eventId: { in: eventIds }, eventbriteDiscountId: { not: "" } },
   });
   return new Map(rows.map((r) => [r.eventId, r._count]));
+}
+
+/**
+ * For a fixed app price: create/update the hidden Eventbrite ticket type and
+ * work out the "-X%" older apps show. Throws EventbriteError (the message is
+ * meant for the admin) when Eventbrite refuses, so a bad price is never saved.
+ */
+export async function syncAppPrice(e: {
+  eventbriteEventId: string;
+  appPriceCents: number;
+  appDiscountLimit: number | null;
+  appTicketClassId: string | null;
+}): Promise<{ appDiscountPercent: number; appTicketClassId: string }> {
+  const { ticketClassId, fullPriceCents } = await upsertAppTicketClass({
+    eventId: e.eventbriteEventId,
+    priceCents: e.appPriceCents,
+    limit: e.appDiscountLimit,
+    ticketClassId: e.appTicketClassId,
+  });
+  return { appDiscountPercent: appPercent(e.appPriceCents, fullPriceCents), appTicketClassId: ticketClassId };
 }

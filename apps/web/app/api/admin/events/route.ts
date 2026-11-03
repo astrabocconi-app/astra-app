@@ -6,6 +6,8 @@ import { requirePageApi } from "@/lib/admin-route";
 import { writeAudit } from "@/lib/audit";
 import { toEventItem } from "@/lib/cms-map";
 import { discountProblem } from "@/lib/ticket-url";
+import { EventbriteError } from "@/lib/eventbrite";
+import { syncAppPrice } from "@/lib/event-discount";
 import { zodMessage } from "@/lib/validation";
 
 export const runtime = "nodejs";
@@ -39,8 +41,26 @@ async function handlePost(req: Request) {
     return errorResponse(400, "BAD_REQUEST", zodMessage(parsed.error), requestId);
   }
   const d = parsed.data;
-  const problem = discountProblem(d.appDiscountPercent, d.eventbriteEventId, d.externalTicketUrl);
+  const problem = discountProblem(d.appPriceCents != null || d.appDiscountPercent, d.eventbriteEventId, d.externalTicketUrl);
   if (problem) return errorResponse(400, "BAD_REQUEST", problem, requestId);
+
+  let appPercent = d.appDiscountPercent ?? null;
+  let appTicketClassId: string | null = null;
+  if (d.appPriceCents != null && d.eventbriteEventId) {
+    try {
+      const synced = await syncAppPrice({
+        eventbriteEventId: d.eventbriteEventId,
+        appPriceCents: d.appPriceCents,
+        appDiscountLimit: d.appDiscountLimit ?? null,
+        appTicketClassId: null,
+      });
+      appPercent = synced.appDiscountPercent;
+      appTicketClassId = synced.appTicketClassId;
+    } catch (e) {
+      if (e instanceof EventbriteError) return errorResponse(400, "BAD_REQUEST", e.message, requestId);
+      throw e;
+    }
+  }
 
   const created = await prisma.$transaction(async (tx) => {
     const event = await tx.event.create({
@@ -55,8 +75,10 @@ async function handlePost(req: Request) {
         published: d.published,
         links: d.links,
         eventbriteEventId: d.eventbriteEventId ?? null,
-        appDiscountPercent: d.appDiscountPercent ?? null,
+        appDiscountPercent: appPercent,
         appDiscountLimit: d.appDiscountLimit ?? null,
+        appPriceCents: d.appPriceCents ?? null,
+        appTicketClassId,
       },
     });
     await writeAudit(

@@ -10,7 +10,7 @@ import { Field, Input, Textarea, Toggle } from "@/app/_ui/field";
 import { ImageInput } from "../_components/image-input";
 import { adminFetch, errorMessage } from "../_lib/admin-fetch";
 import { useDirtyGuard } from "../_lib/use-dirty-guard";
-import { AppDiscount, discountProblems, type AppDiscountValue } from "./app-discount";
+import { AppDiscount, discountProblems, priceCents, type AppDiscountValue } from "./app-discount";
 
 function isHttpsUrl(v: string) {
   try {
@@ -34,8 +34,9 @@ export function EventForm({ id, initial, issued }: { id?: string; initial?: Even
   const [links, setLinks] = useState<ContentLink[]>(initial?.links ?? []);
   const [discount, setDiscount] = useState<AppDiscountValue>({
     eventbriteEventId: initial?.eventbriteEventId ?? "",
-    enabled: Boolean(initial?.appDiscountPercent),
-    percent: initial?.appDiscountPercent ? String(initial.appDiscountPercent) : "",
+    // Events saved in the old percent mode open with the price empty, to be filled in.
+    enabled: initial?.appPriceCents != null || Boolean(initial?.appDiscountPercent),
+    price: initial?.appPriceCents != null ? (initial.appPriceCents / 100).toFixed(2) : "",
     limit: initial?.appDiscountLimit ? String(initial.appDiscountLimit) : "",
   });
   const [loading, setLoading] = useState(false);
@@ -73,7 +74,9 @@ export function EventForm({ id, initial, issued }: { id?: string; initial?: Even
         published,
         links,
         eventbriteEventId: discount.eventbriteEventId || null,
-        appDiscountPercent: on ? Number(discount.percent) : null,
+        // The server works out the "-X%" from Eventbrite's public price.
+        appDiscountPercent: null,
+        appPriceCents: on ? priceCents(discount.price) : null,
         appDiscountLimit: on ? limit : null,
       };
       if (id) await adminFetch(`/api/admin/events/${id}`, { method: "PATCH", body: payload });

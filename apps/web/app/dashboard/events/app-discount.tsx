@@ -18,7 +18,8 @@ type EventbriteEvent = {
 export type AppDiscountValue = {
   eventbriteEventId: string;
   enabled: boolean;
-  percent: string;
+  /** Euros, as typed ("10", "9.50", "9,50"). */
+  price: string;
   limit: string;
 };
 
@@ -32,13 +33,18 @@ export function isEventbriteUrl(url: string): boolean {
   }
 }
 
+/** "9,50" -> 950. NaN when it isn't a price with at most two decimals. */
+export function priceCents(price: string): number {
+  const v = price.trim().replace(",", ".");
+  return /^\d+(\.\d{1,2})?$/.test(v) ? Math.round(Number(v) * 100) : NaN;
+}
+
 /** Blocking problems with the discount block, as short sentences. Empty = fine. */
 export function discountProblems(v: AppDiscountValue, ticketUrl: string): string[] {
   if (!(v.enabled && v.eventbriteEventId)) return [];
   const out: string[] = [];
-  const percent = Number(v.percent);
-  if (!(v.percent.trim() && Number.isInteger(percent) && percent >= 1 && percent <= 100)) {
-    out.push("Percent off must be a whole number from 1 to 100");
+  if (Number.isNaN(priceCents(v.price))) {
+    out.push("App price must be an amount in euros, e.g. 10 or 9.50 (0 = free)");
   }
   if (v.limit.trim()) {
     const limit = Number(v.limit);
@@ -71,9 +77,10 @@ function statusLabel(status: string | undefined) {
 }
 
 /**
- * "In-app discount" on the event form: link the Eventbrite event, then give
- * students who buy through the app a percentage off. Each student gets their
- * own single-use code the first time they tap "Get tickets".
+ * "In-app discount" on the event form: link the Eventbrite event, then set the
+ * price students pay through the app. Saving creates a hidden "ASTRA app" ticket
+ * type at that price with Eventbrite's fee absorbed; each student gets their own
+ * single-use access code for it the first time they tap "Get tickets".
  */
 export function AppDiscount({
   value,
@@ -161,7 +168,9 @@ export function AppDiscount({
       <div>
         <p className="text-sm font-semibold text-gray-900">In-app discount</p>
         <p className="text-xs text-gray-500">
-          Students who buy through the app get a personal single-use Eventbrite code, applied automatically at checkout.
+          Students who buy through the app pay the price below on a hidden &quot;ASTRA app&quot; ticket type, unlocked by
+          a personal single-use code applied automatically at checkout. Eventbrite&apos;s fee is absorbed: they pay
+          exactly this price, and the fee comes out of the payout.
         </p>
       </div>
 
@@ -247,14 +256,14 @@ export function AppDiscount({
             hint={value.eventbriteEventId ? "Shown on the event in the app" : "Link the Eventbrite event first"}
             checked={value.enabled && Boolean(value.eventbriteEventId)}
             onChange={(on) => {
-              if (value.eventbriteEventId) set({ enabled: on, percent: value.percent || "10" });
+              if (value.eventbriteEventId) set({ enabled: on });
             }}
           />
 
           {value.enabled && value.eventbriteEventId && (
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Percent off" required hint="1–100. 100 makes it free.">
-                <Input type="number" min={1} max={100} value={value.percent} onChange={(e) => set({ percent: e.target.value })} />
+              <Field label="App price (€)" required hint="What students pay, fees included. 0 = free. Must be below the public price.">
+                <Input inputMode="decimal" value={value.price} onChange={(e) => set({ price: e.target.value })} placeholder="e.g. 10" />
               </Field>
               <Field label="Max students" hint="Optional. Empty = no limit.">
                 <Input
@@ -286,8 +295,8 @@ export function AppDiscount({
               {limitNum !== null && Number.isInteger(limitNum)
                 ? `${issued} of ${limitNum} codes issued${capReached ? ", cap reached: no new codes will be given out" : ""}. `
                 : `${issued} student${issued === 1 ? " has" : "s have"} a code for this event. `}
-              Changing the percent only affects new codes. Turning the discount off does not take back codes that students
-              already hold.
+              Changing the price applies to everyone who hasn&apos;t bought yet, including students who already hold a
+              code. Turning the discount off does not take back codes that students already hold.
             </p>
           )}
         </>

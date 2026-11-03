@@ -95,6 +95,7 @@ export function toEventItem(e: EventRow, origin?: string): EventItem {
     eventbriteEventId: e.eventbriteEventId,
     appDiscountPercent: e.appDiscountPercent,
     appDiscountLimit: e.appDiscountLimit,
+    appPriceCents: e.appPriceCents,
   };
 }
 

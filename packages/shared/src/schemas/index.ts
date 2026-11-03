@@ -165,6 +165,7 @@ export const IN_APP_ROUTES = [
   "/points-history",
   "/academics",
   "/polare",
+  "/events",
 ] as const;
 export type InAppRoute = (typeof IN_APP_ROUTES)[number];
 
@@ -191,6 +192,7 @@ export const IN_APP_ROUTE_LABELS: Record<InAppRoute, string> = {
   "/points-history": "Points history",
   "/academics": "Academics",
   "/polare": "ASTRA Polare",
+  "/events": "Events",
 };
 
 export const contentLink = z.discriminatedUnion("kind", [

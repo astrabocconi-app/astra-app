@@ -69,7 +69,8 @@ Until that is done, build your own Neon branch URL by hand into `apps/web/.env`.
 | `CARD_TOKEN_HMAC_SECRET` | yes | **separate per environment** | Signs QR card tokens |
 | `ALLOWED_EMAIL_DOMAINS` | no (default `studbocconi.it,unibocconi.it`) | all | Domains allowed to request an OTP |
 | `MOBILE_ALLOWED_ORIGINS` | no | all | Extra trusted origins (CORS / auth). Native requests carry no `Origin`. |
-| `SMTP_HOST` `SMTP_PORT` `SMTP_SECURE` `SMTP_USER` `SMTP_PASS` `EMAIL_FROM` | no (Resend active) | P | Primary mailbox (Aruba: `smtps.aruba.it`, 465, secure) |
+| `SMTP_HOST` `SMTP_PORT` `SMTP_SECURE` `SMTP_USER` `SMTP_PASS` | no (Resend active) | P | Primary mailbox (Aruba: `smtps.aruba.it`, 465, secure) |
+| `EMAIL_FROM` | yes | P | Sender for OTP emails; prod = `ASTRA <verify@astrabocconi.com>` (Resend, verified domain) |
 | `SMTP_USER_2` `SMTP_PASS_2` `EMAIL_FROM_2` | no | P | Failover mailbox |
 | `RESEND_API_KEY` `RESEND_FROM` | no | none | Dead fallback, leave unset |
 | `ADMIN_USERNAME` `ADMIN_EMAIL` `ADMIN_PASSWORD_HASH` | yes for backoffice admin | P (and your own for D) | The single environment admin. Hash from `node apps/web/scripts/create-admin.mjs <username> <email> [password]`. |

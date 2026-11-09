@@ -10,6 +10,13 @@ import { CAMPUS_SHAPE, CAMPUS_LABEL_POINT } from "../lib/campus-geo";
 import { useT } from "../lib/i18n";
 import { useEggStore } from "../lib/egg-store";
 import { announce } from "../lib/use-reduced-motion";
+import { OfferLine } from "./OfferLine";
+import { MobilityOverlay } from "./MobilityOverlay";
+import { useMapSponsors } from "../lib/app-content";
+import { trackVenue } from "../lib/offer";
+
+/** Offers shown on the pin card; the venue page has the rest and the details. */
+const CARD_OFFERS = 3;
 
 const BRAND = "#04107E";
 
@@ -40,6 +47,7 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
   const inverted = useEggStore((s) => s.inverted);
   const cameraRef = useRef<Camera>(null);
   const [selected, setSelected] = useState<PartnerItem | null>(null);
+  const sponsors = useMapSponsors();
 
   // Only partners with coordinates can be pinned; the rest still list fine.
   const pinned = partners.filter(
@@ -75,6 +83,8 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
         scaleBarEnabled={false}
         logoEnabled
         attributionEnabled
+        // Bottom left, beside the logo: the bottom right belongs to the sponsors' bubble.
+        attributionPosition={{ bottom: 8, left: 96 }}
         onPress={() => setSelected(null)}
       >
         <Camera
@@ -111,7 +121,10 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
               key={p.id}
               coordinate={[p.longitude, p.latitude]}
               anchor={{ x: 0.5, y: 1 }}
-              allowOverlap={active}
+              // Every pin stays on the map at every zoom: hiding the ones that
+              // touch made the map look empty until you zoomed in.
+              allowOverlap
+              allowOverlapWithPuck
             >
               <Pressable
                 onPress={() => {
@@ -158,6 +171,9 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
         <Icon name="locate" size={20} color={BRAND} />
       </Pressable>
 
+      {/* Mobility sponsors. Hidden while a pin's card covers the bottom. */}
+      {sponsors && !selected ? <MobilityOverlay content={sponsors} /> : null}
+
       {/* Detail card for the tapped pin. Tapping the card itself (not the close
           or directions buttons) opens the full venue screen. */}
       {selected && (
@@ -184,8 +200,10 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
                 </View>
               )}
               <View className="flex-1">
-                <Text className="text-base font-semibold text-gray-900 dark:text-white">{selected.name}</Text>
-                <Text className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
+                <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
+                  {selected.name}
+                </Text>
+                <Text className="mt-0.5 text-xs text-gray-600 dark:text-gray-300" numberOfLines={1}>
                   {selected.address ?? t("discounts.noAddress")}
                 </Text>
               </View>
@@ -203,37 +221,29 @@ export function DiscountsMap({ partners }: { partners: PartnerItem[] }) {
           </View>
 
           {selected.offers.length > 0 ? (
-            <View className="mt-3 gap-1.5">
-              {selected.offers.map((o) => (
-                <View key={o.id} className="gap-1">
-                  <View className="flex-row items-center gap-2">
-                    <Text
-                      className="rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-astra-primary dark:text-white"
-                      numberOfLines={1}
-                    >
-                      {o.label}
-                    </Text>
-                    <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200" numberOfLines={1}>
-                      {o.title}
-                    </Text>
-                  </View>
-                  {o.description ? (
-                    <Text
-                      className="text-[12px] text-gray-500 dark:text-gray-400"
-                      numberOfLines={2}
-                    >
-                      {o.description}
-                    </Text>
-                  ) : null}
-                </View>
+            // Title only: the details (which usually repeat the discount) are
+            // one tap away on the venue page.
+            <View className="mt-3 gap-2">
+              {selected.offers.slice(0, CARD_OFFERS).map((o) => (
+                <OfferLine key={o.id} offer={o} lines={2} />
               ))}
+              {selected.offers.length > CARD_OFFERS ? (
+                <Text className="text-[12px] font-medium text-astra-primary dark:text-white/80">
+                  {selected.offers.length - CARD_OFFERS === 1
+                    ? t("offer.moreOne")
+                    : t("offer.more", { n: String(selected.offers.length - CARD_OFFERS) })}
+                </Text>
+              ) : null}
             </View>
           ) : (
             <Text className="mt-3 text-[13px] text-gray-500 dark:text-white/70">{t("discounts.noDiscount")}</Text>
           )}
 
           <Pressable
-            onPress={() => openDirections(selected, () => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")))}
+            onPress={() => {
+              trackVenue({ partnerId: selected.id, kind: "DIRECTIONS" });
+              openDirections(selected, () => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")));
+            }}
             accessibilityRole="button"
             className="mt-3 min-h-[44px] flex-row items-center justify-center gap-1.5 rounded-xl bg-astra-light dark:bg-white/10 py-2.5 active:opacity-70"
           >

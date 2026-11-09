@@ -56,6 +56,12 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         href: "/dashboard/materials",
         blurb: "Course handouts (read-only)",
       },
+      {
+        key: "app-content",
+        label: "App overlays",
+        href: "/dashboard/app-content",
+        blurb: "Home bubble and the map's mobility sponsors (logos, text, how-to-redeem)",
+      },
     ],
   },
   {
@@ -134,6 +140,12 @@ export const DASHBOARD_SECTIONS: DashboardSection[] = [
         label: "Class coverage",
         href: "/dashboard/bi/classes",
         blurb: "Share of each class roster that has installed the app",
+      },
+      {
+        key: "bi-venues",
+        label: "Venues & discounts",
+        href: "/dashboard/bi/venues",
+        blurb: "Which venues and discounts students use, view and tap",
       },
     ],
   },

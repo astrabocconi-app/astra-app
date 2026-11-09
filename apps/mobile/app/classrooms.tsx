@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, SectionList, Pressable, ScrollView, RefreshControl } from "react-native";
+import { View, SectionList, ScrollView, RefreshControl } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Icon, Spinner } from "../components/Icon";
@@ -7,10 +7,12 @@ import { ScreenHeader } from "../components/ScreenHeader";
 import { EmptyState } from "../components/EmptyState";
 import { Text } from "../components/AppText";
 import { Chip } from "../components/Chip";
+import { AppSwitch } from "../components/AppSwitch";
 import { queries } from "../lib/prefetch";
 import { useLocale, useT } from "../lib/i18n";
 import { useRefresh } from "../lib/use-refresh";
 import { addDays, romeToday, shortDayLabel, toMinutes } from "../lib/rome-date";
+import { withBuffer } from "../lib/free-rooms";
 
 // The timetable runs from 08:00 to about 23:00; a slot every half hour.
 const TIMES: string[] = (() => {
@@ -21,8 +23,18 @@ const TIMES: string[] = (() => {
   return out;
 })();
 
-const DAY_COUNT = 7;
+// Today and the next two days: further out Bocconi has usually not published
+// the room assignments yet, so those days only ever showed "no timetable".
+const DAY_COUNT = 3;
 const LONG_FREE_MINUTES = 60;
+
+// The two teaching buildings, by the names students use. The timetable calls
+// them by address; anything else it lists (Roentgen, one-off spaces) is left out.
+const BUILDINGS: { source: string; label: string }[] = [
+  { source: "sarfatti 25", label: "Leoni" },
+  { source: "sraffa 13", label: "Velodromo" },
+];
+const buildingLabel = (b: string) => BUILDINGS.find((x) => x.source === b.trim().toLowerCase())?.label ?? null;
 
 // Free@B — which Bocconi classrooms are free, read from the university's own
 // room assignments and worked out on our server.
@@ -51,9 +63,18 @@ export default function ClassroomsScreen() {
   });
   const refresh = useRefresh(refetch);
 
-  const rooms = useMemo(() => data?.rooms ?? [], [data]);
-  const buildings = useMemo(() => Array.from(new Set(rooms.map((r) => r.building))), [rooms]);
   const atMinutes = data?.time ? toMinutes(data.time) : null;
+  // Rooms renamed to their building's everyday name (other buildings dropped),
+  // free until 15 minutes before their next class.
+  const rooms = useMemo(
+    () =>
+      (data?.rooms ?? []).flatMap((r) => {
+        const label = buildingLabel(r.building);
+        return label ? [withBuffer({ ...r, building: label }, atMinutes)] : [];
+      }),
+    [data, atMinutes],
+  );
+  const buildings = useMemo(() => BUILDINGS.map((b) => b.label).filter((b) => rooms.some((r) => r.building === b)), [rooms]);
 
   const sections = useMemo(() => {
     const matches = rooms.filter(
@@ -92,11 +113,6 @@ export default function ClassroomsScreen() {
     return t("classrooms.floor", { n: floor });
   }
 
-  const chip = (active: boolean) =>
-    `min-h-[36px] justify-center rounded-full px-3.5 py-2 ${active ? "bg-astra-primary dark:bg-white" : "bg-gray-100 dark:bg-white/10"}`;
-  const chipText = (active: boolean) =>
-    `text-[13px] font-medium ${active ? "text-white dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`;
-  const chipHitSlop = { top: 6, bottom: 6 };
 
   const updated =
     data?.timestamp && !Number.isNaN(new Date(data.timestamp).getTime())
@@ -129,9 +145,9 @@ export default function ClassroomsScreen() {
           ))}
         </ScrollView>
 
-        {/* Building, then the two room filters */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, gap: 8 }}>
-          {["all", ...buildings].map((b) => (
+        {/* Building */}
+        <View className="flex-row flex-wrap gap-2 px-4 pt-2">
+          {["all", ...BUILDINGS.map((b) => b.label)].map((b) => (
             <Chip
               key={b}
               active={building === b}
@@ -139,25 +155,24 @@ export default function ClassroomsScreen() {
               label={b === "all" ? t("classrooms.allBuildings") : b}
             />
           ))}
-          <Pressable
-            onPress={() => setStudyOnly((v) => !v)}
-            className={chip(studyOnly)}
-            hitSlop={chipHitSlop}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: studyOnly }}
-          >
-            <Text chrome className={chipText(studyOnly)}>{t("classrooms.studyRoomsOnly")}</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setLongOnly((v) => !v)}
-            className={chip(longOnly)}
-            hitSlop={chipHitSlop}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: longOnly }}
-          >
-            <Text chrome className={chipText(longOnly)}>{t("classrooms.longFreeOnly")}</Text>
-          </Pressable>
-        </ScrollView>
+        </View>
+
+        {/* Room filters: switches on their own row, not more chips beside the
+            buildings, so they read as "also" rather than "another building". */}
+        <View className="mx-4 mt-3 flex-row gap-2">
+          <View className="min-h-[48px] flex-1 flex-row items-center justify-between gap-2 rounded-2xl bg-gray-50 dark:bg-white/5 pl-3.5 pr-2">
+            <Text chrome className="flex-1 text-[13px] font-medium text-gray-800 dark:text-gray-100" numberOfLines={1}>
+              {t("classrooms.studyRoomsOnly")}
+            </Text>
+            <AppSwitch value={studyOnly} onValueChange={setStudyOnly} label={t("classrooms.studyRoomsOnly")} />
+          </View>
+          <View className="min-h-[48px] flex-1 flex-row items-center justify-between gap-2 rounded-2xl bg-gray-50 dark:bg-white/5 pl-3.5 pr-2">
+            <Text chrome className="flex-1 text-[13px] font-medium text-gray-800 dark:text-gray-100" numberOfLines={1}>
+              {t("classrooms.longFreeOnly")}
+            </Text>
+            <AppSwitch value={longOnly} onValueChange={setLongOnly} label={t("classrooms.longFreeOnly")} />
+          </View>
+        </View>
       </View>
 
       {isLoading ? (
@@ -182,7 +197,18 @@ export default function ClassroomsScreen() {
           refreshControl={<RefreshControl {...refresh} />}
           ListHeaderComponent={
             <View>
-              <Text className="text-sm text-gray-500 dark:text-gray-300" accessibilityLiveRegion="polite">
+              {/* The two caveats, up front where they are read. */}
+              <View className="mb-2 gap-2">
+                <View className="flex-row gap-2 rounded-2xl border border-amber-200 dark:border-amber-300/30 bg-amber-50 dark:bg-amber-300/10 p-3">
+                  <Icon name="warning" size={16} color="#B45309" />
+                  <Text className="flex-1 text-[12px] leading-[17px] text-amber-900 dark:text-amber-100">{t("classrooms.noteClosed")}</Text>
+                </View>
+                <View className="flex-row gap-2 rounded-2xl border border-blue-200 dark:border-blue-300/30 bg-blue-50 dark:bg-blue-300/10 p-3">
+                  <Icon name="information-circle" size={16} color="#1D4ED8" />
+                  <Text className="flex-1 text-[12px] leading-[17px] text-blue-900 dark:text-blue-100">{t("classrooms.noteStudy")}</Text>
+                </View>
+              </View>
+              <Text className="mt-2 text-sm text-gray-500 dark:text-gray-300" accessibilityLiveRegion="polite">
                 {visibleCount === 1
                   ? t("classrooms.freeRoomsCountSingular", { count: String(visibleCount) })
                   : t("classrooms.freeRoomsCountPlural", { count: String(visibleCount) })}
@@ -253,10 +279,6 @@ export default function ClassroomsScreen() {
           // The caveats stay with the data but out of the way of the results.
           ListFooterComponent={
             <View className="mt-6 gap-3">
-              <View className="flex-row gap-2">
-                <Icon name="information-circle-outline" size={14} color="#9CA3AF" />
-                <Text className="flex-1 text-[11px] leading-4 text-gray-500 dark:text-white/60">{t("classrooms.disclaimer")}</Text>
-              </View>
               <Text className="text-center text-[11px] text-gray-500 dark:text-white/60">
                 {[updated ? t("classrooms.updated", { time: updated }) : null, t("classrooms.credit")].filter(Boolean).join("  ·  ")}
               </Text>

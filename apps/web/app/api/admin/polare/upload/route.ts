@@ -19,8 +19,13 @@ async function handlePost(req: Request) {
 
   // Only the token request comes from a signed-in editor; Vercel's own "upload
   // completed" callback carries a signature that handleUpload verifies.
+  // Two editors upload videos here: Stella Polare reels (polare/…) and the
+  // sponsors' "how to redeem" videos on the App overlays page (content/…).
+  // Each path prefix needs its own page.
   if (body.type === "blob.generate-client-token") {
-    const guard = await requirePageApi(req, requestId, "polare");
+    const pathname = String((body.payload as { pathname?: unknown } | undefined)?.pathname ?? "");
+    const page = pathname.startsWith("content/") ? "app-content" : "polare";
+    const guard = await requirePageApi(req, requestId, page);
     if ("error" in guard) return guard.error;
   }
 
@@ -29,7 +34,7 @@ async function handlePost(req: Request) {
       body,
       request: req,
       onBeforeGenerateToken: async (pathname) => {
-        if (!pathname.startsWith("polare/")) throw new Error("Bad upload path.");
+        if (!pathname.startsWith("polare/") && !pathname.startsWith("content/")) throw new Error("Bad upload path.");
         return { allowedContentTypes: TYPES, maximumSizeInBytes: MAX_BYTES, addRandomSuffix: true };
       },
     });

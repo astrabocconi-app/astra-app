@@ -39,6 +39,8 @@ type OfferDraft = {
   discountType: DiscountTypeValue;
   discountValue: string;
   qrEnabled: boolean;
+  linkUrl: string;
+  linkLabel: string;
 };
 
 function toDraft(o: PartnerItem["offers"][number]): OfferDraft {
@@ -49,7 +51,18 @@ function toDraft(o: PartnerItem["offers"][number]): OfferDraft {
     discountType: o.discountType,
     discountValue: o.discountValue != null ? String(o.discountValue) : "",
     qrEnabled: o.qrEnabled,
+    linkUrl: o.linkUrl ?? "",
+    linkLabel: o.linkLabel ?? "",
   };
+}
+
+function isHttpsUrl(v: string): boolean {
+  try {
+    const u = new URL(v);
+    return u.protocol === "https:" && u.hostname.includes(".");
+  } catch {
+    return false;
+  }
 }
 
 const EMPTY_OFFER: OfferDraft = {
@@ -58,6 +71,8 @@ const EMPTY_OFFER: OfferDraft = {
   discountType: "PERCENT",
   discountValue: "",
   qrEnabled: true,
+  linkUrl: "",
+  linkLabel: "",
 };
 
 export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerItem }) {
@@ -119,6 +134,10 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
     if (o.discountType === "FIXED" && !(v && Number.isInteger(num) && num >= 1)) {
       problems.push(`Discount ${n}: the amount must be a whole number of cents, e.g. 500 for €5`);
     }
+    const link = o.linkUrl.trim();
+    if (link && !isHttpsUrl(link)) {
+      problems.push(`Discount ${n}: the link must be a full web address starting with https://`);
+    }
   });
 
   /** Resolve the typed address to a pin so it can be checked before saving. */
@@ -176,6 +195,8 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
                 ? Number(o.discountValue)
                 : null,
             qrEnabled: o.qrEnabled,
+            linkUrl: o.linkUrl.trim() || null,
+            linkLabel: (o.linkUrl.trim() && o.linkLabel.trim()) || null,
           })),
       };
       if (id) await adminFetch(`/api/admin/partners/${id}`, { method: "PATCH", body: payload });
@@ -372,6 +393,29 @@ export function PartnerForm({ id, initial }: { id?: string; initial?: PartnerIte
                   placeholder="e.g. Valid Mon–Fri, one per student per day"
                 />
               </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field
+                  label="Link (optional)"
+                  hint="Adds a button to this discount in the app, e.g. a Stripe checkout that already has the student price."
+                >
+                  <Input
+                    type="url"
+                    inputMode="url"
+                    value={o.linkUrl}
+                    onChange={(e) => patchOffer(i, { linkUrl: e.target.value })}
+                    placeholder="https://buy.stripe.com/…"
+                  />
+                </Field>
+                <Field label="Button text" hint="Leave empty for “Get this offer”.">
+                  <Input
+                    value={o.linkLabel}
+                    maxLength={40}
+                    onChange={(e) => patchOffer(i, { linkLabel: e.target.value })}
+                    placeholder="e.g. Buy with discount"
+                    disabled={!o.linkUrl.trim()}
+                  />
+                </Field>
+              </div>
               <Toggle
                 label="Redeemed by QR scan"
                 hint="On: a student redeems this by having their card QR scanned at the venue. Off: an informal discount with no scan, shown with a different symbol."

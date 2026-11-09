@@ -193,6 +193,7 @@ export default function RootLayout() {
                 <Stack.Screen name="master-admissions" />
                 <Stack.Screen name="event/[id]" />
                 <Stack.Screen name="venue/[id]" />
+                <Stack.Screen name="sponsor/[id]" />
                 <Stack.Screen name="news/[id]" />
               </Stack.Protected>
               <Stack.Protected guard={isPartner}>

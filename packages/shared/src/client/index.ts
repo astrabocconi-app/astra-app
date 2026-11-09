@@ -6,6 +6,7 @@ import type {
   EventListResponse,
   RewardListResponse,
   PartnerListResponse,
+  VenueInteractionInput,
   ChatResponse,
   MaterialsResponse,
   TicketLinkResponse,
@@ -176,6 +177,15 @@ export function createApiClient(options: ApiClientOptions) {
       }
     },
 
+    /** POST /api/me/consent — record the privacy policy version accepted at sign-in. */
+    consent: async (policyVersion: string) =>
+      (
+        await request<{ ok: true }>("/api/me/consent", {
+          method: "POST",
+          body: JSON.stringify({ policyVersion }),
+        })
+      ).data,
+
     /** GET /api/me — the authenticated student's profile. */
     me: async () => (await request<MeResponse>("/api/me")).data,
     /** PATCH /api/me — name and/or avatar. */
@@ -335,6 +345,14 @@ export function createApiClient(options: ApiClientOptions) {
     /** GET /api/partners — active partner venues + their discounts (Discounts screen). */
     partners: {
       list: async () => (await request<PartnerListResponse>("/api/partners")).data,
+      /** POST /api/partners/interaction — anonymous view / link / directions counter for the backoffice BI. */
+      interaction: async (body: VenueInteractionInput) =>
+        (
+          await request<{ ok: true }>("/api/partners/interaction", {
+            method: "POST",
+            body: JSON.stringify(body),
+          })
+        ).data,
     },
 
     /** GET /api/materials — handouts catalogue (year → subject → items). */

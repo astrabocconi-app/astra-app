@@ -5,7 +5,7 @@ export const en = {
   "classrooms.dayTomorrow": "Tomorrow",
   "classrooms.now": "Now",
   "classrooms.allBuildings": "All buildings",
-  "classrooms.studyRoomsOnly": "Study rooms",
+  "classrooms.studyRoomsOnly": "Aule studio only",
   "classrooms.longFreeOnly": "Free 1h+",
   "classrooms.freeRoomsCountSingular": "{count} free room",
   "classrooms.freeRoomsCountPlural": "{count} free rooms",
@@ -26,7 +26,8 @@ export const en = {
   "classrooms.sectionCount": "{free} of {total} free",
   "classrooms.incomplete": "Some rooms may be missing from this list right now.",
   "classrooms.updated": "Timetable read at {time}",
-  "classrooms.disclaimer": "Availability comes from Bocconi's room assignments. Rooms can still be closed for cleaning, set-up or events, and last-minute changes may not show yet, so double-check before relying on a room.",
+  "classrooms.noteClosed": "Please note: rooms may be closed for cleaning or unexpected events. Times shown account for a 15-minute buffer before the next class. On Saturdays, buildings may be open but the algorithm can have issues due to the lack of information.",
+  "classrooms.noteStudy": "Aula Studio rooms are guaranteed to be open and made for studying. However, this does not guarantee the room being free from others studying there.",
   "classrooms.credit": "Free@B by Michele F. Matozza",
 };
 
@@ -37,7 +38,7 @@ export const it: Record<keyof typeof en, string> = {
   "classrooms.dayTomorrow": "Domani",
   "classrooms.now": "Ora",
   "classrooms.allBuildings": "Tutti gli edifici",
-  "classrooms.studyRoomsOnly": "Aule studio",
+  "classrooms.studyRoomsOnly": "Solo aule studio",
   "classrooms.longFreeOnly": "Libera 1h+",
   "classrooms.freeRoomsCountSingular": "{count} aula libera",
   "classrooms.freeRoomsCountPlural": "{count} aule libere",
@@ -58,6 +59,7 @@ export const it: Record<keyof typeof en, string> = {
   "classrooms.sectionCount": "{free} libere su {total}",
   "classrooms.incomplete": "In questo momento alcune aule potrebbero mancare dall'elenco.",
   "classrooms.updated": "Orario letto alle {time}",
-  "classrooms.disclaimer": "La disponibilità deriva dalle assegnazioni delle aule di Bocconi. Le aule possono comunque essere chiuse per pulizie, allestimenti o eventi, e le modifiche dell'ultimo minuto potrebbero non comparire ancora: verifica prima di affidarti a un'aula.",
+  "classrooms.noteClosed": "Attenzione: le aule possono essere chiuse per pulizie o eventi imprevisti. Gli orari indicati tengono conto di 15 minuti di margine prima della lezione successiva. Il sabato gli edifici possono essere aperti, ma l'algoritmo può sbagliare per la mancanza di informazioni.",
+  "classrooms.noteStudy": "Le Aule Studio sono sicuramente aperte e pensate per lo studio. Questo però non garantisce che siano libere da altre persone che studiano.",
   "classrooms.credit": "Free@B di Michele F. Matozza",
 };

@@ -27,6 +27,25 @@ import { errorCode } from "../lib/api-errors";
 import { TextField } from "./TextField";
 
 type Programme = AcademicCatalogueResponse["programmes"][number];
+/** A row of the programme list: a programme, or a double degree that is a track of one. */
+type ListItem = { key: string; code: string; name: string; programme: Programme; trackId: string | null };
+
+/**
+ * Double degrees that Bocconi runs as a track of a programme, listed on their
+ * own: nobody looks for "HEC" under "International Politics and Government".
+ * Picking one sets the programme and the track together.
+ */
+function doubleDegreeRows(p: Programme): ListItem[] {
+  return p.tracks
+    .filter((tr) => /\bHEC\b/.test(tr.name))
+    .map((tr) => ({
+      key: `${p.id}::${tr.id}`,
+      code: `${p.code}-HEC`,
+      name: `HEC-Bocconi Double Degree · ${tr.name.replace(/\s*\(HEC\)\s*/, "").trim()}`,
+      programme: p,
+      trackId: tr.id,
+    }));
+}
 type Step = "programme" | "year" | "track" | "class" | "done";
 
 const BRAND = "#04107E";
@@ -91,6 +110,9 @@ export function AcademicOnboarding() {
   const [programmeId, setProgrammeId] = useState<string | null>(null);
   const [year, setYear] = useState<number | null>(null);
   const [trackId, setTrackId] = useState<string | null>(null);
+  // Set when a double-degree row was picked: its track is already decided.
+  const [lockedTrackId, setLockedTrackId] = useState<string | null>(null);
+  const [pickedKey, setPickedKey] = useState<string | null>(null);
   const [classId, setClassId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,7 +157,15 @@ export function AcademicOnboarding() {
   const steps: Step[] = [
     "programme",
     "year",
-    ...(year ? (tracksHere.length ? (["track"] as const) : []) : programme?.tracks.length ? (["track"] as const) : []),
+    ...(lockedTrackId
+      ? []
+      : year
+        ? tracksHere.length
+          ? (["track"] as const)
+          : []
+        : programme?.tracks.length
+          ? (["track"] as const)
+          : []),
     ...(hasClasses ? (["class"] as const) : []),
   ];
   const total = programme ? steps.length : 3;
@@ -144,14 +174,22 @@ export function AcademicOnboarding() {
   const levels = useMemo(() => [...new Set(programmes.map((p) => p.level))], [programmes]);
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const rows: ListItem[] = programmes.flatMap((p) => [
+      { key: p.id, code: p.code, name: p.name, programme: p, trackId: null },
+      ...doubleDegreeRows(p),
+    ]);
     const matches = q
-      ? programmes.filter(
-          (p) => p.code.toLowerCase().includes(q) || p.name.toLowerCase().includes(q)
+      ? rows.filter(
+          (r) =>
+            r.code.toLowerCase().includes(q) ||
+            r.name.toLowerCase().includes(q) ||
+            // A track's name finds its programme too ("Finance", "CEMS"…).
+            (!r.trackId && r.programme.tracks.some((tr) => tr.name.toLowerCase().includes(q)))
         )
-      : programmes.filter((p) => p.level === level);
+      : rows.filter((r) => r.programme.level === level);
     // Current programmes first; legacy ones are for students finishing an old plan.
     return [...matches].sort(
-      (a, b) => Number(a.legacy) - Number(b.legacy) || a.code.localeCompare(b.code)
+      (a, b) => Number(a.programme.legacy) - Number(b.programme.legacy) || a.code.localeCompare(b.code)
     );
   }, [programmes, query, level]);
 
@@ -162,18 +200,21 @@ export function AcademicOnboarding() {
 
   /** The step after `from`, for a year already chosen. */
   function nextAfter(from: "year" | "track", y: number, tr: string | null): Step | null {
-    if (from === "year" && openTracks(programme, y).length) return "track";
+    if (from === "year" && !lockedTrackId && openTracks(programme, y).length) return "track";
     if (hasClasses) return "class";
     // Nothing more to ask: save now.
     void save(y, tr, null);
     return null;
   }
 
-  function pickProgramme(p: Programme) {
+  function pickProgramme(item: ListItem) {
+    const p = item.programme;
     cancelTimers();
+    setPickedKey(item.key);
     setProgrammeId(p.id);
     setClassId(null);
-    setTrackId(null);
+    setTrackId(item.trackId);
+    setLockedTrackId(item.trackId);
     if (year && year > p.durationYears) setYear(null);
     // A beat so the selected row paints before the page moves.
     later(() => go("year"), 160);
@@ -182,8 +223,13 @@ export function AcademicOnboarding() {
   function pickYear(y: number) {
     cancelTimers();
     setYear(y);
-    // A track chosen for another year may not exist in this one.
-    const keep = trackId && openTracks(programme, y).some((tr) => tr.id === trackId) ? trackId : null;
+    // A track chosen for another year may not exist in this one; a double
+    // degree's track is part of what was picked and always stays.
+    const keep = lockedTrackId
+      ? lockedTrackId
+      : trackId && openTracks(programme, y).some((tr) => tr.id === trackId)
+        ? trackId
+        : null;
     setTrackId(keep);
     later(() => {
       const next = nextAfter("year", y, keep);
@@ -249,6 +295,8 @@ export function AcademicOnboarding() {
 
   const selectedClass = programme?.classGroups.find((c) => c.id === classId);
   const selectedTrack = programme?.tracks.find((tr) => tr.id === trackId);
+  // "BIG-HEC" for a double degree, else the programme's own code.
+  const pickedCode = (lockedTrackId && programme ? `${programme.code}-HEC` : programme?.code) ?? "";
 
   // The card is a fixed-height window onto a scrolling page. With the keyboard
   // up, or text scaled past 1.3x, it takes the whole screen so the list always
@@ -295,11 +343,11 @@ export function AcademicOnboarding() {
       {/* What's been chosen so far — tap to change it */}
       {step !== "programme" && programme ? (
         <View className="mt-4 flex-row flex-wrap gap-2">
-          <Crumb label={programme.code} onPress={() => go("programme")} />
+          <Crumb label={pickedCode} onPress={() => go("programme")} />
           {(step === "track" || step === "class") && year ? (
             <Crumb label={`${t("onboarding.yearWord")} ${year}`} onPress={() => go("year")} />
           ) : null}
-          {step === "class" && selectedTrack ? (
+          {step === "class" && selectedTrack && !lockedTrackId ? (
             <Crumb label={selectedTrack.code} onPress={() => go("track")} />
           ) : null}
         </View>
@@ -397,7 +445,7 @@ export function AcademicOnboarding() {
                   {step === "programme" ? (
                     <FlatList
                       data={catalogue.data ? list : []}
-                      keyExtractor={(p) => p.id}
+                      keyExtractor={(r) => r.key}
                       keyboardShouldPersistTaps="handled"
                       keyboardDismissMode="on-drag"
                       contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 12, flexGrow: 1 }}
@@ -487,13 +535,17 @@ export function AcademicOnboarding() {
                         ) : null
                       }
                       renderItem={({ item }) => {
-                        const on = item.id === programmeId;
+                        const on = item.key === pickedKey;
+                        // Code over name, both at fixed sizes: a code squeezed
+                        // into a fixed column used to shrink ("CLEFIN-FINANCE"),
+                        // so every row had a different type size.
                         return (
                           <Pressable
                             onPress={() => pickProgramme(item)}
                             accessibilityRole="button"
+                            accessibilityLabel={`${item.code}, ${item.name}`}
                             accessibilityState={{ selected: on }}
-                            className={`min-h-[52px] flex-row items-center gap-3 rounded-xl px-3 py-3.5 ${
+                            className={`min-h-[56px] justify-center rounded-xl px-3.5 py-3 ${
                               on
                                 ? "bg-astra-primary dark:bg-white"
                                 : "active:bg-astra-light dark:active:bg-white/10"
@@ -501,18 +553,17 @@ export function AcademicOnboarding() {
                           >
                             <Text
                               maxFontSizeMultiplier={1.3}
-                              className={`w-[68px] text-[15px] font-semibold ${on ? "text-white dark:text-astra-primary" : "text-astra-primary dark:text-white"}`}
+                              className={`text-[13px] font-bold tracking-wide ${on ? "text-white dark:text-astra-primary" : "text-astra-primary dark:text-white"}`}
                               numberOfLines={1}
-                              adjustsFontSizeToFit
                             >
                               {item.code}
                             </Text>
                             <Text
-                              className={`flex-1 text-[15px] leading-5 ${on ? "text-white/90 dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
+                              className={`mt-0.5 text-[15px] leading-5 ${on ? "text-white/90 dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
                               numberOfLines={3}
                             >
                               {item.name}
-                              {item.legacy ? t("profile.legacySuffix") : ""}
+                              {item.programme.legacy ? t("profile.legacySuffix") : ""}
                             </Text>
                           </Pressable>
                         );
@@ -524,7 +575,10 @@ export function AcademicOnboarding() {
                     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 16 }}>
                       {intro}
                       <View className="flex-row flex-wrap gap-2.5 px-6 pt-7" accessibilityRole="radiogroup">
-                        {Array.from({ length: programme.durationYears }, (_, i) => i + 1).map((y) => {
+                        {Array.from({ length: programme.durationYears }, (_, i) => i + 1)
+                          // A double degree only exists from its track's first year.
+                          .filter((y) => y >= (programme.tracks.find((tr) => tr.id === lockedTrackId)?.fromYear ?? 1))
+                          .map((y) => {
                           const on = y === year;
                           return (
                             <Pressable
@@ -568,7 +622,7 @@ export function AcademicOnboarding() {
                               accessibilityRole="radio"
                               accessibilityLabel={tr.name}
                               accessibilityState={{ selected: on, checked: on, disabled: saving }}
-                              className={`min-h-[56px] flex-row items-center gap-3 rounded-2xl px-4 py-3.5 ${
+                              className={`min-h-[56px] justify-center rounded-2xl px-4 py-3 ${
                                 on
                                   ? "bg-astra-primary dark:bg-white"
                                   : "bg-astra-light dark:bg-white/10 active:opacity-80"
@@ -576,14 +630,13 @@ export function AcademicOnboarding() {
                             >
                               <Text
                                 maxFontSizeMultiplier={1.3}
-                                className={`w-[56px] text-[15px] font-bold ${on ? "text-white dark:text-astra-primary" : "text-astra-primary dark:text-white"}`}
+                                className={`text-[13px] font-bold tracking-wide ${on ? "text-white dark:text-astra-primary" : "text-astra-primary dark:text-white"}`}
                                 numberOfLines={1}
-                                adjustsFontSizeToFit
                               >
                                 {tr.code}
                               </Text>
                               <Text
-                                className={`flex-1 text-[15px] leading-5 ${on ? "text-white dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
+                                className={`mt-0.5 text-[15px] leading-5 ${on ? "text-white dark:text-astra-primary" : "text-gray-700 dark:text-gray-200"}`}
                               >
                                 {tr.name}
                               </Text>

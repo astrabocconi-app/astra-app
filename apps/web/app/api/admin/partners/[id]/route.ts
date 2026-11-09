@@ -65,10 +65,15 @@ async function handlePatch(req: Request, ctx: { params: Promise<{ id: string }> 
   const offersChanged =
     d.offers !== undefined &&
     JSON.stringify(
-      d.offers.map((o) => [o.id ?? null, o.title, o.description, o.discountType, o.discountValue ?? null, o.qrEnabled]),
+      d.offers.map((o) => [
+        o.id ?? null, o.title, o.description, o.discountType, o.discountValue ?? null, o.qrEnabled,
+        o.linkUrl ?? null, o.linkLabel ?? null,
+      ]),
     ) !==
       JSON.stringify(
-        existing.offers.map((o) => [o.id, o.title, o.description, o.discountType, o.discountValue, o.qrEnabled]),
+        existing.offers.map((o) => [
+          o.id, o.title, o.description, o.discountType, o.discountValue, o.qrEnabled, o.linkUrl, o.linkLabel,
+        ]),
       );
   if (offersChanged) changes.offers = [existing.offers.length, d.offers!.length];
   if (Object.keys(changes).length === 0) {

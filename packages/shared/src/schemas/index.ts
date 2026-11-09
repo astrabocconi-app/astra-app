@@ -473,6 +473,10 @@ export const partnerOfferInput = z
     // Redeemed by scanning the student's card QR (the /api/partner/scan flow)
     // versus an informal discount with no digital redemption.
     qrEnabled: z.boolean().default(true),
+    // Optional button on the offer, e.g. a Stripe checkout that already carries
+    // the student price. https only, like every other link the app opens.
+    linkUrl: optionalUrl,
+    linkLabel: optText(40),
   })
   .superRefine((o, ctx) => {
     if (o.discountType === "PERCENT" && o.discountValue != null && o.discountValue > 100) {
@@ -519,6 +523,9 @@ export const partnerOffer = z.object({
   /** Ready-to-render summary, e.g. "20% off" — built server-side so every client agrees. */
   label: z.string(),
   qrEnabled: z.boolean(),
+  /** Optional https button (e.g. a pre-discounted checkout). Absent from servers older than the column. */
+  linkUrl: z.string().nullish(),
+  linkLabel: z.string().nullish(),
 });
 export type PartnerOffer = z.infer<typeof partnerOffer>;
 
@@ -543,6 +550,98 @@ export const partnerListResponse = z.object({
   categories: z.array(z.string()),
 });
 export type PartnerListResponse = z.infer<typeof partnerListResponse>;
+
+/** POST /api/me/consent — the privacy policy version the student accepted at sign-in. */
+export const consentInput = z.object({
+  policyVersion: z.string().trim().min(1).max(40),
+});
+
+/** The privacy policy's current version (its "last updated" date). Bump with the policy. */
+export const PRIVACY_POLICY_VERSION = "2026-10-09";
+
+/** POST /api/partners/interaction — anonymous venue interaction, for the backoffice BI page. */
+export const venueInteractionInput = z.object({
+  partnerId: z.string().trim().min(1).max(64),
+  offerId: z.string().trim().min(1).max(64).nullish(),
+  kind: z.enum(["VIEW", "LINK", "DIRECTIONS"]),
+});
+export type VenueInteractionInput = z.infer<typeof venueInteractionInput>;
+
+// ── Editable app overlays ───────────────────────────────────────────────────
+// Stored as AppContent rows (one JSON document per key) and edited on the
+// backoffice "App content" page. The app reads them through /api/content/:key
+// and hides the feature when the row is missing, disabled or malformed.
+
+export const APP_CONTENT_KEYS = ["home-bubble", "map-sponsors"] as const;
+export type AppContentKey = (typeof APP_CONTENT_KEYS)[number];
+
+/** The small round logo button at the bottom right of Home, and the card it opens. */
+export const homeBubbleContent = z.object({
+  enabled: z.boolean().default(false),
+  /** The round button's picture (square works best). */
+  logoUrl: optionalImageRef,
+  title: optText(80),
+  body: optText(1500),
+  /** Picture at the top of the card. */
+  imageUrl: optionalImageRef,
+  links: contentLinks,
+});
+export type HomeBubbleContent = z.infer<typeof homeBubbleContent>;
+
+/** One picture of a sponsor's "how to redeem" walkthrough. */
+export const sponsorSlide = z.object({
+  imageUrl: optionalImageRef.refine((v) => v !== null, { message: "Each step needs a picture" }),
+  caption: optText(200),
+});
+
+/** A mobility sponsor (Dott, Pikyrent…) offered from the map's "get there fast" bubble. */
+export const mobilitySponsor = z.object({
+  /** Stable slug, used in the app's page address. */
+  id: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .regex(/^[a-z0-9-]+$/, "Use lowercase letters, numbers and dashes"),
+  name: z.string().trim().min(1, "Give the sponsor a name").max(40),
+  logoUrl: optionalImageRef,
+  /** One line under the logo in the chooser, e.g. "First ride free". */
+  tagline: optText(80),
+  title: optText(120),
+  body: optText(2000),
+  imageUrl: optionalImageRef,
+  links: contentLinks,
+  /** "How to redeem": a video, a set of pictures, or both. */
+  redeemLabel: optText(40),
+  redeemVideoUrl: optionalUrl,
+  redeemVideoPosterUrl: optionalImageRef,
+  redeemSlides: z.array(sponsorSlide).max(12).default([]),
+});
+export type MobilitySponsor = z.infer<typeof mobilitySponsor>;
+
+export const mapSponsorsContent = z
+  .object({
+    enabled: z.boolean().default(false),
+    /** The speech bubble on the map. */
+    bubbleText: z.string().trim().min(1).max(40).default("Wanna get there fast?"),
+    /** Heading of the chooser that opens from the bubble. */
+    title: optText(80),
+    subtitle: optText(200),
+    sponsors: z.array(mobilitySponsor).max(6).default([]),
+  })
+  .superRefine((c, ctx) => {
+    const seen = new Set<string>();
+    c.sponsors.forEach((s, i) => {
+      if (seen.has(s.id)) ctx.addIssue({ code: "custom", path: ["sponsors", i, "id"], message: `Two sponsors share the id "${s.id}"` });
+      seen.add(s.id);
+    });
+  });
+export type MapSponsorsContent = z.infer<typeof mapSponsorsContent>;
+
+export const APP_CONTENT_SCHEMAS = {
+  "home-bubble": homeBubbleContent,
+  "map-sponsors": mapSponsorsContent,
+} as const;
 
 // ── Push notifications ──────────────────────────────────────────────────────
 

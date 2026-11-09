@@ -61,3 +61,24 @@ test("item routes are in-app routes", () => {
   assert.equal(isInAppRoute("/news/../x"), false);
   assert.equal(isInAppRoute("https://evil.test"), false);
 });
+
+test("offer links are https only; blank becomes null", async () => {
+  const { partnerOfferInput: o } = await import("./schemas/index.ts");
+  assert.equal(o.parse({ title: "x", linkUrl: "" }).linkUrl, null);
+  assert.equal(o.parse({ title: "x", linkUrl: "https://buy.stripe.com/abc" }).linkUrl, "https://buy.stripe.com/abc");
+  assert.equal(o.safeParse({ title: "x", linkUrl: "http://buy.stripe.com/abc" }).success, false);
+  assert.equal(o.safeParse({ title: "x", linkUrl: "javascript:alert(1)" }).success, false);
+});
+
+test("app overlay content: defaults, https media, unique sponsor ids", async () => {
+  const { homeBubbleContent, mapSponsorsContent } = await import("./schemas/index.ts");
+  assert.deepEqual(homeBubbleContent.parse({}), { enabled: false, logoUrl: null, title: null, body: null, imageUrl: null, links: [] });
+  assert.equal(homeBubbleContent.safeParse({ logoUrl: "http://x.test/a.png" }).success, false);
+  const sponsor = { id: "dott", name: "Dott", redeemSlides: [{ imageUrl: "/api/media/abc", caption: "" }] };
+  const ok = mapSponsorsContent.parse({ enabled: true, sponsors: [sponsor] });
+  assert.equal(ok.bubbleText, "Wanna get there fast?");
+  assert.equal(ok.sponsors[0].redeemSlides[0].caption, null);
+  assert.equal(mapSponsorsContent.safeParse({ sponsors: [sponsor, sponsor] }).success, false);
+  assert.equal(mapSponsorsContent.safeParse({ sponsors: [{ ...sponsor, id: "Dott Bikes" }] }).success, false);
+  assert.equal(mapSponsorsContent.safeParse({ sponsors: [{ ...sponsor, redeemSlides: [{ imageUrl: "" }] }] }).success, false);
+});

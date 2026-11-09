@@ -143,6 +143,8 @@ export function toPartnerOffer(o: Offer): PartnerOffer {
     discountValue: o.discountValue,
     label: offerLabel(o),
     qrEnabled: o.qrEnabled,
+    linkUrl: o.linkUrl,
+    linkLabel: o.linkLabel,
   };
 }
 

@@ -57,7 +57,7 @@ function readSize(file: File, type: "image" | "video"): Promise<{ width: number;
 }
 
 /** A JPEG frame from near the start of a video, used as its cover. Null if the browser can't decode it. */
-function captureFrame(file: File): Promise<File | null> {
+export function captureFrame(file: File): Promise<File | null> {
   return new Promise((resolve) => {
     const url = URL.createObjectURL(file);
     const v = document.createElement("video");

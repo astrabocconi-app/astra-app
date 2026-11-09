@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@astra/db";
 import { newRequestId, errorResponse, withApi } from "@/lib/api";
+import { APP_CONTENT_KEYS } from "@astra/shared";
 import { originFromRequest } from "@/lib/cms-map";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /** Only these keys are readable, so this can't be used to probe the table. */
-const PUBLIC_KEYS = new Set<string>([]);
+const PUBLIC_KEYS = new Set<string>(APP_CONTENT_KEYS);
 
 /**
  * Rewrite uploaded-image references to absolute URLs.
@@ -18,11 +19,11 @@ const PUBLIC_KEYS = new Set<string>([]);
  * The same resolution the CMS mappers do, applied to content JSON.
  */
 function withAbsoluteMedia(data: unknown, origin: string): unknown {
-  if (!origin || data === null || typeof data !== "object") return data;
-  const clone = data as Record<string, unknown>;
-  const poster = clone.posterUrl;
-  if (typeof poster === "string" && poster.startsWith("/api/media/")) {
-    return { ...clone, posterUrl: `${origin}${poster}` };
+  if (!origin) return data;
+  if (typeof data === "string") return data.startsWith("/api/media/") ? `${origin}${data}` : data;
+  if (Array.isArray(data)) return data.map((v) => withAbsoluteMedia(v, origin));
+  if (data !== null && typeof data === "object") {
+    return Object.fromEntries(Object.entries(data).map(([k, v]) => [k, withAbsoluteMedia(v, origin)]));
   }
   return data;
 }

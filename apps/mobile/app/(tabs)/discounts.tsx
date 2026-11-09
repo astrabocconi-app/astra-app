@@ -24,6 +24,8 @@ import { useT } from "../../lib/i18n";
 import { SegmentedToggle } from "../../components/SegmentedToggle";
 import { DiscountsMap } from "../../components/DiscountsMap";
 import { useRefresh } from "../../lib/use-refresh";
+import { OfferLine } from "../../components/OfferLine";
+import { trackVenue } from "../../lib/offer";
 
 type ViewMode = "map" | "list";
 const ALL = "__all__";
@@ -41,6 +43,8 @@ function openDirections(p: PartnerItem, onFail: () => void) {
   if (url) Linking.openURL(url).catch(onFail);
 }
 
+const LIST_OFFERS = 3;
+
 function PartnerRow({
   partner,
   onDirections,
@@ -52,6 +56,8 @@ function PartnerRow({
 }) {
   const t = useT();
   const hasMap = partner.latitude != null && partner.longitude != null;
+  const shown = partner.offers.slice(0, LIST_OFFERS);
+  const hidden = partner.offers.length - shown.length;
   return (
     // Two controls, so two siblings: nesting the directions button inside the
     // row's own Pressable hid it from VoiceOver (an accessible parent swallows
@@ -62,9 +68,10 @@ function PartnerRow({
         accessibilityRole="button"
         accessibilityLabel={[partner.name, partner.category, partner.address].filter(Boolean).join(", ")}
         className="p-4 active:opacity-80"
-        style={{ paddingRight: hasMap ? 60 : 16 }}
       >
-        <View className="flex-row items-start gap-3">
+        {/* Only the header makes room for the directions button; the offers
+            below get the card's full width. */}
+        <View className="flex-row items-center gap-3" style={{ paddingRight: hasMap ? 40 : 0 }}>
           {partner.logoUrl ? (
             <Image
               source={{ uri: partner.logoUrl }}
@@ -78,37 +85,25 @@ function PartnerRow({
             </View>
           )}
           <View className="flex-1">
-            <Text className="text-base font-semibold text-gray-900 dark:text-white">{partner.name}</Text>
-            <Text className="mt-0.5 text-xs text-gray-600 dark:text-gray-300">
-              {partner.address ?? t("discounts.noAddress")}
+            <Text className="text-base font-semibold text-gray-900 dark:text-white" numberOfLines={2}>
+              {partner.name}
             </Text>
-            {partner.category ? (
-              <Text maxFontSizeMultiplier={1.3} className="mt-1 self-start rounded-full bg-gray-100 dark:bg-white/10 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:text-gray-300">
-                {partner.category}
-              </Text>
-            ) : null}
+            <Text className="mt-0.5 text-xs text-gray-600 dark:text-gray-300" numberOfLines={1}>
+              {[partner.category, partner.address ?? t("discounts.noAddress")].filter(Boolean).join(" · ")}
+            </Text>
           </View>
         </View>
 
         {partner.offers.length > 0 ? (
-          <View className="mt-3 gap-1.5">
-            {partner.offers.map((o) => (
-              <View key={o.id} className="gap-1">
-                <View className="flex-row items-center gap-2">
-                  <Text
-                    maxFontSizeMultiplier={1.3}
-                    className="rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-astra-primary dark:text-white"
-                    numberOfLines={1}
-                  >
-                    {o.label}
-                  </Text>
-                  <Text className="flex-1 text-[13px] text-gray-700 dark:text-gray-200">{o.title}</Text>
-                </View>
-                {o.description ? (
-                  <Text className="text-[12px] text-gray-600 dark:text-gray-400">{o.description}</Text>
-                ) : null}
-              </View>
+          <View className="mt-3 gap-2 border-t border-gray-100 dark:border-white/10 pt-3">
+            {shown.map((o) => (
+              <OfferLine key={o.id} offer={o} lines={2} />
             ))}
+            {hidden > 0 ? (
+              <Text className="text-[12px] font-medium text-astra-primary dark:text-white/80">
+                {hidden === 1 ? t("offer.moreOne") : t("offer.more", { n: String(hidden) })}
+              </Text>
+            ) : null}
           </View>
         ) : (
           <Text className="mt-3 text-[13px] text-gray-600 dark:text-white/70">{t("discounts.noDiscount")}</Text>
@@ -119,7 +114,7 @@ function PartnerRow({
         <Pressable
           onPress={onDirections}
           hitSlop={4}
-          className="absolute right-2 top-2 h-11 w-11 items-center justify-center"
+          className="absolute right-2 top-3 h-11 w-11 items-center justify-center"
           accessibilityRole="button"
           accessibilityLabel={`${t("discounts.openInMaps")}, ${partner.name}`}
         >
@@ -156,6 +151,7 @@ export default function DiscountsScreen() {
   const categoryLabel = category === ALL ? t("discounts.allCategories") : category;
 
   function directions(p: PartnerItem) {
+    trackVenue({ partnerId: p.id, kind: "DIRECTIONS" });
     openDirections(p, () => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")));
   }
 

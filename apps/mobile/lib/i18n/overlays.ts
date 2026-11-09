@@ -1,0 +1,33 @@
+export const en = {
+  "overlays.close": "Close",
+  "overlays.homeBubbleA11y": "Open the ASTRA announcement",
+  "overlays.mapBubbleA11y": "Ways to get there fast",
+  "overlays.chooseTitle": "Get there fast",
+  "overlays.chooseSub": "Student discounts with our mobility partners",
+  "overlays.sponsorNotAvailable": "This partner isn't available any more.",
+  "overlays.howToRedeem": "How to redeem",
+  "overlays.step": "Step {n} of {total}",
+  "overlays.next": "Next",
+  "overlays.previous": "Previous",
+  "overlays.videoUnavailable": "Update the app to watch this video.",
+  "offer.getOffer": "Get this offer",
+  "offer.more": "+{n} more",
+  "offer.moreOne": "+1 more",
+};
+
+export const it: Record<keyof typeof en, string> = {
+  "overlays.close": "Chiudi",
+  "overlays.homeBubbleA11y": "Apri l'avviso di ASTRA",
+  "overlays.mapBubbleA11y": "Come arrivare in fretta",
+  "overlays.chooseTitle": "Arriva in fretta",
+  "overlays.chooseSub": "Sconti per studenti con i nostri partner della mobilità",
+  "overlays.sponsorNotAvailable": "Questo partner non è più disponibile.",
+  "overlays.howToRedeem": "Come riscattarlo",
+  "overlays.step": "Passo {n} di {total}",
+  "overlays.next": "Avanti",
+  "overlays.previous": "Indietro",
+  "overlays.videoUnavailable": "Aggiorna l'app per vedere questo video.",
+  "offer.getOffer": "Ottieni l'offerta",
+  "offer.more": "+{n} altre",
+  "offer.moreOne": "+1 altra",
+};

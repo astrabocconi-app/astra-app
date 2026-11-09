@@ -29,6 +29,8 @@ export const en = {
   "login.nameLater": "Not now",
   "login.emailLabel": "Email",
   "login.codeLabel": "6-digit code",
+  "login.consentLabel": "I have read and accept the ASTRA Privacy Policy, and agree to my data being processed to use the app.",
+  "login.readPrivacy": "Read the Privacy Policy",
 };
 
 export const it: Record<keyof typeof en, string> = {
@@ -62,4 +64,6 @@ export const it: Record<keyof typeof en, string> = {
   "login.nameLater": "Non ora",
   "login.emailLabel": "Email",
   "login.codeLabel": "Codice a 6 cifre",
+  "login.consentLabel": "Ho letto e accetto l’Informativa sulla privacy di ASTRA e acconsento al trattamento dei miei dati per usare l’app.",
+  "login.readPrivacy": "Leggi l’Informativa sulla privacy",
 };

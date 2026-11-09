@@ -13,11 +13,12 @@ import { openRoute } from "../lib/open-route";
  * and gets a chevron. Without that, a button that yanks you out to Safari feels
  * like a mis-tap.
  */
-export function ContentLinks({ links }: { links: ContentLink[] }) {
+export function ContentLinks({ links, onOpen }: { links: ContentLink[]; /** Runs first, e.g. to close the sheet the links sit in. */ onOpen?: () => void }) {
   const t = useT();
   if (!links || links.length === 0) return null;
 
   async function open(link: ContentLink) {
+    onOpen?.();
     if (link.kind === "internal") {
       // Routes come from a server-side allowlist, so this is a known screen.
       openRoute(link.value);

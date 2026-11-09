@@ -746,7 +746,6 @@ function ExtrasInputs({
       {state.type === "bachelor" && toggle("bonus", t("calc.bonusBachelor"), t("calc.bonusBachelorSub"))}
       {state.type === "clmg" && toggle("bonus", t("calc.bonusClmg"), t("calc.bonusClmgSub"))}
       {state.type === "master" && toggle("onTime", t("calc.onTime"), t("calc.onTimeSub"))}
-      {state.type === "master" && toggle("athlete", t("calc.athlete"), t("calc.athleteSub"))}
     </>
   );
 }

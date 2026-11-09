@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { View, ScrollView, Pressable, Image, Linking, Platform, Alert } from "react-native";
 import { Text } from "../../components/AppText";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
@@ -10,6 +11,8 @@ import { ScreenHeader } from "../../components/ScreenHeader";
 import { EmptyState } from "../../components/EmptyState";
 import { api } from "../../lib/api";
 import { useT } from "../../lib/i18n";
+import { offerBadge, openOfferLink, trackVenue } from "../../lib/offer";
+import { useEggStore } from "../../lib/egg-store";
 
 function openDirections(p: PartnerItem, onFail: () => void) {
   const query = p.address?.trim()
@@ -28,12 +31,27 @@ export default function VenueDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const t = useT();
   const insets = useSafeAreaInsets();
+  const inverted = useEggStore((s) => s.inverted);
   // Reuses the Discounts screen's own cached list — opening a venue never
   // fires a fresh network request, it just reads what's already in memory.
   const partners = useQuery({ queryKey: ["partners"], queryFn: () => api.partners.list() });
   const venue = partners.data?.items.find((p) => p.id === id);
-  const directions = (p: PartnerItem) =>
+  const directions = (p: PartnerItem) => {
+    trackVenue({ partnerId: p.id, kind: "DIRECTIONS" });
     openDirections(p, () => Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody")));
+  };
+  // One view per visit to this page, once the venue is known.
+  const counted = useRef(false);
+  useEffect(() => {
+    if (!venue || counted.current) return;
+    counted.current = true;
+    trackVenue({ partnerId: venue.id, kind: "VIEW" });
+  }, [venue]);
+  async function openLink(o: PartnerItem["offers"][number]) {
+    if (!venue) return;
+    const ok = await openOfferLink(venue.id, o);
+    if (!ok) Alert.alert(t("links.cannotOpenTitle"), t("links.cannotOpenBody"));
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-astra-primary" edges={["top"]}>
@@ -109,24 +127,36 @@ export default function VenueDetailScreen() {
                 <Text accessibilityRole="header" className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                   {t("venue.offersTitle")}
                 </Text>
-                {venue.offers.map((o) => (
+                {venue.offers.map((o) => {
+                  const badge = offerBadge(o);
+                  return (
                   <View
                     key={o.id}
-                    className="gap-1.5 rounded-2xl border border-gray-100 dark:border-white/10 p-4"
+                    className="gap-2 rounded-2xl border border-gray-100 dark:border-white/10 p-4"
                   >
-                    <View className="flex-row items-center gap-2">
-                      <Text
-                        className="rounded-full bg-astra-light dark:bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-astra-primary dark:text-white"
-                        numberOfLines={1}
-                      >
-                        {o.label}
-                      </Text>
-                      <Text className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-100">
-                        {o.title}
-                      </Text>
-                    </View>
+                    {badge ? (
+                      <View className="self-start rounded-full bg-astra-light dark:bg-white/10 px-2.5 py-1">
+                        <Text maxFontSizeMultiplier={1.3} className="text-[12px] font-semibold text-astra-primary dark:text-white" numberOfLines={1}>
+                          {badge}
+                        </Text>
+                      </View>
+                    ) : null}
+                    <Text className="text-[15px] font-semibold leading-5 text-gray-900 dark:text-white">{o.title}</Text>
                     {o.description ? (
-                      <Text className="text-[13px] text-gray-500 dark:text-gray-400">{o.description}</Text>
+                      <Text className="text-[13px] leading-5 text-gray-600 dark:text-gray-300">{o.description}</Text>
+                    ) : null}
+                    {o.linkUrl ? (
+                      <Pressable
+                        onPress={() => openLink(o)}
+                        accessibilityRole="link"
+                        accessibilityHint={t("links.opensBrowser")}
+                        className="mt-1 min-h-[46px] flex-row items-center justify-center gap-2 rounded-xl bg-astra-primary dark:bg-white px-4 py-3 active:opacity-85"
+                      >
+                        <Text chrome className="text-[15px] font-semibold text-white dark:text-astra-primary" numberOfLines={1}>
+                          {o.linkLabel || t("offer.getOffer")}
+                        </Text>
+                        <Icon name="open-outline" size={16} color={inverted ? "#04107E" : "#FFFFFF"} />
+                      </Pressable>
                     ) : null}
                     <View className="mt-1 flex-row items-center gap-1.5">
                       <Icon
@@ -139,7 +169,8 @@ export default function VenueDetailScreen() {
                       </Text>
                     </View>
                   </View>
-                ))}
+                  );
+                })}
               </View>
             ) : null}
           </View>

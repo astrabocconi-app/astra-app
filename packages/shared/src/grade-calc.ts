@@ -8,17 +8,23 @@
 //            are silent, so the same rule is applied to every pair of modules
 //            named as such).
 //   base     average / 30 × 110
-//   bachelor + thesis 0–4 + 1 bonus (internship, exchange, joint programme,
-//            legal clinic, student-athlete medal…)
+//   bachelor + thesis 0–4 + 1 bonus (curricular internship, legal clinic for
+//            BGL, Exchange or Double Degree/Program with an exam recognised;
+//            one point at most). Bachelors have NO on-time point (Guide N3
+//            2025-26 and 2026-27, section 10.5).
 //            lode: sum of the elements ≥ 111 and thesis ≥ 3
-//   master   + thesis 0–8 (research) or 0–5 (applied) + 1 on time + 1 athlete,
+//   master   + thesis 0–8 (research) or 0–5 (applied) + 1 on time ("laurea in
+//            corso": regular 2nd-year student graduating in July or October),
 //            all of it capped at 8 (the Italian text, which prevails, caps "il
 //            punteggio massimo totale"; the English text names only thesis and
 //            on-time points, so the stricter reading is the conservative one);
 //            lode: total ≥ 111
 //   clmg     + thesis 0–6 + 1 "excellent curriculum" (internship, moot court,
-//            legal clinic, exchange, student-athlete medal), capped at 6;
+//            legal clinic, exchange), capped at 6;
 //            lode: thesis + curriculum = 6 and total ≥ 111
+// No degree has a student-athlete point in the official formula (Guides N3,
+// R2, R5, 2025-26 and 2026-27). The old `athlete` flag stays in saved state so
+// old saves load, but it no longer counts.
 // The regulations say nothing about rounding the total, so the grade is rounded
 // half up (the usual practice, and the screen says so), but lode is judged on
 // the UNROUNDED sum, because the text reads "the sum … is at least 111".
@@ -341,7 +347,7 @@ export function extraPoints(state: CalcState): number {
   const thesis = Math.min(Math.max(state.thesis, 0), thesisMax(state));
   if (state.type === "bachelor") return thesis + (state.bonus ? 1 : 0);
   if (state.type === "clmg") return Math.min(thesis + (state.bonus ? 1 : 0), 6);
-  return Math.min(thesis + (state.onTime ? 1 : 0) + (state.athlete ? 1 : 0), 8);
+  return Math.min(thesis + (state.onTime ? 1 : 0), 8);
 }
 
 export interface Graduation {

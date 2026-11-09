@@ -33,7 +33,7 @@ const config: ExpoConfig = {
   slug: "astra-app",
   owner: "mfmatozza",
   scheme: "astra",
-  version: "1.1.4",
+  version: "1.2.0",
   orientation: "portrait",
   // Stays "automatic" on purpose: the hidden inverted mode (lib/egg-store.ts)
   // flips the whole app through NativeWind's colorScheme.set(), which drives

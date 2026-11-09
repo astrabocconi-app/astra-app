@@ -13,10 +13,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useIsFocused } from "expo-router";
-import { isAllowedEmail, isDevLoginUsername, ALLOWED_EMAIL_DOMAINS } from "@astra/shared";
+import { isAllowedEmail, isDevLoginUsername, ALLOWED_EMAIL_DOMAINS, PRIVACY_POLICY_VERSION } from "@astra/shared";
+import * as WebBrowser from "expo-web-browser";
 import { api } from "../lib/api";
 import { queryClient } from "../lib/query-client";
-import { APP_ENV } from "../lib/config";
+import { APP_ENV, API_URL } from "../lib/config";
 import {
   setToken,
   setAccountType,
@@ -34,6 +35,7 @@ import { IMAGES } from "../lib/assets";
 import { Text } from "../components/AppText";
 import { Button } from "../components/Button";
 import { TextField } from "../components/TextField";
+import { Icon } from "../components/Icon";
 
 // Login against apps/web (Better Auth). Two modes:
 //   • Student — email-OTP (@studbocconi.it) → tabbed home
@@ -74,6 +76,8 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [sentAt, setSentAt] = useState(0);
   const [resendReady, setResendReady] = useState(false);
+  // Active opt-in: the privacy policy must be ticked before a code is sent.
+  const [agreed, setAgreed] = useState(false);
 
   // A session (restored at boot, or just created below) leaves this screen. The
   // screen does the navigating, once the router has the protected screens, which
@@ -116,6 +120,18 @@ export default function LoginScreen() {
     setCode("");
   }
 
+  /** The tick before "Send code", kept as a dated record once there is an account to attach it to. */
+  function recordConsent() {
+    void api.consent(PRIVACY_POLICY_VERSION).catch(() => {});
+  }
+
+  function openPrivacy() {
+    void WebBrowser.openBrowserAsync(`${API_URL}/privacy`, {
+      presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
+      controlsColor: "#04107E",
+    }).catch(() => {});
+  }
+
   /** Start the student session; the effect above does the navigating. */
   async function enterStudentApp() {
     await setAccountType("student");
@@ -133,6 +149,7 @@ export default function LoginScreen() {
         const token = await devLogin(email.trim());
         if (!token) throw new Error(t("login.errorDevLoginFailed"));
         await setToken(token);
+        recordConsent();
         await enterStudentApp();
         return;
       }
@@ -154,6 +171,7 @@ export default function LoginScreen() {
       const { token, user } = await api.auth.verifyOtp(email.trim(), code.trim());
       if (!token) throw new Error(t("login.errorNoToken"));
       await setToken(token);
+      recordConsent();
       await setAccountType("student");
       if (user?.id) void setUserId(user.id).catch(() => {});
       // Ask for a name only when the account has none: a returning student who
@@ -212,7 +230,7 @@ export default function LoginScreen() {
   const studentDisabled =
     loading ||
     (step === "email"
-      ? !(isDevBypass || isAllowedEmail(email))
+      ? !(isDevBypass || (isAllowedEmail(email) && agreed))
       : step === "code"
         ? code.length < 4
         : !(firstName.trim() && lastName.trim()));
@@ -340,6 +358,39 @@ export default function LoginScreen() {
                         // way to dismiss it.
                         inputAccessoryViewID={OTP_ACCESSORY_ID}
                       />
+                    ) : null}
+
+                    {step === "email" && !isDevBypass ? (
+                      <View className="w-full gap-1">
+                        <Pressable
+                          onPress={() => setAgreed((v) => !v)}
+                          disabled={loading}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: agreed, disabled: loading }}
+                          accessibilityLabel={t("login.consentLabel")}
+                          className="min-h-[44px] w-full flex-row items-center gap-3 rounded-xl px-1 py-2 active:opacity-70"
+                        >
+                          <View
+                            className={`h-6 w-6 items-center justify-center rounded-md border-2 ${agreed ? "border-astra-primary bg-astra-primary dark:border-white dark:bg-white" : "border-gray-400 bg-white dark:border-white/60 dark:bg-transparent"}`}
+                          >
+                            {agreed ? <Icon name="checkmark" size={16} color={inverted ? "#04107E" : "#FFFFFF"} /> : null}
+                          </View>
+                          <Text className="flex-1 text-[13px] leading-[18px] text-gray-700 dark:text-gray-200">
+                            {t("login.consentLabel")}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          onPress={openPrivacy}
+                          hitSlop={6}
+                          accessibilityRole="link"
+                          accessibilityHint={t("links.opensBrowser")}
+                          className="min-h-[36px] justify-center self-start pl-10"
+                        >
+                          <Text chrome className="text-[13px] font-semibold text-astra-primary underline dark:text-white">
+                            {t("login.readPrivacy")}
+                          </Text>
+                        </Pressable>
+                      </View>
                     ) : null}
 
                     {error && (

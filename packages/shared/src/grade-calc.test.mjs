@@ -123,6 +123,9 @@ test("master extras are capped at 8 (the Italian text caps the whole total); app
   assert.equal(graduation({ ...s, thesisType: "applied", thesis: 8, onTime: false, athlete: false }, 30).extras, 5);
   assert.equal(extraPoints({ ...s, thesis: 6, athlete: false }), 7);
   assert.equal(extraPoints({ ...s, thesis: 7, athlete: true }), 8);
+  // The legacy athlete flag adds nothing; applied thesis + on time tops out at 6.
+  assert.equal(extraPoints({ ...s, thesis: 6, onTime: false, athlete: true }), 6);
+  assert.equal(extraPoints({ ...s, thesisType: "applied", thesis: 5, onTime: true, athlete: true }), 6);
 });
 
 test("clmg lode needs thesis + curriculum = 6", () => {

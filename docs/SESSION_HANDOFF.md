@@ -37,6 +37,14 @@ touching this repo. Kept short on purpose: history is in `git log`, plans in
 
 ## Open content threads
 
+- App overlays (Home bubble, map "get there fast" sponsors) are AppContent rows edited at
+  /dashboard/app-content. They shipped with placeholder copy and no sponsor logos: fill them
+  in or switch them off there.
+- Venue page views, offer-link taps and directions taps are counted anonymously
+  (VenueInteraction, no user id) for /dashboard/bi/venues. Keep it anonymous: the privacy
+  answers say no tracking.
+- The graduation calculator follows the official Guide formula (N3/R2/R5 2025-26 and
+  2026-27): bachelors have no on-time point, MSc has +1 on time, nobody has an athlete point.
 - New Signorvino venues need real addresses and map pins (set in the backoffice).
 - The Greenmill offer still has placeholder copy.
 - App name is inconsistent across surfaces: store name `ASTRA`, web pages say `myAstra`

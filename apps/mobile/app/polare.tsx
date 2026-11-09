@@ -136,7 +136,9 @@ const PostCard = memo(function PostCard({
       <View className="flex-row items-center gap-3 px-4 pb-3">
         <Image
           source={IMAGES.stellaPolare}
-          style={{ width: 36, height: 36, borderRadius: 18 }}
+          resizeMode="contain"
+          // Wide wordmark: show all of it on the logo's own blue instead of cropping it to the circle.
+          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#04107E" }}
           accessibilityIgnoresInvertColors
           accessibilityElementsHidden
           importantForAccessibility="no"
